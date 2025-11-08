@@ -6,9 +6,8 @@
   "private": true,
   "scripts": {
     "install:all": "npm install && cd mcp-server && npm install && cd ../ui && npm install",
-    "start:server": "cd mcp-server && npm start",
     "start:ui": "cd ui && npm start",
-    "start": "npm run start:server & npm run start:ui",
+    "start": "npm run start:ui",
     "dev:ui": "cd ui && npm run dev",
     "build:ui": "cd ui && npm run build",
     "lint:server": "cd mcp-server && npm run lint",
