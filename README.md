@@ -31,6 +31,24 @@ Both components work together but can also be run independently.
 
 ## 🚀 Quick Start
 
+### Quick Reference
+
+```bash
+# Install dependencies
+npm run install:all
+
+# Start UI (recommended)
+make start
+
+# Stop UI
+make stop
+
+# View all commands
+make help
+```
+
+Then open `http://localhost:9853` in your browser to configure and start the MCP server through the UI.
+
 ### Installation
 
 Install all dependencies:
@@ -85,39 +103,74 @@ Create a configuration file at `mcp-server/temp/mcps.json`:
 
 ### Running
 
-#### Run Both Server and UI
+#### Recommended: Start UI and Manage MCP Server Through UI
 
-From the root directory:
+The recommended way to run MCP Shark is to start the UI, then use the UI's setup interface to configure and start the MCP server:
 
+**Using Makefile (recommended):**
 ```bash
-# Start MCP server (port 9851)
-npm run start:server
+# Start UI (port 9853) - default command
+make start
+# or explicitly
+make start-ui
 
-# In another terminal, start UI (port 9853)
-npm run start:ui
+# Stop UI - default command
+make stop
+# or explicitly
+make stop-ui
 ```
 
-Or use the UI to start the server - the UI includes a setup page where you can configure and start the MCP server.
-
-#### Run Individually
-
-**MCP Server only:**
+**Using npm:**
 ```bash
+# Start UI (port 9853)
+npm run start:ui
+
+# Stop UI (Ctrl+C or use make stop)
+```
+
+Then:
+1. Open `http://localhost:9853` in your browser
+2. Go to the "MCP Server Setup" tab
+3. Select or provide your MCP configuration file
+4. Click "Start MCP Shark" to start the server
+
+The UI will automatically:
+- Convert your MCP config to the correct format
+- Start the MCP server on port 9851
+- Manage the server lifecycle (start/stop/restart)
+
+**Note:** When you stop the UI using `make stop`, it will automatically stop the MCP server as well (if it was started through the UI).
+
+#### Alternative: Run MCP Server Separately
+
+If you need to run the MCP server independently (without the UI):
+
+```bash
+# Start MCP server directly (port 9851)
 cd mcp-server
 npm start
+
+# Or using Makefile
+make start-server
+
+# Stop MCP server
+make stop-server
 ```
 
-**UI only:**
-```bash
-cd ui
-npm start
-```
+**Note:** When running the server separately, you'll need to manually create the config file at `mcp-server/temp/mcps.json` before starting.
 
-**UI Development Mode:**
+#### Development Mode
+
+**UI Development Mode (with hot reload):**
 ```bash
 cd ui
 npm run dev
+
+# Or using Makefile
+make dev-ui
 ```
+
+The UI will be available at `http://localhost:5173` (or the port Vite assigns).
 
 ## 📖 Usage
 
@@ -158,19 +211,22 @@ http://localhost:9853
          │ HTTP
          ▼
 ┌─────────────────────────────────┐
-│   MCP Shark Server (9851)        │
-│   - Aggregates MCP servers       │
-│   - Audit logging (SQLite)       │
-└──────────┬───────────────────────┘
-           │
-           ▼
-┌─────────────────────────────────┐
 │   MCP Shark UI (9853)            │
 │   - Real-time monitoring         │
 │   - Server management            │
 │   - Log inspection               │
+│   └──► Manages & starts          │
+└──────────┬───────────────────────┘
+           │ spawns
+           ▼
+┌─────────────────────────────────┐
+│   MCP Shark Server (9851)        │
+│   - Aggregates MCP servers       │
+│   - Audit logging (SQLite)       │
 └─────────────────────────────────┘
 ```
+
+**Note:** The MCP Shark Server is started and managed by the UI as a child process. The UI provides the interface to configure, start, stop, and monitor the server.
 
 ## 📁 Project Structure
 
@@ -198,11 +254,11 @@ From the root directory:
 # Install all dependencies
 npm run install:all
 
-# Start MCP server
-npm run start:server
-
-# Start UI
+# Start UI (recommended - manage MCP server through UI)
 npm run start:ui
+
+# Start MCP server directly (alternative - if not using UI)
+npm run start:server
 
 # UI development mode
 npm run dev:ui
@@ -216,6 +272,46 @@ npm run lint:server
 # Format MCP server
 npm run format:server
 ```
+
+**Using Makefile:**
+
+```bash
+# Start UI (recommended - default)
+make start              # or make start-ui
+
+# Stop UI (default)
+make stop               # or make stop-ui
+# Note: This will stop the UI and any MCP server started through it
+
+# Start MCP server directly (alternative - not recommended)
+make start-server
+make stop-server
+
+# Development mode
+make dev-ui
+
+# Build UI for production
+make build-ui
+
+# Clean up (stops services and removes PID files)
+make clean
+
+# Show all available commands
+make help
+```
+
+**Makefile Commands Summary:**
+
+| Command | Description |
+|---------|-------------|
+| `make start` / `make start-ui` | Start the UI server on port 9853 |
+| `make stop` / `make stop-ui` | Stop the UI server and any related processes |
+| `make start-server` | Start MCP server directly (requires manual config) |
+| `make stop-server` | Stop MCP server if running separately |
+| `make dev-ui` | Start UI in development mode with hot reload |
+| `make build-ui` | Build UI for production |
+| `make clean` | Stop all services and clean up PID/log files |
+| `make help` | Show all available commands |
 
 ### Code Quality
 

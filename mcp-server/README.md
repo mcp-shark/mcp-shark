@@ -48,11 +48,24 @@ Create a configuration file at `temp/mcps.json`:
 
 ### Running
 
+**Recommended: Managed through UI**
+
+The recommended way to run the MCP server is through the UI interface:
+
+1. Start the UI server (see main README)
+2. Use the UI's "MCP Server Setup" tab to configure and start the server
+
+**Alternative: Run Directly**
+
+If you need to run the server independently:
+
 ```bash
 npm start
 ```
 
 The server will start on `http://localhost:9851/mcp`
+
+**Note:** When running directly, ensure you have a valid configuration file at `temp/mcps.json` before starting.
 
 ## 📖 Usage
 

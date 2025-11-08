@@ -468,6 +468,30 @@ function checkPortReady(port, host = 'localhost', timeout = 10000) {
   });
 }
 
+// Function to find mcp-server path (shared utility)
+function findMcpServerPath() {
+  let mcpServerPath = path.join(process.cwd(), '../mcp-server');
+  
+  if (!fs.existsSync(mcpServerPath)) {
+    mcpServerPath = path.join(__dirname, '../mcp-server');
+  }
+  
+  if (!fs.existsSync(mcpServerPath)) {
+    const possiblePaths = [
+      path.join(process.cwd(), 'mcp-server'),
+      path.join(__dirname, 'mcp-server'),
+    ];
+    for (const possiblePath of possiblePaths) {
+      if (fs.existsSync(possiblePath)) {
+        mcpServerPath = possiblePath;
+        break;
+      }
+    }
+  }
+  
+  return mcpServerPath;
+}
+
 export function createUIServer(db) {
   const app = express();
   const server = createServer(app);
@@ -682,28 +706,7 @@ export function createUIServer(db) {
       }
 
       // Write converted config to mcp-server's temp/mcps.json
-      // Try to find mcp-server directory relative to ui
-      let mcpServerPath = path.join(process.cwd(), '../mcp-server');
-      
-      // If that doesn't exist, try absolute path from __dirname
-      if (!fs.existsSync(mcpServerPath)) {
-        mcpServerPath = path.join(__dirname, '../mcp-server');
-      }
-      
-      // If still doesn't exist, try to find it in common locations
-      if (!fs.existsSync(mcpServerPath)) {
-        const possiblePaths = [
-          path.join(process.cwd(), 'mcp-server'),
-          path.join(__dirname, 'mcp-server'),
-        ];
-        for (const possiblePath of possiblePaths) {
-          if (fs.existsSync(possiblePath)) {
-            mcpServerPath = possiblePath;
-            break;
-          }
-        }
-      }
-
+      const mcpServerPath = findMcpServerPath();
       const tempDir = path.join(mcpServerPath, 'temp');
       const mcpsJsonPath = path.join(tempDir, 'mcps.json');
 

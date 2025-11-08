@@ -28,17 +28,9 @@ npm install
 
 ## 🚀 Usage
 
-### Development Mode
+### Starting the UI
 
-Start the development server with hot reload:
-
-```bash
-npm run dev
-```
-
-The UI will be available at `http://localhost:5173` (or the port Vite assigns).
-
-### Production Mode
+**Production Mode:**
 
 1. Build the frontend:
 ```bash
@@ -57,6 +49,34 @@ DB_PATH=/path/to/mcp-shark.sqlite npm start
 
 The server will start on port `9853` by default (configurable via `UI_PORT` environment variable).
 
+**Development Mode:**
+
+Start the development server with hot reload:
+
+```bash
+npm run dev
+```
+
+The UI will be available at `http://localhost:5173` (or the port Vite assigns).
+
+### Managing the MCP Server
+
+The MCP server is **managed through the UI**, not started separately:
+
+1. Start the UI server (see above)
+2. Open `http://localhost:9853` in your browser
+3. Navigate to the **"MCP Server Setup"** tab
+4. Select or provide your MCP configuration file (e.g., `~/.cursor/mcp.json`)
+5. Click **"Start MCP Shark"** to start the server
+
+The UI will:
+- Convert your MCP config format automatically
+- Start the MCP server on port 9851
+- Display server logs in real-time
+- Allow you to stop/restart the server
+
+**Note:** The MCP server is started as a child process by the UI server. When you stop the UI, the MCP server will also be stopped automatically.
+
 ### Environment Variables
 
 - `UI_PORT`: Port for the server (default: `9853`)
@@ -64,26 +84,22 @@ The server will start on port `9853` by default (configurable via `UI_PORT` envi
 
 ## 📡 API Endpoints
 
-### GET `/api/requests`
-Retrieve communication requests/responses with optional filtering.
+### Traffic & Monitoring
+- `GET /api/requests` - Retrieve communication requests/responses with optional filtering
+- `GET /api/conversations` - Get request/response conversation pairs
+- `GET /api/sessions` - List all sessions
+- `GET /api/statistics` - Get traffic statistics
 
-### GET `/api/conversations`
-Get request/response conversation pairs.
+### MCP Server Management
+- `GET /api/composite/status` - Get the status of the MCP Shark server
+- `GET /api/composite/logs` - Get MCP Shark server logs
+- `POST /api/composite/setup` - Configure and start the MCP Shark server
+- `POST /api/composite/stop` - Stop the MCP Shark server
+- `POST /api/composite/logs/clear` - Clear server logs
 
-### GET `/api/sessions`
-List all sessions.
-
-### GET `/api/composite/logs`
-Get MCP Shark server logs.
-
-### POST `/api/composite/setup`
-Configure and start the MCP Shark server.
-
-### POST `/api/composite/stop`
-Stop the MCP Shark server.
-
-### GET `/api/composite/status`
-Get the status of the MCP Shark server.
+### Configuration
+- `GET /api/config/detect` - Detect default MCP config file paths
+- `GET /api/config/read` - Read MCP configuration file
 
 ## 🔌 WebSocket
 
