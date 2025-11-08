@@ -114,6 +114,7 @@ vite.config.ts.timestamp-*
 **/temp/db/*.sqlite*
 **/temp/db/*.sqlite-shm
 **/temp/db/*.sqlite-wal
+**/temp/mcps.json
 
 # Makefile PID and log files
 **/.ui.pid
