@@ -1,6 +1,3 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 # Fix linting and formatting issues in all files
 # Continue even if this fails (some tools may not be available)
 npm run fix:all 2>/dev/null || true
