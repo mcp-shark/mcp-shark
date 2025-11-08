@@ -1,0 +1,50 @@
+{
+  "name": "mcp-shark-server",
+  "version": "1.0.0",
+  "description": "MCP Shark server - aggregate multiple MCP servers",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "mcp-shark": "./mcp-shark.js"
+  },
+  "scripts": {
+    "lint": "eslint . --ext .js",
+    "lint:fix": "eslint . --ext .js --fix",
+    "format": "prettier --write \"**/*.{js,json,css,md}\"",
+    "format:check": "prettier --check \"**/*.{js,json,css,md}\"",
+    "prepare": "husky install",
+    "start": "node mcp-shark.js"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,css,md}": [
+      "prettier --write"
+    ]
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "@eslint/js": "^9.15.0",
+    "eslint": "^9.15.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.20.2",
+    "better-sqlite3": "^12.4.1",
+    "commander": "^14.0.2",
+    "consola": "^3.4.2",
+    "express": "^4.18.2",
+    "jsonrpc-lite": "^2.2.0",
+    "save": "^2.9.0"
+  }
+}

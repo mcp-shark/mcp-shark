@@ -25,8 +25,27 @@ coverage
 # nyc test coverage
 .nyc_output
 
+# Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
+.grunt
+
+# Bower dependency directory (https://bower.io/)
+bower_components
+
+# node-waf configuration
+.lock-wscript
+
+# Compiled binary addons (https://nodejs.org/api/addons.html)
+build/Release
+
 # Dependency directories
 node_modules/
+jspm_packages/
+
+# Snowpack dependency directory (https://snowpack.dev/)
+web_modules/
+
+# TypeScript cache
+*.tsbuildinfo
 
 # Optional npm cache directory
 .npm
@@ -36,6 +55,9 @@ node_modules/
 
 # Optional stylelint cache
 .stylelintcache
+
+# Optional REPL history
+.node_repl_history
 
 # Output of 'npm pack'
 *.tgz
@@ -59,6 +81,12 @@ out
 # Nuxt.js build / generate output
 .nuxt
 dist
+
+# Gatsby files
+.cache/
+# Comment in the public line in if your project uses Gatsby and not Next.js
+# https://nextjs.org/blog/next-9-1#public-directory-support
+# public
 
 # vuepress build output
 .vuepress/dist
@@ -109,14 +137,5 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+temp/db/*
 
-# Database files
-**/temp/db/*.sqlite*
-**/temp/db/*.sqlite-shm
-**/temp/db/*.sqlite-wal
-
-# Makefile PID and log files
-**/.ui.pid
-**/.server.pid
-**/.ui.log
-**/.server.log

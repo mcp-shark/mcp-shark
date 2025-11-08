@@ -1,0 +1,216 @@
+import { Readable } from 'node:stream';
+import { parse as parseJsonRpc } from 'jsonrpc-lite';
+
+/* ---------- helpers ---------- */
+
+function toBuffer(body) {
+  if (body === undefined || body === null) {
+    return Buffer.alloc(0);
+  }
+
+  if (Buffer.isBuffer(body)) {
+    return body;
+  }
+
+  if (
+    typeof body === 'object' &&
+    body.type === 'Buffer' &&
+    Array.isArray(body.data)
+  ) {
+    return Buffer.from(body.data);
+  }
+
+  if (typeof body === 'string') {
+    return Buffer.from(body, 'utf8');
+  }
+
+  if (typeof body === 'object') {
+    return Buffer.from(JSON.stringify(body));
+  }
+
+  return Buffer.alloc(0);
+}
+
+async function readBody(req) {
+  if (req.body) {
+    return toBuffer(req.body);
+  }
+
+  const chunks = [];
+
+  for await (const chunk of req) {
+    chunks.push(chunk);
+  }
+
+  return Buffer.concat(chunks);
+}
+
+function captureResponse(res) {
+  const chunks = [];
+
+  const wrapped = new Proxy(res, {
+    get(target, prop, receiver) {
+      if (prop === 'write') {
+        return function (chunk, ...args) {
+          if (chunk) {
+            const buf = toBuffer(chunk);
+            chunks.push(buf);
+          }
+          return target.write(chunk, ...args);
+        };
+      }
+
+      if (prop === 'end') {
+        return function (chunk, ...args) {
+          if (chunk) {
+            const buf = toBuffer(chunk);
+            chunks.push(buf);
+          }
+          return target.end(chunk, ...args);
+        };
+      }
+
+      return Reflect.get(target, prop, receiver);
+    },
+  });
+
+  return {
+    res: wrapped,
+    getBody: () => {
+      return Buffer.concat(chunks);
+    },
+  };
+}
+
+function tryParseJsonRpc(buf) {
+  if (!buf || buf.length === 0) {
+    return null;
+  }
+
+  const text = buf.toString('utf8');
+
+  try {
+    const parsed = parseJsonRpc(text);
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function rebuildReq(req, buf) {
+  const r = new Readable({
+    read() {
+      this.push(buf);
+      this.push(null);
+    },
+  });
+
+  r.headers = req.headers;
+  r.method = req.method;
+  r.url = req.url;
+
+  return r;
+}
+
+function waitForResponseFinish(res) {
+  return new Promise(resolve => {
+    let done = false;
+
+    function finishOnce() {
+      if (!done) {
+        done = true;
+        resolve();
+      }
+    }
+
+    res.on('finish', finishOnce);
+    res.on('close', finishOnce);
+  });
+}
+
+/* ---------- main handler ---------- */
+
+export async function withAuditRequestResponseHandler(
+  transport,
+  req,
+  res,
+  auditLogger
+) {
+  const reqBuf = await readBody(req);
+  const reqJsonRpc = tryParseJsonRpc(reqBuf);
+
+  // Extract request body as string
+  const reqBodyStr = reqBuf.toString('utf8');
+  const reqBodyJson = (() => {
+    try {
+      return JSON.parse(reqBodyStr);
+    } catch {
+      return null;
+    }
+  })();
+
+  // Log request packet to database
+  const requestResult = auditLogger.logRequestPacket({
+    method: req.method,
+    url: req.url,
+    headers: req.headers,
+    body: reqBodyJson || reqBodyStr,
+    userAgent: req.headers['user-agent'] || req.headers['User-Agent'] || null,
+    remoteAddress: req.socket?.remoteAddress || null,
+  });
+
+  const { res: wrappedRes, getBody } = captureResponse(res);
+
+  const replayReq = req.body ? req : rebuildReq(req, reqBuf);
+
+  const parsedForTransport = reqJsonRpc
+    ? (() => {
+        try {
+          return JSON.parse(reqBuf.toString('utf8'));
+        } catch {
+          return undefined;
+        }
+      })()
+    : undefined;
+
+  // hand over to transport
+  await transport.handleRequest(replayReq, wrappedRes, parsedForTransport);
+
+  // wait until response fully finished (important for SSE / streaming)
+  await waitForResponseFinish(wrappedRes);
+
+  const resBuf = getBody();
+
+  const resHeaders =
+    wrappedRes.getHeaders && typeof wrappedRes.getHeaders === 'function'
+      ? wrappedRes.getHeaders()
+      : {};
+
+  // Extract response body as string
+  const resBodyStr = resBuf.toString('utf8');
+  const resBodyJson = (() => {
+    try {
+      return JSON.parse(resBodyStr);
+    } catch {
+      return null;
+    }
+  })();
+
+  // Extract JSON-RPC ID from request for correlation
+  const jsonrpcId =
+    reqJsonRpc?.payload?.id !== undefined
+      ? String(reqJsonRpc.payload.id)
+      : null;
+
+  // Log response packet to database
+  auditLogger.logResponsePacket({
+    statusCode: wrappedRes.statusCode || 200,
+    headers: resHeaders,
+    body: resBodyJson || resBodyStr,
+    requestFrameNumber: requestResult?.frameNumber || null,
+    requestTimestampNs: requestResult?.timestampNs || null,
+    jsonrpcId,
+    userAgent: req.headers['user-agent'] || req.headers['User-Agent'] || null,
+    remoteAddress: req.socket?.remoteAddress || null,
+  });
+}

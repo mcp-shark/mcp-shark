@@ -1,0 +1,45 @@
+{
+  "name": "mcp-shark",
+  "version": "1.0.0",
+  "description": "MCP Shark - Aggregate multiple MCP servers with a unified UI",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install && cd mcp-server && npm install && cd ../ui && npm install",
+    "start:server": "cd mcp-server && npm start",
+    "start:ui": "cd ui && npm start",
+    "start": "npm run start:server & npm run start:ui",
+    "dev:ui": "cd ui && npm run dev",
+    "build:ui": "cd ui && npm run build",
+    "lint:server": "cd mcp-server && npm run lint",
+    "lint:fix:server": "cd mcp-server && npm run lint:fix",
+    "format:server": "cd mcp-server && npm run format",
+    "prepare": "husky install || true"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,css,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "aggregator",
+    "server",
+    "ui"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3"
+  }
+}
+
