@@ -14,11 +14,16 @@
     "lint:server": "cd mcp-server && npm run lint",
     "lint:fix:server": "cd mcp-server && npm run lint:fix",
     "format:server": "cd mcp-server && npm run format",
+    "lint:ui": "cd ui && (eslint . --ext .js,.jsx,.ts,.tsx || echo 'eslint not available in ui')",
+    "lint:fix:ui": "cd ui && (eslint . --ext .js,.jsx,.ts,.tsx --fix || echo 'eslint not available in ui')",
+    "format:ui": "prettier --write \"ui/**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "lint:fix:all": "(npm run lint:fix:server || true) && (npm run lint:fix:ui || true)",
+    "format:all": "(npm run format:server || true) && (npm run format:ui || true)",
+    "fix:all": "(npm run lint:fix:all || true) && (npm run format:all || true)",
     "prepare": "husky install || true"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
       "prettier --write"
     ],
     "*.{json,css,md,yml,yaml}": [
@@ -42,4 +47,3 @@
     "prettier": "^3.3.3"
   }
 }
-

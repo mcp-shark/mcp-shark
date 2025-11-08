@@ -65,7 +65,7 @@ function queryRequests(db, filters = {}) {
 
   // Specific field filters with partial matching
   if (sessionId) {
-    queryParts.push('AND session_id LIKE ? ESCAPE \'\\\'');
+    queryParts.push("AND session_id LIKE ? ESCAPE '\\'");
     params.push(`%${sessionId}%`);
   }
   if (direction) {
@@ -73,11 +73,11 @@ function queryRequests(db, filters = {}) {
     params.push(direction);
   }
   if (method) {
-    queryParts.push('AND method LIKE ? ESCAPE \'\\\'');
+    queryParts.push("AND method LIKE ? ESCAPE '\\'");
     params.push(`%${method}%`);
   }
   if (jsonrpcMethod) {
-    queryParts.push('AND jsonrpc_method LIKE ? ESCAPE \'\\\'');
+    queryParts.push("AND jsonrpc_method LIKE ? ESCAPE '\\'");
     params.push(`%${jsonrpcMethod}%`);
   }
   if (statusCode !== null && statusCode !== undefined) {
@@ -93,7 +93,7 @@ function queryRequests(db, filters = {}) {
     params.push(endTime);
   }
   if (jsonrpcId) {
-    queryParts.push('AND jsonrpc_id LIKE ? ESCAPE \'\\\'');
+    queryParts.push("AND jsonrpc_id LIKE ? ESCAPE '\\'");
     params.push(`%${jsonrpcId}%`);
   }
 
@@ -207,12 +207,7 @@ function getSessionRequests(db, sessionId, limit = 10000) {
 const getSessionPackets = getSessionRequests;
 
 function getSessions(db, filters = {}) {
-  const {
-    startTime = null,
-    endTime = null,
-    limit = 1000,
-    offset = 0,
-  } = filters;
+  const { startTime = null, endTime = null, limit = 1000, offset = 0 } = filters;
 
   const queryParts = ['SELECT * FROM sessions WHERE 1=1'];
   const params = [];
@@ -376,7 +371,7 @@ function openDb(dbPath) {
 
   // Check if database file exists
   const dbExists = fs.existsSync(dbPath);
-  
+
   // Open or create the database
   const db = new Database(dbPath);
   db.pragma('journal_mode = WAL');
@@ -411,7 +406,7 @@ function restoreOriginalConfig() {
         // Restore original content
         fs.writeFileSync(originalConfigData.filePath, originalConfigData.originalContent);
         console.log(`Restored original config to: ${originalConfigData.filePath}`);
-        
+
         // Optionally remove backup file
         if (originalConfigData.backupPath && fs.existsSync(originalConfigData.backupPath)) {
           // Keep backup for safety, but could remove it: fs.unlinkSync(originalConfigData.backupPath);
@@ -443,15 +438,15 @@ function serializeBigInt(obj) {
 function checkPortReady(port, host = 'localhost', timeout = 10000) {
   return new Promise((resolve, reject) => {
     const startTime = Date.now();
-    
+
     const tryConnect = () => {
       const socket = createConnection(port, host);
-      
+
       socket.on('connect', () => {
         socket.destroy();
         resolve(true);
       });
-      
+
       socket.on('error', (err) => {
         socket.destroy();
         const elapsed = Date.now() - startTime;
@@ -463,7 +458,7 @@ function checkPortReady(port, host = 'localhost', timeout = 10000) {
         }
       });
     };
-    
+
     tryConnect();
   });
 }
@@ -471,11 +466,11 @@ function checkPortReady(port, host = 'localhost', timeout = 10000) {
 // Function to find mcp-server path (shared utility)
 function findMcpServerPath() {
   let mcpServerPath = path.join(process.cwd(), '../mcp-server');
-  
+
   if (!fs.existsSync(mcpServerPath)) {
     mcpServerPath = path.join(__dirname, '../mcp-server');
   }
-  
+
   if (!fs.existsSync(mcpServerPath)) {
     const possiblePaths = [
       path.join(process.cwd(), 'mcp-server'),
@@ -488,7 +483,7 @@ function findMcpServerPath() {
       }
     }
   }
-  
+
   return mcpServerPath;
 }
 
@@ -669,21 +664,21 @@ export function createUIServer(db) {
       // Read file content
       let content;
       let resolvedFilePath = null;
-      
+
       if (fileContent) {
         content = fileContent;
         // If filePath is also provided with fileContent, use it for updating
         if (filePath) {
-          resolvedFilePath = filePath.startsWith('~') 
+          resolvedFilePath = filePath.startsWith('~')
             ? path.join(homedir(), filePath.slice(1))
             : filePath;
         }
       } else {
         // Expand tilde to home directory
-        resolvedFilePath = filePath.startsWith('~') 
+        resolvedFilePath = filePath.startsWith('~')
           ? path.join(homedir(), filePath.slice(1))
           : filePath;
-        
+
         if (!fs.existsSync(resolvedFilePath)) {
           return res.status(404).json({ error: 'File not found', path: resolvedFilePath });
         }
@@ -717,7 +712,7 @@ export function createUIServer(db) {
 
       // Write the converted config to temp/mcps.json
       fs.writeFileSync(mcpsJsonPath, JSON.stringify(convertedConfig, null, 2));
-      
+
       console.log(`Wrote converted config to: ${mcpsJsonPath}`);
 
       // Stop existing mcp-shark server process if running
@@ -729,9 +724,9 @@ export function createUIServer(db) {
       // Verify mcp-shark.js exists
       const mcpSharkJsPath = path.join(mcpServerPath, 'mcp-shark.js');
       if (!fs.existsSync(mcpSharkJsPath)) {
-        return res.status(500).json({ 
-          error: 'MCP Shark server not found', 
-          details: `Could not find mcp-shark.js at ${mcpSharkJsPath}` 
+        return res.status(500).json({
+          error: 'MCP Shark server not found',
+          details: `Could not find mcp-shark.js at ${mcpSharkJsPath}`,
         });
       }
 
@@ -740,7 +735,7 @@ export function createUIServer(db) {
       mcpSharkProcess = spawn('node', [mcpSharkJsPath], {
         cwd: mcpServerPath, // Set working directory to mcp-server so temp/mcps.json resolves correctly
         stdio: ['ignore', 'pipe', 'pipe'], // Capture stdout and stderr
-        env: { ...process.env }
+        env: { ...process.env },
       });
 
       // Clear previous logs
@@ -773,9 +768,9 @@ export function createUIServer(db) {
         console.error('Failed to start mcp-shark server:', err);
         logEntry('error', `Failed to start mcp-shark server: ${err.message}`);
         mcpSharkProcess = null;
-        return res.status(500).json({ 
-          error: 'Failed to start mcp-shark server', 
-          details: err.message 
+        return res.status(500).json({
+          error: 'Failed to start mcp-shark server',
+          details: err.message,
         });
       });
 
@@ -792,46 +787,46 @@ export function createUIServer(db) {
         await checkPortReady(9851, 'localhost', 15000); // Wait up to 15 seconds
         console.log('MCP Shark server is ready!');
 
-      // Update original file to point to mcp-shark server
-      // Preserve the original structure but replace mcpServers with mcp-shark endpoint
-      const updatedConfig = {
-        ...originalConfig,
-        mcpServers: {
-          'my-mcp-server': {
-            type: 'http',
-            url: 'http://localhost:9851/mcp'
-          }
-        }
-      };
-
-      // If filePath provided, update the file
-      if (resolvedFilePath && fs.existsSync(resolvedFilePath)) {
-        // Create backup first
-        const backupPath = `${resolvedFilePath}.backup`;
-        fs.copyFileSync(resolvedFilePath, backupPath);
-        
-        // Store original content for restoration
-        originalConfigData = {
-          filePath: resolvedFilePath,
-          originalContent: content, // Store the original JSON content
-          backupPath: backupPath
+        // Update original file to point to mcp-shark server
+        // Preserve the original structure but replace mcpServers with mcp-shark endpoint
+        const updatedConfig = {
+          ...originalConfig,
+          mcpServers: {
+            'my-mcp-server': {
+              type: 'http',
+              url: 'http://localhost:9851/mcp',
+            },
+          },
         };
-        
-        fs.writeFileSync(resolvedFilePath, JSON.stringify(updatedConfig, null, 2));
-          console.log(`Updated config file: ${resolvedFilePath}`);
-      } else {
-        // Clear original config data if no file path
-        originalConfigData = null;
-      }
 
-      res.json({
-        success: true,
+        // If filePath provided, update the file
+        if (resolvedFilePath && fs.existsSync(resolvedFilePath)) {
+          // Create backup first
+          const backupPath = `${resolvedFilePath}.backup`;
+          fs.copyFileSync(resolvedFilePath, backupPath);
+
+          // Store original content for restoration
+          originalConfigData = {
+            filePath: resolvedFilePath,
+            originalContent: content, // Store the original JSON content
+            backupPath: backupPath,
+          };
+
+          fs.writeFileSync(resolvedFilePath, JSON.stringify(updatedConfig, null, 2));
+          console.log(`Updated config file: ${resolvedFilePath}`);
+        } else {
+          // Clear original config data if no file path
+          originalConfigData = null;
+        }
+
+        res.json({
+          success: true,
           message: 'MCP Shark server started successfully and config file updated',
-        convertedConfig,
-        updatedConfig,
-        filePath: resolvedFilePath || null,
-        backupPath: resolvedFilePath ? `${resolvedFilePath}.backup` : null
-      });
+          convertedConfig,
+          updatedConfig,
+          filePath: resolvedFilePath || null,
+          backupPath: resolvedFilePath ? `${resolvedFilePath}.backup` : null,
+        });
       } catch (waitError) {
         console.error('MCP Shark server did not start in time:', waitError);
         // Kill the process if it's still running
@@ -839,9 +834,9 @@ export function createUIServer(db) {
           mcpSharkProcess.kill();
           mcpSharkProcess = null;
         }
-        return res.status(500).json({ 
-          error: 'MCP Shark server failed to start', 
-          details: waitError.message 
+        return res.status(500).json({
+          error: 'MCP Shark server failed to start',
+          details: waitError.message,
         });
       }
     } catch (error) {
@@ -856,10 +851,10 @@ export function createUIServer(db) {
       if (mcpSharkProcess) {
         mcpSharkProcess.kill();
         mcpSharkProcess = null;
-        
+
         // Restore original config when stopping
         restoreOriginalConfig();
-        
+
         res.json({ success: true, message: 'MCP Shark server stopped and config restored' });
       } else {
         res.json({ success: true, message: 'MCP Shark server was not running' });
@@ -873,7 +868,7 @@ export function createUIServer(db) {
   app.get('/api/composite/status', (req, res) => {
     res.json({
       running: mcpSharkProcess !== null,
-      pid: mcpSharkProcess?.pid || null
+      pid: mcpSharkProcess?.pid || null,
     });
   });
 
@@ -881,7 +876,7 @@ export function createUIServer(db) {
   app.get('/api/config/read', (req, res) => {
     try {
       const { filePath } = req.query;
-      
+
       if (!filePath) {
         return res.status(400).json({ error: 'filePath is required' });
       }
@@ -910,7 +905,7 @@ export function createUIServer(db) {
         displayPath: resolvedPath.replace(homedir(), '~'),
         content: content,
         parsed: parsed,
-        exists: true
+        exists: true,
       });
     } catch (error) {
       res.status(500).json({ error: 'Failed to read file', details: error.message });
@@ -926,9 +921,9 @@ export function createUIServer(db) {
     // Cursor paths
     const cursorPaths = [
       path.join(homeDir, '.cursor', 'mcp.json'),
-      ...(platform === 'win32' 
+      ...(platform === 'win32'
         ? [path.join(process.env.USERPROFILE || '', '.cursor', 'mcp.json')]
-        : [])
+        : []),
     ];
 
     // Windsurf paths
@@ -936,7 +931,7 @@ export function createUIServer(db) {
       path.join(homeDir, '.codeium', 'windsurf', 'mcp_config.json'),
       ...(platform === 'win32'
         ? [path.join(process.env.USERPROFILE || '', '.codeium', 'windsurf', 'mcp_config.json')]
-        : [])
+        : []),
     ];
 
     // Check Cursor paths
@@ -946,7 +941,7 @@ export function createUIServer(db) {
           editor: 'Cursor',
           path: cursorPath,
           displayPath: cursorPath.replace(homeDir, '~'),
-          exists: true
+          exists: true,
         });
         break; // Only add first found
       }
@@ -959,7 +954,7 @@ export function createUIServer(db) {
           editor: 'Windsurf',
           path: windsurfPath,
           displayPath: windsurfPath.replace(homeDir, '~'),
-          exists: true
+          exists: true,
         });
         break; // Only add first found
       }
@@ -971,14 +966,14 @@ export function createUIServer(db) {
         editor: 'Cursor',
         path: path.join(homeDir, '.cursor', 'mcp.json'),
         displayPath: '~/.cursor/mcp.json',
-        exists: fs.existsSync(path.join(homeDir, '.cursor', 'mcp.json'))
+        exists: fs.existsSync(path.join(homeDir, '.cursor', 'mcp.json')),
       },
       {
         editor: 'Windsurf',
         path: path.join(homeDir, '.codeium', 'windsurf', 'mcp_config.json'),
         displayPath: '~/.codeium/windsurf/mcp_config.json',
-        exists: fs.existsSync(path.join(homeDir, '.codeium', 'windsurf', 'mcp_config.json'))
-      }
+        exists: fs.existsSync(path.join(homeDir, '.codeium', 'windsurf', 'mcp_config.json')),
+      },
     ];
 
     // If we found existing files, only return those. Otherwise return defaults.
@@ -987,7 +982,7 @@ export function createUIServer(db) {
     res.json({
       detected: result,
       platform,
-      homeDir
+      homeDir,
     });
   });
 
@@ -1003,7 +998,7 @@ export function createUIServer(db) {
 
   process.on('SIGTERM', cleanup);
   process.on('SIGINT', cleanup);
-  
+
   // Also handle uncaught exceptions and unhandled rejections
   process.on('exit', () => {
     restoreOriginalConfig();
@@ -1019,7 +1014,7 @@ export function createUIServer(db) {
   const clients = new Set();
   let lastTs = 0;
 
-  wss.on('connection', ws => {
+  wss.on('connection', (ws) => {
     clients.add(ws);
     ws.on('close', () => clients.delete(ws));
   });
@@ -1027,7 +1022,7 @@ export function createUIServer(db) {
   const notifyClients = () => {
     const requests = queryRequests(db, { limit: 100 });
     const message = JSON.stringify({ type: 'update', data: serializeBigInt(requests) });
-    clients.forEach(client => {
+    clients.forEach((client) => {
       if (client.readyState === 1) {
         client.send(message);
       }
@@ -1036,7 +1031,7 @@ export function createUIServer(db) {
 
   const broadcastLogUpdate = (logEntry) => {
     const message = JSON.stringify({ type: 'log', data: logEntry });
-    clients.forEach(client => {
+    clients.forEach((client) => {
       if (client.readyState === 1) {
         client.send(message);
       }
@@ -1044,9 +1039,7 @@ export function createUIServer(db) {
   };
 
   setInterval(() => {
-    const lastCheck = db
-      .prepare('SELECT MAX(timestamp_ns) as max_ts FROM packets')
-      .get();
+    const lastCheck = db.prepare('SELECT MAX(timestamp_ns) as max_ts FROM packets').get();
     if (lastCheck && lastCheck.max_ts > lastTs) {
       lastTs = lastCheck.max_ts;
       notifyClients();
@@ -1076,7 +1069,9 @@ export async function runUIServer(dbPath) {
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const dbPath = process.env.DB_PATH || process.argv[2] || path.join(process.cwd(), '../mcp-server/temp/db/mcp-shark.sqlite');
+  const dbPath =
+    process.env.DB_PATH ||
+    process.argv[2] ||
+    path.join(process.cwd(), '../mcp-server/temp/db/mcp-shark.sqlite');
   runUIServer(dbPath).catch(console.error);
 }
-

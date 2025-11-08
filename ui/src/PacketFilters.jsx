@@ -171,4 +171,3 @@ function RequestFilters({ filters, onFilterChange, stats }) {
 }
 
 export default RequestFilters;
-

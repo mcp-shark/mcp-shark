@@ -41,7 +41,9 @@ function RequestDetail({ request, onClose }) {
   };
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#1e1e1e' }}>
+    <div
+      style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#1e1e1e' }}
+    >
       {/* Header */}
       <div
         style={{
@@ -55,7 +57,8 @@ function RequestDetail({ request, onClose }) {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <h3 style={{ fontSize: '13px', fontWeight: 'normal', color: '#d4d4d4', margin: 0 }}>
-            #{request.frame_number}: {request.direction === 'request' ? 'HTTP Request' : 'HTTP Response'}
+            #{request.frame_number}:{' '}
+            {request.direction === 'request' ? 'HTTP Request' : 'HTTP Response'}
           </h3>
           <span
             style={{
@@ -349,7 +352,9 @@ function RequestDetail({ request, onClose }) {
 
         {activeTab === 'raw' && (
           <div style={{ fontFamily: 'monospace', fontSize: '11px' }}>
-            <div style={{ marginBottom: '8px', color: '#858585' }}>Raw Request/Response Data (Headers + Body)</div>
+            <div style={{ marginBottom: '8px', color: '#858585' }}>
+              Raw Request/Response Data (Headers + Body)
+            </div>
             <pre
               style={{
                 background: '#1e1e1e',
@@ -372,4 +377,3 @@ function RequestDetail({ request, onClose }) {
 }
 
 export default RequestDetail;
-

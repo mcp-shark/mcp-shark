@@ -31,7 +31,7 @@ function App() {
       const response = await fetch(`/api/requests?${queryParams}`);
       const data = await response.json();
       setRequests(data);
-      
+
       if (data.length > 0) {
         // For descending order (latest first), use the last entry as the reference time
         // The last entry in DESC order is the oldest one
@@ -81,7 +81,9 @@ function App() {
   }, [filters]);
 
   return (
-    <div style={{ display: 'flex', height: '100vh', flexDirection: 'column', background: '#1e1e1e' }}>
+    <div
+      style={{ display: 'flex', height: '100vh', flexDirection: 'column', background: '#1e1e1e' }}
+    >
       <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
       {activeTab === 'traffic' && (
@@ -127,4 +129,3 @@ function App() {
 }
 
 export default App;
-

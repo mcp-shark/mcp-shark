@@ -19,10 +19,10 @@ function CompositeSetup() {
     fetchStatus();
     // Poll status every 2 seconds
     const interval = setInterval(fetchStatus, 2000);
-    
+
     // Detect default config paths
     detectConfigPaths();
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -98,9 +98,7 @@ function CompositeSetup() {
     setMessage(null);
 
     try {
-      const payload = fileContent
-        ? { fileContent, filePath: updatePath || null }
-        : { filePath };
+      const payload = fileContent ? { fileContent, filePath: updatePath || null } : { filePath };
 
       const res = await fetch('/api/composite/setup', {
         method: 'POST',
@@ -174,7 +172,8 @@ function CompositeSetup() {
           MCP Shark Server Setup
         </h2>
         <p style={{ fontSize: '13px', color: '#858585', lineHeight: '1.5' }}>
-          Convert your MCP configuration file and start the MCP Shark server to aggregate multiple MCP servers into a single endpoint.
+          Convert your MCP configuration file and start the MCP Shark server to aggregate multiple
+          MCP servers into a single endpoint.
         </p>
       </div>
 
@@ -188,18 +187,28 @@ function CompositeSetup() {
         }}
       >
         <div style={{ marginBottom: '16px' }}>
-          <h3 style={{ fontSize: '14px', fontWeight: '500', marginBottom: '8px', color: '#d4d4d4' }}>
+          <h3
+            style={{ fontSize: '14px', fontWeight: '500', marginBottom: '8px', color: '#d4d4d4' }}
+          >
             Configuration File
           </h3>
           <p style={{ fontSize: '12px', color: '#858585', lineHeight: '1.4' }}>
-            Select your MCP configuration file or provide a file path. The file will be converted to MCP Shark format and used to start the server.
+            Select your MCP configuration file or provide a file path. The file will be converted to
+            MCP Shark format and used to start the server.
           </p>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {detectedPaths.length > 0 && (
             <div style={{ marginBottom: '8px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '8px',
+                }}
+              >
                 <div style={{ fontSize: '12px', color: '#858585', fontWeight: '500' }}>
                   Detected Configuration Files:
                 </div>
@@ -250,10 +259,10 @@ function CompositeSetup() {
                       alignItems: 'center',
                       transition: 'all 0.2s',
                     }}
-                    onMouseEnter={e => {
+                    onMouseEnter={(e) => {
                       e.currentTarget.style.background = item.exists ? '#264f78' : '#3d3d3d';
                     }}
-                    onMouseLeave={e => {
+                    onMouseLeave={(e) => {
                       e.currentTarget.style.background = item.exists ? '#1e3a5f' : '#2d2d2d';
                     }}
                   >
@@ -322,10 +331,10 @@ function CompositeSetup() {
                 whiteSpace: 'nowrap',
                 transition: 'background 0.2s',
               }}
-              onMouseEnter={e => {
+              onMouseEnter={(e) => {
                 e.currentTarget.style.background = '#1177bb';
               }}
-              onMouseLeave={e => {
+              onMouseLeave={(e) => {
                 e.currentTarget.style.background = '#0e639c';
               }}
             >
@@ -356,7 +365,14 @@ function CompositeSetup() {
           </div>
           {fileContent && !filePath && (
             <div>
-              <label style={{ display: 'block', fontSize: '12px', color: '#858585', marginBottom: '6px' }}>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: '12px',
+                  color: '#858585',
+                  marginBottom: '6px',
+                }}
+              >
                 Optional: File Path to Update
               </label>
               <input
@@ -375,14 +391,22 @@ function CompositeSetup() {
                 }}
               />
               <div style={{ fontSize: '11px', color: '#666', marginTop: '6px' }}>
-                Provide the file path if you want to update the original config file (backup will be created)
+                Provide the file path if you want to update the original config file (backup will be
+                created)
               </div>
             </div>
           )}
 
           {fileContent && (
             <div style={{ marginTop: '8px' }}>
-              <div style={{ color: '#858585', fontSize: '12px', marginBottom: '6px', fontWeight: '500' }}>
+              <div
+                style={{
+                  color: '#858585',
+                  fontSize: '12px',
+                  marginBottom: '6px',
+                  fontWeight: '500',
+                }}
+              >
                 File Content Preview
               </div>
               <pre
@@ -416,7 +440,9 @@ function CompositeSetup() {
         }}
       >
         <div style={{ marginBottom: '16px' }}>
-          <h3 style={{ fontSize: '14px', fontWeight: '500', marginBottom: '8px', color: '#d4d4d4' }}>
+          <h3
+            style={{ fontSize: '14px', fontWeight: '500', marginBottom: '8px', color: '#d4d4d4' }}
+          >
             Server Control
           </h3>
         </div>
@@ -438,12 +464,12 @@ function CompositeSetup() {
               opacity: loading || (!fileContent && !filePath) ? 0.5 : 1,
               transition: 'all 0.2s',
             }}
-            onMouseEnter={e => {
+            onMouseEnter={(e) => {
               if (!loading && (fileContent || filePath) && !status.running) {
                 e.currentTarget.style.background = '#1177bb';
               }
             }}
-            onMouseLeave={e => {
+            onMouseLeave={(e) => {
               if (!status.running) {
                 e.currentTarget.style.background = '#0e639c';
               }
@@ -468,12 +494,12 @@ function CompositeSetup() {
                 opacity: loading ? 0.5 : 1,
                 transition: 'background 0.2s',
               }}
-              onMouseEnter={e => {
+              onMouseEnter={(e) => {
                 if (!loading) {
                   e.currentTarget.style.background = '#e63946';
                 }
               }}
-              onMouseLeave={e => {
+              onMouseLeave={(e) => {
                 e.currentTarget.style.background = '#c72e2e';
               }}
             >
@@ -538,17 +564,32 @@ function CompositeSetup() {
         <h3 style={{ fontSize: '14px', fontWeight: '500', marginBottom: '12px', color: '#d4d4d4' }}>
           What This Does
         </h3>
-        <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '13px', color: '#858585', lineHeight: '1.8' }}>
-          <li>Converts your MCP config (<code style={{ color: '#dcdcaa' }}>mcpServers</code>) to MCP Shark format (<code style={{ color: '#dcdcaa' }}>servers</code>)</li>
-          <li>Starts the MCP Shark server on <code style={{ color: '#4ec9b0' }}>http://localhost:9851/mcp</code></li>
+        <ul
+          style={{
+            margin: 0,
+            paddingLeft: '20px',
+            fontSize: '13px',
+            color: '#858585',
+            lineHeight: '1.8',
+          }}
+        >
           <li>
-            {(filePath || updatePath)
+            Converts your MCP config (<code style={{ color: '#dcdcaa' }}>mcpServers</code>) to MCP
+            Shark format (<code style={{ color: '#dcdcaa' }}>servers</code>)
+          </li>
+          <li>
+            Starts the MCP Shark server on{' '}
+            <code style={{ color: '#4ec9b0' }}>http://localhost:9851/mcp</code>
+          </li>
+          <li>
+            {filePath || updatePath
               ? 'Updates your original config file to point to the MCP Shark server (creates a backup first)'
               : 'Note: Provide a file path to update your original config file automatically'}
           </li>
           {(filePath || updatePath) && (
             <li style={{ color: '#89d185', marginTop: '4px' }}>
-              ✓ Original config will be automatically restored when you stop the server or close the UI
+              ✓ Original config will be automatically restored when you stop the server or close the
+              UI
             </li>
           )}
         </ul>
@@ -599,7 +640,14 @@ function CompositeSetup() {
               }}
             >
               <div>
-                <h3 style={{ fontSize: '16px', fontWeight: '500', marginBottom: '4px', color: '#d4d4d4' }}>
+                <h3
+                  style={{
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    marginBottom: '4px',
+                    color: '#d4d4d4',
+                  }}
+                >
                   MCP Configuration File
                 </h3>
                 {configContent && (
@@ -672,4 +720,3 @@ function CompositeSetup() {
 }
 
 export default CompositeSetup;
-

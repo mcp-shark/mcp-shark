@@ -82,7 +82,9 @@ function CompositeLogs() {
   });
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#1e1e1e' }}>
+    <div
+      style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#1e1e1e' }}
+    >
       {/* Toolbar */}
       <div
         style={{
@@ -232,4 +234,3 @@ function CompositeLogs() {
 }
 
 export default CompositeLogs;
-

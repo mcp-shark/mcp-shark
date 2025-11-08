@@ -49,4 +49,3 @@ async function main(configPath) {
 }
 
 main(path.join(process.cwd(), 'temp', 'mcps.json'));
-

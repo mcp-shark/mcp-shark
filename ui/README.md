@@ -33,16 +33,19 @@ npm install
 **Production Mode:**
 
 1. Build the frontend:
+
 ```bash
 npm run build
 ```
 
 2. Start the server:
+
 ```bash
 npm start
 ```
 
 Or specify a custom database path:
+
 ```bash
 DB_PATH=/path/to/mcp-shark.sqlite npm start
 ```
@@ -70,6 +73,7 @@ The MCP server is **managed through the UI**, not started separately:
 5. Click **"Start MCP Shark"** to start the server
 
 The UI will:
+
 - Convert your MCP config format automatically
 - Start the MCP server on port 9851
 - Display server logs in real-time
@@ -85,12 +89,14 @@ The UI will:
 ## 📡 API Endpoints
 
 ### Traffic & Monitoring
+
 - `GET /api/requests` - Retrieve communication requests/responses with optional filtering
 - `GET /api/conversations` - Get request/response conversation pairs
 - `GET /api/sessions` - List all sessions
 - `GET /api/statistics` - Get traffic statistics
 
 ### MCP Server Management
+
 - `GET /api/composite/status` - Get the status of the MCP Shark server
 - `GET /api/composite/logs` - Get MCP Shark server logs
 - `POST /api/composite/setup` - Configure and start the MCP Shark server
@@ -98,6 +104,7 @@ The UI will:
 - `POST /api/composite/logs/clear` - Clear server logs
 
 ### Configuration
+
 - `GET /api/config/detect` - Detect default MCP config file paths
 - `GET /api/config/read` - Read MCP configuration file
 
@@ -106,27 +113,34 @@ The UI will:
 The server broadcasts real-time updates via WebSocket on the same port as the HTTP server.
 
 **Connection:**
+
 - Development: `ws://localhost:9853`
 - Production: `wss://your-domain.com` (if using HTTPS)
 
 **Message Format:**
+
 ```json
 {
   "type": "update",
-  "data": [/* array of log entries */]
+  "data": [
+    /* array of log entries */
+  ]
 }
 ```
 
 ## 🎨 UI Features
 
 ### Filtering
+
 - **Server**: Filter by server name
 - **Direction**: Filter by request or response
 - **Method**: Filter by HTTP method (GET, POST, etc.)
 - **Status**: Filter by status (success, error, pending)
 
 ### Log Table
+
 Displays:
+
 - Timestamp
 - Server name
 - Direction (request/response)
@@ -136,7 +150,9 @@ Displays:
 - Payload size (KB)
 
 ### Log Detail Panel
+
 Click any log entry to view:
+
 - Full log metadata
 - Request ID
 - Error messages (if any)

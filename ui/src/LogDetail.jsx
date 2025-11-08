@@ -3,11 +3,25 @@ function LogDetail({ log, onClose }) {
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ padding: '12px', borderBottom: '1px solid #333', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div
+        style={{
+          padding: '12px',
+          borderBottom: '1px solid #333',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <h3 style={{ fontSize: '14px', fontWeight: 'normal' }}>Details</h3>
         <button
           onClick={onClose}
-          style={{ background: 'none', border: 'none', color: '#d4d4d4', cursor: 'pointer', fontSize: '18px' }}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#d4d4d4',
+            cursor: 'pointer',
+            fontSize: '18px',
+          }}
         >
           ×
         </button>
@@ -77,4 +91,3 @@ function LogDetail({ log, onClose }) {
 }
 
 export default LogDetail;
-
