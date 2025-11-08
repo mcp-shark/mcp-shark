@@ -792,7 +792,7 @@ export function createUIServer(db) {
         const updatedConfig = {
           ...originalConfig,
           mcpServers: {
-            'my-mcp-server': {
+            'mcp-shark-server': {
               type: 'http',
               url: 'http://localhost:9851/mcp',
             },
