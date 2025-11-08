@@ -16,17 +16,27 @@ Both components work together but can also be run independently.
 ## ✨ Features
 
 ### MCP Server
+
 - **🔗 Multi-Server Aggregation**: Connect to multiple MCP servers simultaneously (HTTP and stdio)
-- **📊 Comprehensive Audit Logging**: SQLite-based logging with request/response tracking
-- **🌐 HTTP Interface**: RESTful API endpoint for easy integration
+- **📊 Comprehensive Audit Logging**: SQLite-based logging with request/response tracking, performance metrics, and error handling
+- **🌐 HTTP Interface**: RESTful API endpoint for easy integration with any MCP client
 - **🔄 Session Management**: Automatic session handling for stateful MCP interactions
 - **🛠️ Unified Tool Access**: Access tools from all connected servers through a single interface
+- **📝 Prompt & Resource Aggregation**: Unified access to prompts and resources across all servers
+- **⚡ Streaming Support**: Full support for async iterable responses (streaming)
+- **🔍 Request Correlation**: Track request/response pairs with correlation IDs
+- **🔌 Format Conversion**: Automatically converts between different MCP config formats (IDE format ↔ MCP Shark format)
 
 ### UI
+
 - **Real-time Updates**: WebSocket-powered live log streaming
 - **Advanced Filtering**: Filter by server, direction, HTTP method, and status
 - **Detailed Log View**: Inspect individual log entries with full payload details
 - **MCP Server Management**: Configure and manage MCP Shark server from the UI
+- **Automatic Config Detection**: Automatically detects MCP configuration files for popular IDEs (Cursor, Windsurf)
+- **Config Conversion**: Automatically converts IDE MCP config format to MCP Shark format
+- **Server Lifecycle Management**: Start, stop, and restart MCP server from the UI
+- **Live Server Logs**: Real-time streaming of MCP server logs
 - **Dark Theme UI**: Modern, developer-friendly interface
 
 ## 🚀 Quick Start
@@ -80,7 +90,26 @@ cd ../ui && npm install
 
 ### Configuration
 
-Create a configuration file at `mcp-server/temp/mcps.json`:
+**No manual configuration needed!** MCP Shark automatically detects and uses your existing IDE MCP configuration files.
+
+#### Automatic IDE Config Detection
+
+The UI automatically detects MCP configuration files from popular IDEs:
+
+- **Cursor**: `~/.cursor/mcp.json`
+- **Windsurf**: `~/.codeium/windsurf/mcp_config.json`
+
+When you start the UI and navigate to the "MCP Server Setup" tab, it will:
+
+1. **Auto-detect** your IDE's MCP configuration file
+2. **Display** detected configs with their paths
+3. **Allow selection** of which config to use
+4. **Automatically convert** the IDE config format to MCP Shark's internal format
+5. **Start the server** with your existing MCP servers configured
+
+#### Manual Configuration (Optional)
+
+If you prefer to run the MCP server directly (without the UI), you can manually create a configuration file at `mcp-server/temp/mcps.json`:
 
 ```json
 {
@@ -101,6 +130,8 @@ Create a configuration file at `mcp-server/temp/mcps.json`:
 }
 ```
 
+**Note:** This is only needed if running the server separately. When using the UI (recommended), it handles configuration automatically.
+
 ### Running
 
 #### Recommended: Start UI and Manage MCP Server Through UI
@@ -108,6 +139,7 @@ Create a configuration file at `mcp-server/temp/mcps.json`:
 The recommended way to run MCP Shark is to start the UI, then use the UI's setup interface to configure and start the MCP server:
 
 **Using Makefile (recommended):**
+
 ```bash
 # Start UI (port 9853) - default command
 make start
@@ -121,6 +153,7 @@ make stop-ui
 ```
 
 **Using npm:**
+
 ```bash
 # Start UI (port 9853)
 npm run start:ui
@@ -129,15 +162,20 @@ npm run start:ui
 ```
 
 Then:
+
 1. Open `http://localhost:9853` in your browser
 2. Go to the "MCP Server Setup" tab
-3. Select or provide your MCP configuration file
-4. Click "Start MCP Shark" to start the server
+3. The UI will automatically detect your IDE's MCP configuration files (Cursor, Windsurf)
+4. Select the detected config file or provide a custom path
+5. Click "Start MCP Shark" to start the server
 
 The UI will automatically:
-- Convert your MCP config to the correct format
-- Start the MCP server on port 9851
-- Manage the server lifecycle (start/stop/restart)
+
+- **Detect** your IDE's MCP configuration files (Cursor, Windsurf)
+- **Convert** your MCP config format to MCP Shark's internal format
+- **Start** the MCP server on port 9851 with all your configured servers
+- **Manage** the server lifecycle (start/stop/restart)
+- **Stream** real-time server logs to the UI
 
 **Note:** When you stop the UI using `make stop`, it will automatically stop the MCP server as well (if it was started through the UI).
 
@@ -157,11 +195,12 @@ make start-server
 make stop-server
 ```
 
-**Note:** When running the server separately, you'll need to manually create the config file at `mcp-server/temp/mcps.json` before starting.
+**Note:** When running the server separately (not recommended), you'll need to manually create the config file at `mcp-server/temp/mcps.json` before starting. The UI handles all configuration automatically when you use the recommended workflow.
 
 #### Development Mode
 
 **UI Development Mode (with hot reload):**
+
 ```bash
 cd ui
 npm run dev
@@ -302,16 +341,16 @@ make help
 
 **Makefile Commands Summary:**
 
-| Command | Description |
-|---------|-------------|
-| `make start` / `make start-ui` | Start the UI server on port 9853 |
-| `make stop` / `make stop-ui` | Stop the UI server and any related processes |
-| `make start-server` | Start MCP server directly (requires manual config) |
-| `make stop-server` | Stop MCP server if running separately |
-| `make dev-ui` | Start UI in development mode with hot reload |
-| `make build-ui` | Build UI for production |
-| `make clean` | Stop all services and clean up PID/log files |
-| `make help` | Show all available commands |
+| Command                        | Description                                        |
+| ------------------------------ | -------------------------------------------------- |
+| `make start` / `make start-ui` | Start the UI server on port 9853                   |
+| `make stop` / `make stop-ui`   | Stop the UI server and any related processes       |
+| `make start-server`            | Start MCP server directly (requires manual config) |
+| `make stop-server`             | Stop MCP server if running separately              |
+| `make dev-ui`                  | Start UI in development mode with hot reload       |
+| `make build-ui`                | Build UI for production                            |
+| `make clean`                   | Stop all services and clean up PID/log files       |
+| `make help`                    | Show all available commands                        |
 
 ### Code Quality
 
@@ -360,10 +399,11 @@ chore: update dependencies
 
 Before each commit, the following checks run automatically:
 
-1. **Lint-staged**: Runs ESLint and Prettier on staged files
-2. **Commitlint**: Validates commit message format
+1. **Fix All**: Runs `npm run fix:all` to fix linting and formatting issues in all files (continues on error)
+2. **Lint-staged**: Runs Prettier on staged files to ensure consistent formatting
+3. **Commitlint**: Validates commit message format (non-blocking)
 
-If any check fails, the commit will be rejected. Fix the issues and try again.
+The hooks are configured to be non-blocking - they will attempt to fix issues automatically and won't block your commit if tools are unavailable. However, it's recommended to ensure your code is properly formatted before committing.
 
 ## 🔌 Supported MCP Methods
 
@@ -399,4 +439,3 @@ Contributions are welcome! Please ensure your code passes linting and formatting
 ---
 
 **Built with ❤️ using the Model Context Protocol SDK**
-
