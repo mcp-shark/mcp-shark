@@ -12,16 +12,15 @@ import {
 import { initDb } from 'mcp-shark-common/db/init.js';
 import { getLogger } from 'mcp-shark-common/db/logger.js';
 import {
-  prepareAppDataSpaces,
-  prepareAppDataSpaces,
+  getDatabaseFile,
   getMcpConfigPath,
+  prepareAppDataSpaces,
 } from 'mcp-shark-common/configs/index.js';
 import { withAuditRequestResponseHandler } from './lib/auditor/audit.js';
 
 function initAuditLogger(logger) {
   logger.info('Initializing audit logger at', getDatabaseFile());
-  const db = initDb(getDatabaseFile());
-  return getLogger(db);
+  return getLogger(initDb(getDatabaseFile()));
 }
 
 async function main() {
