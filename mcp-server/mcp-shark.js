@@ -61,19 +61,40 @@ const configPath =
   process.argv[2] || // Command-line argument (used by UI server)
   process.env.MCP_SHARK_CONFIG_PATH || // Environment variable
   path.join(process.cwd(), 'temp', 'mcps.json'); // Default fallback
+
+// Log startup information to stdout/stderr so it's captured by parent process
+console.log('[MCP-Shark] Starting MCP server...');
+console.log(`[MCP-Shark] Config path: ${configPath}`);
+console.log(`[MCP-Shark] Data directory: ${dataDir}`);
+console.log(`[MCP-Shark] Database path: ${DB_FILE}`);
+console.log(`[MCP-Shark] Working directory: ${process.cwd()}`);
+
 main(configPath)
   .then(() => {
-    consola.info('MCP server started successfully');
+    const successMsg = 'MCP server started successfully';
+    console.log(`[MCP-Shark] ${successMsg}`);
+    console.log(`[MCP-Shark] Config path: ${configPath}`);
+    console.log(`[MCP-Shark] Data directory: ${dataDir}`);
+    console.log(`[MCP-Shark] Database path: ${DB_FILE}`);
+    // Also use consola for consistency
+    consola.info(successMsg);
     consola.info(`Config path: ${configPath}`);
     consola.info(`Data directory: ${dataDir}`);
     consola.info(`Database path: ${DB_FILE}`);
   })
   .catch(error => {
-    consola.info('Error starting MCP server:', error);
-    consola.info('Error message:', error.message);
-    consola.info('Error stack:', error.stack);
-    consola.error('Error starting MCP server:', error);
-    consola.error(error.message);
-    consola.error(error.stack);
+    const errorMsg = 'Error starting MCP server';
+    // Log to stderr for errors
+    console.error(`[MCP-Shark] ${errorMsg}:`, error);
+    console.error(`[MCP-Shark] Error message: ${error.message}`);
+    if (error.stack) {
+      console.error(`[MCP-Shark] Error stack:`, error.stack);
+    }
+    // Also use consola for consistency
+    consola.error(errorMsg, error);
+    consola.error(`Error message: ${error.message}`);
+    if (error.stack) {
+      consola.error(`Error stack: ${error.stack}`);
+    }
     process.exit(1);
   });

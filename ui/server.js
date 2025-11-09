@@ -758,6 +758,13 @@ export function createUIServer(db) {
       
       // Pass the config path as an argument to mcp-shark.js
       // This ensures it reads from the correct location in both Electron and non-Electron environments
+      console.log(`[UI Server] Spawning MCP-Shark server...`);
+      console.log(`[UI Server] Executable: ${nodeExecutable}`);
+      console.log(`[UI Server] Script: ${mcpSharkJsPath}`);
+      console.log(`[UI Server] Config: ${mcpsJsonPath}`);
+      console.log(`[UI Server] CWD: ${mcpServerPath}`);
+      console.log(`[UI Server] Data dir: ${dataDir || 'N/A'}`);
+      
       mcpSharkProcess = spawn(nodeExecutable, [mcpSharkJsPath, mcpsJsonPath], {
         cwd: mcpServerPath, // Set working directory to mcp-server
         stdio: ['ignore', 'pipe', 'pipe'], // Capture stdout and stderr
@@ -767,6 +774,8 @@ export function createUIServer(db) {
           ...(dataDir && { MCP_SHARK_DATA_DIR: dataDir }), // Set data directory if in Electron
         },
       });
+
+      console.log(`[UI Server] MCP-Shark process spawned with PID: ${mcpSharkProcess.pid}`);
 
       // Clear previous logs
       mcpSharkLogs = [];
@@ -782,13 +791,13 @@ export function createUIServer(db) {
         broadcastLogUpdate({ timestamp, type, line });
       };
 
-      // Capture stdout
+      // Capture stdout - preserve exact output for debugging
       mcpSharkProcess.stdout.on('data', (data) => {
         logEntry('stdout', data);
         process.stdout.write(data); // Also output to parent process
       });
 
-      // Capture stderr
+      // Capture stderr - preserve exact output for debugging
       mcpSharkProcess.stderr.on('data', (data) => {
         logEntry('stderr', data);
         process.stderr.write(data); // Also output to parent process
@@ -804,10 +813,14 @@ export function createUIServer(db) {
         });
       });
 
-      mcpSharkProcess.on('exit', (code) => {
-        const message = `MCP Shark server process exited with code ${code}`;
-        console.log(message);
+      mcpSharkProcess.on('exit', (code, signal) => {
+        const message = `MCP Shark server process exited with code ${code}${signal ? ` (signal: ${signal})` : ''}`;
+        console.log(`[UI Server] ${message}`);
         logEntry('exit', message);
+        if (code !== 0 && code !== null) {
+          console.error(`[UI Server] MCP-Shark process exited with non-zero code: ${code}`);
+          logEntry('error', `Process exited with code ${code}`);
+        }
         mcpSharkProcess = null;
       });
 
