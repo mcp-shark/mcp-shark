@@ -55,12 +55,10 @@ main()
   .then(() => {
     const successMsg = 'MCP server started successfully';
     console.log(`[MCP-Shark] ${successMsg}`);
-    console.log(`[MCP-Shark] Config path: ${configPath}`);
     console.log(`[MCP-Shark] Data directory: ${dataDir}`);
     console.log(`[MCP-Shark] Database path: ${DB_FILE}`);
     // Also use consola for consistency
     consola.info(successMsg);
-    consola.info(`Config path: ${configPath}`);
     consola.info(`Data directory: ${dataDir}`);
     consola.info(`Database path: ${DB_FILE}`);
   })
