@@ -711,13 +711,13 @@ export function createUIServer(db) {
       let dataDir = null;
       
       if (isElectron) {
-        // We're in Electron - use OS temp directory (always writable)
+        // We're in Electron - use user's home directory (always writable)
         const os = await import('node:os');
-        dataDir = process.env.MCP_SHARK_DATA_DIR || os.tmpdir();
-        tempDir = path.join(dataDir, 'mcp-shark');
+        dataDir = process.env.MCP_SHARK_DATA_DIR || path.join(os.homedir(), '.mcp-shark');
+        tempDir = dataDir;
         mcpsJsonPath = path.join(tempDir, 'mcps.json');
-        console.log(`Electron detected - using writable temp directory: ${tempDir}`);
-        console.log(`Setting MCP_SHARK_DATA_DIR to OS temp: ${dataDir}`);
+        console.log(`Electron detected - using home directory: ${tempDir}`);
+        console.log(`Setting MCP_SHARK_DATA_DIR to home directory: ${dataDir}`);
       } else {
         // Not in Electron - use mcp-server's temp directory
         tempDir = path.join(mcpServerPath, 'temp');

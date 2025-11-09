@@ -16,10 +16,10 @@ import { getLogger } from './lib/db/logger.js';
 import { withAuditRequestResponseHandler } from './lib/auditor/audit.js';
 
 const DB_NAME = 'mcp-shark.sqlite';
-// Use MCP_SHARK_DATA_DIR if set (for Electron apps), otherwise use OS temp directory or process.cwd()
-// MCP_SHARK_DATA_DIR is set by Electron to a writable location (OS temp directory)
-const dataDir = process.env.MCP_SHARK_DATA_DIR || os.tmpdir();
-const DB_PATH = path.join(dataDir, 'mcp-shark', 'db');
+// Use MCP_SHARK_DATA_DIR if set (for Electron apps), otherwise use user's home directory
+// MCP_SHARK_DATA_DIR is set by Electron to a writable location (user's home directory)
+const dataDir = process.env.MCP_SHARK_DATA_DIR || path.join(os.homedir(), '.mcp-shark');
+const DB_PATH = path.join(dataDir, 'db');
 const DB_FILE = path.join(DB_PATH, DB_NAME);
 
 function initAuditLogger(logger) {
