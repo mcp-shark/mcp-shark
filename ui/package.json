@@ -14,7 +14,7 @@
     "react-dom": "^18.2.0",
     "express": "^4.18.2",
     "ws": "^8.16.0",
-    "mcp-shark-common": "file:../../mcp-shark-common"
+    "mcp-shark-common": "github:mcp-shark/mcp-shark-common"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
