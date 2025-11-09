@@ -52,4 +52,12 @@ async function main(configPath) {
   await runInternalServer(consola, 9851, app);
 }
 
-main(path.join(process.cwd(), 'temp', 'mcps.json'));
+// Config path can be provided as:
+// 1. Command-line argument (when spawned from UI server, especially in Electron)
+// 2. Environment variable MCP_SHARK_CONFIG_PATH
+// 3. Default: temp/mcps.json relative to current working directory
+const configPath =
+  process.argv[2] || // Command-line argument (used by UI server)
+  process.env.MCP_SHARK_CONFIG_PATH || // Environment variable
+  path.join(process.cwd(), 'temp', 'mcps.json'); // Default fallback
+main(configPath);

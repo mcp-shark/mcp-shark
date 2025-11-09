@@ -701,9 +701,28 @@ export function createUIServer(db) {
       }
 
       // Write converted config to mcp-server's temp/mcps.json
+      // In Electron, use a writable location (OS temp directory)
       const mcpServerPath = findMcpServerPath();
-      const tempDir = path.join(mcpServerPath, 'temp');
-      const mcpsJsonPath = path.join(tempDir, 'mcps.json');
+      
+      // Check if we're in Electron by looking for ELECTRON_RUN_AS_NODE or process.resourcesPath
+      const isElectron = process.env.ELECTRON_RUN_AS_NODE || process.resourcesPath;
+      let mcpsJsonPath;
+      let tempDir;
+      let dataDir = null;
+      
+      if (isElectron) {
+        // We're in Electron - use OS temp directory (always writable)
+        const os = await import('node:os');
+        dataDir = process.env.MCP_SHARK_DATA_DIR || os.tmpdir();
+        tempDir = path.join(dataDir, 'mcp-shark');
+        mcpsJsonPath = path.join(tempDir, 'mcps.json');
+        console.log(`Electron detected - using writable temp directory: ${tempDir}`);
+        console.log(`Setting MCP_SHARK_DATA_DIR to OS temp: ${dataDir}`);
+      } else {
+        // Not in Electron - use mcp-server's temp directory
+        tempDir = path.join(mcpServerPath, 'temp');
+        mcpsJsonPath = path.join(tempDir, 'mcps.json');
+      }
 
       // Ensure temp directory exists
       if (!fs.existsSync(tempDir)) {
@@ -731,25 +750,16 @@ export function createUIServer(db) {
       }
 
       // Start mcp-shark server
-      // The mcp-shark.js will use the default path: temp/mcps.json (relative to cwd)
+      // Pass the config path as an argument so it works in both Electron and non-Electron environments
       // Use process.execPath (Electron's executable) when running in Electron
       // This works in both development (Electron dev) and packaged apps
       // When ELECTRON_RUN_AS_NODE is set, process.execPath still points to Electron's executable
       const nodeExecutable = process.execPath || 'node';
       
-      // Set a writable data directory for the database
-      // In Electron apps, use OS temp directory instead of the read-only app bundle
-      // Check if we're in Electron by looking for ELECTRON_RUN_AS_NODE or process.resourcesPath
-      let dataDir = null;
-      if (process.env.ELECTRON_RUN_AS_NODE || process.resourcesPath) {
-        // We're in Electron - use OS temp directory (always writable)
-        const os = await import('node:os');
-        dataDir = os.tmpdir();
-        console.log(`Setting MCP_SHARK_DATA_DIR to OS temp: ${dataDir}`);
-      }
-      
-      mcpSharkProcess = spawn(nodeExecutable, [mcpSharkJsPath], {
-        cwd: mcpServerPath, // Set working directory to mcp-server so temp/mcps.json resolves correctly
+      // Pass the config path as an argument to mcp-shark.js
+      // This ensures it reads from the correct location in both Electron and non-Electron environments
+      mcpSharkProcess = spawn(nodeExecutable, [mcpSharkJsPath, mcpsJsonPath], {
+        cwd: mcpServerPath, // Set working directory to mcp-server
         stdio: ['ignore', 'pipe', 'pipe'], // Capture stdout and stderr
         env: {
           ...process.env,
