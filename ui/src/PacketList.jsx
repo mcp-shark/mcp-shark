@@ -2,14 +2,34 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 
 // SVG Icon Components
 const ChevronDown = ({ size = 12, color = 'currentColor' }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-    <polyline points="6 9 12 15 18 9"/>
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{ display: 'inline-block', verticalAlign: 'middle' }}
+  >
+    <polyline points="6 9 12 15 18 9" />
   </svg>
 );
 
 const ChevronRight = ({ size = 12, color = 'currentColor' }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-    <polyline points="9 18 15 12 9 6"/>
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{ display: 'inline-block', verticalAlign: 'middle' }}
+  >
+    <polyline points="9 18 15 12 9 6" />
   </svg>
 );
 
@@ -35,10 +55,9 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
     // Try to extract from body_json first
     if (request.body_json) {
       try {
-        const body = typeof request.body_json === 'string' 
-          ? JSON.parse(request.body_json) 
-          : request.body_json;
-        
+        const body =
+          typeof request.body_json === 'string' ? JSON.parse(request.body_json) : request.body_json;
+
         // Check for params.name in JSON-RPC format
         if (body.params && body.params.name) {
           const fullName = body.params.name;
@@ -54,10 +73,9 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
     // Try to extract from body_raw
     if (request.body_raw) {
       try {
-        const body = typeof request.body_raw === 'string' 
-          ? JSON.parse(request.body_raw) 
-          : request.body_raw;
-        
+        const body =
+          typeof request.body_raw === 'string' ? JSON.parse(request.body_raw) : request.body_raw;
+
         if (body.params && body.params.name) {
           const fullName = body.params.name;
           const serverName = fullName.includes('.') ? fullName.split('.')[0] : fullName;
@@ -538,9 +556,7 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
   );
 
   const renderGeneralView = () => (
-    <tbody>
-      {requests.map((request) => renderRequestRow(request))}
-    </tbody>
+    <tbody>{requests.map((request) => renderRequestRow(request))}</tbody>
   );
 
   const renderGroupedByServerView = () => (
@@ -581,7 +597,14 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
                   fontSize: '11px',
                 }}
               >
-                <span style={{ marginRight: '8px', userSelect: 'none', display: 'inline-flex', alignItems: 'center' }}>
+                <span
+                  style={{
+                    marginRight: '8px',
+                    userSelect: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                  }}
+                >
                   {isServerExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
                 </span>
                 <span style={{ color: '#858585' }}>Server:</span>{' '}
@@ -636,8 +659,19 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
                           fontSize: '10px',
                         }}
                       >
-                        <span style={{ marginRight: '8px', userSelect: 'none', display: 'inline-flex', alignItems: 'center' }}>
-                          {isSessionExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                        <span
+                          style={{
+                            marginRight: '8px',
+                            userSelect: 'none',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                          }}
+                        >
+                          {isSessionExpanded ? (
+                            <ChevronDown size={12} />
+                          ) : (
+                            <ChevronRight size={12} />
+                          )}
                         </span>
                         <span style={{ color: '#858585' }}>Session:</span>{' '}
                         {session.sessionId ? (

@@ -1,4 +1,3 @@
-import * as path from 'node:path';
 import { consola } from 'consola';
 
 import { runAllExternalServers } from './lib/server/external/all.js';
