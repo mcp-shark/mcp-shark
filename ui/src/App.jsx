@@ -6,6 +6,7 @@ import CompositeSetup from './CompositeSetup';
 import CompositeLogs from './CompositeLogs';
 import TabNavigation from './TabNavigation';
 import IntroTour from './IntroTour';
+import { colors, fonts } from './theme';
 
 // SVG Icon Component
 const HelpIcon = ({ size = 16, color = 'currentColor' }) => (
@@ -253,7 +254,12 @@ function App() {
 
   return (
     <div
-      style={{ display: 'flex', height: '100vh', flexDirection: 'column', background: '#1e1e1e' }}
+      style={{
+        display: 'flex',
+        height: '100vh',
+        flexDirection: 'column',
+        background: colors.bgPrimary,
+      }}
     >
       {showTour && (
         <IntroTour
@@ -291,27 +297,30 @@ function App() {
             position: 'absolute',
             top: '12px',
             right: '16px',
-            background: '#252526',
-            border: '1px solid #3e3e42',
-            borderRadius: '4px',
-            padding: '6px 10px',
-            color: '#858585',
+            background: colors.bgCard,
+            border: `1px solid ${colors.borderLight}`,
+            borderRadius: '8px',
+            padding: '8px 12px',
+            color: colors.textSecondary,
             cursor: 'pointer',
+            fontFamily: fonts.body,
+            fontSize: '12px',
+            fontWeight: '500',
+            boxShadow: `0 2px 4px ${colors.shadowSm}`,
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
-            fontSize: '12px',
             zIndex: 100,
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = '#2d2d30';
-            e.currentTarget.style.color = '#d4d4d4';
-            e.currentTarget.style.borderColor = '#3e3e42';
+            e.currentTarget.style.background = colors.bgHover;
+            e.currentTarget.style.color = colors.textPrimary;
+            e.currentTarget.style.borderColor = colors.borderMedium;
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = '#252526';
-            e.currentTarget.style.color = '#858585';
-            e.currentTarget.style.borderColor = '#3e3e42';
+            e.currentTarget.style.background = colors.bgCard;
+            e.currentTarget.style.color = colors.textSecondary;
+            e.currentTarget.style.borderColor = colors.borderLight;
           }}
           title="Start interactive tour"
         >
@@ -321,9 +330,16 @@ function App() {
       </div>
 
       {activeTab === 'traffic' && (
-        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-            <RequestFilters filters={filters} onFilterChange={setFilters} stats={stats} />
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden', minHeight: 0 }}>
+          <div
+            style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0 }}
+          >
+            <RequestFilters
+              filters={filters}
+              onFilterChange={setFilters}
+              stats={stats}
+              onExport={() => {}}
+            />
             <RequestList
               requests={requests}
               selected={selected}
@@ -335,10 +351,11 @@ function App() {
             <div
               style={{
                 width: '600px',
-                borderLeft: '1px solid #3e3e42',
+                borderLeft: `1px solid ${colors.borderLight}`,
                 overflow: 'hidden',
                 display: 'flex',
                 flexDirection: 'column',
+                background: colors.bgCard,
               }}
             >
               <RequestDetail request={selected} onClose={() => setSelected(null)} />

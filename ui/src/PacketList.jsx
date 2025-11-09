@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { colors, fonts } from './theme';
 
 // SVG Icon Components
 const ChevronDown = ({ size = 12, color = 'currentColor' }) => (
@@ -39,9 +40,13 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
   const [columnWidths, setColumnWidths] = useState({
     frame: 60,
     time: 120,
+    datetime: 180,
     source: 120,
     destination: 120,
     protocol: 80,
+    method: 80,
+    status: 80,
+    endpoint: 250,
     length: 80,
     info: 400,
   });
@@ -314,14 +319,14 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
 
   const getRequestColor = (request) => {
     if (request.direction === 'request') {
-      return '#1e3a5f'; // Blue for requests
+      return colors.bgCard; // White for requests
     } else {
       if (request.status_code >= 400) {
-        return '#5f1e1e'; // Dark red for errors
+        return '#fef0f0'; // Soft red background for errors
       } else if (request.status_code >= 300) {
-        return '#5f4f1e'; // Dark yellow for redirects
+        return '#fff8e8'; // Soft yellow background for redirects
       } else {
-        return '#1e5f3a'; // Dark green for success
+        return '#f0f8f0'; // Soft green background for success
       }
     }
   };
@@ -330,6 +335,24 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
     if (!firstTime) return '0.000000';
     const diff = new Date(timestampISO) - new Date(firstTime);
     return (diff / 1000).toFixed(6);
+  };
+
+  const formatDateTime = (timestampISO) => {
+    if (!timestampISO) return '-';
+    try {
+      const date = new Date(timestampISO);
+      return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      });
+    } catch (e) {
+      return timestampISO;
+    }
   };
 
   const getSourceDest = (request) => {
@@ -344,6 +367,54 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
         dest: request.remote_address || 'Client',
       };
     }
+  };
+
+  const getEndpoint = (request) => {
+    if (request.direction === 'request') {
+      // Extract endpoint from JSON-RPC body (format: {"method": "prompts/list", "jsonrpc": "2.0", "id": 8})
+      // Try to extract from body_json first
+      if (request.body_json) {
+        try {
+          const body =
+            typeof request.body_json === 'string'
+              ? JSON.parse(request.body_json)
+              : request.body_json;
+          if (body && typeof body === 'object' && body.method) {
+            return body.method;
+          }
+        } catch (e) {
+          // Failed to parse JSON, try body_raw
+        }
+      }
+      // Try to extract from body_raw
+      if (request.body_raw) {
+        try {
+          const body =
+            typeof request.body_raw === 'string' ? JSON.parse(request.body_raw) : request.body_raw;
+          if (body && typeof body === 'object' && body.method) {
+            return body.method;
+          }
+        } catch (e) {
+          // Failed to parse
+        }
+      }
+      // Fallback to jsonrpc_method field if available
+      if (request.jsonrpc_method) {
+        return request.jsonrpc_method;
+      }
+      // Fallback to URL if nothing else is available
+      if (request.url) {
+        try {
+          const url = new URL(request.url);
+          return url.pathname + (url.search || '');
+        } catch (e) {
+          const url = request.url;
+          const match = url.match(/^https?:\/\/[^\/]+(\/.*)$/);
+          return match ? match[1] : url;
+        }
+      }
+    }
+    return '-';
   };
 
   const getInfo = (request) => {
@@ -371,12 +442,13 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
         onClick={() => onSelect(request)}
         style={{
           cursor: 'pointer',
-          background: isSelected ? '#264f78' : color,
-          borderBottom: '1px solid #2d2d30',
+          background: isSelected ? `${colors.accentBlue}20` : color,
+          borderBottom: `1px solid ${colors.borderLight}`,
+          fontFamily: fonts.body,
         }}
         onMouseEnter={(e) => {
           if (!isSelected) {
-            e.currentTarget.style.background = isSelected ? '#264f78' : '#2a2d2e';
+            e.currentTarget.style.background = `${colors.accentBlue}15`;
           }
         }}
         onMouseLeave={(e) => {
@@ -387,64 +459,134 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
       >
         <td
           style={{
-            padding: '2px 8px',
-            borderRight: '1px solid #2d2d30',
-            color: '#d4d4d4',
+            padding: '8px 12px',
+            borderRight: `1px solid ${colors.borderLight}`,
+            color: colors.textPrimary,
             textAlign: 'right',
+            fontFamily: fonts.mono,
+            fontSize: '12px',
           }}
         >
           {request.frame_number}
         </td>
         <td
           style={{
-            padding: '2px 8px',
-            borderRight: '1px solid #2d2d30',
-            color: '#d4d4d4',
+            padding: '8px 12px',
+            borderRight: `1px solid ${colors.borderLight}`,
+            color: colors.textPrimary,
+            fontFamily: fonts.mono,
+            fontSize: '12px',
           }}
         >
           {relativeTime}
         </td>
         <td
           style={{
-            padding: '2px 8px',
-            borderRight: '1px solid #2d2d30',
-            color: request.direction === 'request' ? '#4ec9b0' : '#ce9178',
+            padding: '8px 12px',
+            borderRight: `1px solid ${colors.borderLight}`,
+            color: colors.textPrimary,
+            fontFamily: fonts.body,
+            fontSize: '12px',
+          }}
+        >
+          {formatDateTime(request.timestamp_iso)}
+        </td>
+        <td
+          style={{
+            padding: '8px 12px',
+            borderRight: `1px solid ${colors.borderLight}`,
+            color: request.direction === 'request' ? colors.accentBlue : colors.accentGreen,
+            fontFamily: fonts.mono,
+            fontSize: '12px',
+            fontWeight: '500',
           }}
         >
           {source}
         </td>
         <td
           style={{
-            padding: '2px 8px',
-            borderRight: '1px solid #2d2d30',
-            color: request.direction === 'request' ? '#4ec9b0' : '#ce9178',
+            padding: '8px 12px',
+            borderRight: `1px solid ${colors.borderLight}`,
+            color: request.direction === 'request' ? colors.accentBlue : colors.accentGreen,
+            fontFamily: fonts.mono,
+            fontSize: '12px',
+            fontWeight: '500',
           }}
         >
           {dest}
         </td>
         <td
           style={{
-            padding: '2px 8px',
-            borderRight: '1px solid #2d2d30',
-            color: '#dcdcaa',
+            padding: '8px 12px',
+            borderRight: `1px solid ${colors.borderLight}`,
+            color: colors.textPrimary,
+            fontFamily: fonts.mono,
+            fontSize: '12px',
+            fontWeight: '500',
           }}
         >
           {request.protocol || 'HTTP'}
         </td>
         <td
           style={{
-            padding: '2px 8px',
-            borderRight: '1px solid #2d2d30',
-            color: '#d4d4d4',
+            padding: '8px 12px',
+            borderRight: `1px solid ${colors.borderLight}`,
+            color: request.direction === 'request' ? colors.accentBlue : colors.textSecondary,
+            fontFamily: fonts.mono,
+            fontSize: '12px',
+            fontWeight: '500',
+          }}
+        >
+          {request.direction === 'request' ? request.method || '-' : '-'}
+        </td>
+        <td
+          style={{
+            padding: '8px 12px',
+            borderRight: `1px solid ${colors.borderLight}`,
+            color:
+              request.direction === 'response'
+                ? request.status_code >= 400
+                  ? colors.error
+                  : request.status_code >= 300
+                    ? colors.warning
+                    : colors.success
+                : colors.textSecondary,
+            fontFamily: fonts.mono,
+            fontSize: '12px',
+            fontWeight: '500',
+          }}
+        >
+          {request.direction === 'response' ? request.status_code || '-' : '-'}
+        </td>
+        <td
+          style={{
+            padding: '8px 12px',
+            borderRight: `1px solid ${colors.borderLight}`,
+            color: colors.textPrimary,
+            fontFamily: fonts.mono,
+            fontSize: '12px',
+          }}
+        >
+          {getEndpoint(request)}
+        </td>
+        <td
+          style={{
+            padding: '8px 12px',
+            borderRight: `1px solid ${colors.borderLight}`,
+            color: colors.textPrimary,
             textAlign: 'right',
+            fontFamily: fonts.mono,
+            fontSize: '12px',
           }}
         >
           {request.length}
         </td>
         <td
           style={{
-            padding: '2px 8px',
-            color: '#d4d4d4',
+            padding: '8px 12px',
+            color: colors.textPrimary,
+            fontFamily: fonts.body,
+            fontSize: '12px',
           }}
         >
           {getInfo(request)}
@@ -454,18 +596,28 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
   };
 
   const renderTableHeader = () => (
-    <thead style={{ position: 'sticky', top: 0, background: '#252526', zIndex: 10 }}>
+    <thead
+      style={{
+        position: 'sticky',
+        top: 0,
+        background: colors.bgCard,
+        zIndex: 10,
+        boxShadow: `0 2px 4px ${colors.shadowSm}`,
+      }}
+    >
       <tr>
         <th
           style={{
             padding: '4px 8px',
             textAlign: 'left',
-            borderBottom: '2px solid #3e3e42',
-            borderRight: '1px solid #3e3e42',
+            borderBottom: `2px solid ${colors.borderMedium}`,
+            borderRight: `1px solid ${colors.borderLight}`,
             width: `${columnWidths.frame}px`,
             minWidth: `${columnWidths.frame}px`,
-            color: '#cccccc',
-            fontWeight: 'bold',
+            color: colors.textPrimary,
+            fontWeight: '600',
+            fontFamily: fonts.body,
+            fontSize: '12px',
           }}
         >
           No.
@@ -474,12 +626,14 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
           style={{
             padding: '4px 8px',
             textAlign: 'left',
-            borderBottom: '2px solid #3e3e42',
-            borderRight: '1px solid #3e3e42',
+            borderBottom: `2px solid ${colors.borderMedium}`,
+            borderRight: `1px solid ${colors.borderLight}`,
             width: `${columnWidths.time}px`,
             minWidth: `${columnWidths.time}px`,
-            color: '#cccccc',
-            fontWeight: 'bold',
+            color: colors.textPrimary,
+            fontWeight: '600',
+            fontFamily: fonts.body,
+            fontSize: '12px',
           }}
         >
           Time
@@ -488,12 +642,30 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
           style={{
             padding: '4px 8px',
             textAlign: 'left',
-            borderBottom: '2px solid #3e3e42',
-            borderRight: '1px solid #3e3e42',
+            borderBottom: `2px solid ${colors.borderMedium}`,
+            borderRight: `1px solid ${colors.borderLight}`,
+            width: `${columnWidths.datetime}px`,
+            minWidth: `${columnWidths.datetime}px`,
+            color: colors.textPrimary,
+            fontWeight: '600',
+            fontFamily: fonts.body,
+            fontSize: '12px',
+          }}
+        >
+          Date/Time
+        </th>
+        <th
+          style={{
+            padding: '4px 8px',
+            textAlign: 'left',
+            borderBottom: `2px solid ${colors.borderMedium}`,
+            borderRight: `1px solid ${colors.borderLight}`,
             width: `${columnWidths.source}px`,
             minWidth: `${columnWidths.source}px`,
-            color: '#cccccc',
-            fontWeight: 'bold',
+            color: colors.textPrimary,
+            fontWeight: '600',
+            fontFamily: fonts.body,
+            fontSize: '12px',
           }}
         >
           Source
@@ -502,12 +674,14 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
           style={{
             padding: '4px 8px',
             textAlign: 'left',
-            borderBottom: '2px solid #3e3e42',
-            borderRight: '1px solid #3e3e42',
+            borderBottom: `2px solid ${colors.borderMedium}`,
+            borderRight: `1px solid ${colors.borderLight}`,
             width: `${columnWidths.destination}px`,
             minWidth: `${columnWidths.destination}px`,
-            color: '#cccccc',
-            fontWeight: 'bold',
+            color: colors.textPrimary,
+            fontWeight: '600',
+            fontFamily: fonts.body,
+            fontSize: '12px',
           }}
         >
           Destination
@@ -516,12 +690,14 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
           style={{
             padding: '4px 8px',
             textAlign: 'left',
-            borderBottom: '2px solid #3e3e42',
-            borderRight: '1px solid #3e3e42',
+            borderBottom: `2px solid ${colors.borderMedium}`,
+            borderRight: `1px solid ${colors.borderLight}`,
             width: `${columnWidths.protocol}px`,
             minWidth: `${columnWidths.protocol}px`,
-            color: '#cccccc',
-            fontWeight: 'bold',
+            color: colors.textPrimary,
+            fontWeight: '600',
+            fontFamily: fonts.body,
+            fontSize: '12px',
           }}
         >
           Protocol
@@ -529,13 +705,63 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
         <th
           style={{
             padding: '4px 8px',
+            textAlign: 'left',
+            borderBottom: `2px solid ${colors.borderMedium}`,
+            borderRight: `1px solid ${colors.borderLight}`,
+            width: `${columnWidths.method}px`,
+            minWidth: `${columnWidths.method}px`,
+            color: colors.textPrimary,
+            fontWeight: '600',
+            fontFamily: fonts.body,
+            fontSize: '12px',
+          }}
+        >
+          Method
+        </th>
+        <th
+          style={{
+            padding: '4px 8px',
+            textAlign: 'left',
+            borderBottom: `2px solid ${colors.borderMedium}`,
+            borderRight: `1px solid ${colors.borderLight}`,
+            width: `${columnWidths.status}px`,
+            minWidth: `${columnWidths.status}px`,
+            color: colors.textPrimary,
+            fontWeight: '600',
+            fontFamily: fonts.body,
+            fontSize: '12px',
+          }}
+        >
+          Status
+        </th>
+        <th
+          style={{
+            padding: '4px 8px',
+            textAlign: 'left',
+            borderBottom: `2px solid ${colors.borderMedium}`,
+            borderRight: `1px solid ${colors.borderLight}`,
+            width: `${columnWidths.endpoint}px`,
+            minWidth: `${columnWidths.endpoint}px`,
+            color: colors.textPrimary,
+            fontWeight: '600',
+            fontFamily: fonts.body,
+            fontSize: '12px',
+          }}
+        >
+          Endpoint
+        </th>
+        <th
+          style={{
+            padding: '4px 8px',
             textAlign: 'right',
-            borderBottom: '2px solid #3e3e42',
-            borderRight: '1px solid #3e3e42',
+            borderBottom: `2px solid ${colors.borderMedium}`,
+            borderRight: `1px solid ${colors.borderLight}`,
             width: `${columnWidths.length}px`,
             minWidth: `${columnWidths.length}px`,
-            color: '#cccccc',
-            fontWeight: 'bold',
+            color: colors.textPrimary,
+            fontWeight: '600',
+            fontFamily: fonts.body,
+            fontSize: '12px',
           }}
         >
           Length
@@ -544,9 +770,11 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
           style={{
             padding: '4px 8px',
             textAlign: 'left',
-            borderBottom: '2px solid #3e3e42',
-            color: '#cccccc',
-            fontWeight: 'bold',
+            borderBottom: `2px solid ${colors.borderMedium}`,
+            color: colors.textPrimary,
+            fontWeight: '600',
+            fontFamily: fonts.body,
+            fontSize: '12px',
           }}
         >
           Info
@@ -577,23 +805,24 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
               onClick={() => toggleServerFirst(serverGroup.serverName)}
               style={{
                 cursor: 'pointer',
-                background: '#2d2d30',
-                borderBottom: '2px solid #3e3e42',
-                borderTop: '2px solid #3e3e42',
+                background: colors.bgSecondary,
+                borderBottom: `2px solid ${colors.borderMedium}`,
+                borderTop: `2px solid ${colors.borderMedium}`,
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#3a3a3a';
+                e.currentTarget.style.background = colors.bgHover;
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#2d2d30';
+                e.currentTarget.style.background = colors.bgSecondary;
               }}
             >
               <td
-                colSpan={7}
+                colSpan={11}
                 style={{
                   padding: '6px 12px',
-                  color: '#dcdcaa',
-                  fontWeight: 'bold',
+                  color: colors.textPrimary,
+                  fontFamily: fonts.body,
+                  fontWeight: '600',
                   fontSize: '11px',
                 }}
               >
@@ -607,15 +836,32 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
                 >
                   {isServerExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
                 </span>
-                <span style={{ color: '#858585' }}>Server:</span>{' '}
+                <span style={{ color: colors.textSecondary, fontFamily: fonts.body }}>Server:</span>{' '}
                 {serverGroup.serverName ? (
-                  <span style={{ color: '#4ec9b0', fontFamily: 'monospace' }}>
+                  <span
+                    style={{ color: colors.accentBlue, fontFamily: fonts.mono, fontWeight: '500' }}
+                  >
                     {serverGroup.serverName}
                   </span>
                 ) : (
-                  <span style={{ color: '#858585', fontStyle: 'italic' }}>(Unknown Server)</span>
+                  <span
+                    style={{
+                      color: colors.textSecondary,
+                      fontStyle: 'italic',
+                      fontFamily: fonts.body,
+                    }}
+                  >
+                    (Unknown Server)
+                  </span>
                 )}
-                <span style={{ marginLeft: '12px', color: '#858585', fontWeight: 'normal' }}>
+                <span
+                  style={{
+                    marginLeft: '12px',
+                    color: colors.textSecondary,
+                    fontWeight: '400',
+                    fontFamily: fonts.body,
+                  }}
+                >
                   ({requestCountText})
                 </span>
               </td>
@@ -640,22 +886,23 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
                       }}
                       style={{
                         cursor: 'pointer',
-                        background: '#252526',
-                        borderBottom: '1px solid #3e3e42',
+                        background: colors.bgCard,
+                        borderBottom: `1px solid ${colors.borderLight}`,
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.background = '#2a2d2e';
+                        e.currentTarget.style.background = colors.bgHover;
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.background = '#252526';
+                        e.currentTarget.style.background = colors.bgCard;
                       }}
                     >
                       <td
-                        colSpan={7}
+                        colSpan={11}
                         style={{
                           padding: '6px 12px 6px 32px',
-                          color: '#dcdcaa',
-                          fontWeight: 'bold',
+                          color: colors.textPrimary,
+                          fontFamily: fonts.body,
+                          fontWeight: '600',
                           fontSize: '10px',
                         }}
                       >
@@ -673,18 +920,37 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
                             <ChevronRight size={12} />
                           )}
                         </span>
-                        <span style={{ color: '#858585' }}>Session:</span>{' '}
+                        <span style={{ color: colors.textSecondary, fontFamily: fonts.body }}>
+                          Session:
+                        </span>{' '}
                         {session.sessionId ? (
-                          <span style={{ color: '#ce9178', fontFamily: 'monospace' }}>
+                          <span
+                            style={{
+                              color: colors.accentGreen,
+                              fontFamily: fonts.mono,
+                              fontWeight: '500',
+                            }}
+                          >
                             {session.sessionId}
                           </span>
                         ) : (
-                          <span style={{ color: '#858585', fontStyle: 'italic' }}>
+                          <span
+                            style={{
+                              color: colors.textSecondary,
+                              fontStyle: 'italic',
+                              fontFamily: fonts.body,
+                            }}
+                          >
                             (No Session ID)
                           </span>
                         )}
                         <span
-                          style={{ marginLeft: '12px', color: '#858585', fontWeight: 'normal' }}
+                          style={{
+                            marginLeft: '12px',
+                            color: colors.textSecondary,
+                            fontWeight: '400',
+                            fontFamily: fonts.body,
+                          }}
                         >
                           ({sessionRequestCountText})
                         </span>
@@ -720,38 +986,65 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
               onClick={() => toggleSession(sessionGroup.sessionId)}
               style={{
                 cursor: 'pointer',
-                background: '#2d2d30',
-                borderBottom: '2px solid #3e3e42',
-                borderTop: '2px solid #3e3e42',
+                background: colors.bgSecondary,
+                borderBottom: `2px solid ${colors.borderMedium}`,
+                borderTop: `2px solid ${colors.borderMedium}`,
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#3a3a3a';
+                e.currentTarget.style.background = colors.bgHover;
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#2d2d30';
+                e.currentTarget.style.background = colors.bgSecondary;
               }}
             >
               <td
-                colSpan={7}
+                colSpan={11}
                 style={{
                   padding: '6px 12px',
-                  color: '#dcdcaa',
-                  fontWeight: 'bold',
+                  color: colors.textPrimary,
+                  fontFamily: fonts.body,
+                  fontWeight: '600',
                   fontSize: '11px',
                 }}
               >
-                <span style={{ marginRight: '8px', userSelect: 'none' }}>
-                  {isSessionExpanded ? '▼' : '▶'}
+                <span
+                  style={{
+                    marginRight: '8px',
+                    userSelect: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  {isSessionExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
                 </span>
-                <span style={{ color: '#858585' }}>Session:</span>{' '}
+                <span style={{ color: colors.textSecondary, fontFamily: fonts.body }}>
+                  Session:
+                </span>{' '}
                 {sessionGroup.sessionId ? (
-                  <span style={{ color: '#4ec9b0', fontFamily: 'monospace' }}>
+                  <span
+                    style={{ color: colors.accentBlue, fontFamily: fonts.mono, fontWeight: '500' }}
+                  >
                     {sessionGroup.sessionId}
                   </span>
                 ) : (
-                  <span style={{ color: '#858585', fontStyle: 'italic' }}>(No Session ID)</span>
+                  <span
+                    style={{
+                      color: colors.textSecondary,
+                      fontStyle: 'italic',
+                      fontFamily: fonts.body,
+                    }}
+                  >
+                    (No Session ID)
+                  </span>
                 )}
-                <span style={{ marginLeft: '12px', color: '#858585', fontWeight: 'normal' }}>
+                <span
+                  style={{
+                    marginLeft: '12px',
+                    color: colors.textSecondary,
+                    fontWeight: '400',
+                    fontFamily: fonts.body,
+                  }}
+                >
                   ({requestCountText})
                 </span>
               </td>
@@ -776,35 +1069,61 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
                       }}
                       style={{
                         cursor: 'pointer',
-                        background: '#252526',
-                        borderBottom: '1px solid #3e3e42',
+                        background: colors.bgCard,
+                        borderBottom: `1px solid ${colors.borderLight}`,
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.background = '#2a2d2e';
+                        e.currentTarget.style.background = colors.bgHover;
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.background = '#252526';
+                        e.currentTarget.style.background = colors.bgCard;
                       }}
                     >
                       <td
-                        colSpan={7}
+                        colSpan={11}
                         style={{
                           padding: '6px 12px 6px 32px',
-                          color: '#dcdcaa',
-                          fontWeight: 'bold',
+                          color: colors.textPrimary,
+                          fontFamily: fonts.body,
+                          fontWeight: '600',
                           fontSize: '10px',
                         }}
                       >
-                        <span style={{ marginRight: '8px', userSelect: 'none' }}>
-                          {isServerExpanded ? '▼' : '▶'}
+                        <span
+                          style={{
+                            marginRight: '8px',
+                            userSelect: 'none',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                          }}
+                        >
+                          {isServerExpanded ? (
+                            <ChevronDown size={12} />
+                          ) : (
+                            <ChevronRight size={12} />
+                          )}
                         </span>
-                        <span style={{ color: '#858585' }}>Server:</span>{' '}
+                        <span style={{ color: colors.textSecondary, fontFamily: fonts.body }}>
+                          Server:
+                        </span>{' '}
                         {server.serverName ? (
-                          <span style={{ color: '#ce9178', fontFamily: 'monospace' }}>
+                          <span
+                            style={{
+                              color: colors.accentGreen,
+                              fontFamily: fonts.mono,
+                              fontWeight: '500',
+                            }}
+                          >
                             {server.serverName}
                           </span>
                         ) : (
-                          <span style={{ color: '#858585', fontStyle: 'italic' }}>
+                          <span
+                            style={{
+                              color: colors.textSecondary,
+                              fontStyle: 'italic',
+                              fontFamily: fonts.body,
+                            }}
+                          >
                             (Unknown Server)
                           </span>
                         )}
@@ -828,39 +1147,53 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
   );
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#1e1e1e' }}>
+    <div
+      style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        background: colors.bgPrimary,
+        minHeight: 0,
+        overflow: 'hidden',
+      }}
+    >
       {/* View Mode Tabs */}
       <div
         data-tour="view-modes"
         style={{
           display: 'flex',
-          borderBottom: '1px solid #3e3e42',
-          background: '#252526',
+          borderBottom: `1px solid ${colors.borderLight}`,
+          background: colors.bgCard,
           padding: '0 12px',
+          boxShadow: `0 1px 3px ${colors.shadowSm}`,
+          flexShrink: 0,
         }}
       >
         <button
           onClick={() => setViewMode('general')}
           style={{
-            padding: '8px 16px',
-            background: viewMode === 'general' ? '#1e1e1e' : 'transparent',
+            padding: '10px 18px',
+            background: viewMode === 'general' ? colors.bgSecondary : 'transparent',
+            fontFamily: fonts.body,
             border: 'none',
-            borderBottom: viewMode === 'general' ? '2px solid #0e639c' : '2px solid transparent',
-            color: viewMode === 'general' ? '#d4d4d4' : '#858585',
+            borderBottom:
+              viewMode === 'general' ? `2px solid ${colors.accentBlue}` : '2px solid transparent',
+            color: viewMode === 'general' ? colors.textPrimary : colors.textSecondary,
+            borderRadius: '6px 6px 0 0',
             cursor: 'pointer',
             fontSize: '12px',
             fontWeight: viewMode === 'general' ? '500' : 'normal',
           }}
           onMouseEnter={(e) => {
             if (viewMode !== 'general') {
-              e.currentTarget.style.background = '#2d2d30';
-              e.currentTarget.style.color = '#d4d4d4';
+              e.currentTarget.style.background = colors.bgHover;
+              e.currentTarget.style.color = colors.textPrimary;
             }
           }}
           onMouseLeave={(e) => {
             if (viewMode !== 'general') {
               e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = '#858585';
+              e.currentTarget.style.color = colors.textSecondary;
             }
           }}
         >
@@ -869,26 +1202,30 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
         <button
           onClick={() => setViewMode('groupedBySession')}
           style={{
-            padding: '8px 16px',
-            background: viewMode === 'groupedBySession' ? '#1e1e1e' : 'transparent',
+            padding: '10px 18px',
+            background: viewMode === 'groupedBySession' ? colors.bgSecondary : 'transparent',
+            fontFamily: fonts.body,
             border: 'none',
             borderBottom:
-              viewMode === 'groupedBySession' ? '2px solid #0e639c' : '2px solid transparent',
-            color: viewMode === 'groupedBySession' ? '#d4d4d4' : '#858585',
+              viewMode === 'groupedBySession'
+                ? `2px solid ${colors.accentBlue}`
+                : '2px solid transparent',
+            color: viewMode === 'groupedBySession' ? colors.textPrimary : colors.textSecondary,
             cursor: 'pointer',
             fontSize: '12px',
             fontWeight: viewMode === 'groupedBySession' ? '500' : 'normal',
+            borderRadius: '6px 6px 0 0',
           }}
           onMouseEnter={(e) => {
             if (viewMode !== 'groupedBySession') {
-              e.currentTarget.style.background = '#2d2d30';
-              e.currentTarget.style.color = '#d4d4d4';
+              e.currentTarget.style.background = colors.bgHover;
+              e.currentTarget.style.color = colors.textPrimary;
             }
           }}
           onMouseLeave={(e) => {
             if (viewMode !== 'groupedBySession') {
               e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = '#858585';
+              e.currentTarget.style.color = colors.textSecondary;
             }
           }}
         >
@@ -897,26 +1234,30 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
         <button
           onClick={() => setViewMode('groupedByServer')}
           style={{
-            padding: '8px 16px',
-            background: viewMode === 'groupedByServer' ? '#1e1e1e' : 'transparent',
+            padding: '10px 18px',
+            background: viewMode === 'groupedByServer' ? colors.bgSecondary : 'transparent',
+            fontFamily: fonts.body,
             border: 'none',
             borderBottom:
-              viewMode === 'groupedByServer' ? '2px solid #0e639c' : '2px solid transparent',
-            color: viewMode === 'groupedByServer' ? '#d4d4d4' : '#858585',
+              viewMode === 'groupedByServer'
+                ? `2px solid ${colors.accentBlue}`
+                : '2px solid transparent',
+            color: viewMode === 'groupedByServer' ? colors.textPrimary : colors.textSecondary,
             cursor: 'pointer',
             fontSize: '12px',
             fontWeight: viewMode === 'groupedByServer' ? '500' : 'normal',
+            borderRadius: '6px 6px 0 0',
           }}
           onMouseEnter={(e) => {
             if (viewMode !== 'groupedByServer') {
-              e.currentTarget.style.background = '#2d2d30';
-              e.currentTarget.style.color = '#d4d4d4';
+              e.currentTarget.style.background = colors.bgHover;
+              e.currentTarget.style.color = colors.textPrimary;
             }
           }}
           onMouseLeave={(e) => {
             if (viewMode !== 'groupedByServer') {
               e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = '#858585';
+              e.currentTarget.style.color = colors.textSecondary;
             }
           }}
         >
@@ -925,14 +1266,22 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
       </div>
 
       {/* Table */}
-      <div style={{ flex: 1, overflow: 'auto' }}>
+      <div
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          overflowX: 'auto',
+          minHeight: 0,
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
         <table
           ref={tableRef}
           style={{
             width: '100%',
             borderCollapse: 'collapse',
             fontSize: '12px',
-            fontFamily: 'monospace',
+            fontFamily: fonts.mono,
           }}
         >
           {renderTableHeader()}

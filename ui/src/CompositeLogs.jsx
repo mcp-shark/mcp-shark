@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { colors, fonts } from './theme';
 
 function CompositeLogs() {
   const [logs, setLogs] = useState([]);
@@ -92,13 +93,13 @@ function CompositeLogs() {
     switch (type) {
       case 'stderr':
       case 'error':
-        return '#f48771';
+        return colors.error;
       case 'stdout':
-        return '#d4d4d4';
+        return colors.textPrimary;
       case 'exit':
-        return '#dcdcaa';
+        return colors.accentOrange;
       default:
-        return '#858585';
+        return colors.textSecondary;
     }
   };
 
@@ -115,20 +116,21 @@ function CompositeLogs() {
         flexDirection: 'column',
         height: '100%',
         width: '100%',
-        background: '#1e1e1e',
+        background: colors.bgPrimary,
         overflow: 'hidden',
       }}
     >
       {/* Toolbar */}
       <div
         style={{
-          padding: '8px 12px',
-          borderBottom: '1px solid #3e3e42',
-          background: '#252526',
+          padding: '12px 16px',
+          borderBottom: `1px solid ${colors.borderLight}`,
+          background: colors.bgCard,
           display: 'flex',
-          gap: '8px',
+          gap: '10px',
           alignItems: 'center',
           flexWrap: 'wrap',
+          boxShadow: `0 1px 3px ${colors.shadowSm}`,
         }}
       >
         <input
@@ -137,13 +139,23 @@ function CompositeLogs() {
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           style={{
-            padding: '4px 8px',
-            background: '#1e1e1e',
-            border: '1px solid #3e3e42',
-            color: '#d4d4d4',
-            fontSize: '12px',
-            fontFamily: 'monospace',
+            padding: '8px 12px',
+            background: colors.bgSecondary,
+            border: `1px solid ${colors.borderLight}`,
+            color: colors.textPrimary,
+            fontSize: '13px',
+            fontFamily: fonts.body,
             width: '300px',
+            borderRadius: '6px',
+            transition: 'all 0.2s',
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = colors.accentBlue;
+            e.currentTarget.style.boxShadow = `0 0 0 3px ${colors.accentBlue}20`;
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = colors.borderLight;
+            e.currentTarget.style.boxShadow = 'none';
           }}
         />
 
@@ -151,11 +163,23 @@ function CompositeLogs() {
           value={logType}
           onChange={(e) => setLogType(e.target.value)}
           style={{
-            padding: '4px 8px',
-            background: '#1e1e1e',
-            border: '1px solid #3e3e42',
-            color: '#d4d4d4',
-            fontSize: '12px',
+            padding: '8px 12px',
+            background: colors.bgSecondary,
+            border: `1px solid ${colors.borderLight}`,
+            color: colors.textPrimary,
+            fontSize: '13px',
+            fontFamily: fonts.body,
+            borderRadius: '6px',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = colors.accentBlue;
+            e.currentTarget.style.boxShadow = `0 0 0 3px ${colors.accentBlue}20`;
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = colors.borderLight;
+            e.currentTarget.style.boxShadow = 'none';
           }}
         >
           <option value="all">All Types</option>
@@ -169,9 +193,10 @@ function CompositeLogs() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '6px',
-            color: '#d4d4d4',
-            fontSize: '12px',
+            gap: '8px',
+            color: colors.textPrimary,
+            fontSize: '13px',
+            fontFamily: fonts.body,
             cursor: 'pointer',
           }}
         >
@@ -187,13 +212,25 @@ function CompositeLogs() {
         <button
           onClick={clearLogs}
           style={{
-            padding: '4px 12px',
-            background: '#5f1e1e',
-            border: '1px solid #7f3e3e',
-            color: '#f48771',
+            padding: '8px 14px',
+            background: colors.buttonDanger,
+            border: 'none',
+            color: colors.textInverse,
             fontSize: '12px',
+            fontFamily: fonts.body,
+            fontWeight: '500',
             cursor: 'pointer',
-            borderRadius: '3px',
+            borderRadius: '6px',
+            transition: 'all 0.2s',
+            boxShadow: `0 2px 4px ${colors.shadowSm}`,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = colors.buttonDangerHover;
+            e.currentTarget.style.transform = 'translateY(-1px)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = colors.buttonDanger;
+            e.currentTarget.style.transform = 'translateY(0)';
           }}
         >
           Clear Logs
@@ -217,25 +254,38 @@ function CompositeLogs() {
             }
           }}
           style={{
-            padding: '4px 12px',
-            background: '#0e639c',
-            border: '1px solid #0e639c',
-            color: '#ffffff',
+            padding: '8px 14px',
+            background: colors.buttonPrimary,
+            border: 'none',
+            color: colors.textInverse,
             fontSize: '12px',
+            fontFamily: fonts.body,
+            fontWeight: '500',
             cursor: 'pointer',
-            borderRadius: '3px',
+            borderRadius: '6px',
+            transition: 'all 0.2s',
+            boxShadow: `0 2px 4px ${colors.shadowSm}`,
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = '#1177bb';
+            e.currentTarget.style.background = colors.buttonPrimaryHover;
+            e.currentTarget.style.transform = 'translateY(-1px)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = '#0e639c';
+            e.currentTarget.style.background = colors.buttonPrimary;
+            e.currentTarget.style.transform = 'translateY(0)';
           }}
         >
           Export Logs
         </button>
 
-        <div style={{ marginLeft: 'auto', color: '#858585', fontSize: '11px' }}>
+        <div
+          style={{
+            marginLeft: 'auto',
+            color: colors.textSecondary,
+            fontSize: '12px',
+            fontFamily: fonts.body,
+          }}
+        >
           {filteredLogs.length} / {logs.length} lines
         </div>
       </div>
@@ -245,14 +295,21 @@ function CompositeLogs() {
         style={{
           flex: 1,
           overflow: 'auto',
-          padding: '8px',
-          fontFamily: 'monospace',
+          padding: '12px',
+          fontFamily: fonts.mono,
           fontSize: '12px',
-          background: '#1e1e1e',
+          background: colors.bgPrimary,
         }}
       >
         {filteredLogs.length === 0 ? (
-          <div style={{ color: '#858585', padding: '20px', textAlign: 'center' }}>
+          <div
+            style={{
+              color: colors.textSecondary,
+              padding: '40px',
+              textAlign: 'center',
+              fontFamily: fonts.body,
+            }}
+          >
             {logs.length === 0
               ? 'No logs available. Start the MCP Shark server to see logs here.'
               : 'No logs match the current filter.'}
@@ -266,19 +323,20 @@ function CompositeLogs() {
                 style={{
                   display: 'flex',
                   gap: '12px',
-                  padding: '2px 0',
-                  borderBottom: '1px solid #2d2d30',
+                  padding: '6px 8px',
+                  borderBottom: `1px solid ${colors.borderLight}`,
                 }}
               >
-                <span style={{ color: '#858585', minWidth: '180px', flexShrink: 0 }}>
+                <span style={{ color: colors.textSecondary, minWidth: '180px', flexShrink: 0 }}>
                   {new Date(log.timestamp).toLocaleTimeString()}
                 </span>
                 <span
                   style={{
-                    color: '#858585',
+                    color: colors.textSecondary,
                     minWidth: '60px',
                     flexShrink: 0,
                     textTransform: 'uppercase',
+                    fontFamily: fonts.body,
                     fontSize: '11px',
                   }}
                 >

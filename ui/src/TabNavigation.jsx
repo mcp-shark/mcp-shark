@@ -1,3 +1,5 @@
+import { colors, fonts } from './theme';
+
 // SVG Icon Components
 const NetworkIcon = ({ size = 16, color = 'currentColor' }) => (
   <svg
@@ -80,8 +82,9 @@ function TabNavigation({ activeTab, onTabChange }) {
   return (
     <div
       style={{
-        borderBottom: '1px solid #333',
-        background: '#1e1e1e',
+        borderBottom: `1px solid ${colors.borderLight}`,
+        background: colors.bgCard,
+        boxShadow: `0 1px 3px ${colors.shadowSm}`,
       }}
     >
       <div
@@ -99,35 +102,38 @@ function TabNavigation({ activeTab, onTabChange }) {
             }
             onClick={() => onTabChange(tab.id)}
             style={{
-              padding: '12px 20px',
-              background: activeTab === tab.id ? '#252526' : 'transparent',
+              padding: '14px 24px',
+              background: activeTab === tab.id ? colors.bgSecondary : 'transparent',
               border: 'none',
-              borderBottom: activeTab === tab.id ? '2px solid #0e639c' : '2px solid transparent',
-              color: activeTab === tab.id ? '#d4d4d4' : '#858585',
+              borderBottom:
+                activeTab === tab.id ? `3px solid ${colors.accentBlue}` : '3px solid transparent',
+              color: activeTab === tab.id ? colors.textPrimary : colors.textSecondary,
               cursor: 'pointer',
               fontSize: '13px',
-              fontWeight: activeTab === tab.id ? '500' : 'normal',
+              fontFamily: fonts.body,
+              fontWeight: activeTab === tab.id ? '600' : '400',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'flex-start',
-              gap: '2px',
+              gap: '4px',
               transition: 'all 0.2s',
               position: 'relative',
+              borderRadius: '8px 8px 0 0',
             }}
             onMouseEnter={(e) => {
               if (activeTab !== tab.id) {
-                e.currentTarget.style.background = '#252526';
-                e.currentTarget.style.color = '#d4d4d4';
+                e.currentTarget.style.background = colors.bgHover;
+                e.currentTarget.style.color = colors.textPrimary;
               }
             }}
             onMouseLeave={(e) => {
               if (activeTab !== tab.id) {
                 e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = '#858585';
+                e.currentTarget.style.color = colors.textSecondary;
               }
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div style={{ display: 'flex', alignItems: 'center', color: 'currentColor' }}>
                 <tab.icon size={16} />
               </div>
@@ -136,8 +142,9 @@ function TabNavigation({ activeTab, onTabChange }) {
             <div
               style={{
                 fontSize: '11px',
-                color: activeTab === tab.id ? '#858585' : '#666',
-                fontWeight: 'normal',
+                color: activeTab === tab.id ? colors.textSecondary : colors.textTertiary,
+                fontWeight: '400',
+                fontFamily: fonts.body,
               }}
             >
               {tab.description}

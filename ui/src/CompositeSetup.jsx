@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { colors, fonts } from './theme';
 
 function CompositeSetup() {
   const [fileContent, setFileContent] = useState('');
@@ -219,7 +220,7 @@ function CompositeSetup() {
         position: 'relative',
         width: '100%',
         height: '100%',
-        background: '#1e1e1e',
+        background: colors.bgPrimary,
         overflow: 'auto',
       }}
     >
@@ -236,11 +237,24 @@ function CompositeSetup() {
       >
         <div style={{ marginBottom: '24px' }}>
           <h2
-            style={{ fontSize: '18px', fontWeight: '500', marginBottom: '8px', color: '#d4d4d4' }}
+            style={{
+              fontSize: '20px',
+              fontWeight: '600',
+              marginBottom: '8px',
+              color: colors.textPrimary,
+              fontFamily: fonts.body,
+            }}
           >
             MCP Shark Server Setup
           </h2>
-          <p style={{ fontSize: '13px', color: '#858585', lineHeight: '1.5' }}>
+          <p
+            style={{
+              fontSize: '14px',
+              color: colors.textSecondary,
+              lineHeight: '1.6',
+              fontFamily: fonts.body,
+            }}
+          >
             Convert your MCP configuration file and start the MCP Shark server to aggregate multiple
             MCP servers into a single endpoint.
           </p>
@@ -248,8 +262,8 @@ function CompositeSetup() {
 
         <div
           style={{
-            background: '#252526',
-            border: '1px solid #333',
+            background: colors.bgCard,
+            border: `1px solid ${colors.borderLight}`,
             borderRadius: '6px',
             padding: '20px',
             marginBottom: '20px',
@@ -257,11 +271,24 @@ function CompositeSetup() {
         >
           <div style={{ marginBottom: '16px' }}>
             <h3
-              style={{ fontSize: '14px', fontWeight: '500', marginBottom: '8px', color: '#d4d4d4' }}
+              style={{
+                fontSize: '15px',
+                fontWeight: '600',
+                marginBottom: '8px',
+                color: colors.textPrimary,
+                fontFamily: fonts.body,
+              }}
             >
               Configuration File
             </h3>
-            <p style={{ fontSize: '12px', color: '#858585', lineHeight: '1.4' }}>
+            <p
+              style={{
+                fontSize: '13px',
+                color: colors.textSecondary,
+                lineHeight: '1.5',
+                fontFamily: fonts.body,
+              }}
+            >
               Select your MCP configuration file or provide a file path. The file will be converted
               to MCP Shark format and used to start the server.
             </p>
@@ -278,7 +305,14 @@ function CompositeSetup() {
                     marginBottom: '8px',
                   }}
                 >
-                  <div style={{ fontSize: '12px', color: '#858585', fontWeight: '500' }}>
+                  <div
+                    style={{
+                      fontSize: '13px',
+                      color: colors.textPrimary,
+                      fontWeight: '600',
+                      fontFamily: fonts.body,
+                    }}
+                  >
                     Detected Configuration Files:
                   </div>
                   <button
@@ -287,8 +321,8 @@ function CompositeSetup() {
                     style={{
                       padding: '4px 8px',
                       background: 'transparent',
-                      border: '1px solid #444',
-                      color: '#858585',
+                      border: `1px solid ${colors.borderMedium}`,
+                      color: colors.textSecondary,
                       cursor: detecting ? 'not-allowed' : 'pointer',
                       fontSize: '11px',
                       borderRadius: '4px',
@@ -320,9 +354,9 @@ function CompositeSetup() {
                       }}
                       style={{
                         padding: '8px 12px',
-                        background: item.exists ? '#1e3a5f' : '#2d2d2d',
-                        border: `1px solid ${item.exists ? '#0e639c' : '#444'}`,
-                        color: '#d4d4d4',
+                        background: item.exists ? `${colors.accentBlue}20` : colors.bgSecondary,
+                        border: `1px solid ${item.exists ? colors.accentBlue : colors.borderMedium}`,
+                        color: colors.textPrimary,
                         cursor: 'pointer',
                         fontSize: '12px',
                         borderRadius: '4px',
@@ -333,10 +367,14 @@ function CompositeSetup() {
                         transition: 'all 0.2s',
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.background = item.exists ? '#264f78' : '#3d3d3d';
+                        e.currentTarget.style.background = item.exists
+                          ? `${colors.accentBlue}30`
+                          : colors.bgHover;
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.background = item.exists ? '#1e3a5f' : '#2d2d2d';
+                        e.currentTarget.style.background = item.exists
+                          ? `${colors.accentBlue}20`
+                          : colors.bgSecondary;
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -374,7 +412,13 @@ function CompositeSetup() {
                         </span>
                         <div>
                           <div style={{ fontWeight: '500' }}>{item.editor}</div>
-                          <div style={{ fontSize: '11px', color: '#858585' }}>
+                          <div
+                            style={{
+                              fontSize: '12px',
+                              color: colors.textSecondary,
+                              fontFamily: fonts.body,
+                            }}
+                          >
                             {item.displayPath}
                           </div>
                         </div>
@@ -386,8 +430,8 @@ function CompositeSetup() {
                               style={{
                                 fontSize: '10px',
                                 padding: '2px 6px',
-                                background: '#89d185',
-                                color: '#1e1e1e',
+                                background: colors.success,
+                                color: colors.textInverse,
                                 borderRadius: '3px',
                                 fontWeight: '500',
                               }}
@@ -403,8 +447,8 @@ function CompositeSetup() {
                                 fontSize: '10px',
                                 padding: '2px 6px',
                                 background: 'transparent',
-                                border: '1px solid #444',
-                                color: '#858585',
+                                border: `1px solid ${colors.borderMedium}`,
+                                color: colors.textSecondary,
                                 borderRadius: '3px',
                                 cursor: 'pointer',
                               }}
@@ -426,9 +470,9 @@ function CompositeSetup() {
                 data-tour="select-file"
                 style={{
                   padding: '8px 16px',
-                  background: '#0e639c',
-                  border: '1px solid #0e639c',
-                  color: '#ffffff',
+                  background: colors.buttonPrimary,
+                  border: `1px solid ${colors.buttonPrimary}`,
+                  color: colors.textInverse,
                   cursor: 'pointer',
                   fontSize: '13px',
                   borderRadius: '4px',
@@ -437,10 +481,10 @@ function CompositeSetup() {
                   transition: 'background 0.2s',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#1177bb';
+                  e.currentTarget.style.background = colors.buttonPrimaryHover;
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#0e639c';
+                  e.currentTarget.style.background = colors.buttonPrimary;
                 }}
               >
                 Select File
@@ -451,7 +495,16 @@ function CompositeSetup() {
                   style={{ display: 'none' }}
                 />
               </label>
-              <span style={{ color: '#666', fontSize: '12px', fontWeight: '500' }}>OR</span>
+              <span
+                style={{
+                  color: colors.textTertiary,
+                  fontSize: '13px',
+                  fontWeight: '500',
+                  fontFamily: fonts.body,
+                }}
+              >
+                OR
+              </span>
               <input
                 type="text"
                 placeholder="Enter file path (e.g., ~/.cursor/mcp.json)"
@@ -460,9 +513,9 @@ function CompositeSetup() {
                 style={{
                   flex: 1,
                   padding: '8px 12px',
-                  background: '#1e1e1e',
-                  border: '1px solid #444',
-                  color: '#d4d4d4',
+                  background: colors.bgPrimary,
+                  border: `1px solid ${colors.borderMedium}`,
+                  color: colors.textPrimary,
                   fontSize: '13px',
                   borderRadius: '4px',
                 }}
@@ -474,7 +527,7 @@ function CompositeSetup() {
                   style={{
                     display: 'block',
                     fontSize: '12px',
-                    color: '#858585',
+                    color: colors.textSecondary,
                     marginBottom: '6px',
                   }}
                 >
@@ -488,14 +541,21 @@ function CompositeSetup() {
                   style={{
                     width: '100%',
                     padding: '8px 12px',
-                    background: '#1e1e1e',
-                    border: '1px solid #444',
-                    color: '#d4d4d4',
+                    background: colors.bgPrimary,
+                    border: `1px solid ${colors.borderMedium}`,
+                    color: colors.textPrimary,
                     fontSize: '13px',
                     borderRadius: '4px',
                   }}
                 />
-                <div style={{ fontSize: '11px', color: '#666', marginTop: '6px' }}>
+                <div
+                  style={{
+                    fontSize: '12px',
+                    color: colors.textSecondary,
+                    marginTop: '6px',
+                    fontFamily: fonts.body,
+                  }}
+                >
                   Provide the file path if you want to update the original config file (backup will
                   be created)
                 </div>
@@ -506,7 +566,7 @@ function CompositeSetup() {
               <div style={{ marginTop: '8px' }}>
                 <div
                   style={{
-                    color: '#858585',
+                    color: colors.textSecondary,
                     fontSize: '12px',
                     marginBottom: '6px',
                     fontWeight: '500',
@@ -516,15 +576,15 @@ function CompositeSetup() {
                 </div>
                 <pre
                   style={{
-                    background: '#1e1e1e',
+                    background: colors.bgPrimary,
                     padding: '12px',
                     borderRadius: '4px',
                     fontSize: '12px',
                     fontFamily: 'monospace',
-                    color: '#d4d4d4',
+                    color: colors.textPrimary,
                     maxHeight: '200px',
                     overflow: 'auto',
-                    border: '1px solid #333',
+                    border: `1px solid ${colors.borderLight}`,
                     lineHeight: '1.5',
                   }}
                 >
@@ -537,8 +597,8 @@ function CompositeSetup() {
 
         <div
           style={{
-            background: '#252526',
-            border: '1px solid #333',
+            background: colors.bgCard,
+            border: `1px solid ${colors.borderLight}`,
             borderRadius: '6px',
             padding: '20px',
             marginBottom: '20px',
@@ -546,70 +606,81 @@ function CompositeSetup() {
         >
           <div style={{ marginBottom: '16px' }}>
             <h3
-              style={{ fontSize: '14px', fontWeight: '500', marginBottom: '8px', color: '#d4d4d4' }}
+              style={{
+                fontSize: '15px',
+                fontWeight: '600',
+                marginBottom: '8px',
+                color: colors.textPrimary,
+                fontFamily: fonts.body,
+              }}
             >
               Server Control
             </h3>
           </div>
 
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <button
-              data-tour="start-button"
-              onClick={handleSetup}
-              disabled={loading || (!fileContent && !filePath)}
-              style={{
-                padding: '10px 20px',
-                background: status.running ? '#2d2d2d' : '#0e639c',
-                border: '1px solid',
-                borderColor: status.running ? '#444' : '#0e639c',
-                color: '#ffffff',
-                cursor: loading || (!fileContent && !filePath) ? 'not-allowed' : 'pointer',
-                fontSize: '13px',
-                fontWeight: '500',
-                borderRadius: '4px',
-                opacity: loading || (!fileContent && !filePath) ? 0.5 : 1,
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={(e) => {
-                if (!loading && (fileContent || filePath) && !status.running) {
-                  e.currentTarget.style.background = '#1177bb';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!status.running) {
-                  e.currentTarget.style.background = '#0e639c';
-                }
-              }}
-            >
-              {loading ? 'Processing...' : status.running ? 'Restart MCP Shark' : 'Start MCP Shark'}
-            </button>
-
-            {status.running && (
+            {status.running ? (
               <button
                 onClick={handleStop}
                 disabled={loading}
                 style={{
                   padding: '10px 20px',
-                  background: '#c72e2e',
-                  border: '1px solid #c72e2e',
-                  color: '#ffffff',
+                  background: colors.buttonDanger,
+                  border: `1px solid ${colors.buttonDanger}`,
+                  color: colors.textInverse,
                   cursor: loading ? 'not-allowed' : 'pointer',
                   fontSize: '13px',
+                  fontFamily: fonts.body,
                   fontWeight: '500',
-                  borderRadius: '4px',
+                  borderRadius: '6px',
                   opacity: loading ? 0.5 : 1,
-                  transition: 'background 0.2s',
+                  transition: 'all 0.2s',
+                  boxShadow: `0 2px 4px ${colors.shadowSm}`,
                 }}
                 onMouseEnter={(e) => {
                   if (!loading) {
-                    e.currentTarget.style.background = '#e63946';
+                    e.currentTarget.style.background = colors.buttonDangerHover;
+                    e.currentTarget.style.transform = 'translateY(-1px)';
                   }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#c72e2e';
+                  e.currentTarget.style.background = colors.buttonDanger;
+                  e.currentTarget.style.transform = 'translateY(0)';
                 }}
               >
-                Stop MCP Shark
+                {loading ? 'Stopping...' : 'Stop MCP Shark'}
+              </button>
+            ) : (
+              <button
+                data-tour="start-button"
+                onClick={handleSetup}
+                disabled={loading || (!fileContent && !filePath)}
+                style={{
+                  padding: '10px 20px',
+                  background: colors.buttonPrimary,
+                  border: `1px solid ${colors.buttonPrimary}`,
+                  color: colors.textInverse,
+                  cursor: loading || (!fileContent && !filePath) ? 'not-allowed' : 'pointer',
+                  fontSize: '13px',
+                  fontFamily: fonts.body,
+                  fontWeight: '500',
+                  borderRadius: '6px',
+                  opacity: loading || (!fileContent && !filePath) ? 0.5 : 1,
+                  transition: 'all 0.2s',
+                  boxShadow: `0 2px 4px ${colors.shadowSm}`,
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading && (fileContent || filePath)) {
+                    e.currentTarget.style.background = colors.buttonPrimaryHover;
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = colors.buttonPrimary;
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                {loading ? 'Processing...' : 'Start MCP Shark'}
               </button>
             )}
 
@@ -620,8 +691,8 @@ function CompositeSetup() {
                 alignItems: 'center',
                 gap: '10px',
                 padding: '8px 16px',
-                background: '#1e1e1e',
-                border: '1px solid #333',
+                background: colors.bgPrimary,
+                border: `1px solid ${colors.borderLight}`,
                 borderRadius: '4px',
               }}
             >
@@ -663,8 +734,8 @@ function CompositeSetup() {
         {backups.length > 0 && (
           <div
             style={{
-              background: '#252526',
-              border: '1px solid #333',
+              background: colors.bgCard,
+              border: `1px solid ${colors.borderLight}`,
               borderRadius: '6px',
               padding: '20px',
               marginBottom: '20px',
@@ -687,8 +758,8 @@ function CompositeSetup() {
                 style={{
                   padding: '4px 8px',
                   background: 'transparent',
-                  border: '1px solid #444',
-                  color: '#858585',
+                  border: `1px solid ${colors.borderMedium}`,
+                  color: colors.textSecondary,
                   cursor: loadingBackups ? 'not-allowed' : 'pointer',
                   fontSize: '11px',
                   borderRadius: '4px',
@@ -702,7 +773,7 @@ function CompositeSetup() {
             <p
               style={{
                 fontSize: '12px',
-                color: '#858585',
+                color: colors.textSecondary,
                 marginBottom: '12px',
                 lineHeight: '1.4',
               }}
@@ -716,8 +787,8 @@ function CompositeSetup() {
                   key={idx}
                   style={{
                     padding: '12px',
-                    background: '#1e1e1e',
-                    border: '1px solid #444',
+                    background: colors.bgPrimary,
+                    border: `1px solid ${colors.borderMedium}`,
                     borderRadius: '4px',
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -727,7 +798,7 @@ function CompositeSetup() {
                   <div style={{ flex: 1 }}>
                     <div
                       style={{
-                        color: '#d4d4d4',
+                        color: colors.textPrimary,
                         fontSize: '12px',
                         fontWeight: '500',
                         marginBottom: '4px',
@@ -769,8 +840,8 @@ function CompositeSetup() {
 
         <div
           style={{
-            background: '#252526',
-            border: '1px solid #333',
+            background: colors.bgCard,
+            border: `1px solid ${colors.borderLight}`,
             borderRadius: '6px',
             padding: '20px',
           }}
@@ -785,7 +856,7 @@ function CompositeSetup() {
               margin: 0,
               paddingLeft: '20px',
               fontSize: '13px',
-              color: '#858585',
+              color: colors.textSecondary,
               lineHeight: '1.8',
             }}
           >
@@ -834,8 +905,8 @@ function CompositeSetup() {
           >
             <div
               style={{
-                background: '#1e1e1e',
-                border: '1px solid #333',
+                background: colors.bgPrimary,
+                border: `1px solid ${colors.borderLight}`,
                 borderRadius: '8px',
                 width: '100%',
                 maxWidth: '800px',
@@ -861,7 +932,7 @@ function CompositeSetup() {
                       fontSize: '16px',
                       fontWeight: '500',
                       marginBottom: '4px',
-                      color: '#d4d4d4',
+                      color: colors.textPrimary,
                     }}
                   >
                     MCP Configuration File
@@ -880,7 +951,7 @@ function CompositeSetup() {
                   style={{
                     background: 'transparent',
                     border: 'none',
-                    color: '#d4d4d4',
+                    color: colors.textPrimary,
                     cursor: 'pointer',
                     fontSize: '24px',
                     padding: '0',
@@ -908,14 +979,14 @@ function CompositeSetup() {
                 ) : configContent ? (
                   <pre
                     style={{
-                      background: '#1e1e1e',
+                      background: colors.bgPrimary,
                       padding: '16px',
                       borderRadius: '4px',
                       fontSize: '13px',
                       fontFamily: 'monospace',
-                      color: '#d4d4d4',
+                      color: colors.textPrimary,
                       overflow: 'auto',
-                      border: '1px solid #333',
+                      border: `1px solid ${colors.borderLight}`,
                       lineHeight: '1.6',
                       margin: 0,
                     }}
