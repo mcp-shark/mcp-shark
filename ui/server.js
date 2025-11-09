@@ -324,7 +324,7 @@ function createTables(db) {
       response_timestamp_ns INTEGER,
       duration_ms REAL,               -- Round-trip time in milliseconds
       status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'completed', 'timeout', 'error')),
-      
+
       FOREIGN KEY (request_frame_number) REFERENCES packets(frame_number),
       FOREIGN KEY (response_frame_number) REFERENCES packets(frame_number)
     );
