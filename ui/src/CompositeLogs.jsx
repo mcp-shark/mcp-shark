@@ -37,19 +37,46 @@ function CompositeLogs() {
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
+    ws.onopen = () => {
+      console.log('WebSocket connected for logs');
+    };
+
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
     ws.onmessage = (e) => {
-      const msg = JSON.parse(e.data);
-      if (msg.type === 'log') {
-        setLogs((prev) => {
-          // Add new log at the beginning (latest first)
-          const newLogs = [msg.data, ...prev];
-          // Keep only last 5000 in memory
-          return newLogs.slice(0, 5000);
-        });
+      try {
+        const msg = JSON.parse(e.data);
+        if (msg.type === 'log') {
+          setLogs((prev) => {
+            // Add new log at the beginning (latest first)
+            const newLogs = [msg.data, ...prev];
+            // Keep only last 5000 in memory
+            return newLogs.slice(0, 5000);
+          });
+        }
+      } catch (error) {
+        console.error('Failed to parse WebSocket message:', error);
       }
     };
 
-    return () => ws.close();
+    ws.onclose = () => {
+      console.log('WebSocket closed, attempting to reconnect...');
+      // Attempt to reconnect after a delay
+      setTimeout(() => {
+        if (wsRef.current?.readyState === WebSocket.CLOSED) {
+          // Reconnect logic would go here, but for now just log
+          console.log('WebSocket reconnection needed');
+        }
+      }, 3000);
+    };
+
+    return () => {
+      if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+        ws.close();
+      }
+    };
   }, []);
 
   const clearLogs = async () => {
@@ -83,7 +110,14 @@ function CompositeLogs() {
 
   return (
     <div
-      style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#1e1e1e' }}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        width: '100%',
+        background: '#1e1e1e',
+        overflow: 'hidden',
+      }}
     >
       {/* Toolbar */}
       <div
@@ -163,6 +197,42 @@ function CompositeLogs() {
           }}
         >
           Clear Logs
+        </button>
+
+        <button
+          onClick={async () => {
+            try {
+              const response = await fetch('/api/composite/logs/export');
+              const blob = await response.blob();
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `mcp-shark-logs-${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
+              document.body.appendChild(a);
+              a.click();
+              window.URL.revokeObjectURL(url);
+              document.body.removeChild(a);
+            } catch (error) {
+              console.error('Failed to export logs:', error);
+            }
+          }}
+          style={{
+            padding: '4px 12px',
+            background: '#0e639c',
+            border: '1px solid #0e639c',
+            color: '#ffffff',
+            fontSize: '12px',
+            cursor: 'pointer',
+            borderRadius: '3px',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = '#1177bb';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = '#0e639c';
+          }}
+        >
+          Export Logs
         </button>
 
         <div style={{ marginLeft: 'auto', color: '#858585', fontSize: '11px' }}>

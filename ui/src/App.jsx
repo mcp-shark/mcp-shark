@@ -354,7 +354,7 @@ function App() {
       )}
 
       {activeTab === 'setup' && (
-        <div style={{ flex: 1, overflow: 'auto' }}>
+        <div style={{ flex: 1, overflow: 'hidden', width: '100%', height: '100%' }}>
           <CompositeSetup />
         </div>
       )}

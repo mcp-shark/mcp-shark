@@ -54,12 +54,30 @@ function restoreOriginalConfig() {
         if (originalConfigData.backupPath && fs.existsSync(originalConfigData.backupPath)) {
           // Keep backup for safety, but could remove it: fs.unlinkSync(originalConfigData.backupPath);
         }
+        originalConfigData = null;
+        return true;
       }
       originalConfigData = null;
+      return false;
     } catch (error) {
       console.error('Failed to restore original config:', error);
+      const timestamp = new Date().toISOString();
+      const errorLog = {
+        timestamp,
+        type: 'error',
+        line: `[RESTORE ERROR] Failed to restore: ${error.message}`,
+      };
+      mcpSharkLogs.push(errorLog);
+      // Keep only last MAX_LOG_LINES
+      if (mcpSharkLogs.length > MAX_LOG_LINES) {
+        mcpSharkLogs.shift();
+      }
+      // Broadcast to WebSocket clients
+      broadcastLogUpdate(errorLog);
+      return false;
     }
   }
+  return false;
 }
 
 // Helper to serialize BigInt values for JSON
@@ -140,6 +158,25 @@ export function createUIServer() {
   const wss = new WebSocketServer({ server });
 
   app.use(express.json());
+
+  // WebSocket clients set
+  const clients = new Set();
+
+  // WebSocket connection handler
+  wss.on('connection', (ws) => {
+    clients.add(ws);
+    ws.on('close', () => clients.delete(ws));
+  });
+
+  // Broadcast log updates to all connected clients
+  const broadcastLogUpdate = (logEntry) => {
+    const message = JSON.stringify({ type: 'log', data: logEntry });
+    clients.forEach((client) => {
+      if (client.readyState === 1) {
+        client.send(message);
+      }
+    });
+  };
 
   // Get requests/responses (Wireshark-like traffic list)
   app.get('/api/requests', (req, res) => {
@@ -275,6 +312,22 @@ export function createUIServer() {
   app.post('/api/composite/logs/clear', (req, res) => {
     mcpSharkLogs = [];
     res.json({ success: true, message: 'Logs cleared' });
+  });
+
+  // Export mcp-shark server logs
+  app.get('/api/composite/logs/export', (req, res) => {
+    try {
+      const logsText = mcpSharkLogs
+        .map((log) => `[${log.timestamp}] [${log.type.toUpperCase()}] ${log.line}`)
+        .join('\n');
+
+      const filename = `mcp-shark-logs-${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
+      res.setHeader('Content-Type', 'text/plain');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(logsText);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to export logs', details: error.message });
+    }
   });
 
   // Convert mcpServers format to servers format
@@ -480,6 +533,21 @@ export function createUIServer() {
 
           fs.writeFileSync(resolvedFilePath, JSON.stringify(updatedConfig, null, 2));
           console.log(`Updated config file: ${resolvedFilePath}`);
+
+          // Log backup creation
+          const timestamp = new Date().toISOString();
+          const backupLog = {
+            timestamp,
+            type: 'stdout',
+            line: `[BACKUP] Created backup: ${backupPath.replace(homedir(), '~')}`,
+          };
+          mcpSharkLogs.push(backupLog);
+          // Keep only last MAX_LOG_LINES
+          if (mcpSharkLogs.length > MAX_LOG_LINES) {
+            mcpSharkLogs.shift();
+          }
+          // Broadcast to WebSocket clients
+          broadcastLogUpdate(backupLog);
         } else {
           // Clear original config data if no file path
           originalConfigData = null;
@@ -500,6 +568,19 @@ export function createUIServer() {
           mcpSharkProcess.kill();
           mcpSharkProcess = null;
         }
+        const timestamp = new Date().toISOString();
+        const errorLog = {
+          timestamp,
+          type: 'error',
+          line: `[ERROR] MCP Shark server failed to start: ${waitError.message}`,
+        };
+        mcpSharkLogs.push(errorLog);
+        // Keep only last MAX_LOG_LINES
+        if (mcpSharkLogs.length > MAX_LOG_LINES) {
+          mcpSharkLogs.shift();
+        }
+        // Broadcast to WebSocket clients
+        broadcastLogUpdate(errorLog);
         return res.status(500).json({
           error: 'MCP Shark server failed to start',
           details: waitError.message,
@@ -507,6 +588,19 @@ export function createUIServer() {
       }
     } catch (error) {
       console.error('Error setting up mcp-shark server:', error);
+      const timestamp = new Date().toISOString();
+      const errorLog = {
+        timestamp,
+        type: 'error',
+        line: `[ERROR] Failed to setup mcp-shark server: ${error.message}`,
+      };
+      mcpSharkLogs.push(errorLog);
+      // Keep only last MAX_LOG_LINES
+      if (mcpSharkLogs.length > MAX_LOG_LINES) {
+        mcpSharkLogs.shift();
+      }
+      // Broadcast to WebSocket clients
+      broadcastLogUpdate(errorLog);
       res.status(500).json({ error: 'Failed to setup mcp-shark server', details: error.message });
     }
   });
@@ -519,7 +613,24 @@ export function createUIServer() {
         mcpSharkProcess = null;
 
         // Restore original config when stopping
-        restoreOriginalConfig();
+        const restored = restoreOriginalConfig();
+
+        // Log restoration
+        if (restored && originalConfigData) {
+          const timestamp = new Date().toISOString();
+          const restoreLog = {
+            timestamp,
+            type: 'stdout',
+            line: `[RESTORE] Restored original config: ${originalConfigData.filePath.replace(homedir(), '~')}`,
+          };
+          mcpSharkLogs.push(restoreLog);
+          // Keep only last MAX_LOG_LINES
+          if (mcpSharkLogs.length > MAX_LOG_LINES) {
+            mcpSharkLogs.shift();
+          }
+          // Broadcast to WebSocket clients
+          broadcastLogUpdate(restoreLog);
+        }
 
         res.json({ success: true, message: 'MCP Shark server stopped and config restored' });
       } else {
@@ -536,6 +647,132 @@ export function createUIServer() {
       running: mcpSharkProcess !== null,
       pid: mcpSharkProcess?.pid || null,
     });
+  });
+
+  // API endpoint to list backup files
+  app.get('/api/config/backups', (req, res) => {
+    try {
+      const backups = [];
+
+      // Common MCP config locations
+      const commonPaths = [
+        path.join(homedir(), '.cursor', 'mcp.json'),
+        path.join(homedir(), '.codeium', 'windsurf', 'mcp_config.json'),
+      ];
+
+      // Check for backup files
+      commonPaths.forEach((configPath) => {
+        const backupPath = `${configPath}.backup`;
+        if (fs.existsSync(backupPath)) {
+          const stats = fs.statSync(backupPath);
+          backups.push({
+            originalPath: configPath,
+            backupPath: backupPath,
+            createdAt: stats.birthtime.toISOString(),
+            size: stats.size,
+            displayPath: configPath.replace(homedir(), '~'),
+          });
+        }
+      });
+
+      // Also check for any .backup files in common directories
+      const backupDirs = [
+        path.join(homedir(), '.cursor'),
+        path.join(homedir(), '.codeium', 'windsurf'),
+      ];
+
+      backupDirs.forEach((dir) => {
+        if (fs.existsSync(dir)) {
+          const files = fs.readdirSync(dir);
+          files
+            .filter((file) => file.endsWith('.backup'))
+            .forEach((file) => {
+              const backupPath = path.join(dir, file);
+              const originalPath = backupPath.replace('.backup', '');
+              if (!backups.find((b) => b.backupPath === backupPath)) {
+                const stats = fs.statSync(backupPath);
+                backups.push({
+                  originalPath: originalPath,
+                  backupPath: backupPath,
+                  createdAt: stats.birthtime.toISOString(),
+                  size: stats.size,
+                  displayPath: originalPath.replace(homedir(), '~'),
+                });
+              }
+            });
+        }
+      });
+
+      res.json({ backups: backups.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to list backups', details: error.message });
+    }
+  });
+
+  // API endpoint to restore from backup
+  app.post('/api/config/restore', (req, res) => {
+    try {
+      const { backupPath } = req.body;
+
+      if (!backupPath) {
+        return res.status(400).json({ error: 'backupPath is required' });
+      }
+
+      // Expand tilde to home directory
+      let resolvedBackupPath = backupPath;
+      if (backupPath.startsWith('~')) {
+        resolvedBackupPath = path.join(homedir(), backupPath.slice(1));
+      }
+
+      if (!fs.existsSync(resolvedBackupPath)) {
+        return res.status(404).json({ error: 'Backup file not found', path: resolvedBackupPath });
+      }
+
+      // Determine original file path
+      const originalPath = resolvedBackupPath.replace('.backup', '');
+
+      // Read backup content
+      const backupContent = fs.readFileSync(resolvedBackupPath, 'utf8');
+
+      // Restore original file
+      fs.writeFileSync(originalPath, backupContent);
+
+      // Log the restoration
+      const timestamp = new Date().toISOString();
+      const restoreLog = {
+        timestamp,
+        type: 'stdout',
+        line: `[RESTORE] Restored config from backup: ${originalPath.replace(homedir(), '~')}`,
+      };
+      mcpSharkLogs.push(restoreLog);
+      // Keep only last MAX_LOG_LINES
+      if (mcpSharkLogs.length > MAX_LOG_LINES) {
+        mcpSharkLogs.shift();
+      }
+      // Broadcast to WebSocket clients
+      broadcastLogUpdate(restoreLog);
+
+      res.json({
+        success: true,
+        message: 'Config file restored from backup',
+        originalPath: originalPath.replace(homedir(), '~'),
+      });
+    } catch (error) {
+      const timestamp = new Date().toISOString();
+      const errorLog = {
+        timestamp,
+        type: 'error',
+        line: `[RESTORE ERROR] Failed to restore: ${error.message}`,
+      };
+      mcpSharkLogs.push(errorLog);
+      // Keep only last MAX_LOG_LINES
+      if (mcpSharkLogs.length > MAX_LOG_LINES) {
+        mcpSharkLogs.shift();
+      }
+      // Broadcast to WebSocket clients
+      broadcastLogUpdate(errorLog);
+      res.status(500).json({ error: 'Failed to restore backup', details: error.message });
+    }
   });
 
   // API endpoint to read MCP config file
@@ -715,26 +952,11 @@ export function createUIServer() {
     res.sendFile(path.join(staticPath, 'index.html'));
   });
 
-  const clients = new Set();
   let lastTs = 0;
-
-  wss.on('connection', (ws) => {
-    clients.add(ws);
-    ws.on('close', () => clients.delete(ws));
-  });
 
   const notifyClients = () => {
     const requests = queryRequests(db, { limit: 100 });
     const message = JSON.stringify({ type: 'update', data: serializeBigInt(requests) });
-    clients.forEach((client) => {
-      if (client.readyState === 1) {
-        client.send(message);
-      }
-    });
-  };
-
-  const broadcastLogUpdate = (logEntry) => {
-    const message = JSON.stringify({ type: 'log', data: logEntry });
     clients.forEach((client) => {
       if (client.readyState === 1) {
         client.send(message);
