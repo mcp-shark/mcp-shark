@@ -732,10 +732,18 @@ export function createUIServer(db) {
 
       // Start mcp-shark server
       // The mcp-shark.js will use the default path: temp/mcps.json (relative to cwd)
-      mcpSharkProcess = spawn('node', [mcpSharkJsPath], {
+      // Use process.execPath (Electron's executable) when running in Electron
+      // This works in both development (Electron dev) and packaged apps
+      // When ELECTRON_RUN_AS_NODE is set, process.execPath still points to Electron's executable
+      const nodeExecutable = process.execPath || 'node';
+
+      mcpSharkProcess = spawn(nodeExecutable, [mcpSharkJsPath], {
         cwd: mcpServerPath, // Set working directory to mcp-server so temp/mcps.json resolves correctly
         stdio: ['ignore', 'pipe', 'pipe'], // Capture stdout and stderr
-        env: { ...process.env },
+        env: {
+          ...process.env,
+          ELECTRON_RUN_AS_NODE: '1', // Tell Electron to run as Node.js
+        },
       });
 
       // Clear previous logs
