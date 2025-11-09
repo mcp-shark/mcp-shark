@@ -9,6 +9,8 @@ import { spawn } from 'node:child_process';
 import { homedir } from 'node:os';
 import { createConnection } from 'net';
 
+import { enhancePath } from './paths.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -765,11 +767,13 @@ export function createUIServer(db) {
       console.log(`[UI Server] CWD: ${mcpServerPath}`);
       console.log(`[UI Server] Data dir: ${dataDir || 'N/A'}`);
 
+      const enhancedPath = enhancePath(process.env.PATH);
       mcpSharkProcess = spawn(nodeExecutable, [mcpSharkJsPath, mcpsJsonPath], {
         cwd: mcpServerPath, // Set working directory to mcp-server
         stdio: ['ignore', 'pipe', 'pipe'], // Capture stdout and stderr
         env: {
           ...process.env,
+          PATH: enhancedPath,
           ELECTRON_RUN_AS_NODE: '1', // Tell Electron to run as Node.js
           ...(dataDir && { MCP_SHARK_DATA_DIR: dataDir }), // Set data directory if in Electron
         },
@@ -791,7 +795,7 @@ export function createUIServer(db) {
         broadcastLogUpdate({ timestamp, type, line });
       };
 
-      logEntry('info', `[UI Server] Enhanced PATH: ${process.env.PATH}`);
+      logEntry('info', `[UI Server] Enhanced PATH: ${enhancedPath}`);
       // Capture stdout - preserve exact output for debugging
       mcpSharkProcess.stdout.on('data', (data) => {
         logEntry('stdout', data);

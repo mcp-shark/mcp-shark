@@ -69,6 +69,7 @@ console.log(`[MCP-Shark] Config path: ${configPath}`);
 console.log(`[MCP-Shark] Data directory: ${dataDir}`);
 console.log(`[MCP-Shark] Database path: ${DB_FILE}`);
 console.log(`[MCP-Shark] Working directory: ${process.cwd()}`);
+console.log(`[MCP-Shark] PATH: ${process.env.PATH}`);
 
 main(configPath)
   .then(() => {
