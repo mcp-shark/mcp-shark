@@ -21,6 +21,9 @@ import {
   getMcpConfigPath,
   getWorkingDirectory,
   getDatabaseFile,
+  prepareAppDataSpaces,
+  readHelpState,
+  writeHelpState,
 } from 'mcp-shark-common/configs/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -128,6 +131,9 @@ function findMcpServerPath() {
 }
 
 export function createUIServer() {
+  // Ensure app data directories exist
+  prepareAppDataSpaces();
+
   const db = openDb(getDatabaseFile());
   const app = express();
   const server = createServer(app);
@@ -666,6 +672,22 @@ export function createUIServer() {
 
   const staticPath = path.join(__dirname, 'dist');
   app.use(express.static(staticPath));
+
+  // Help state management
+  app.get('/api/help/state', (req, res) => {
+    const state = readHelpState();
+    res.json({ dismissed: state.dismissed || false });
+  });
+
+  app.post('/api/help/dismiss', (req, res) => {
+    const state = { dismissed: true, dismissedAt: new Date().toISOString() };
+    const success = writeHelpState(state);
+    if (success) {
+      res.json({ success: true });
+    } else {
+      res.status(500).json({ error: 'Failed to save help state' });
+    }
+  });
 
   app.get('*', (req, res) => {
     res.sendFile(path.join(staticPath, 'index.html'));

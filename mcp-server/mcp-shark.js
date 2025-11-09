@@ -23,7 +23,7 @@ function initAuditLogger(logger) {
 }
 
 async function main() {
-  consola.level = 'info'; // 'debug';
+  consola.level = 'info';
 
   prepareAppDataSpaces();
 

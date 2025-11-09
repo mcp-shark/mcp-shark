@@ -5,6 +5,25 @@ import RequestFilters from './PacketFilters';
 import CompositeSetup from './CompositeSetup';
 import CompositeLogs from './CompositeLogs';
 import TabNavigation from './TabNavigation';
+import HelpGuide from './HelpGuide';
+
+// SVG Icon Component
+const HelpIcon = ({ size = 16, color = 'currentColor' }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="10" />
+    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+    <line x1="12" y1="17" x2="12.01" y2="17" />
+  </svg>
+);
 
 function App() {
   const [activeTab, setActiveTab] = useState('traffic');
@@ -13,6 +32,8 @@ function App() {
   const [filters, setFilters] = useState({});
   const [stats, setStats] = useState(null);
   const [firstRequestTime, setFirstRequestTime] = useState(null);
+  const [showHelp, setShowHelp] = useState(false);
+  const [helpDismissed, setHelpDismissed] = useState(true);
   const wsRef = useRef(null);
 
   const loadRequests = async () => {
@@ -51,6 +72,24 @@ function App() {
   };
 
   useEffect(() => {
+    // Check help state on mount
+    const checkHelpState = async () => {
+      try {
+        const response = await fetch('/api/help/state');
+        const data = await response.json();
+        setHelpDismissed(data.dismissed);
+        if (!data.dismissed) {
+          setShowHelp(true);
+        }
+      } catch (error) {
+        console.error('Failed to load help state:', error);
+        // Show help by default if we can't check state
+        setShowHelp(true);
+        setHelpDismissed(false);
+      }
+    };
+
+    checkHelpState();
     loadRequests();
 
     const wsUrl = import.meta.env.DEV
@@ -84,7 +123,43 @@ function App() {
     <div
       style={{ display: 'flex', height: '100vh', flexDirection: 'column', background: '#1e1e1e' }}
     >
-      <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+      {showHelp && <HelpGuide onClose={() => setShowHelp(false)} />}
+      <div style={{ position: 'relative' }}>
+        <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <button
+          onClick={() => setShowHelp(true)}
+          style={{
+            position: 'absolute',
+            top: '12px',
+            right: '16px',
+            background: '#252526',
+            border: '1px solid #3e3e42',
+            borderRadius: '4px',
+            padding: '6px 10px',
+            color: '#858585',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '12px',
+            zIndex: 100,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = '#2d2d30';
+            e.currentTarget.style.color = '#d4d4d4';
+            e.currentTarget.style.borderColor = '#3e3e42';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = '#252526';
+            e.currentTarget.style.color = '#858585';
+            e.currentTarget.style.borderColor = '#3e3e42';
+          }}
+          title="Show help guide"
+        >
+          <HelpIcon size={14} />
+          Help
+        </button>
+      </div>
 
       {activeTab === 'traffic' && (
         <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
