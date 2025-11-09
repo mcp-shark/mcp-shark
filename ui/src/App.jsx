@@ -5,7 +5,7 @@ import RequestFilters from './PacketFilters';
 import CompositeSetup from './CompositeSetup';
 import CompositeLogs from './CompositeLogs';
 import TabNavigation from './TabNavigation';
-import HelpGuide from './HelpGuide';
+import IntroTour from './IntroTour';
 
 // SVG Icon Component
 const HelpIcon = ({ size = 16, color = 'currentColor' }) => (
@@ -32,9 +32,136 @@ function App() {
   const [filters, setFilters] = useState({});
   const [stats, setStats] = useState(null);
   const [firstRequestTime, setFirstRequestTime] = useState(null);
-  const [showHelp, setShowHelp] = useState(false);
-  const [helpDismissed, setHelpDismissed] = useState(true);
+  const [showTour, setShowTour] = useState(false);
+  const [tourDismissed, setTourDismissed] = useState(true);
   const wsRef = useRef(null);
+
+  // Define tour steps
+  const tourSteps = [
+    {
+      target: '[data-tour="tabs"]',
+      title: 'Welcome to MCP Shark!',
+      content: (
+        <div>
+          <p style={{ margin: '0 0 12px 0' }}>
+            MCP Shark is a powerful tool for monitoring and analyzing Model Context Protocol (MCP)
+            communications. Let's take a quick tour!
+          </p>
+          <p style={{ margin: 0 }}>
+            You can navigate between three main sections using these tabs.
+          </p>
+        </div>
+      ),
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="traffic-tab"]',
+      title: 'Traffic Capture',
+      content: (
+        <div>
+          <p style={{ margin: '0 0 8px 0' }}>
+            The <strong>Traffic Capture</strong> tab shows all HTTP requests and responses between
+            your IDE and MCP servers.
+          </p>
+          <p style={{ margin: 0 }}>
+            You can view traffic in different ways: as a flat list, grouped by session, or grouped
+            by server.
+          </p>
+        </div>
+      ),
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="filters"]',
+      title: 'Search & Filters',
+      content: (
+        <div>
+          <p style={{ margin: '0 0 8px 0' }}>
+            Use the search bar and filters to find specific requests, sessions, or servers.
+          </p>
+          <p style={{ margin: 0 }}>
+            You can search by method, URL, JSON-RPC method, session ID, server name, or any text
+            content.
+          </p>
+        </div>
+      ),
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="view-modes"]',
+      title: 'View Modes',
+      content: (
+        <div>
+          <p style={{ margin: '0 0 8px 0' }}>
+            Switch between different view modes to organize traffic:
+          </p>
+          <ul style={{ margin: '0 0 8px 0', paddingLeft: '20px' }}>
+            <li>
+              <strong>General List:</strong> Flat chronological view
+            </li>
+            <li>
+              <strong>Grouped by Session & Server:</strong> Organize by session, then server
+            </li>
+            <li>
+              <strong>Grouped by Server & Session:</strong> Organize by server, then session
+            </li>
+          </ul>
+          <p style={{ margin: 0 }}>Click on group headers to expand or collapse them.</p>
+        </div>
+      ),
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="logs-tab"]',
+      title: 'MCP Shark Logs',
+      content: (
+        <div>
+          <p style={{ margin: '0 0 8px 0' }}>
+            The <strong>MCP Shark Logs</strong> tab shows server console output and debug
+            information.
+          </p>
+          <p style={{ margin: 0 }}>
+            Use this to troubleshoot issues or monitor server activity in real-time.
+          </p>
+        </div>
+      ),
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="setup-tab"]',
+      title: 'MCP Server Setup',
+      content: (
+        <div>
+          <p style={{ margin: '0 0 8px 0' }}>
+            The <strong>MCP Server Setup</strong> tab is where you configure and start the MCP Shark
+            server.
+          </p>
+          <p style={{ margin: 0 }}>
+            It automatically detects your IDE's MCP configuration files and helps you get started
+            quickly.
+          </p>
+        </div>
+      ),
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="help-button"]',
+      title: 'Need Help?',
+      content: (
+        <div>
+          <p style={{ margin: '0 0 8px 0' }}>
+            Click the <strong>Help</strong> button anytime to see a detailed guide or restart this
+            tour.
+          </p>
+          <p style={{ margin: 0 }}>
+            You're all set! Start by configuring your MCP server in the Setup tab, then watch the
+            traffic flow in the Traffic Capture tab.
+          </p>
+        </div>
+      ),
+      position: 'left',
+    },
+  ];
 
   const loadRequests = async () => {
     try {
@@ -72,24 +199,30 @@ function App() {
   };
 
   useEffect(() => {
-    // Check help state on mount
-    const checkHelpState = async () => {
+    // Check tour state on mount (profile-specific, stored in ~/.mcp-shark/help-state.json)
+    const checkTourState = async () => {
       try {
         const response = await fetch('/api/help/state');
         const data = await response.json();
-        setHelpDismissed(data.dismissed);
-        if (!data.dismissed) {
-          setShowHelp(true);
+        setTourDismissed(data.dismissed || data.tourCompleted);
+        // Only show tour if it hasn't been completed/dismissed
+        if (!data.dismissed && !data.tourCompleted) {
+          // Small delay to ensure DOM is ready
+          setTimeout(() => {
+            setShowTour(true);
+          }, 500);
         }
       } catch (error) {
-        console.error('Failed to load help state:', error);
-        // Show help by default if we can't check state
-        setShowHelp(true);
-        setHelpDismissed(false);
+        console.error('Failed to load tour state:', error);
+        // Show tour by default if we can't check state (first time user)
+        setTimeout(() => {
+          setShowTour(true);
+        }, 500);
+        setTourDismissed(false);
       }
     };
 
-    checkHelpState();
+    checkTourState();
     loadRequests();
 
     const wsUrl = import.meta.env.DEV
@@ -123,11 +256,18 @@ function App() {
     <div
       style={{ display: 'flex', height: '100vh', flexDirection: 'column', background: '#1e1e1e' }}
     >
-      {showHelp && <HelpGuide onClose={() => setShowHelp(false)} />}
-      <div style={{ position: 'relative' }}>
+      {showTour && (
+        <IntroTour
+          steps={tourSteps}
+          onComplete={() => setShowTour(false)}
+          onSkip={() => setShowTour(false)}
+        />
+      )}
+      <div style={{ position: 'relative' }} data-tour="tabs">
         <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
         <button
-          onClick={() => setShowHelp(true)}
+          onClick={() => setShowTour(true)}
+          data-tour="help-button"
           style={{
             position: 'absolute',
             top: '12px',
@@ -154,10 +294,10 @@ function App() {
             e.currentTarget.style.color = '#858585';
             e.currentTarget.style.borderColor = '#3e3e42';
           }}
-          title="Show help guide"
+          title="Start interactive tour"
         >
           <HelpIcon size={14} />
-          Help
+          Start Tour
         </button>
       </div>
 

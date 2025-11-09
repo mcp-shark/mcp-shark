@@ -1,6 +1,7 @@
 function RequestFilters({ filters, onFilterChange, stats }) {
   return (
     <div
+      data-tour="filters"
       style={{
         padding: '8px 12px',
         borderBottom: '1px solid #3e3e42',

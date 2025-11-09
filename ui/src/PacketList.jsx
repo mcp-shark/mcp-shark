@@ -831,6 +831,7 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#1e1e1e' }}>
       {/* View Mode Tabs */}
       <div
+        data-tour="view-modes"
         style={{
           display: 'flex',
           borderBottom: '1px solid #3e3e42',

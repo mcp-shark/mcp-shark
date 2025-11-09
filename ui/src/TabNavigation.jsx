@@ -94,6 +94,9 @@ function TabNavigation({ activeTab, onTabChange }) {
         {tabs.map((tab) => (
           <button
             key={tab.id}
+            data-tour={
+              tab.id === 'traffic' ? 'traffic-tab' : tab.id === 'logs' ? 'logs-tab' : 'setup-tab'
+            }
             onClick={() => onTabChange(tab.id)}
             style={{
               padding: '12px 20px',

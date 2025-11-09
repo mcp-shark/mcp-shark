@@ -673,19 +673,41 @@ export function createUIServer() {
   const staticPath = path.join(__dirname, 'dist');
   app.use(express.static(staticPath));
 
-  // Help state management
+  // Help state management (profile-specific, stored in ~/.mcp-shark/help-state.json)
   app.get('/api/help/state', (req, res) => {
     const state = readHelpState();
-    res.json({ dismissed: state.dismissed || false });
+    res.json({
+      dismissed: state.dismissed || false,
+      tourCompleted: state.tourCompleted || false,
+    });
   });
 
   app.post('/api/help/dismiss', (req, res) => {
-    const state = { dismissed: true, dismissedAt: new Date().toISOString() };
+    const { tourCompleted } = req.body || {};
+    const state = {
+      dismissed: true,
+      tourCompleted: tourCompleted || false,
+    };
     const success = writeHelpState(state);
     if (success) {
       res.json({ success: true });
     } else {
       res.status(500).json({ error: 'Failed to save help state' });
+    }
+  });
+
+  // Reset tour (for testing or if user wants to see it again)
+  app.post('/api/help/reset', (req, res) => {
+    const state = {
+      dismissed: false,
+      tourCompleted: false,
+      dismissedAt: null,
+    };
+    const success = writeHelpState(state);
+    if (success) {
+      res.json({ success: true });
+    } else {
+      res.status(500).json({ error: 'Failed to reset help state' });
     }
   });
 
