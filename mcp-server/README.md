@@ -175,6 +175,7 @@ mcp-server/
 ```
 
 **Note:** Configuration and database files are stored in `~/.mcp-shark/` by default:
+
 - `~/.mcp-shark/mcps.json` - Server configuration
 - `~/.mcp-shark/db/mcp-shark.sqlite` - SQLite database
 

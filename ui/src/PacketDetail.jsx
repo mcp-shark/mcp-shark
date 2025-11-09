@@ -1,5 +1,12 @@
 import { useState } from 'react';
 
+// SVG Icon Component
+const ChevronDown = ({ size = 12, color = 'currentColor' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '4px' }}>
+    <polyline points="6 9 12 15 18 9"/>
+  </svg>
+);
+
 function RequestDetail({ request, onClose }) {
   const [activeTab, setActiveTab] = useState('details');
 
@@ -128,7 +135,7 @@ function RequestDetail({ request, onClose }) {
                   if (next) next.style.display = next.style.display === 'none' ? 'block' : 'none';
                 }}
               >
-                ▼ Request/Response #{request.frame_number}: {request.length} bytes
+                <ChevronDown size={12} /> Request/Response #{request.frame_number}: {request.length} bytes
               </div>
               <div style={{ paddingLeft: '16px', color: '#d4d4d4' }}>
                 <div>Entry Number: {request.frame_number}</div>
@@ -152,7 +159,7 @@ function RequestDetail({ request, onClose }) {
                   if (next) next.style.display = next.style.display === 'none' ? 'block' : 'none';
                 }}
               >
-                ▼ Network Information
+                <ChevronDown size={12} /> Network Information
               </div>
               <div style={{ paddingLeft: '16px', color: '#d4d4d4' }}>
                 <div>Remote Address: {request.remote_address || 'N/A'}</div>
@@ -177,7 +184,7 @@ function RequestDetail({ request, onClose }) {
                   if (next) next.style.display = next.style.display === 'none' ? 'block' : 'none';
                 }}
               >
-                ▼ {request.protocol || 'HTTP'} Protocol
+                <ChevronDown size={12} /> {request.protocol || 'HTTP'} Protocol
               </div>
               <div style={{ paddingLeft: '16px', color: '#d4d4d4' }}>
                 <div>Direction: {request.direction}</div>
@@ -204,7 +211,7 @@ function RequestDetail({ request, onClose }) {
                   if (next) next.style.display = next.style.display === 'none' ? 'block' : 'none';
                 }}
               >
-                ▼ Headers
+                <ChevronDown size={12} /> Headers
               </div>
               <div style={{ paddingLeft: '16px', color: '#d4d4d4' }}>
                 {Object.entries(headers).map(([key, value]) => (
@@ -232,7 +239,7 @@ function RequestDetail({ request, onClose }) {
                     if (next) next.style.display = next.style.display === 'none' ? 'block' : 'none';
                   }}
                 >
-                  ▼ Body
+                  <ChevronDown size={12} /> Body
                 </div>
                 <div style={{ paddingLeft: '16px', color: '#d4d4d4' }}>
                   <pre
@@ -268,7 +275,7 @@ function RequestDetail({ request, onClose }) {
                     if (next) next.style.display = next.style.display === 'none' ? 'block' : 'none';
                   }}
                 >
-                  ▼ JSON-RPC Result
+                  <ChevronDown size={12} /> JSON-RPC Result
                 </div>
                 <div style={{ paddingLeft: '16px', color: '#d4d4d4' }}>
                   <pre
@@ -303,7 +310,7 @@ function RequestDetail({ request, onClose }) {
                     if (next) next.style.display = next.style.display === 'none' ? 'block' : 'none';
                   }}
                 >
-                  ▼ JSON-RPC Error
+                  <ChevronDown size={12} /> JSON-RPC Error
                 </div>
                 <div style={{ paddingLeft: '16px', color: '#f48771' }}>
                   <pre

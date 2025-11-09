@@ -198,6 +198,7 @@ ui/
 The application expects a SQLite database with tables for packets, conversations, and sessions. The database is created and managed by the MCP Shark server using the `mcp-shark-common` package.
 
 The database schema includes:
+
 - `packets`: Individual HTTP request/response packets with full metadata
 - `conversations`: Correlated request/response pairs
 - `sessions`: Session tracking for stateful MCP interactions

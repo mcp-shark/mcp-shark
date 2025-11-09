@@ -54,7 +54,7 @@ async function main() {
 main()
   .then(() => {
     const successMsg = 'MCP server started successfully';
-    console.log(`[MCP-Shark] ${successMsg}`);;
+    console.log(`[MCP-Shark] ${successMsg}`);
     consola.info(successMsg);
   })
   .catch(error => {
