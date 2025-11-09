@@ -736,13 +736,25 @@ export function createUIServer(db) {
       // This works in both development (Electron dev) and packaged apps
       // When ELECTRON_RUN_AS_NODE is set, process.execPath still points to Electron's executable
       const nodeExecutable = process.execPath || 'node';
-
+      
+      // Set a writable data directory for the database
+      // In Electron apps, use OS temp directory instead of the read-only app bundle
+      // Check if we're in Electron by looking for ELECTRON_RUN_AS_NODE or process.resourcesPath
+      let dataDir = null;
+      if (process.env.ELECTRON_RUN_AS_NODE || process.resourcesPath) {
+        // We're in Electron - use OS temp directory (always writable)
+        const os = await import('node:os');
+        dataDir = os.tmpdir();
+        console.log(`Setting MCP_SHARK_DATA_DIR to OS temp: ${dataDir}`);
+      }
+      
       mcpSharkProcess = spawn(nodeExecutable, [mcpSharkJsPath], {
         cwd: mcpServerPath, // Set working directory to mcp-server so temp/mcps.json resolves correctly
         stdio: ['ignore', 'pipe', 'pipe'], // Capture stdout and stderr
         env: {
           ...process.env,
           ELECTRON_RUN_AS_NODE: '1', // Tell Electron to run as Node.js
+          ...(dataDir && { MCP_SHARK_DATA_DIR: dataDir }), // Set data directory if in Electron
         },
       });
 
