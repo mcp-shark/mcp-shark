@@ -1,6 +1,7 @@
 import { execSync } from 'child_process';
-import * as path from 'path';
-import * as fs from 'fs';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
 
 /**
  * Get system PATH from the host machine's shell environment
@@ -89,7 +90,6 @@ function getSystemPath() {
 
       // Fallback: try to read from common shell config files
       // For zsh, check .zshrc first (interactive), then .zprofile (login)
-      const os = require('os');
       const homeDir = os.homedir();
       const configFiles = [
         { file: path.join(homeDir, '.zshrc'), shell: 'zsh', interactive: true },
