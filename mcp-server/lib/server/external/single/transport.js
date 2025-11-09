@@ -24,7 +24,6 @@ export function makeTransport({
     ...configEnv,
   };
 
-
   const requestInit = { headers: { ...configHeaders } };
 
   switch (type) {

@@ -32,7 +32,7 @@ function getSystemPath() {
             // Try interactive mode first (loads .zshrc), then login mode
             const shellName = path.basename(shell);
             let pathOutput;
-            
+
             if (shellName === 'zsh') {
               // For zsh, try interactive mode to get .zshrc PATH additions
               try {
@@ -75,7 +75,7 @@ function getSystemPath() {
                 },
               });
             }
-            
+
             const systemPath = pathOutput.trim();
             if (systemPath) {
               console.log(`[Server Manager] Got PATH from ${shell} (${shellName})`);
@@ -168,9 +168,7 @@ export function enhancePath(originalPath) {
             return fs
               .readdirSync(nvmVersionsPath, { withFileTypes: true })
               .filter((dirent) => dirent.isDirectory())
-              .map((dirent) =>
-                path.join(nvmVersionsPath, dirent.name, 'bin')
-              );
+              .map((dirent) => path.join(nvmVersionsPath, dirent.name, 'bin'));
           }
         } catch (_e) {
           // Ignore errors reading nvm directory
@@ -209,13 +207,7 @@ export function enhancePath(originalPath) {
     });
 
     // Combine: system PATH (from shell) + user-specific paths + original PATH
-    return [
-      systemPath,
-      ...userPaths,
-      originalPath || '',
-    ]
-      .filter((p) => p)
-      .join(pathSeparator);
+    return [systemPath, ...userPaths, originalPath || ''].filter((p) => p).join(pathSeparator);
   }
 
   // Fallback: add common system and user locations
@@ -238,22 +230,14 @@ export function enhancePath(originalPath) {
         ]
       : []),
     // Linux specific
-    ...(process.platform === 'linux'
-      ? ['/snap/bin', path.join(homeDir, '.local', 'bin')]
-      : []),
+    ...(process.platform === 'linux' ? ['/snap/bin', path.join(homeDir, '.local', 'bin')] : []),
     // Windows specific
     ...(process.platform === 'win32'
       ? [
           path.join(process.env.ProgramFiles || '', 'nodejs'),
           path.join(process.env['ProgramFiles(x86)'] || '', 'nodejs'),
           path.join(homeDir, 'AppData', 'Roaming', 'npm'),
-          path.join(
-            process.env.ProgramFiles || '',
-            'Docker',
-            'Docker',
-            'resources',
-            'bin'
-          ),
+          path.join(process.env.ProgramFiles || '', 'Docker', 'Docker', 'resources', 'bin'),
         ]
       : []),
     // User-specific paths (prioritize these)
