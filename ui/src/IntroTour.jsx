@@ -47,11 +47,15 @@ const ChevronLeft = ({ size = 16, color = 'currentColor' }) => (
   </svg>
 );
 
-function IntroTour({ steps, onComplete, onSkip }) {
+function IntroTour({ steps, onComplete, onSkip, onStepChange }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [highlightedElement, setHighlightedElement] = useState(null);
   const [elementRect, setElementRect] = useState(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const overlayRef = useRef(null);
+  const tooltipRef = useRef(null);
 
   // Update element position on scroll/resize
   useEffect(() => {
@@ -84,7 +88,12 @@ function IntroTour({ steps, onComplete, onSkip }) {
     const step = steps[currentStep];
     if (!step) return;
 
-    // Small delay to ensure DOM is ready
+    // Notify parent of step change
+    if (onStepChange) {
+      onStepChange(currentStep);
+    }
+
+    // Small delay to ensure DOM is ready (longer delay if tab switching might be needed)
     const timer = setTimeout(() => {
       // Find the target element
       const element = document.querySelector(step.target);
@@ -101,14 +110,18 @@ function IntroTour({ steps, onComplete, onSkip }) {
         setHighlightedElement(null);
         setElementRect(null);
       }
-    }, 100);
+    }, 200); // Slightly longer delay to allow tab switching
 
     return () => clearTimeout(timer);
-  }, [currentStep, steps]);
+  }, [currentStep, steps, onStepChange]);
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
+      const nextStep = currentStep + 1;
+      setCurrentStep(nextStep);
+      if (onStepChange) {
+        onStepChange(nextStep);
+      }
     } else {
       handleComplete();
     }
@@ -116,7 +129,11 @@ function IntroTour({ steps, onComplete, onSkip }) {
 
   const handlePrevious = () => {
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+      const prevStep = currentStep - 1;
+      setCurrentStep(prevStep);
+      if (onStepChange) {
+        onStepChange(prevStep);
+      }
     }
   };
 
@@ -137,6 +154,48 @@ function IntroTour({ steps, onComplete, onSkip }) {
     handleComplete();
     if (onSkip) onSkip();
   };
+
+  // Drag handlers
+  const handleMouseDown = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (tooltipRef.current) {
+      const rect = tooltipRef.current.getBoundingClientRect();
+      setDragOffset({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      });
+      setIsDragging(true);
+    }
+  };
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e) => {
+      setTooltipPosition({
+        x: e.clientX - dragOffset.x,
+        y: e.clientY - dragOffset.y,
+      });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, dragOffset]);
+
+  // Reset tooltip position when step changes
+  useEffect(() => {
+    setTooltipPosition({ x: 0, y: 0 });
+  }, [currentStep]);
 
   if (steps.length === 0 || currentStep >= steps.length) {
     return null;
@@ -286,51 +345,64 @@ function IntroTour({ steps, onComplete, onSkip }) {
 
           let left, top, transform;
 
-          if (step.position === 'left') {
-            left = elementRect.left - tooltipWidth - spacing;
-            top = elementRect.top + elementRect.height / 2;
-            transform = 'translateY(-50%)';
-            // Adjust if off-screen
-            if (left < 10) {
-              left = elementRect.right + spacing;
-              transform = 'translateY(-50%)';
-            }
-          } else if (step.position === 'right') {
-            left = elementRect.right + spacing;
-            top = elementRect.top + elementRect.height / 2;
-            transform = 'translateY(-50%)';
-            // Adjust if off-screen
-            if (left + tooltipWidth > window.innerWidth - 10) {
-              left = elementRect.left - tooltipWidth - spacing;
-              transform = 'translateY(-50%)';
-            }
-          } else if (step.position === 'top') {
-            left = elementRect.left + elementRect.width / 2;
-            top = elementRect.top - tooltipHeight - spacing;
-            transform = 'translate(-50%, 0)';
-            // Adjust if off-screen
-            if (top < 10) {
-              top = elementRect.bottom + spacing;
-              transform = 'translate(-50%, 0)';
-            }
+          // Use custom position if tooltip has been dragged
+          if (tooltipPosition.x !== 0 || tooltipPosition.y !== 0) {
+            left = tooltipPosition.x;
+            top = tooltipPosition.y;
+            transform = 'none';
+            // Ensure tooltip stays within viewport
+            left = Math.max(10, Math.min(left, window.innerWidth - tooltipWidth - 10));
+            top = Math.max(10, Math.min(top, window.innerHeight - tooltipHeight - 10));
           } else {
-            // bottom (default)
-            left = elementRect.left + elementRect.width / 2;
-            top = elementRect.bottom + spacing;
-            transform = 'translate(-50%, 0)';
-            // Adjust if off-screen
-            if (top + tooltipHeight > window.innerHeight - 10) {
+            // Calculate initial position based on step.position
+            if (step.position === 'left') {
+              left = elementRect.left - tooltipWidth - spacing;
+              top = elementRect.top + elementRect.height / 2;
+              transform = 'translateY(-50%)';
+              // Adjust if off-screen
+              if (left < 10) {
+                left = elementRect.right + spacing;
+                transform = 'translateY(-50%)';
+              }
+            } else if (step.position === 'right') {
+              left = elementRect.right + spacing;
+              top = elementRect.top + elementRect.height / 2;
+              transform = 'translateY(-50%)';
+              // Adjust if off-screen
+              if (left + tooltipWidth > window.innerWidth - 10) {
+                left = elementRect.left - tooltipWidth - spacing;
+                transform = 'translateY(-50%)';
+              }
+            } else if (step.position === 'top') {
+              left = elementRect.left + elementRect.width / 2;
               top = elementRect.top - tooltipHeight - spacing;
               transform = 'translate(-50%, 0)';
+              // Adjust if off-screen
+              if (top < 10) {
+                top = elementRect.bottom + spacing;
+                transform = 'translate(-50%, 0)';
+              }
+            } else {
+              // bottom (default)
+              left = elementRect.left + elementRect.width / 2;
+              top = elementRect.bottom + spacing;
+              transform = 'translate(-50%, 0)';
+              // Adjust if off-screen
+              if (top + tooltipHeight > window.innerHeight - 10) {
+                top = elementRect.top - tooltipHeight - spacing;
+                transform = 'translate(-50%, 0)';
+              }
             }
-          }
 
-          // Ensure tooltip stays within viewport
-          left = Math.max(10, Math.min(left, window.innerWidth - tooltipWidth - 10));
-          top = Math.max(10, Math.min(top, window.innerHeight - tooltipHeight - 10));
+            // Ensure tooltip stays within viewport
+            left = Math.max(10, Math.min(left, window.innerWidth - tooltipWidth - 10));
+            top = Math.max(10, Math.min(top, window.innerHeight - tooltipHeight - 10));
+          }
 
           return (
             <div
+              ref={tooltipRef}
+              onMouseDown={handleMouseDown}
               style={{
                 position: 'fixed',
                 left: `${left}px`,
@@ -345,8 +417,20 @@ function IntroTour({ steps, onComplete, onSkip }) {
                 boxShadow: '0 4px 20px rgba(0, 0, 0, 0.5)',
                 zIndex: 10001,
                 pointerEvents: 'auto',
+                cursor: isDragging ? 'grabbing' : 'grab',
+                userSelect: 'none',
               }}
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                // Only stop propagation if not clicking on interactive elements
+                const target = e.target;
+                if (
+                  target.tagName !== 'BUTTON' &&
+                  target.tagName !== 'INPUT' &&
+                  !target.closest('button')
+                ) {
+                  e.stopPropagation();
+                }
+              }}
             >
               {/* Header */}
               <div
@@ -357,16 +441,23 @@ function IntroTour({ steps, onComplete, onSkip }) {
                   marginBottom: '12px',
                 }}
               >
-                <div>
+                <div style={{ flex: 1, pointerEvents: 'none' }}>
                   <h3 style={{ margin: 0, color: '#4ec9b0', fontSize: '16px', fontWeight: '600' }}>
                     {step.title}
                   </h3>
                   <p style={{ margin: '4px 0 0 0', color: '#858585', fontSize: '12px' }}>
                     Step {currentStep + 1} of {steps.length}
+                    {isDragging && (
+                      <span style={{ marginLeft: '8px', fontSize: '11px' }}>• Dragging</span>
+                    )}
                   </p>
                 </div>
                 <button
-                  onClick={handleSkip}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSkip();
+                  }}
+                  onMouseDown={(e) => e.stopPropagation()}
                   style={{
                     background: 'transparent',
                     border: 'none',
@@ -377,6 +468,7 @@ function IntroTour({ steps, onComplete, onSkip }) {
                     alignItems: 'center',
                     borderRadius: '4px',
                     marginLeft: '12px',
+                    pointerEvents: 'auto',
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = '#3e3e42';
@@ -399,6 +491,7 @@ function IntroTour({ steps, onComplete, onSkip }) {
                   fontSize: '14px',
                   lineHeight: '1.6',
                   marginBottom: '20px',
+                  pointerEvents: 'none',
                 }}
               >
                 {step.content}
@@ -411,10 +504,15 @@ function IntroTour({ steps, onComplete, onSkip }) {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   gap: '12px',
+                  pointerEvents: 'none',
                 }}
               >
                 <button
-                  onClick={handleSkip}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSkip();
+                  }}
+                  onMouseDown={(e) => e.stopPropagation()}
                   style={{
                     background: 'transparent',
                     border: '1px solid #3e3e42',
@@ -424,6 +522,7 @@ function IntroTour({ steps, onComplete, onSkip }) {
                     cursor: 'pointer',
                     fontSize: '13px',
                     flex: 1,
+                    pointerEvents: 'auto',
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = '#2d2d30';
@@ -438,10 +537,14 @@ function IntroTour({ steps, onComplete, onSkip }) {
                 >
                   Skip Tour
                 </button>
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div style={{ display: 'flex', gap: '8px', pointerEvents: 'auto' }}>
                   {currentStep > 0 && (
                     <button
-                      onClick={handlePrevious}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePrevious();
+                      }}
+                      onMouseDown={(e) => e.stopPropagation()}
                       style={{
                         background: '#2d2d30',
                         border: '1px solid #3e3e42',
@@ -466,7 +569,11 @@ function IntroTour({ steps, onComplete, onSkip }) {
                     </button>
                   )}
                   <button
-                    onClick={handleNext}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNext();
+                    }}
+                    onMouseDown={(e) => e.stopPropagation()}
                     style={{
                       background: '#0e639c',
                       border: 'none',

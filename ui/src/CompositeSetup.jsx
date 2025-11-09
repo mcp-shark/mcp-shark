@@ -230,10 +230,14 @@ function CompositeSetup() {
                   {detecting ? 'Detecting...' : '🔄 Refresh'}
                 </button>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div
+                data-tour="detected-editors"
+                style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}
+              >
                 {detectedPaths.map((item, idx) => (
                   <button
                     key={idx}
+                    data-tour={idx === 0 ? 'first-detected-editor' : undefined}
                     onClick={() => {
                       setFilePath(item.path);
                       setFileContent(''); // Clear any file picker content
@@ -348,6 +352,7 @@ function CompositeSetup() {
 
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <label
+              data-tour="select-file"
               style={{
                 padding: '8px 16px',
                 background: '#0e639c',
@@ -478,6 +483,7 @@ function CompositeSetup() {
 
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
           <button
+            data-tour="start-button"
             onClick={handleSetup}
             disabled={loading || (!fileContent && !filePath)}
             style={{

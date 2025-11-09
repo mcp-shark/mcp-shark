@@ -36,7 +36,7 @@ function App() {
   const [tourDismissed, setTourDismissed] = useState(true);
   const wsRef = useRef(null);
 
-  // Define tour steps
+  // Define tour steps - focused on setup workflow
   const tourSteps = [
     {
       target: '[data-tour="tabs"]',
@@ -45,83 +45,11 @@ function App() {
         <div>
           <p style={{ margin: '0 0 12px 0' }}>
             MCP Shark is a powerful tool for monitoring and analyzing Model Context Protocol (MCP)
-            communications. Let's take a quick tour!
+            communications. Let's get you started!
           </p>
           <p style={{ margin: 0 }}>
-            You can navigate between three main sections using these tabs.
-          </p>
-        </div>
-      ),
-      position: 'bottom',
-    },
-    {
-      target: '[data-tour="traffic-tab"]',
-      title: 'Traffic Capture',
-      content: (
-        <div>
-          <p style={{ margin: '0 0 8px 0' }}>
-            The <strong>Traffic Capture</strong> tab shows all HTTP requests and responses between
-            your IDE and MCP servers.
-          </p>
-          <p style={{ margin: 0 }}>
-            You can view traffic in different ways: as a flat list, grouped by session, or grouped
-            by server.
-          </p>
-        </div>
-      ),
-      position: 'bottom',
-    },
-    {
-      target: '[data-tour="filters"]',
-      title: 'Search & Filters',
-      content: (
-        <div>
-          <p style={{ margin: '0 0 8px 0' }}>
-            Use the search bar and filters to find specific requests, sessions, or servers.
-          </p>
-          <p style={{ margin: 0 }}>
-            You can search by method, URL, JSON-RPC method, session ID, server name, or any text
-            content.
-          </p>
-        </div>
-      ),
-      position: 'bottom',
-    },
-    {
-      target: '[data-tour="view-modes"]',
-      title: 'View Modes',
-      content: (
-        <div>
-          <p style={{ margin: '0 0 8px 0' }}>
-            Switch between different view modes to organize traffic:
-          </p>
-          <ul style={{ margin: '0 0 8px 0', paddingLeft: '20px' }}>
-            <li>
-              <strong>General List:</strong> Flat chronological view
-            </li>
-            <li>
-              <strong>Grouped by Session & Server:</strong> Organize by session, then server
-            </li>
-            <li>
-              <strong>Grouped by Server & Session:</strong> Organize by server, then session
-            </li>
-          </ul>
-          <p style={{ margin: 0 }}>Click on group headers to expand or collapse them.</p>
-        </div>
-      ),
-      position: 'bottom',
-    },
-    {
-      target: '[data-tour="logs-tab"]',
-      title: 'MCP Shark Logs',
-      content: (
-        <div>
-          <p style={{ margin: '0 0 8px 0' }}>
-            The <strong>MCP Shark Logs</strong> tab shows server console output and debug
-            information.
-          </p>
-          <p style={{ margin: 0 }}>
-            Use this to troubleshoot issues or monitor server activity in real-time.
+            First, you'll need to set up the MCP Shark server. Click on the{' '}
+            <strong>MCP Server Setup</strong> tab to begin.
           </p>
         </div>
       ),
@@ -129,16 +57,89 @@ function App() {
     },
     {
       target: '[data-tour="setup-tab"]',
-      title: 'MCP Server Setup',
+      title: 'Step 1: Open MCP Server Setup',
       content: (
         <div>
           <p style={{ margin: '0 0 8px 0' }}>
-            The <strong>MCP Server Setup</strong> tab is where you configure and start the MCP Shark
+            Click on the <strong>MCP Server Setup</strong> tab to configure and start the MCP Shark
             server.
           </p>
-          <p style={{ margin: 0 }}>
-            It automatically detects your IDE's MCP configuration files and helps you get started
-            quickly.
+          <p style={{ margin: 0, fontSize: '12px', color: '#858585' }}>
+            This is where you'll configure your MCP servers and start monitoring.
+          </p>
+        </div>
+      ),
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="detected-editors"]',
+      title: 'Step 2: Select Your Configuration',
+      content: (
+        <div>
+          <p style={{ margin: '0 0 8px 0' }}>
+            MCP Shark automatically detects your IDE's MCP configuration files. You have two
+            options:
+          </p>
+          <ul style={{ margin: '0 0 8px 0', paddingLeft: '20px', fontSize: '13px' }}>
+            <li>
+              Click on any <strong>detected editor</strong> (like Cursor or Windsurf) to use its
+              config
+            </li>
+            <li>
+              Or click <strong>"Select File"</strong> to upload your own config file
+            </li>
+          </ul>
+          <p style={{ margin: 0, fontSize: '12px', color: '#858585' }}>
+            When you click a detected editor, the file path will automatically populate in the text
+            box.
+          </p>
+        </div>
+      ),
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="select-file"]',
+      title: 'Alternative: Upload Your Config',
+      content: (
+        <div>
+          <p style={{ margin: '0 0 8px 0' }}>
+            If you prefer, you can click <strong>"Select File"</strong> to upload your MCP
+            configuration file directly.
+          </p>
+          <p style={{ margin: 0, fontSize: '12px', color: '#858585' }}>
+            Or manually enter the file path in the text box next to it.
+          </p>
+        </div>
+      ),
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="start-button"]',
+      title: 'Step 3: Start MCP Shark',
+      content: (
+        <div>
+          <p style={{ margin: '0 0 8px 0' }}>
+            Once you've selected a configuration file (either from detected editors or uploaded),
+            click <strong>"Start MCP Shark"</strong> to begin monitoring.
+          </p>
+          <p style={{ margin: 0, fontSize: '12px', color: '#858585' }}>
+            The server will start and begin capturing all MCP traffic between your IDE and servers.
+          </p>
+        </div>
+      ),
+      position: 'top',
+    },
+    {
+      target: '[data-tour="traffic-tab"]',
+      title: 'View Your Traffic',
+      content: (
+        <div>
+          <p style={{ margin: '0 0 8px 0' }}>
+            After starting the server, switch to the <strong>Traffic Capture</strong> tab to see all
+            HTTP requests and responses in real-time.
+          </p>
+          <p style={{ margin: 0, fontSize: '12px', color: '#858585' }}>
+            You can view traffic as a flat list, grouped by session, or grouped by server.
           </p>
         </div>
       ),
@@ -150,12 +151,10 @@ function App() {
       content: (
         <div>
           <p style={{ margin: '0 0 8px 0' }}>
-            Click the <strong>Help</strong> button anytime to see a detailed guide or restart this
-            tour.
+            Click the <strong>Start Tour</strong> button anytime to restart this guide or get help.
           </p>
-          <p style={{ margin: 0 }}>
-            You're all set! Start by configuring your MCP server in the Setup tab, then watch the
-            traffic flow in the Traffic Capture tab.
+          <p style={{ margin: 0, fontSize: '12px', color: '#858585' }}>
+            You're all set! Start by configuring your MCP server, then watch the traffic flow.
           </p>
         </div>
       ),
@@ -261,6 +260,26 @@ function App() {
           steps={tourSteps}
           onComplete={() => setShowTour(false)}
           onSkip={() => setShowTour(false)}
+          onStepChange={(stepIndex) => {
+            // Auto-switch tabs based on tour step
+            const step = tourSteps[stepIndex];
+            if (step) {
+              if (
+                step.target === '[data-tour="setup-tab"]' ||
+                step.target === '[data-tour="detected-editors"]' ||
+                step.target === '[data-tour="select-file"]' ||
+                step.target === '[data-tour="start-button"]'
+              ) {
+                if (activeTab !== 'setup') {
+                  setActiveTab('setup');
+                }
+              } else if (step.target === '[data-tour="traffic-tab"]') {
+                if (activeTab !== 'traffic') {
+                  setActiveTab('traffic');
+                }
+              }
+            }
+          }}
         />
       )}
       <div style={{ position: 'relative' }} data-tour="tabs">
