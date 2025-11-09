@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 
 function RequestList({ requests, selected, onSelect, firstRequestTime }) {
   const tableRef = useRef(null);
@@ -11,6 +11,58 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
     length: 80,
     info: 400,
   });
+  const [expandedSessions, setExpandedSessions] = useState(new Set());
+
+  // Group requests by session_id
+  const groupedRequests = useMemo(() => {
+    const groups = new Map();
+
+    requests.forEach((request) => {
+      const sessionId = request.session_id || '__NO_SESSION__';
+      if (!groups.has(sessionId)) {
+        groups.set(sessionId, []);
+      }
+      groups.get(sessionId).push(request);
+    });
+
+    // Convert to array and sort by first request timestamp in each group
+    return Array.from(groups.entries())
+      .map(([sessionId, groupRequests]) => ({
+        sessionId: sessionId === '__NO_SESSION__' ? null : sessionId,
+        requests: groupRequests.sort(
+          (a, b) => new Date(a.timestamp_iso) - new Date(b.timestamp_iso)
+        ),
+      }))
+      .sort((a, b) => {
+        // Sort groups by their first request timestamp (most recent first)
+        const aTime = a.requests[0]?.timestamp_iso || '';
+        const bTime = b.requests[0]?.timestamp_iso || '';
+        return new Date(bTime) - new Date(aTime);
+      });
+  }, [requests]);
+
+  // Initialize all groups as expanded by default
+  useEffect(() => {
+    const allSessionIds = new Set(groupedRequests.map((g) => g.sessionId || '__NO_SESSION__'));
+    setExpandedSessions((prev) => {
+      const updated = new Set(prev);
+      allSessionIds.forEach((id) => updated.add(id));
+      return updated;
+    });
+  }, [groupedRequests]);
+
+  const toggleSession = (sessionId) => {
+    const key = sessionId || '__NO_SESSION__';
+    setExpandedSessions((prev) => {
+      const updated = new Set(prev);
+      if (updated.has(key)) {
+        updated.delete(key);
+      } else {
+        updated.add(key);
+      }
+      return updated;
+    });
+  };
 
   const getRequestColor = (request) => {
     if (request.direction === 'request') {
@@ -57,6 +109,100 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
       const rpc = request.jsonrpc_method ? ` ${request.jsonrpc_method}` : '';
       return `${status}${rpc}`;
     }
+  };
+
+  const renderRequestRow = (request) => {
+    const isSelected = selected?.frame_number === request.frame_number;
+    const color = getRequestColor(request);
+    const { source, dest } = getSourceDest(request);
+    const relativeTime = formatRelativeTime(request.timestamp_iso, firstRequestTime);
+
+    return (
+      <tr
+        key={request.frame_number}
+        onClick={() => onSelect(request)}
+        style={{
+          cursor: 'pointer',
+          background: isSelected ? '#264f78' : color,
+          borderBottom: '1px solid #2d2d30',
+        }}
+        onMouseEnter={(e) => {
+          if (!isSelected) {
+            e.currentTarget.style.background = isSelected ? '#264f78' : '#2a2d2e';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isSelected) {
+            e.currentTarget.style.background = color;
+          }
+        }}
+      >
+        <td
+          style={{
+            padding: '2px 8px',
+            borderRight: '1px solid #2d2d30',
+            color: '#d4d4d4',
+            textAlign: 'right',
+          }}
+        >
+          {request.frame_number}
+        </td>
+        <td
+          style={{
+            padding: '2px 8px',
+            borderRight: '1px solid #2d2d30',
+            color: '#d4d4d4',
+          }}
+        >
+          {relativeTime}
+        </td>
+        <td
+          style={{
+            padding: '2px 8px',
+            borderRight: '1px solid #2d2d30',
+            color: request.direction === 'request' ? '#4ec9b0' : '#ce9178',
+          }}
+        >
+          {source}
+        </td>
+        <td
+          style={{
+            padding: '2px 8px',
+            borderRight: '1px solid #2d2d30',
+            color: request.direction === 'request' ? '#4ec9b0' : '#ce9178',
+          }}
+        >
+          {dest}
+        </td>
+        <td
+          style={{
+            padding: '2px 8px',
+            borderRight: '1px solid #2d2d30',
+            color: '#dcdcaa',
+          }}
+        >
+          {request.protocol || 'HTTP'}
+        </td>
+        <td
+          style={{
+            padding: '2px 8px',
+            borderRight: '1px solid #2d2d30',
+            color: '#d4d4d4',
+            textAlign: 'right',
+          }}
+        >
+          {request.length}
+        </td>
+        <td
+          style={{
+            padding: '2px 8px',
+            color: '#d4d4d4',
+          }}
+        >
+          {getInfo(request)}
+        </td>
+      </tr>
+    );
   };
 
   return (
@@ -170,97 +316,58 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
           </tr>
         </thead>
         <tbody>
-          {requests.map((request) => {
-            const isSelected = selected?.frame_number === request.frame_number;
-            const color = getRequestColor(request);
-            const { source, dest } = getSourceDest(request);
-            const relativeTime = formatRelativeTime(request.timestamp_iso, firstRequestTime);
+          {groupedRequests.map((group) => {
+            const sessionKey = group.sessionId || '__NO_SESSION__';
+            const isExpanded = expandedSessions.has(sessionKey);
+            const requestCount = group.requests.length;
+            const requestCountText = requestCount === 1 ? '1 request' : `${requestCount} requests`;
 
             return (
-              <tr
-                key={request.frame_number}
-                onClick={() => onSelect(request)}
-                style={{
-                  cursor: 'pointer',
-                  background: isSelected ? '#264f78' : color,
-                  borderBottom: '1px solid #2d2d30',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.background = isSelected ? '#264f78' : '#2a2d2e';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.background = color;
-                  }
-                }}
-              >
-                <td
+              <React.Fragment key={sessionKey}>
+                {/* Session Group Header */}
+                <tr
+                  onClick={() => toggleSession(group.sessionId)}
                   style={{
-                    padding: '2px 8px',
-                    borderRight: '1px solid #2d2d30',
-                    color: '#d4d4d4',
-                    textAlign: 'right',
+                    cursor: 'pointer',
+                    background: '#2d2d30',
+                    borderBottom: '2px solid #3e3e42',
+                    borderTop: '2px solid #3e3e42',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#3a3a3a';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#2d2d30';
                   }}
                 >
-                  {request.frame_number}
-                </td>
-                <td
-                  style={{
-                    padding: '2px 8px',
-                    borderRight: '1px solid #2d2d30',
-                    color: '#d4d4d4',
-                  }}
-                >
-                  {relativeTime}
-                </td>
-                <td
-                  style={{
-                    padding: '2px 8px',
-                    borderRight: '1px solid #2d2d30',
-                    color: request.direction === 'request' ? '#4ec9b0' : '#ce9178',
-                  }}
-                >
-                  {source}
-                </td>
-                <td
-                  style={{
-                    padding: '2px 8px',
-                    borderRight: '1px solid #2d2d30',
-                    color: request.direction === 'request' ? '#4ec9b0' : '#ce9178',
-                  }}
-                >
-                  {dest}
-                </td>
-                <td
-                  style={{
-                    padding: '2px 8px',
-                    borderRight: '1px solid #2d2d30',
-                    color: '#dcdcaa',
-                  }}
-                >
-                  {request.protocol || 'HTTP'}
-                </td>
-                <td
-                  style={{
-                    padding: '2px 8px',
-                    borderRight: '1px solid #2d2d30',
-                    color: '#d4d4d4',
-                    textAlign: 'right',
-                  }}
-                >
-                  {request.length}
-                </td>
-                <td
-                  style={{
-                    padding: '2px 8px',
-                    color: '#d4d4d4',
-                  }}
-                >
-                  {getInfo(request)}
-                </td>
-              </tr>
+                  <td
+                    colSpan={7}
+                    style={{
+                      padding: '6px 12px',
+                      color: '#dcdcaa',
+                      fontWeight: 'bold',
+                      fontSize: '11px',
+                    }}
+                  >
+                    <span style={{ marginRight: '8px', userSelect: 'none' }}>
+                      {isExpanded ? '▼' : '▶'}
+                    </span>
+                    <span style={{ color: '#858585' }}>Session:</span>{' '}
+                    {group.sessionId ? (
+                      <span style={{ color: '#4ec9b0', fontFamily: 'monospace' }}>
+                        {group.sessionId}
+                      </span>
+                    ) : (
+                      <span style={{ color: '#858585', fontStyle: 'italic' }}>(No Session ID)</span>
+                    )}
+                    <span style={{ marginLeft: '12px', color: '#858585', fontWeight: 'normal' }}>
+                      ({requestCountText})
+                    </span>
+                  </td>
+                </tr>
+                {/* Session Requests */}
+                {isExpanded && group.requests.map((request) => renderRequestRow(request))}
+              </React.Fragment>
             );
           })}
         </tbody>
