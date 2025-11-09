@@ -790,7 +790,6 @@ export function createUIServer(db) {
         // Broadcast to WebSocket clients
         broadcastLogUpdate({ timestamp, type, line });
       };
-      logEntry('info', `[UI Server] Enhanced PATH: ${enhancedPath.substring}...`);
 
       // Capture stdout - preserve exact output for debugging
       mcpSharkProcess.stdout.on('data', (data) => {
