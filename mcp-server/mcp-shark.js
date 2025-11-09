@@ -40,7 +40,8 @@ async function main(configPath) {
   const auditLogger = initAuditLogger(consola);
   const result = await runAllExternalServers(consola, configPath);
   if (isError(result)) {
-    consola.error(result.error);
+    consola.error(result);
+    console.error(JSON.stringify(result));
     process.exit(1);
   }
 
