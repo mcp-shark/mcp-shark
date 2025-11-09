@@ -490,11 +490,12 @@ function findMcpServerPath() {
 /**
  * Get system PATH from the host machine's shell environment
  * This works in Electron by executing a shell command to get the actual PATH
+ * Includes both system PATH and user's custom PATH from shell config files
  */
 function getSystemPath() {
   try {
     if (process.platform === 'win32') {
-      // Windows: use cmd to get PATH
+      // Windows: use cmd to get PATH (includes user PATH)
       const pathOutput = execSync('cmd /c echo %PATH%', {
         encoding: 'utf8',
         timeout: 2000,
@@ -502,24 +503,72 @@ function getSystemPath() {
       });
       return pathOutput.trim();
     } else {
-      // Unix-like: use shell to get PATH
-      // Try different shells to get the actual PATH
-      const shells = ['/bin/zsh', '/bin/bash', '/bin/sh'];
+      // Unix-like: use shell to get PATH from user's actual shell environment
+      // Try to detect the user's default shell first
+      const userShell = process.env.SHELL || '/bin/zsh';
+      const shells = [userShell, '/bin/zsh', '/bin/bash', '/bin/sh'];
+
       for (const shell of shells) {
         if (fs.existsSync(shell)) {
           try {
+            // Use -l (login shell) to load user's shell config files (.zshrc, .bashrc, etc.)
+            // This ensures we get the user's custom PATH additions
             const pathOutput = execSync(`${shell} -l -c 'echo $PATH'`, {
               encoding: 'utf8',
-              timeout: 2000,
+              timeout: 3000,
               stdio: ['ignore', 'pipe', 'ignore'],
-              env: { ...process.env, PATH: process.env.PATH || '' },
+              // Don't pass PATH in env to avoid circular reference
+              env: {
+                ...Object.fromEntries(
+                  Object.entries(process.env).filter(([key]) => key !== 'PATH')
+                ),
+              },
             });
             const systemPath = pathOutput.trim();
             if (systemPath) {
+              console.log(`[UI Server] Got PATH from ${shell}`);
               return systemPath;
             }
           } catch (_e) {
             // Try next shell
+            continue;
+          }
+        }
+      }
+
+      // Fallback: try to read from common shell config files
+      const homeDir = homedir();
+      const configFiles = [
+        { file: path.join(homeDir, '.zshrc'), shell: 'zsh' },
+        { file: path.join(homeDir, '.bashrc'), shell: 'bash' },
+        { file: path.join(homeDir, '.bash_profile'), shell: 'bash' },
+        { file: path.join(homeDir, '.profile'), shell: 'sh' },
+      ];
+
+      for (const { file, shell: shellName } of configFiles) {
+        if (fs.existsSync(file)) {
+          try {
+            // Source the config file and get PATH
+            const pathOutput = execSync(
+              `/bin/${shellName} -c 'source ${file} 2>/dev/null; echo $PATH'`,
+              {
+                encoding: 'utf8',
+                timeout: 3000,
+                stdio: ['ignore', 'pipe', 'ignore'],
+                env: {
+                  ...Object.fromEntries(
+                    Object.entries(process.env).filter(([key]) => key !== 'PATH')
+                  ),
+                },
+              }
+            );
+            const systemPath = pathOutput.trim();
+            if (systemPath) {
+              console.log(`[UI Server] Got PATH from ${file}`);
+              return systemPath;
+            }
+          } catch (_e) {
+            // Try next config file
             continue;
           }
         }
