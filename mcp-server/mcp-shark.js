@@ -11,8 +11,8 @@ import {
   getInternalServer,
   runInternalServer,
 } from './lib/server/internal/run.js';
-import { initDb } from './lib/db/init.js';
-import { getLogger } from './lib/db/logger.js';
+import { initDb } from 'mcp-shark-common/db/init.js';
+import { getLogger } from 'mcp-shark-common/db/logger.js';
 import { withAuditRequestResponseHandler } from './lib/auditor/audit.js';
 
 const DB_NAME = 'mcp-shark.sqlite';
