@@ -43,6 +43,6 @@
     "consola": "^3.4.2",
     "express": "^4.18.2",
     "jsonrpc-lite": "^2.2.0",
-    "mcp-shark-common": "file:../../mcp-shark-common"
+    "mcp-shark-common": "github:mcp-shark/mcp-shark-common"
   }
 }
