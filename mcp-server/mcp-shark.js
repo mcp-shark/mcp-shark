@@ -69,6 +69,9 @@ main(configPath)
     consola.info(`Database path: ${DB_FILE}`);
   })
   .catch(error => {
+    consola.info('Error starting MCP server:', error);
+    consola.info('Error message:', error.message);
+    consola.info('Error stack:', error.stack);
     consola.error('Error starting MCP server:', error);
     consola.error(error.message);
     consola.error(error.stack);
