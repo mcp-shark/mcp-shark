@@ -1,5 +1,8 @@
 # MCP Shark
 
+> **⚠️ ALPHA VERSION - STILL TESTING**  
+> This is an alpha version of MCP Shark. The software is still under active development and testing. Features may change, and there may be bugs or incomplete functionality. Use at your own risk.
+
 > **Aggregate multiple Model Context Protocol (MCP) servers into a single unified interface with a powerful monitoring UI**
 
 MCP Shark is a complete solution for aggregating multiple MCP servers (both HTTP and stdio-based) into one cohesive endpoint, with a real-time web interface for monitoring and inspecting all communications.
