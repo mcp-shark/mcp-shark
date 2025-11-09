@@ -791,6 +791,7 @@ export function createUIServer(db) {
         broadcastLogUpdate({ timestamp, type, line });
       };
 
+      logEntry('info', `[UI Server] Enhanced PATH: ${process.env.PATH}`);
       // Capture stdout - preserve exact output for debugging
       mcpSharkProcess.stdout.on('data', (data) => {
         logEntry('stdout', data);
