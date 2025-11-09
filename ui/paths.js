@@ -143,7 +143,6 @@ function getSystemPath() {
  * This is especially important in Electron where PATH might not include system executables
  */
 export function enhancePath(originalPath) {
-  const os = require('os');
   const homeDir = os.homedir();
   const pathSeparator = process.platform === 'win32' ? ';' : ':';
 
