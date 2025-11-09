@@ -1270,9 +1270,11 @@ export async function runUIServer(dbPath) {
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const dbPath =
-    process.env.DB_PATH ||
-    process.argv[2] ||
-    path.join(process.cwd(), '../mcp-server/temp/db/mcp-shark.sqlite');
-  runUIServer(dbPath).catch(console.error);
+  const DB_NAME = 'mcp-shark.sqlite';
+  // Use MCP_SHARK_DATA_DIR if set (for Electron apps), otherwise use user's home directory
+  // MCP_SHARK_DATA_DIR is set by Electron to a writable location (user's home directory)
+  const dataDir = path.join(os.homedir(), '.mcp-shark');
+  const DB_PATH = path.join(dataDir, 'db');
+  const dbFile = path.join(DB_PATH, DB_NAME);
+  runUIServer(dbFile).catch(console.error);
 }
