@@ -21,8 +21,14 @@ A real-time web interface for monitoring and inspecting MCP (Model Context Proto
 
 ## 📦 Installation
 
+From the root directory:
+
 ```bash
-# Install dependencies
+# Install all dependencies (recommended)
+npm run install:all
+
+# Or install UI dependencies only
+cd ui
 npm install
 ```
 
@@ -84,7 +90,7 @@ The UI will:
 ### Environment Variables
 
 - `UI_PORT`: Port for the server (default: `9853`)
-- `DB_PATH`: Path to the SQLite database file (default: `../mcp-server/temp/db/mcp-shark.sqlite`)
+- `DB_PATH`: Path to the SQLite database file (default: `~/.mcp-shark/db/mcp-shark.sqlite`)
 
 ## 📡 API Endpoints
 
@@ -189,7 +195,12 @@ ui/
 
 ### Database Schema
 
-The application expects a SQLite database with tables for packets, conversations, and sessions. The database is created and managed by the MCP Shark server.
+The application expects a SQLite database with tables for packets, conversations, and sessions. The database is created and managed by the MCP Shark server using the `mcp-shark-common` package.
+
+The database schema includes:
+- `packets`: Individual HTTP request/response packets with full metadata
+- `conversations`: Correlated request/response pairs
+- `sessions`: Session tracking for stateful MCP interactions
 
 ## 🤝 Contributing
 

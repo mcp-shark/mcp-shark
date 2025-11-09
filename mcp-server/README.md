@@ -25,7 +25,13 @@ npm install
 
 ### Configuration
 
-Create a configuration file at `temp/mcps.json`:
+**Recommended: Use the UI**
+
+The recommended way to configure the MCP server is through the UI interface, which automatically detects and converts IDE configuration files.
+
+**Alternative: Manual Configuration**
+
+If running the server directly, create a configuration file at `~/.mcp-shark/mcps.json`:
 
 ```json
 {
@@ -65,7 +71,7 @@ npm start
 
 The server will start on `http://localhost:9851/mcp`
 
-**Note:** When running directly, ensure you have a valid configuration file at `temp/mcps.json` before starting.
+**Note:** When running directly, ensure you have a valid configuration file at `~/.mcp-shark/mcps.json` before starting. The UI handles configuration automatically when using the recommended workflow.
 
 ## 📖 Usage
 
@@ -164,10 +170,13 @@ mcp-server/
 │   │   └── query.js            # Database queries
 │   └── common/
 │       └── error.js            # Error handling utilities
-└── temp/
-    ├── db/                     # SQLite database
-    └── mcps.json               # Server configuration
+└── lib/
+    └── ...
 ```
+
+**Note:** Configuration and database files are stored in `~/.mcp-shark/` by default:
+- `~/.mcp-shark/mcps.json` - Server configuration
+- `~/.mcp-shark/db/mcp-shark.sqlite` - SQLite database
 
 ## 🔧 Configuration Format
 
@@ -203,7 +212,7 @@ mcp-server/
 
 ## 📊 Audit Logging
 
-All MCP communications are logged to SQLite (`temp/db/mcp-shark.sqlite`) with:
+All MCP communications are logged to SQLite (default location: `~/.mcp-shark/db/mcp-shark.sqlite`) with:
 
 - **Request/Response Tracking**: Full payload logging with correlation IDs
 - **Performance Metrics**: Duration, latency, and timing information
@@ -236,6 +245,10 @@ npm run format
 # Check formatting
 npm run format:check
 ```
+
+### Dependencies
+
+This package uses `mcp-shark-common` for shared database utilities and configuration management. The database initialization and logging functionality is provided by the common package.
 
 ### Code Quality
 

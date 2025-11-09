@@ -109,7 +109,7 @@ When you start the UI and navigate to the "MCP Server Setup" tab, it will:
 
 #### Manual Configuration (Optional)
 
-If you prefer to run the MCP server directly (without the UI), you can manually create a configuration file at `mcp-server/temp/mcps.json`:
+If you prefer to run the MCP server directly (without the UI), you can manually create a configuration file at `~/.mcp-shark/mcps.json`:
 
 ```json
 {
@@ -195,7 +195,7 @@ make start-server
 make stop-server
 ```
 
-**Note:** When running the server separately (not recommended), you'll need to manually create the config file at `mcp-server/temp/mcps.json` before starting. The UI handles all configuration automatically when you use the recommended workflow.
+**Note:** When running the server separately (not recommended), you'll need to manually create the config file at `~/.mcp-shark/mcps.json` before starting. The UI handles all configuration automatically when you use the recommended workflow.
 
 #### Development Mode
 
@@ -416,7 +416,7 @@ The hooks are configured to be non-blocking - they will attempt to fix issues au
 
 ## 📊 Audit Logging
 
-All MCP communications are logged to SQLite (`mcp-server/temp/db/mcp-shark.sqlite`) with:
+All MCP communications are logged to SQLite (default location: `~/.mcp-shark/db/mcp-shark.sqlite`) with:
 
 - **Request/Response Tracking**: Full payload logging with correlation IDs
 - **Performance Metrics**: Duration, latency, and timing information
@@ -424,9 +424,9 @@ All MCP communications are logged to SQLite (`mcp-server/temp/db/mcp-shark.sqlit
 - **Session Management**: Session ID tracking for stateful interactions
 - **Server Identification**: Track which external server handled each request
 
-## 🚀 Future: Electron App
+## 🖥️ Electron App
 
-This project is structured to support future Electron app integration. The separate `mcp-server` and `ui` components can be packaged together in an Electron application.
+MCP Shark is also available as a desktop application! See the [mcp-shark-app](../mcp-shark-app) repository for the Electron wrapper that packages MCP Shark into a native desktop application for Windows, macOS, and Linux.
 
 ## 📝 License
 
