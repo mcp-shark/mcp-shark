@@ -5,7 +5,7 @@ import Database from 'better-sqlite3';
 import * as path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'url';
 import * as fs from 'node:fs';
-import { spawn, execSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { homedir } from 'node:os';
 import { createConnection } from 'net';
 
@@ -487,158 +487,6 @@ function findMcpServerPath() {
   return mcpServerPath;
 }
 
-/**
- * Get system PATH from the host machine's shell environment
- * This works in Electron by executing a shell command to get the actual PATH
- * Includes both system PATH and user's custom PATH from shell config files
- */
-function getSystemPath() {
-  try {
-    if (process.platform === 'win32') {
-      // Windows: use cmd to get PATH (includes user PATH)
-      const pathOutput = execSync('cmd /c echo %PATH%', {
-        encoding: 'utf8',
-        timeout: 2000,
-        stdio: ['ignore', 'pipe', 'ignore'],
-      });
-      return pathOutput.trim();
-    } else {
-      // Unix-like: use shell to get PATH from user's actual shell environment
-      // Try to detect the user's default shell first
-      const userShell = process.env.SHELL || '/bin/zsh';
-      const shells = [userShell, '/bin/zsh', '/bin/bash', '/bin/sh'];
-
-      for (const shell of shells) {
-        if (fs.existsSync(shell)) {
-          try {
-            // Use -l (login shell) to load user's shell config files (.zshrc, .bashrc, etc.)
-            // This ensures we get the user's custom PATH additions
-            const pathOutput = execSync(`${shell} -l -c 'echo $PATH'`, {
-              encoding: 'utf8',
-              timeout: 3000,
-              stdio: ['ignore', 'pipe', 'ignore'],
-              // Don't pass PATH in env to avoid circular reference
-              env: {
-                ...Object.fromEntries(
-                  Object.entries(process.env).filter(([key]) => key !== 'PATH')
-                ),
-              },
-            });
-            const systemPath = pathOutput.trim();
-            if (systemPath) {
-              console.log(`[UI Server] Got PATH from ${shell}`);
-              return systemPath;
-            }
-          } catch (_e) {
-            // Try next shell
-            continue;
-          }
-        }
-      }
-
-      // Fallback: try to read from common shell config files
-      const homeDir = homedir();
-      const configFiles = [
-        { file: path.join(homeDir, '.zshrc'), shell: 'zsh' },
-        { file: path.join(homeDir, '.bashrc'), shell: 'bash' },
-        { file: path.join(homeDir, '.bash_profile'), shell: 'bash' },
-        { file: path.join(homeDir, '.profile'), shell: 'sh' },
-      ];
-
-      for (const { file, shell: shellName } of configFiles) {
-        if (fs.existsSync(file)) {
-          try {
-            // Source the config file and get PATH
-            const pathOutput = execSync(
-              `/bin/${shellName} -c 'source ${file} 2>/dev/null; echo $PATH'`,
-              {
-                encoding: 'utf8',
-                timeout: 3000,
-                stdio: ['ignore', 'pipe', 'ignore'],
-                env: {
-                  ...Object.fromEntries(
-                    Object.entries(process.env).filter(([key]) => key !== 'PATH')
-                  ),
-                },
-              }
-            );
-            const systemPath = pathOutput.trim();
-            if (systemPath) {
-              console.log(`[UI Server] Got PATH from ${file}`);
-              return systemPath;
-            }
-          } catch (_e) {
-            // Try next config file
-            continue;
-          }
-        }
-      }
-    }
-  } catch (error) {
-    console.warn('[UI Server] Could not get system PATH:', error.message);
-  }
-  return null;
-}
-
-/**
- * Enhance PATH environment variable to include system paths
- * This is especially important in Electron where PATH might not include system executables
- */
-function enhancePathForSpawn(originalPath) {
-  // If we're in Electron, try to get the actual system PATH
-  if (process.env.ELECTRON_RUN_AS_NODE || process.resourcesPath) {
-    const systemPath = getSystemPath();
-    if (systemPath) {
-      console.log('[UI Server] Using system PATH from host machine');
-      // Combine system PATH with original PATH, prioritizing system PATH
-      const pathSeparator = process.platform === 'win32' ? ';' : ':';
-      return [systemPath, originalPath || ''].filter((p) => p).join(pathSeparator);
-    }
-
-    // Fallback: add common system locations
-    console.log('[UI Server] Could not get system PATH, adding common locations');
-    const homeDir = homedir();
-    const pathsToAdd = [
-      // System binary locations
-      '/usr/local/bin',
-      '/usr/bin',
-      '/opt/homebrew/bin',
-      '/usr/local/opt/node/bin',
-      '/opt/local/bin',
-      '/sbin',
-      '/usr/sbin',
-      // macOS specific
-      ...(process.platform === 'darwin'
-        ? [
-            '/opt/homebrew/opt/python/bin',
-            '/usr/local/opt/python/bin',
-            '/Applications/Docker.app/Contents/Resources/bin',
-          ]
-        : []),
-      // Linux specific
-      ...(process.platform === 'linux' ? ['/snap/bin', path.join(homeDir, '.local', 'bin')] : []),
-      // Windows specific
-      ...(process.platform === 'win32'
-        ? [
-            path.join(process.env.ProgramFiles || '', 'nodejs'),
-            path.join(process.env['ProgramFiles(x86)'] || '', 'nodejs'),
-            path.join(homeDir, 'AppData', 'Roaming', 'npm'),
-            path.join(process.env.ProgramFiles || '', 'Docker', 'Docker', 'resources', 'bin'),
-          ]
-        : []),
-      // User-specific paths
-      path.join(homeDir, '.npm-global', 'bin'),
-      path.join(homeDir, '.cargo', 'bin'),
-      path.join(homeDir, '.local', 'bin'),
-    ].filter((p) => p && fs.existsSync(p));
-
-    const pathSeparator = process.platform === 'win32' ? ';' : ':';
-    return [...pathsToAdd, originalPath || ''].filter((p) => p).join(pathSeparator);
-  }
-
-  return originalPath || process.env.PATH || '';
-}
-
 export function createUIServer(db) {
   const app = express();
   const server = createServer(app);
@@ -917,16 +765,11 @@ export function createUIServer(db) {
       console.log(`[UI Server] CWD: ${mcpServerPath}`);
       console.log(`[UI Server] Data dir: ${dataDir || 'N/A'}`);
 
-      // Enhance PATH to include system paths so spawned process can find npx, uv, docker, etc.
-      const enhancedPath = enhancePathForSpawn(process.env.PATH);
-      console.log(`[UI Server] Enhanced PATH: ${enhancedPath}...`);
-
       mcpSharkProcess = spawn(nodeExecutable, [mcpSharkJsPath, mcpsJsonPath], {
         cwd: mcpServerPath, // Set working directory to mcp-server
         stdio: ['ignore', 'pipe', 'pipe'], // Capture stdout and stderr
         env: {
           ...process.env,
-          PATH: enhancedPath, // Use enhanced PATH with system paths
           ELECTRON_RUN_AS_NODE: '1', // Tell Electron to run as Node.js
           ...(dataDir && { MCP_SHARK_DATA_DIR: dataDir }), // Set data directory if in Electron
         },
