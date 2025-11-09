@@ -18,7 +18,8 @@ import { withAuditRequestResponseHandler } from './lib/auditor/audit.js';
 const DB_NAME = 'mcp-shark.sqlite';
 // Use MCP_SHARK_DATA_DIR if set (for Electron apps), otherwise use user's home directory
 // MCP_SHARK_DATA_DIR is set by Electron to a writable location (user's home directory)
-const dataDir = process.env.MCP_SHARK_DATA_DIR || path.join(os.homedir(), '.mcp-shark');
+const dataDir =
+  process.env.MCP_SHARK_DATA_DIR || path.join(os.homedir(), '.mcp-shark');
 const DB_PATH = path.join(dataDir, 'db');
 const DB_FILE = path.join(DB_PATH, DB_NAME);
 
@@ -60,4 +61,16 @@ const configPath =
   process.argv[2] || // Command-line argument (used by UI server)
   process.env.MCP_SHARK_CONFIG_PATH || // Environment variable
   path.join(process.cwd(), 'temp', 'mcps.json'); // Default fallback
-main(configPath);
+main(configPath)
+  .then(() => {
+    consola.info('MCP server started successfully');
+    consola.info(`Config path: ${configPath}`);
+    consola.info(`Data directory: ${dataDir}`);
+    consola.info(`Database path: ${DB_FILE}`);
+  })
+  .catch(error => {
+    consola.error('Error starting MCP server:', error);
+    consola.error(error.message);
+    consola.error(error.stack);
+    process.exit(1);
+  });
