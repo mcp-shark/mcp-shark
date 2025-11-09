@@ -4,248 +4,188 @@
 
 MCP Shark is a complete solution for aggregating multiple MCP servers (both HTTP and stdio-based) into one cohesive endpoint, with a real-time web interface for monitoring and inspecting all communications.
 
-## 🎯 Overview
+## What is MCP Shark?
 
-MCP Shark consists of two main components:
+MCP Shark is a powerful tool for monitoring and analyzing Model Context Protocol (MCP) communications. It captures all HTTP requests and responses between your IDE and MCP servers, providing Wireshark-like forensic analysis capabilities.
 
-1. **MCP Server** (`mcp-server/`) - Aggregates multiple MCP servers into a single endpoint
-2. **UI** (`ui/`) - Real-time web interface for monitoring and managing MCP communications
+### Key Features
 
-Both components work together but can also be run independently.
+- **Multi-Server Aggregation**: Connect to multiple MCP servers simultaneously (HTTP and stdio)
+- **Real-Time Monitoring**: Live web interface showing all MCP traffic as it happens
+- **Advanced Filtering**: Filter traffic by session, server, method, status, and more
+- **Multiple View Modes**: View traffic as a flat list, grouped by session, or grouped by server
+- **Automatic Config Detection**: Automatically detects and uses your IDE's MCP configuration files
+- **Export Capabilities**: Export captured traffic and logs in JSON, CSV, or TXT formats
+- **Comprehensive Logging**: SQLite-based logging with request/response tracking and performance metrics
 
-## ✨ Features
-
-### MCP Server
-
-- **🔗 Multi-Server Aggregation**: Connect to multiple MCP servers simultaneously (HTTP and stdio)
-- **📊 Comprehensive Audit Logging**: SQLite-based logging with request/response tracking, performance metrics, and error handling
-- **🌐 HTTP Interface**: RESTful API endpoint for easy integration with any MCP client
-- **🔄 Session Management**: Automatic session handling for stateful MCP interactions
-- **🛠️ Unified Tool Access**: Access tools from all connected servers through a single interface
-- **📝 Prompt & Resource Aggregation**: Unified access to prompts and resources across all servers
-- **⚡ Streaming Support**: Full support for async iterable responses (streaming)
-- **🔍 Request Correlation**: Track request/response pairs with correlation IDs
-- **🔌 Format Conversion**: Automatically converts between different MCP config formats (IDE format ↔ MCP Shark format)
-
-### UI
-
-- **Real-time Updates**: WebSocket-powered live log streaming
-- **Advanced Filtering**: Filter by server, direction, HTTP method, and status
-- **Detailed Log View**: Inspect individual log entries with full payload details
-- **MCP Server Management**: Configure and manage MCP Shark server from the UI
-- **Automatic Config Detection**: Automatically detects MCP configuration files for popular IDEs (Cursor, Windsurf)
-- **Config Conversion**: Automatically converts IDE MCP config format to MCP Shark format
-- **Server Lifecycle Management**: Start, stop, and restart MCP server from the UI
-- **Live Server Logs**: Real-time streaming of MCP server logs
-- **Dark Theme UI**: Modern, developer-friendly interface
-
-## 🚀 Quick Start
-
-### Quick Reference
-
-```bash
-# Install dependencies
-npm run install:all
-
-# Start UI (recommended)
-make start
-
-# Stop UI
-make stop
-
-# View all commands
-make help
-```
-
-Then open `http://localhost:9853` in your browser to configure and start the MCP server through the UI.
+## Quick Start
 
 ### Installation
 
-Install all dependencies:
+1. **Install dependencies:**
 
 ```bash
 npm run install:all
 ```
 
-After installation, initialize git hooks:
+2. **Start the UI:**
 
 ```bash
-npm run prepare
-```
-
-This sets up Husky for pre-commit and commit-msg validation.
-
-Or install individually:
-
-```bash
-# Install root dependencies
-npm install
-
-# Install MCP server dependencies
-cd mcp-server && npm install
-
-# Install UI dependencies
-cd ../ui && npm install
-```
-
-### Configuration
-
-**No manual configuration needed!** MCP Shark automatically detects and uses your existing IDE MCP configuration files.
-
-#### Automatic IDE Config Detection
-
-The UI automatically detects MCP configuration files from popular IDEs:
-
-- **Cursor**: `~/.cursor/mcp.json`
-- **Windsurf**: `~/.codeium/windsurf/mcp_config.json`
-
-When you start the UI and navigate to the "MCP Server Setup" tab, it will:
-
-1. **Auto-detect** your IDE's MCP configuration file
-2. **Display** detected configs with their paths
-3. **Allow selection** of which config to use
-4. **Automatically convert** the IDE config format to MCP Shark's internal format
-5. **Start the server** with your existing MCP servers configured
-
-#### Manual Configuration (Optional)
-
-If you prefer to run the MCP server directly (without the UI), you can manually create a configuration file at `~/.mcp-shark/mcps.json`:
-
-```json
-{
-  "servers": {
-    "github": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "headers": {
-        "Authorization": "Bearer YOUR_TOKEN"
-      }
-    },
-    "@21st-dev/magic": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@21st-dev/magic@latest", "API_KEY=\"your-api-key\""]
-    }
-  }
-}
-```
-
-**Note:** This is only needed if running the server separately. When using the UI (recommended), it handles configuration automatically.
-
-### Running
-
-#### Recommended: Start UI and Manage MCP Server Through UI
-
-The recommended way to run MCP Shark is to start the UI, then use the UI's setup interface to configure and start the MCP server:
-
-**Using Makefile (recommended):**
-
-```bash
-# Start UI (port 9853) - default command
 make start
-# or explicitly
-make start-ui
-
-# Stop UI - default command
-make stop
-# or explicitly
-make stop-ui
 ```
 
-**Using npm:**
+3. **Open your browser:**
 
-```bash
-# Start UI (port 9853)
-npm run start:ui
+Navigate to `http://localhost:9853`
 
-# Stop UI (Ctrl+C or use make stop)
-```
+That's it! The interactive tour will guide you through the setup process on first launch.
 
-Then:
+### UI Tabs
 
-1. Open `http://localhost:9853` in your browser
-2. Go to the "MCP Server Setup" tab
-3. The UI will automatically detect your IDE's MCP configuration files (Cursor, Windsurf)
-4. Select the detected config file or provide a custom path
-5. Click "Start MCP Shark" to start the server
+The UI provides three main tabs:
 
-The UI will automatically:
+- **Traffic Capture**: Monitor and analyze all MCP traffic in real-time
+- **MCP Shark Logs**: View server console output and debug logs
+- **MCP Server Setup**: Configure and manage the MCP Shark server
 
-- **Detect** your IDE's MCP configuration files (Cursor, Windsurf)
-- **Convert** your MCP config format to MCP Shark's internal format
-- **Start** the MCP server on port 9851 with all your configured servers
-- **Manage** the server lifecycle (start/stop/restart)
-- **Stream** real-time server logs to the UI
+## How to Use
 
-**Note:** When you stop the UI using `make stop`, it will automatically stop the MCP server as well (if it was started through the UI).
+### Step 1: Open MCP Server Setup
 
-#### Alternative: Run MCP Server Separately
+When you first open MCP Shark, you'll see an interactive tour. If you've used it before, click the **"Start Tour"** button in the top-right corner to see the guide again.
 
-If you need to run the MCP server independently (without the UI):
+1. Click on the **MCP Server Setup** tab
+2. This is where you'll configure your MCP servers and start monitoring
 
-```bash
-# Start MCP server directly (port 9851)
-cd mcp-server
-npm start
+### Step 2: Select Your Configuration
 
-# Or using Makefile
-make start-server
+MCP Shark automatically detects your IDE's MCP configuration files. You have two options:
 
-# Stop MCP server
-make stop-server
-```
+**Option A: Use a Detected Editor**
 
-**Note:** When running the server separately (not recommended), you'll need to manually create the config file at `~/.mcp-shark/mcps.json` before starting. The UI handles all configuration automatically when you use the recommended workflow.
+- MCP Shark automatically detects configuration files from:
+  - **Cursor**: `~/.cursor/mcp.json`
+  - **Windsurf**: `~/.codeium/windsurf/mcp_config.json`
+- Click on any detected editor (like Cursor or Windsurf) to use its config
+- The file path will automatically populate in the text box
 
-#### Development Mode
+**Option B: Select Your Own File**
 
-**UI Development Mode (with hot reload):**
+- Click **"Select File"** to upload your own MCP configuration file
+- Choose any valid MCP config file from your system
 
-```bash
-cd ui
-npm run dev
+### Step 3: Start MCP Shark
 
-# Or using Makefile
-make dev-ui
-```
+Once you've selected a configuration file (either from detected editors or uploaded):
 
-The UI will be available at `http://localhost:5173` (or the port Vite assigns).
+1. Click **"Start MCP Shark"** to begin monitoring
+2. The server will start and begin capturing all MCP traffic between your IDE and servers
+3. You'll see real-time logs in the setup page showing the server status
 
-## 📖 Usage
+### Step 4: View Your Traffic
 
-### MCP Server Endpoint
+After starting the server, switch to the **Traffic Capture** tab to see all HTTP requests and responses in real-time.
 
-All MCP requests should be sent to:
+**View Modes:**
 
-```
-POST http://localhost:9851/mcp
-```
+- **General List**: Flat list of all requests and responses
+- **Grouped by Session & Server**: Group traffic by session ID, then by server name
+- **Grouped by Server & Session**: Group traffic by server name, then by session ID
 
-### Example: List All Tools
+**Features:**
 
-```bash
-curl -X POST http://localhost:9851/mcp \
-  -H "Content-Type: application/json" \
-  -d '{
-    "jsonrpc": "2.0",
-    "id": 1,
-    "method": "tools/list"
-  }'
-```
+- **Filtering**: Filter by method, status, protocol, session, and more
+- **Search**: Search across all fields including URLs, endpoints, and JSON-RPC methods
+- **Export**: Export captured traffic in JSON, CSV, or TXT formats
+- **Details**: Click any request to see full details including headers, body, and timing
 
-### UI Access
+### Step 5: View Logs
 
-Open your browser to:
+Switch to the **MCP Shark Logs** tab to see:
 
-```
-http://localhost:9853
-```
+- Server console output
+- Configuration backup and restore events
+- Error messages and debugging information
+- Export logs as text files
 
-## 🏗️ Architecture
+### Need Help?
+
+Click the **"Start Tour"** button anytime to restart the interactive guide or get help.
+
+## Advanced Usage
+
+### Exporting Traffic
+
+1. Go to the **Traffic Capture** tab
+2. Apply any filters you want (optional)
+3. Click the **"Export"** button in the filters section
+4. Choose your format:
+   - **JSON**: Full structured data
+   - **CSV**: Spreadsheet-friendly format
+   - **TXT**: Human-readable text format
+
+### Managing Backups
+
+MCP Shark automatically creates backups of your original MCP configuration files before making changes:
+
+1. Go to the **MCP Server Setup** tab
+2. Scroll to the **"Backed Up Configuration Files"** section
+3. View all available backups with timestamps
+4. Click **"Restore"** to restore any backup
+
+### Stopping the Server
+
+1. Go to the **MCP Server Setup** tab
+2. Click **"Stop MCP Shark"** (the button changes to "Stop" when the server is running)
+3. The server will stop and your original configuration will be restored
+
+## Understanding the Traffic View
+
+### Columns
+
+- **No.**: Frame number (sequential request/response number)
+- **Time**: Relative time from first request
+- **Date/Time**: Human-readable timestamp
+- **Source**: Source address (Client or Server)
+- **Destination**: Destination address (Client or Server)
+- **Protocol**: Protocol type (HTTP, etc.)
+- **Method**: HTTP method (GET, POST, etc.)
+- **Status**: HTTP status code (for responses)
+- **Endpoint**: JSON-RPC method (e.g., `tools/list`, `prompts/list`)
+- **Length**: Packet size in bytes
+- **Info**: Summary information
+
+### Filtering
+
+Use the filter bar at the top of the Traffic Capture tab to:
+
+- **Search**: General search across all fields
+- **Filter by Method**: HTTP methods (GET, POST, etc.)
+- **Filter by Status**: HTTP status codes
+- **Filter by Protocol**: Protocol types
+- **Filter by Direction**: Request or Response
+- **Filter by Session**: Specific session IDs
+
+### Grouped Views
+
+**Grouped by Session & Server:**
+
+- First level: Session IDs
+- Second level: Server names within each session
+- Useful for tracking conversations within a session
+
+**Grouped by Server & Session:**
+
+- First level: Server names
+- Second level: Session IDs within each server
+- Useful for seeing all activity from a specific server
+
+## Architecture
 
 ```
 ┌─────────────────┐
 │   MCP Client    │
+│   (Your IDE)    │
 └────────┬────────┘
          │ HTTP
          ▼
@@ -259,15 +199,13 @@ http://localhost:9853
            │ spawns
            ▼
 ┌─────────────────────────────────┐
-│   MCP Shark Server (9851)        │
-│   - Aggregates MCP servers       │
+│   MCP Shark Server (9851)       │
+│   - Aggregates MCP servers      │
 │   - Audit logging (SQLite)       │
 └─────────────────────────────────┘
 ```
 
-**Note:** The MCP Shark Server is started and managed by the UI as a child process. The UI provides the interface to configure, start, stop, and monitor the server.
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 mcp-shark/
@@ -283,129 +221,7 @@ mcp-shark/
 └── README.md             # This file
 ```
 
-## 🛠️ Development
-
-### Scripts
-
-From the root directory:
-
-```bash
-# Install all dependencies
-npm run install:all
-
-# Start UI (recommended - manage MCP server through UI)
-npm run start:ui
-
-# Start MCP server directly (alternative - if not using UI)
-npm run start:server
-
-# UI development mode
-npm run dev:ui
-
-# Build UI
-npm run build:ui
-
-# Lint MCP server
-npm run lint:server
-
-# Format MCP server
-npm run format:server
-```
-
-**Using Makefile:**
-
-```bash
-# Start UI (recommended - default)
-make start              # or make start-ui
-
-# Stop UI (default)
-make stop               # or make stop-ui
-# Note: This will stop the UI and any MCP server started through it
-
-# Start MCP server directly (alternative - not recommended)
-make start-server
-make stop-server
-
-# Development mode
-make dev-ui
-
-# Build UI for production
-make build-ui
-
-# Clean up (stops services and removes PID files)
-make clean
-
-# Show all available commands
-make help
-```
-
-**Makefile Commands Summary:**
-
-| Command                        | Description                                        |
-| ------------------------------ | -------------------------------------------------- |
-| `make start` / `make start-ui` | Start the UI server on port 9853                   |
-| `make stop` / `make stop-ui`   | Stop the UI server and any related processes       |
-| `make start-server`            | Start MCP server directly (requires manual config) |
-| `make stop-server`             | Stop MCP server if running separately              |
-| `make dev-ui`                  | Start UI in development mode with hot reload       |
-| `make build-ui`                | Build UI for production                            |
-| `make clean`                   | Stop all services and clean up PID/log files       |
-| `make help`                    | Show all available commands                        |
-
-### Code Quality
-
-- **ESLint**: Code linting with Prettier integration
-- **Prettier**: Code formatting
-- **Husky**: Git hooks for pre-commit checks
-- **Commitlint**: Conventional commit message validation
-
-### Commit Convention
-
-This project uses [Conventional Commits](https://www.conventionalcommits.org/) for commit messages. The format is:
-
-```
-<type>(<scope>): <subject>
-
-<body>
-
-<footer>
-```
-
-#### Types
-
-- `feat`: A new feature
-- `fix`: A bug fix
-- `docs`: Documentation only changes
-- `style`: Changes that do not affect the meaning of the code
-- `refactor`: A code change that neither fixes a bug nor adds a feature
-- `perf`: A code change that improves performance
-- `test`: Adding missing tests or correcting existing tests
-- `build`: Changes that affect the build system or external dependencies
-- `ci`: Changes to CI configuration files and scripts
-- `chore`: Other changes that don't modify src or test files
-- `revert`: Reverts a previous commit
-
-#### Examples
-
-```bash
-feat(ui): add dark mode toggle
-fix(server): resolve memory leak in session handling
-docs(readme): update installation instructions
-refactor(mcp-server): simplify error handling
-chore: update dependencies
-```
-
-#### Pre-commit Hooks
-
-Before each commit, the following checks run automatically:
-
-1. **Fix All**: Runs `npm run fix:all` to fix linting and formatting issues in all files (continues on error)
-2. **Lint-staged**: Runs Prettier on staged files to ensure consistent formatting
-3. **Commitlint**: Validates commit message format (non-blocking)
-
-The hooks are configured to be non-blocking - they will attempt to fix issues automatically and won't block your commit if tools are unavailable. However, it's recommended to ensure your code is properly formatted before committing.
-
-## 🔌 Supported MCP Methods
+## Supported MCP Methods
 
 - `tools/list` - List all tools from all servers
 - `tools/call` - Call a tool from any server
@@ -414,7 +230,7 @@ The hooks are configured to be non-blocking - they will attempt to fix issues au
 - `resources/list` - List all resources from all servers
 - `resources/read` - Read a specific resource
 
-## 📊 Audit Logging
+## Audit Logging
 
 All MCP communications are logged to SQLite (default location: `~/.mcp-shark/db/mcp-shark.sqlite`) with:
 
@@ -424,18 +240,16 @@ All MCP communications are logged to SQLite (default location: `~/.mcp-shark/db/
 - **Session Management**: Session ID tracking for stateful interactions
 - **Server Identification**: Track which external server handled each request
 
-## 🖥️ Electron App
+## Electron App
 
 MCP Shark is also available as a desktop application! See the [mcp-shark-app](../mcp-shark-app) repository for the Electron wrapper that packages MCP Shark into a native desktop application for Windows, macOS, and Linux.
 
-## 📝 License
+## Additional Resources
 
-ISC
-
-## 🤝 Contributing
-
-Contributions are welcome! Please ensure your code passes linting and formatting checks before submitting.
+- **[DEVELOPERS.md](./DEVELOPERS.md)**: Developer guide and setup instructions
+- **[CONTRIBUTING.md](./CONTRIBUTING.md)**: Guidelines for contributing to the project
+- **[LICENSE](./LICENSE)**: License information
 
 ---
 
-**Built with ❤️ using the Model Context Protocol SDK**
+**Built with the Model Context Protocol SDK**
