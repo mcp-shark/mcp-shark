@@ -2,6 +2,14 @@
 
 We welcome contributions! Here's how you can help:
 
+## Table of Contents
+
+- [Getting Started](#getting-started)
+- [Development Guidelines](#development-guidelines)
+- [Commit Convention](#commit-convention)
+- [Pre-commit Hooks](#pre-commit-hooks)
+- [Code Quality](#code-quality)
+
 ## Getting Started
 
 1. **Fork the repository**

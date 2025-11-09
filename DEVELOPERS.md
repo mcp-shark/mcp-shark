@@ -2,6 +2,19 @@
 
 This guide is for developers who want to contribute to or extend MCP Shark.
 
+## Table of Contents
+
+- [Getting Started](#getting-started)
+- [Development Scripts](#development-scripts)
+- [Project Structure](#project-structure)
+- [Architecture Overview](#architecture-overview)
+- [Code Quality](#code-quality)
+- [Development Workflow](#development-workflow)
+- [Testing](#testing)
+- [Building](#building)
+- [Debugging](#debugging)
+- [Additional Resources](#additional-resources)
+
 ## Getting Started
 
 1. **Clone the repository:**

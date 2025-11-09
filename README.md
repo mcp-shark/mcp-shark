@@ -4,6 +4,33 @@
 
 MCP Shark is a complete solution for aggregating multiple MCP servers (both HTTP and stdio-based) into one cohesive endpoint, with a real-time web interface for monitoring and inspecting all communications.
 
+## Table of Contents
+
+- [What is MCP Shark?](#what-is-mcp-shark)
+- [Quick Start](#quick-start)
+  - [Installation](#installation)
+  - [UI Tabs](#ui-tabs)
+- [How to Use](#how-to-use)
+  - [Step 1: Open MCP Server Setup](#step-1-open-mcp-server-setup)
+  - [Step 2: Select Your Configuration](#step-2-select-your-configuration)
+  - [Step 3: Start MCP Shark](#step-3-start-mcp-shark)
+  - [Step 4: View Your Traffic](#step-4-view-your-traffic)
+  - [Step 5: View Logs](#step-5-view-logs)
+- [Advanced Usage](#advanced-usage)
+  - [Exporting Traffic](#exporting-traffic)
+  - [Managing Backups](#managing-backups)
+  - [Stopping the Server](#stopping-the-server)
+- [Understanding the Traffic View](#understanding-the-traffic-view)
+  - [Columns](#columns)
+  - [Filtering](#filtering)
+  - [Grouped Views](#grouped-views)
+- [Architecture](#architecture)
+- [Project Structure](#project-structure)
+- [Supported MCP Methods](#supported-mcp-methods)
+- [Audit Logging](#audit-logging)
+- [Electron App](#electron-app)
+- [Additional Resources](#additional-resources)
+
 ## What is MCP Shark?
 
 MCP Shark is a powerful tool for monitoring and analyzing Model Context Protocol (MCP) communications. It captures all HTTP requests and responses between your IDE and MCP servers, providing Wireshark-like forensic analysis capabilities.
@@ -242,7 +269,7 @@ All MCP communications are logged to SQLite (default location: `~/.mcp-shark/db/
 
 ## Electron App
 
-MCP Shark is also available as a desktop application! See the [mcp-shark-app](../mcp-shark-app) repository for the Electron wrapper that packages MCP Shark into a native desktop application for Windows, macOS, and Linux.
+MCP Shark is also available as a desktop application! See the [mcp-shark-app](https://github.com/mcp-shark/mcp-shark-app) repository for the Electron wrapper that packages MCP Shark into a native desktop application for Windows, macOS, and Linux.
 
 ## Additional Resources
 
