@@ -54,23 +54,16 @@ async function main() {
 main()
   .then(() => {
     const successMsg = 'MCP server started successfully';
-    console.log(`[MCP-Shark] ${successMsg}`);
-    console.log(`[MCP-Shark] Data directory: ${dataDir}`);
-    console.log(`[MCP-Shark] Database path: ${DB_FILE}`);
-    // Also use consola for consistency
+    console.log(`[MCP-Shark] ${successMsg}`);;
     consola.info(successMsg);
-    consola.info(`Data directory: ${dataDir}`);
-    consola.info(`Database path: ${DB_FILE}`);
   })
   .catch(error => {
     const errorMsg = 'Error starting MCP server';
-    // Log to stderr for errors
     console.error(`[MCP-Shark] ${errorMsg}:`, error);
     console.error(`[MCP-Shark] Error message: ${error.message}`);
     if (error.stack) {
       console.error(`[MCP-Shark] Error stack:`, error.stack);
     }
-    // Also use consola for consistency
     consola.error(errorMsg, error);
     consola.error(`Error message: ${error.message}`);
     if (error.stack) {

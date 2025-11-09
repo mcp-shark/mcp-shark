@@ -357,8 +357,6 @@ export function createUIServer() {
       // Write converted config to mcp-server's temp/mcps.json
       // In Electron, use a writable location (OS temp directory)
       const mcpServerPath = findMcpServerPath();
-
-      const dataDir = getWorkingDirectory();
       const mcpsJsonPath = getMcpConfigPath();
 
       // Write the converted config to temp/mcps.json
@@ -395,7 +393,7 @@ export function createUIServer() {
       logEntry('info', `[UI Server] Script: ${mcpSharkJsPath}`);
       logEntry('info', `[UI Server] Config: ${mcpsJsonPath}`);
       logEntry('info', `[UI Server] CWD: ${mcpServerPath}`);
-      logEntry('info', `[UI Server] Data dir: ${dataDir || 'N/A'}`);
+      logEntry('info', `[UI Server] Data dir: ${getWorkingDirectory()}`);
 
       const enhancedPath = enhancePath(process.env.PATH);
       mcpSharkProcess = spawn(nodeExecutable, [mcpSharkJsPath, mcpsJsonPath], {
