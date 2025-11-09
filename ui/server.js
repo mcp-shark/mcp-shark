@@ -17,6 +17,11 @@ import {
   getStatistics,
 } from 'mcp-shark-common/db/query.js';
 import { openDb } from 'mcp-shark-common/db/init.js';
+import {
+  getMcpConfigPath,
+  getWorkingDirectory,
+  getDatabaseFile,
+} from 'mcp-shark-common/configs/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -122,7 +127,8 @@ function findMcpServerPath() {
   return mcpServerPath;
 }
 
-export function createUIServer(db) {
+export function createUIServer() {
+  const db = openDb(getDatabaseFile());
   const app = express();
   const server = createServer(app);
   const wss = new WebSocketServer({ server });
@@ -289,6 +295,19 @@ export function createUIServer(db) {
 
   // API endpoint to process MCP config file
   app.post('/api/composite/setup', async (req, res) => {
+    // Clear previous logs
+    mcpSharkLogs = [];
+    function logEntry(type, data) {
+      const timestamp = new Date().toISOString();
+      const line = data.toString();
+      mcpSharkLogs.push({ timestamp, type, line });
+      // Keep only last MAX_LOG_LINES
+      if (mcpSharkLogs.length > MAX_LOG_LINES) {
+        mcpSharkLogs.shift();
+      }
+      // Broadcast to WebSocket clients
+      broadcastLogUpdate({ timestamp, type, line });
+    }
     try {
       const { filePath, fileContent } = req.body;
 
@@ -339,30 +358,8 @@ export function createUIServer(db) {
       // In Electron, use a writable location (OS temp directory)
       const mcpServerPath = findMcpServerPath();
 
-      // Check if we're in Electron by looking for ELECTRON_RUN_AS_NODE or process.resourcesPath
-      const isElectron = process.env.ELECTRON_RUN_AS_NODE || process.resourcesPath;
-      let mcpsJsonPath;
-      let tempDir;
-      let dataDir = null;
-
-      if (isElectron) {
-        // We're in Electron - use user's home directory (always writable)
-        const os = await import('node:os');
-        dataDir = process.env.MCP_SHARK_DATA_DIR || path.join(os.homedir(), '.mcp-shark');
-        tempDir = dataDir;
-        mcpsJsonPath = path.join(tempDir, 'mcps.json');
-        console.log(`Electron detected - using home directory: ${tempDir}`);
-        console.log(`Setting MCP_SHARK_DATA_DIR to home directory: ${dataDir}`);
-      } else {
-        // Not in Electron - use mcp-server's temp directory
-        tempDir = path.join(mcpServerPath, 'temp');
-        mcpsJsonPath = path.join(tempDir, 'mcps.json');
-      }
-
-      // Ensure temp directory exists
-      if (!fs.existsSync(tempDir)) {
-        fs.mkdirSync(tempDir, { recursive: true });
-      }
+      const dataDir = getWorkingDirectory();
+      const mcpsJsonPath = getMcpConfigPath();
 
       // Write the converted config to temp/mcps.json
       fs.writeFileSync(mcpsJsonPath, JSON.stringify(convertedConfig, null, 2));
@@ -393,12 +390,12 @@ export function createUIServer(db) {
 
       // Pass the config path as an argument to mcp-shark.js
       // This ensures it reads from the correct location in both Electron and non-Electron environments
-      console.log(`[UI Server] Spawning MCP-Shark server...`);
-      console.log(`[UI Server] Executable: ${nodeExecutable}`);
-      console.log(`[UI Server] Script: ${mcpSharkJsPath}`);
-      console.log(`[UI Server] Config: ${mcpsJsonPath}`);
-      console.log(`[UI Server] CWD: ${mcpServerPath}`);
-      console.log(`[UI Server] Data dir: ${dataDir || 'N/A'}`);
+      logEntry('info', `[UI Server] Spawning MCP-Shark server...`);
+      logEntry('info', `[UI Server] Executable: ${nodeExecutable}`);
+      logEntry('info', `[UI Server] Script: ${mcpSharkJsPath}`);
+      logEntry('info', `[UI Server] Config: ${mcpsJsonPath}`);
+      logEntry('info', `[UI Server] CWD: ${mcpServerPath}`);
+      logEntry('info', `[UI Server] Data dir: ${dataDir || 'N/A'}`);
 
       const enhancedPath = enhancePath(process.env.PATH);
       mcpSharkProcess = spawn(nodeExecutable, [mcpSharkJsPath, mcpsJsonPath], {
@@ -407,26 +404,10 @@ export function createUIServer(db) {
         env: {
           ...process.env,
           PATH: enhancedPath,
-          ELECTRON_RUN_AS_NODE: '1', // Tell Electron to run as Node.js
-          ...(dataDir && { MCP_SHARK_DATA_DIR: dataDir }), // Set data directory if in Electron
         },
       });
 
       console.log(`[UI Server] MCP-Shark process spawned with PID: ${mcpSharkProcess.pid}`);
-
-      // Clear previous logs
-      mcpSharkLogs = [];
-      const logEntry = (type, data) => {
-        const timestamp = new Date().toISOString();
-        const line = data.toString();
-        mcpSharkLogs.push({ timestamp, type, line });
-        // Keep only last MAX_LOG_LINES
-        if (mcpSharkLogs.length > MAX_LOG_LINES) {
-          mcpSharkLogs.shift();
-        }
-        // Broadcast to WebSocket clients
-        broadcastLogUpdate({ timestamp, type, line });
-      };
 
       logEntry('info', `[UI Server] Enhanced PATH: ${enhancedPath}`);
       // Capture stdout - preserve exact output for debugging
@@ -730,10 +711,9 @@ export function createUIServer(db) {
   return { server };
 }
 
-export async function runUIServer(dbPath) {
-  const db = openDb(dbPath);
+export async function runUIServer() {
   const port = parseInt(process.env.UI_PORT) || 9853;
-  const { server } = createUIServer(db);
+  const { server } = createUIServer();
 
   server.listen(port, '0.0.0.0', () => {
     console.log(`UI server listening on http://localhost:${port}`);
@@ -750,11 +730,5 @@ export async function runUIServer(dbPath) {
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const DB_NAME = 'mcp-shark.sqlite';
-  // Use MCP_SHARK_DATA_DIR if set (for Electron apps), otherwise use user's home directory
-  // MCP_SHARK_DATA_DIR is set by Electron to a writable location (user's home directory)
-  const dataDir = path.join(homedir(), '.mcp-shark');
-  const DB_PATH = path.join(dataDir, 'db');
-  const dbFile = path.join(DB_PATH, DB_NAME);
-  runUIServer(dbFile).catch(console.error);
+  runUIServer().catch(console.error);
 }
