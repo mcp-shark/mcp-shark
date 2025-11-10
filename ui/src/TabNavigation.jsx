@@ -1,4 +1,5 @@
 import { colors, fonts } from './theme';
+import { SharkLogo } from './components/SharkLogo';
 
 // SVG Icon Components
 const NetworkIcon = ({ size = 16, color = 'currentColor' }) => (
@@ -90,10 +91,32 @@ function TabNavigation({ activeTab, onTabChange }) {
       <div
         style={{
           display: 'flex',
+          alignItems: 'center',
           padding: '0 16px',
-          gap: '4px',
+          gap: '12px',
         }}
       >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            paddingRight: '12px',
+            borderRight: `1px solid ${colors.borderLight}`,
+          }}
+        >
+          <SharkLogo size={24} />
+          <span
+            style={{
+              fontSize: '16px',
+              fontWeight: '600',
+              color: colors.textPrimary,
+              fontFamily: fonts.body,
+            }}
+          >
+            MCP Shark
+          </span>
+        </div>
         {tabs.map((tab) => (
           <button
             key={tab.id}
