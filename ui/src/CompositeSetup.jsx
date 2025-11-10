@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { colors, fonts } from './theme';
 
 function CompositeSetup() {
@@ -16,6 +16,44 @@ function CompositeSetup() {
   const [loadingConfig, setLoadingConfig] = useState(false);
   const [backups, setBackups] = useState([]);
   const [loadingBackups, setLoadingBackups] = useState(false);
+  const [services, setServices] = useState([]);
+  const [selectedServices, setSelectedServices] = useState(new Set());
+  const [loadingServices, setLoadingServices] = useState(false);
+
+  // Define extractServices before useEffect that uses it
+  const extractServices = useCallback(async () => {
+    if (!fileContent && !filePath) {
+      setServices([]);
+      setSelectedServices(new Set());
+      return;
+    }
+
+    setLoadingServices(true);
+    try {
+      const payload = fileContent ? { fileContent } : { filePath };
+      const res = await fetch('/api/config/services', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.services) {
+        setServices(data.services);
+        // Select all services by default
+        setSelectedServices(new Set(data.services.map((s) => s.name)));
+      } else {
+        setServices([]);
+        setSelectedServices(new Set());
+      }
+    } catch (err) {
+      console.error('Failed to extract services:', err);
+      setServices([]);
+      setSelectedServices(new Set());
+    } finally {
+      setLoadingServices(false);
+    }
+  }, [fileContent, filePath]);
 
   useEffect(() => {
     // Check composite status on mount
@@ -31,6 +69,16 @@ function CompositeSetup() {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Extract services automatically when fileContent or filePath changes
+  useEffect(() => {
+    if (fileContent || filePath) {
+      extractServices();
+    } else {
+      setServices([]);
+      setSelectedServices(new Set());
+    }
+  }, [fileContent, filePath, extractServices]);
 
   const detectConfigPaths = async () => {
     setDetecting(true);
@@ -133,15 +181,18 @@ function CompositeSetup() {
       reader.onload = (event) => {
         setFileContent(event.target.result);
         // Don't set filePath from file picker (browser security - can't get full path)
+        // Services will be extracted automatically via useEffect when fileContent changes
       };
       reader.readAsText(file);
     }
   };
 
   const handlePathInput = (e) => {
-    setFilePath(e.target.value);
-    if (e.target.value) {
+    const value = e.target.value;
+    setFilePath(value);
+    if (value) {
       setFileContent(''); // Clear file content when path is entered
+      // Services will be extracted automatically via useEffect when filePath changes
     }
   };
 
@@ -156,6 +207,11 @@ function CompositeSetup() {
 
     try {
       const payload = fileContent ? { fileContent, filePath: updatePath || null } : { filePath };
+
+      // Add selected services if any are selected
+      if (selectedServices.size > 0) {
+        payload.selectedServices = Array.from(selectedServices);
+      }
 
       const res = await fetch('/api/composite/setup', {
         method: 'POST',
@@ -174,6 +230,8 @@ function CompositeSetup() {
         setFileContent('');
         setFilePath('');
         setUpdatePath('');
+        setServices([]);
+        setSelectedServices(new Set());
         setTimeout(fetchStatus, 1000);
       } else {
         setError(data.error || 'Failed to setup MCP Shark server');
@@ -345,6 +403,7 @@ function CompositeSetup() {
                         setFilePath(item.path);
                         setFileContent(''); // Clear any file picker content
                         setUpdatePath(item.path); // Set update path to same as file path
+                        // Services will be extracted automatically via useEffect when filePath changes
                       }}
                       onDoubleClick={() => {
                         // Double-click to view the file
@@ -592,6 +651,209 @@ function CompositeSetup() {
                 </pre>
               </div>
             )}
+
+            {/* Service Selection */}
+            {services.length > 0 && (
+              <div style={{ marginTop: '16px' }}>
+                <div style={{ marginBottom: '12px' }}>
+                  <h3
+                    style={{
+                      fontSize: '15px',
+                      fontWeight: '600',
+                      marginBottom: '8px',
+                      color: colors.textPrimary,
+                      fontFamily: fonts.body,
+                    }}
+                  >
+                    Select Services
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: '13px',
+                      color: colors.textSecondary,
+                      lineHeight: '1.5',
+                      fontFamily: fonts.body,
+                    }}
+                  >
+                    Choose which services to include in the MCP Shark server. Only selected services
+                    will be available.
+                  </p>
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '8px',
+                    marginBottom: '12px',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <button
+                    onClick={() => {
+                      setSelectedServices(new Set(services.map((s) => s.name)));
+                    }}
+                    style={{
+                      padding: '4px 12px',
+                      background: 'transparent',
+                      border: `1px solid ${colors.borderMedium}`,
+                      color: colors.textSecondary,
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    Select All
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedServices(new Set());
+                    }}
+                    style={{
+                      padding: '4px 12px',
+                      background: 'transparent',
+                      border: `1px solid ${colors.borderMedium}`,
+                      color: colors.textSecondary,
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    Deselect All
+                  </button>
+                  <div
+                    style={{
+                      marginLeft: 'auto',
+                      fontSize: '12px',
+                      color: colors.textSecondary,
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    {selectedServices.size} of {services.length} selected
+                  </div>
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                    maxHeight: '300px',
+                    overflowY: 'auto',
+                    padding: '8px',
+                    background: colors.bgPrimary,
+                    borderRadius: '4px',
+                    border: `1px solid ${colors.borderLight}`,
+                  }}
+                >
+                  {services.map((service) => {
+                    const isSelected = selectedServices.has(service.name);
+                    return (
+                      <label
+                        key={service.name}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          padding: '10px',
+                          background: isSelected ? `${colors.accentBlue}15` : 'transparent',
+                          border: `1px solid ${isSelected ? colors.accentBlue : colors.borderMedium}`,
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isSelected) {
+                            e.currentTarget.style.background = colors.bgHover;
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isSelected) {
+                            e.currentTarget.style.background = 'transparent';
+                          }
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => {
+                            const newSelected = new Set(selectedServices);
+                            if (e.target.checked) {
+                              newSelected.add(service.name);
+                            } else {
+                              newSelected.delete(service.name);
+                            }
+                            setSelectedServices(newSelected);
+                          }}
+                          style={{
+                            width: '18px',
+                            height: '18px',
+                            cursor: 'pointer',
+                          }}
+                        />
+                        <div style={{ flex: 1 }}>
+                          <div
+                            style={{
+                              fontWeight: '500',
+                              color: colors.textPrimary,
+                              fontSize: '13px',
+                              marginBottom: '4px',
+                            }}
+                          >
+                            {service.name}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: '11px',
+                              color: colors.textSecondary,
+                              display: 'flex',
+                              gap: '12px',
+                              flexWrap: 'wrap',
+                            }}
+                          >
+                            <span
+                              style={{
+                                padding: '2px 6px',
+                                background: service.type === 'http' ? '#0e639c' : '#4a9e5f',
+                                color: colors.textInverse,
+                                borderRadius: '3px',
+                                fontSize: '10px',
+                                fontWeight: '500',
+                              }}
+                            >
+                              {service.type.toUpperCase()}
+                            </span>
+                            {service.url && (
+                              <span style={{ fontFamily: 'monospace', fontSize: '11px' }}>
+                                {service.url}
+                              </span>
+                            )}
+                            {service.command && (
+                              <span style={{ fontFamily: 'monospace', fontSize: '11px' }}>
+                                {service.command} {service.args?.join(' ') || ''}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+                {selectedServices.size === 0 && (
+                  <div
+                    style={{
+                      marginTop: '8px',
+                      padding: '8px 12px',
+                      background: '#5a1d1d',
+                      border: `1px solid #c72e2e`,
+                      borderRadius: '4px',
+                      color: '#f48771',
+                      fontSize: '12px',
+                    }}
+                  >
+                    ⚠️ Please select at least one service to start the server
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -654,7 +916,11 @@ function CompositeSetup() {
               <button
                 data-tour="start-button"
                 onClick={handleSetup}
-                disabled={loading || (!fileContent && !filePath)}
+                disabled={
+                  loading ||
+                  (!fileContent && !filePath) ||
+                  (services.length > 0 && selectedServices.size === 0)
+                }
                 style={{
                   padding: '10px 20px',
                   background: colors.buttonPrimary,
@@ -665,12 +931,21 @@ function CompositeSetup() {
                   fontFamily: fonts.body,
                   fontWeight: '500',
                   borderRadius: '6px',
-                  opacity: loading || (!fileContent && !filePath) ? 0.5 : 1,
+                  opacity:
+                    loading ||
+                    (!fileContent && !filePath) ||
+                    (services.length > 0 && selectedServices.size === 0)
+                      ? 0.5
+                      : 1,
                   transition: 'all 0.2s',
                   boxShadow: `0 2px 4px ${colors.shadowSm}`,
                 }}
                 onMouseEnter={(e) => {
-                  if (!loading && (fileContent || filePath)) {
+                  if (
+                    !loading &&
+                    (fileContent || filePath) &&
+                    (services.length === 0 || selectedServices.size > 0)
+                  ) {
                     e.currentTarget.style.background = colors.buttonPrimaryHover;
                     e.currentTarget.style.transform = 'translateY(-1px)';
                   }

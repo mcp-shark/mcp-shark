@@ -458,6 +458,86 @@ export function createUIServer() {
     return converted;
   }
 
+  // Extract services from config file
+  function extractServices(config) {
+    const { mcpServers, servers } = config;
+    const servicesMap = new Map();
+
+    // Extract from servers format (preferred if both exist)
+    if (servers) {
+      Object.entries(servers).forEach(([name, cfg]) => {
+        const type = cfg.type || (cfg.url ? 'http' : cfg.command ? 'stdio' : 'stdio');
+        servicesMap.set(name, {
+          name,
+          type,
+          url: cfg.url || null,
+          command: cfg.command || null,
+          args: cfg.args || null,
+        });
+      });
+    }
+
+    // Extract from mcpServers format (only if not already in servicesMap)
+    if (mcpServers) {
+      Object.entries(mcpServers).forEach(([name, cfg]) => {
+        if (!servicesMap.has(name)) {
+          const type = cfg.type || (cfg.url ? 'http' : cfg.command ? 'stdio' : 'stdio');
+          servicesMap.set(name, {
+            name,
+            type,
+            url: cfg.url || null,
+            command: cfg.command || null,
+            args: cfg.args || null,
+          });
+        }
+      });
+    }
+
+    return Array.from(servicesMap.values());
+  }
+
+  // API endpoint to extract services from config file
+  app.post('/api/config/services', (req, res) => {
+    try {
+      const { filePath, fileContent } = req.body;
+
+      if (!filePath && !fileContent) {
+        return res.status(400).json({ error: 'Either filePath or fileContent is required' });
+      }
+
+      // Read file content
+      let content;
+      if (fileContent) {
+        content = fileContent;
+      } else {
+        // Expand tilde to home directory
+        const resolvedFilePath = filePath.startsWith('~')
+          ? path.join(homedir(), filePath.slice(1))
+          : filePath;
+
+        if (!fs.existsSync(resolvedFilePath)) {
+          return res.status(404).json({ error: 'File not found', path: resolvedFilePath });
+        }
+        content = fs.readFileSync(resolvedFilePath, 'utf-8');
+      }
+
+      // Parse JSON
+      let config;
+      try {
+        config = JSON.parse(content);
+      } catch (e) {
+        return res.status(400).json({ error: 'Invalid JSON file', details: e.message });
+      }
+
+      // Extract services
+      const services = extractServices(config);
+
+      res.json({ success: true, services });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to extract services', details: error.message });
+    }
+  });
+
   // API endpoint to process MCP config file
   app.post('/api/composite/setup', async (req, res) => {
     // Clear previous logs
@@ -474,7 +554,7 @@ export function createUIServer() {
       broadcastLogUpdate({ timestamp, type, line });
     }
     try {
-      const { filePath, fileContent } = req.body;
+      const { filePath, fileContent, selectedServices } = req.body;
 
       if (!filePath && !fileContent) {
         return res.status(400).json({ error: 'Either filePath or fileContent is required' });
@@ -513,7 +593,18 @@ export function createUIServer() {
       }
 
       // Convert mcpServers to servers format
-      const convertedConfig = convertMcpServersToServers(originalConfig);
+      let convertedConfig = convertMcpServersToServers(originalConfig);
+
+      // Filter to only selected services if provided
+      if (selectedServices && Array.isArray(selectedServices) && selectedServices.length > 0) {
+        const filteredServers = {};
+        selectedServices.forEach((serviceName) => {
+          if (convertedConfig.servers[serviceName]) {
+            filteredServers[serviceName] = convertedConfig.servers[serviceName];
+          }
+        });
+        convertedConfig = { servers: filteredServers };
+      }
 
       if (Object.keys(convertedConfig.servers).length === 0) {
         return res.status(400).json({ error: 'No servers found in config' });
@@ -613,16 +704,80 @@ export function createUIServer() {
         console.log('MCP Shark server is ready!');
 
         // Update original file to point to mcp-shark server
-        // Preserve the original structure but replace mcpServers with mcp-shark endpoint
-        const updatedConfig = {
-          ...originalConfig,
-          mcpServers: {
+        // Replace only selected services with mcp-shark endpoint, keep non-selected services
+        const updatedConfig = { ...originalConfig };
+
+        // Determine which format the original config uses
+        const hasMcpServers =
+          originalConfig.mcpServers && typeof originalConfig.mcpServers === 'object';
+        const hasServers = originalConfig.servers && typeof originalConfig.servers === 'object';
+
+        // Get selected service names
+        // If selectedServices is not provided, treat all services as selected (backward compatibility)
+        let selectedServiceNames;
+        if (selectedServices && Array.isArray(selectedServices) && selectedServices.length > 0) {
+          selectedServiceNames = new Set(selectedServices);
+        } else {
+          // No selectedServices provided - get all service names from original config
+          selectedServiceNames = new Set();
+          if (hasMcpServers) {
+            Object.keys(originalConfig.mcpServers).forEach((name) =>
+              selectedServiceNames.add(name)
+            );
+          } else if (hasServers) {
+            Object.keys(originalConfig.servers).forEach((name) => selectedServiceNames.add(name));
+          }
+        }
+
+        if (hasMcpServers) {
+          // Use mcpServers format
+          const updatedMcpServers = {};
+
+          // Add mcp-shark endpoint for selected services
+          if (selectedServiceNames.size > 0) {
+            updatedMcpServers['mcp-shark-server'] = {
+              type: 'http',
+              url: 'http://localhost:9851/mcp',
+            };
+          }
+
+          // Keep non-selected services
+          Object.entries(originalConfig.mcpServers).forEach(([name, cfg]) => {
+            if (!selectedServiceNames.has(name)) {
+              updatedMcpServers[name] = cfg;
+            }
+          });
+
+          updatedConfig.mcpServers = updatedMcpServers;
+        } else if (hasServers) {
+          // Use servers format
+          const updatedServers = {};
+
+          // Add mcp-shark endpoint for selected services
+          if (selectedServiceNames.size > 0) {
+            updatedServers['mcp-shark-server'] = {
+              type: 'http',
+              url: 'http://localhost:9851/mcp',
+            };
+          }
+
+          // Keep non-selected services
+          Object.entries(originalConfig.servers).forEach(([name, cfg]) => {
+            if (!selectedServiceNames.has(name)) {
+              updatedServers[name] = cfg;
+            }
+          });
+
+          updatedConfig.servers = updatedServers;
+        } else {
+          // No existing format, create mcpServers format
+          updatedConfig.mcpServers = {
             'mcp-shark-server': {
               type: 'http',
               url: 'http://localhost:9851/mcp',
             },
-          },
-        };
+          };
+        }
 
         // If filePath provided, update the file
         if (resolvedFilePath && fs.existsSync(resolvedFilePath)) {
