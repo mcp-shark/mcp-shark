@@ -8,6 +8,8 @@ import TabNavigation from './TabNavigation';
 import IntroTour from './IntroTour';
 import { colors, fonts } from './theme';
 import { tourSteps } from './config/tourSteps.jsx';
+import { slideInRight, slideOutRight, fadeIn } from './utils/animations';
+import anime from 'animejs';
 
 // SVG Icon Component
 const HelpIcon = ({ size = 16, color = 'currentColor' }) => (
@@ -37,6 +39,8 @@ function App() {
   const [showTour, setShowTour] = useState(false);
   const [tourDismissed, setTourDismissed] = useState(true);
   const wsRef = useRef(null);
+  const detailPanelRef = useRef(null);
+  const prevTabRef = useRef(activeTab);
 
   const loadRequests = async () => {
     try {
@@ -127,6 +131,31 @@ function App() {
     loadRequests();
   }, [filters]);
 
+  // Animate detail panel when selected changes
+  useEffect(() => {
+    if (selected && detailPanelRef.current) {
+      // Small delay to ensure DOM is ready, then animate in
+      setTimeout(() => {
+        if (detailPanelRef.current) {
+          detailPanelRef.current.style.opacity = '0';
+          detailPanelRef.current.style.transform = 'translateX(600px)';
+          slideInRight(detailPanelRef.current, { width: 600 });
+        }
+      }, 10);
+    }
+  }, [selected]);
+
+  // Animate tab content changes
+  useEffect(() => {
+    if (prevTabRef.current !== activeTab) {
+      const tabContent = document.querySelector('[data-tab-content]');
+      if (tabContent) {
+        fadeIn(tabContent, { duration: 300 });
+      }
+      prevTabRef.current = activeTab;
+    }
+  }, [activeTab]);
+
   return (
     <div
       style={{
@@ -205,7 +234,10 @@ function App() {
       </div>
 
       {activeTab === 'traffic' && (
-        <div style={{ display: 'flex', flex: 1, overflow: 'hidden', minHeight: 0 }}>
+        <div
+          data-tab-content
+          style={{ display: 'flex', flex: 1, overflow: 'hidden', minHeight: 0 }}
+        >
           <div
             style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0 }}
           >
@@ -224,6 +256,7 @@ function App() {
           </div>
           {selected && (
             <div
+              ref={detailPanelRef}
               style={{
                 width: '600px',
                 borderLeft: `1px solid ${colors.borderLight}`,
@@ -240,13 +273,19 @@ function App() {
       )}
 
       {activeTab === 'logs' && (
-        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <div
+          data-tab-content
+          style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
+        >
           <CompositeLogs />
         </div>
       )}
 
       {activeTab === 'setup' && (
-        <div style={{ flex: 1, overflow: 'hidden', width: '100%', height: '100%' }}>
+        <div
+          data-tab-content
+          style={{ flex: 1, overflow: 'hidden', width: '100%', height: '100%' }}
+        >
           <CompositeSetup />
         </div>
       )}

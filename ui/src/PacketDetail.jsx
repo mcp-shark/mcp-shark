@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { colors } from './theme';
 import PacketDetailHeader from './components/PacketDetailHeader';
 import TabNavigation from './components/TabNavigation';
@@ -6,9 +6,19 @@ import DetailsTab from './components/DetailsTab';
 import HexTab from './components/HexTab';
 import RawTab from './components/RawTab';
 import { generateHexDump, createFullRequestText } from './utils/hexUtils.js';
+import { fadeIn } from './utils/animations';
 
 function RequestDetail({ request, onClose }) {
   const [activeTab, setActiveTab] = useState('details');
+  const tabContentRef = useRef(null);
+  const prevTabRef = useRef(activeTab);
+
+  useEffect(() => {
+    if (prevTabRef.current !== activeTab && tabContentRef.current) {
+      fadeIn(tabContentRef.current, { duration: 300 });
+      prevTabRef.current = activeTab;
+    }
+  }, [activeTab]);
 
   if (!request) return null;
 
@@ -35,6 +45,7 @@ function RequestDetail({ request, onClose }) {
       />
 
       <div
+        ref={tabContentRef}
         style={{
           flex: 1,
           overflow: 'auto',

@@ -1,4 +1,4 @@
-.PHONY: help install install-all start stop start-ui stop-ui start-server stop-server dev-ui build-ui clean
+.PHONY: help install install-all start stop start-ui stop-ui start-server stop-server dev-ui build-ui clean clean-node-modules
 
 # Default target
 help:
@@ -23,7 +23,8 @@ help:
 	@echo "  make stop-server      - Stop the MCP server"
 	@echo ""
 	@echo "Other:"
-	@echo "  make clean            - Clean build artifacts and node_modules"
+	@echo "  make clean            - Clean build artifacts and log files"
+	@echo "  make clean-node-modules - Remove all node_modules and package-lock.json files"
 	@echo "  make help             - Show this help message"
 
 # Installation
@@ -179,4 +180,34 @@ clean:
 	@rm -f ui/.ui.pid mcp-server/.server.pid
 	@rm -f ui/.ui.log mcp-server/.server.log
 	@echo "Cleanup complete"
+
+# Remove all node_modules folders and package-lock.json files
+clean-node-modules:
+	@echo "Removing all node_modules folders and package-lock.json files..."
+	@if [ -d "node_modules" ]; then \
+		echo "  Removing root node_modules..."; \
+		rm -rf node_modules; \
+	fi
+	@if [ -f "package-lock.json" ]; then \
+		echo "  Removing root package-lock.json..."; \
+		rm -f package-lock.json; \
+	fi
+	@if [ -d "mcp-server/node_modules" ]; then \
+		echo "  Removing mcp-server/node_modules..."; \
+		rm -rf mcp-server/node_modules; \
+	fi
+	@if [ -f "mcp-server/package-lock.json" ]; then \
+		echo "  Removing mcp-server/package-lock.json..."; \
+		rm -f mcp-server/package-lock.json; \
+	fi
+	@if [ -d "ui/node_modules" ]; then \
+		echo "  Removing ui/node_modules..."; \
+		rm -rf ui/node_modules; \
+	fi
+	@if [ -f "ui/package-lock.json" ]; then \
+		echo "  Removing ui/package-lock.json..."; \
+		rm -f ui/package-lock.json; \
+	fi
+	@echo "All node_modules folders and package-lock.json files removed!"
+	@echo "Run 'make install-all' to reinstall dependencies."
 

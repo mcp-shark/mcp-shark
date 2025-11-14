@@ -1,6 +1,17 @@
+import { useEffect, useRef } from 'react';
 import { colors, fonts } from './theme';
+import { fadeIn } from './utils/animations';
+import anime from 'animejs';
 
 function RequestFilters({ filters, onFilterChange, stats, onExport }) {
+  const filtersRef = useRef(null);
+
+  useEffect(() => {
+    if (filtersRef.current) {
+      fadeIn(filtersRef.current, { duration: 400 });
+    }
+  }, []);
+
   const handleExport = async (format = 'json') => {
     try {
       const queryParams = new URLSearchParams();
@@ -33,6 +44,7 @@ function RequestFilters({ filters, onFilterChange, stats, onExport }) {
 
   return (
     <div
+      ref={filtersRef}
       data-tour="filters"
       style={{
         padding: '12px 16px',
@@ -63,12 +75,22 @@ function RequestFilters({ filters, onFilterChange, stats, onExport }) {
           transition: 'all 0.2s',
         }}
         onFocus={(e) => {
-          e.currentTarget.style.borderColor = colors.accentBlue;
-          e.currentTarget.style.boxShadow = `0 0 0 3px ${colors.accentBlue}20`;
+          anime({
+            targets: e.currentTarget,
+            borderColor: colors.accentBlue,
+            boxShadow: [`0 0 0 0px ${colors.accentBlue}20`, `0 0 0 3px ${colors.accentBlue}20`],
+            duration: 200,
+            easing: 'easeOutQuad',
+          });
         }}
         onBlur={(e) => {
-          e.currentTarget.style.borderColor = colors.borderLight;
-          e.currentTarget.style.boxShadow = 'none';
+          anime({
+            targets: e.currentTarget,
+            borderColor: colors.borderLight,
+            boxShadow: 'none',
+            duration: 200,
+            easing: 'easeOutQuad',
+          });
         }}
       />
 
@@ -89,12 +111,22 @@ function RequestFilters({ filters, onFilterChange, stats, onExport }) {
           transition: 'all 0.2s',
         }}
         onFocus={(e) => {
-          e.currentTarget.style.borderColor = colors.accentBlue;
-          e.currentTarget.style.boxShadow = `0 0 0 3px ${colors.accentBlue}20`;
+          anime({
+            targets: e.currentTarget,
+            borderColor: colors.accentBlue,
+            boxShadow: [`0 0 0 0px ${colors.accentBlue}20`, `0 0 0 3px ${colors.accentBlue}20`],
+            duration: 200,
+            easing: 'easeOutQuad',
+          });
         }}
         onBlur={(e) => {
-          e.currentTarget.style.borderColor = colors.borderLight;
-          e.currentTarget.style.boxShadow = 'none';
+          anime({
+            targets: e.currentTarget,
+            borderColor: colors.borderLight,
+            boxShadow: 'none',
+            duration: 200,
+            easing: 'easeOutQuad',
+          });
         }}
       />
 
@@ -115,12 +147,22 @@ function RequestFilters({ filters, onFilterChange, stats, onExport }) {
           transition: 'all 0.2s',
         }}
         onFocus={(e) => {
-          e.currentTarget.style.borderColor = colors.accentBlue;
-          e.currentTarget.style.boxShadow = `0 0 0 3px ${colors.accentBlue}20`;
+          anime({
+            targets: e.currentTarget,
+            borderColor: colors.accentBlue,
+            boxShadow: [`0 0 0 0px ${colors.accentBlue}20`, `0 0 0 3px ${colors.accentBlue}20`],
+            duration: 200,
+            easing: 'easeOutQuad',
+          });
         }}
         onBlur={(e) => {
-          e.currentTarget.style.borderColor = colors.borderLight;
-          e.currentTarget.style.boxShadow = 'none';
+          anime({
+            targets: e.currentTarget,
+            borderColor: colors.borderLight,
+            boxShadow: 'none',
+            duration: 200,
+            easing: 'easeOutQuad',
+          });
         }}
       />
 
@@ -139,12 +181,22 @@ function RequestFilters({ filters, onFilterChange, stats, onExport }) {
           transition: 'all 0.2s',
         }}
         onFocus={(e) => {
-          e.currentTarget.style.borderColor = colors.accentBlue;
-          e.currentTarget.style.boxShadow = `0 0 0 3px ${colors.accentBlue}20`;
+          anime({
+            targets: e.currentTarget,
+            borderColor: colors.accentBlue,
+            boxShadow: [`0 0 0 0px ${colors.accentBlue}20`, `0 0 0 3px ${colors.accentBlue}20`],
+            duration: 200,
+            easing: 'easeOutQuad',
+          });
         }}
         onBlur={(e) => {
-          e.currentTarget.style.borderColor = colors.borderLight;
-          e.currentTarget.style.boxShadow = 'none';
+          anime({
+            targets: e.currentTarget,
+            borderColor: colors.borderLight,
+            boxShadow: 'none',
+            duration: 200,
+            easing: 'easeOutQuad',
+          });
         }}
       >
         <option value="">All Directions</option>
@@ -169,12 +221,22 @@ function RequestFilters({ filters, onFilterChange, stats, onExport }) {
           transition: 'all 0.2s',
         }}
         onFocus={(e) => {
-          e.currentTarget.style.borderColor = colors.accentBlue;
-          e.currentTarget.style.boxShadow = `0 0 0 3px ${colors.accentBlue}20`;
+          anime({
+            targets: e.currentTarget,
+            borderColor: colors.accentBlue,
+            boxShadow: [`0 0 0 0px ${colors.accentBlue}20`, `0 0 0 3px ${colors.accentBlue}20`],
+            duration: 200,
+            easing: 'easeOutQuad',
+          });
         }}
         onBlur={(e) => {
-          e.currentTarget.style.borderColor = colors.borderLight;
-          e.currentTarget.style.boxShadow = 'none';
+          anime({
+            targets: e.currentTarget,
+            borderColor: colors.borderLight,
+            boxShadow: 'none',
+            duration: 200,
+            easing: 'easeOutQuad',
+          });
         }}
       />
 
@@ -195,12 +257,22 @@ function RequestFilters({ filters, onFilterChange, stats, onExport }) {
           transition: 'all 0.2s',
         }}
         onFocus={(e) => {
-          e.currentTarget.style.borderColor = colors.accentBlue;
-          e.currentTarget.style.boxShadow = `0 0 0 3px ${colors.accentBlue}20`;
+          anime({
+            targets: e.currentTarget,
+            borderColor: colors.accentBlue,
+            boxShadow: [`0 0 0 0px ${colors.accentBlue}20`, `0 0 0 3px ${colors.accentBlue}20`],
+            duration: 200,
+            easing: 'easeOutQuad',
+          });
         }}
         onBlur={(e) => {
-          e.currentTarget.style.borderColor = colors.borderLight;
-          e.currentTarget.style.boxShadow = 'none';
+          anime({
+            targets: e.currentTarget,
+            borderColor: colors.borderLight,
+            boxShadow: 'none',
+            duration: 200,
+            easing: 'easeOutQuad',
+          });
         }}
       />
 
@@ -226,12 +298,22 @@ function RequestFilters({ filters, onFilterChange, stats, onExport }) {
           transition: 'all 0.2s',
         }}
         onFocus={(e) => {
-          e.currentTarget.style.borderColor = colors.accentBlue;
-          e.currentTarget.style.boxShadow = `0 0 0 3px ${colors.accentBlue}20`;
+          anime({
+            targets: e.currentTarget,
+            borderColor: colors.accentBlue,
+            boxShadow: [`0 0 0 0px ${colors.accentBlue}20`, `0 0 0 3px ${colors.accentBlue}20`],
+            duration: 200,
+            easing: 'easeOutQuad',
+          });
         }}
         onBlur={(e) => {
-          e.currentTarget.style.borderColor = colors.borderLight;
-          e.currentTarget.style.boxShadow = 'none';
+          anime({
+            targets: e.currentTarget,
+            borderColor: colors.borderLight,
+            boxShadow: 'none',
+            duration: 200,
+            easing: 'easeOutQuad',
+          });
         }}
       />
 
@@ -252,12 +334,22 @@ function RequestFilters({ filters, onFilterChange, stats, onExport }) {
           transition: 'all 0.2s',
         }}
         onFocus={(e) => {
-          e.currentTarget.style.borderColor = colors.accentBlue;
-          e.currentTarget.style.boxShadow = `0 0 0 3px ${colors.accentBlue}20`;
+          anime({
+            targets: e.currentTarget,
+            borderColor: colors.accentBlue,
+            boxShadow: [`0 0 0 0px ${colors.accentBlue}20`, `0 0 0 3px ${colors.accentBlue}20`],
+            duration: 200,
+            easing: 'easeOutQuad',
+          });
         }}
         onBlur={(e) => {
-          e.currentTarget.style.borderColor = colors.borderLight;
-          e.currentTarget.style.boxShadow = 'none';
+          anime({
+            targets: e.currentTarget,
+            borderColor: colors.borderLight,
+            boxShadow: 'none',
+            duration: 200,
+            easing: 'easeOutQuad',
+          });
         }}
       />
 
@@ -326,14 +418,24 @@ function RequestFilters({ filters, onFilterChange, stats, onExport }) {
               boxShadow: `0 2px 4px ${colors.shadowSm}`,
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = colors.buttonPrimaryHover;
-              e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.boxShadow = `0 4px 8px ${colors.shadowMd}`;
+              anime({
+                targets: e.currentTarget,
+                background: colors.buttonPrimaryHover,
+                translateY: -1,
+                boxShadow: [`0 2px 4px ${colors.shadowSm}`, `0 4px 8px ${colors.shadowMd}`],
+                duration: 200,
+                easing: 'easeOutQuad',
+              });
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = colors.buttonPrimary;
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = `0 2px 4px ${colors.shadowSm}`;
+              anime({
+                targets: e.currentTarget,
+                background: colors.buttonPrimary,
+                translateY: 0,
+                boxShadow: [`0 4px 8px ${colors.shadowMd}`, `0 2px 4px ${colors.shadowSm}`],
+                duration: 200,
+                easing: 'easeOutQuad',
+              });
             }}
             title="Export as JSON"
           >

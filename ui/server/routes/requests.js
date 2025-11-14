@@ -5,24 +5,48 @@ export function createRequestsRoutes(db) {
   const router = {};
 
   router.getRequests = (req, res) => {
-    const limit = parseInt(req.query.limit) || 1000;
-    const offset = parseInt(req.query.offset) || 0;
-    const filters = {
-      sessionId: req.query.sessionId || null,
-      direction: req.query.direction || null,
-      method: req.query.method || null,
-      jsonrpcMethod: req.query.jsonrpcMethod || null,
-      statusCode: req.query.statusCode ? parseInt(req.query.statusCode) : null,
-      jsonrpcId: req.query.jsonrpcId || null,
-      search: req.query.search || null,
-      serverName: req.query.serverName || null,
-      startTime: req.query.startTime ? BigInt(req.query.startTime) : null,
-      endTime: req.query.endTime ? BigInt(req.query.endTime) : null,
-      limit,
-      offset,
-    };
-    const requests = queryRequests(db, filters);
-    res.json(serializeBigInt(requests));
+    try {
+      const limit = parseInt(req.query.limit) || 1000;
+      const offset = parseInt(req.query.offset) || 0;
+
+      // Sanitize search parameter - convert empty strings to null
+      let search = req.query.search;
+      if (search !== undefined && search !== null) {
+        search = String(search).trim();
+        search = search.length > 0 ? search : null;
+      } else {
+        search = null;
+      }
+
+      // Build filters object, ensuring all values are properly typed
+      const filters = {
+        sessionId: (req.query.sessionId && String(req.query.sessionId).trim()) || null,
+        direction: (req.query.direction && String(req.query.direction).trim()) || null,
+        method: (req.query.method && String(req.query.method).trim()) || null,
+        jsonrpcMethod: (req.query.jsonrpcMethod && String(req.query.jsonrpcMethod).trim()) || null,
+        statusCode: req.query.statusCode ? parseInt(req.query.statusCode) : null,
+        jsonrpcId: (req.query.jsonrpcId && String(req.query.jsonrpcId).trim()) || null,
+        search: search,
+        serverName: (req.query.serverName && String(req.query.serverName).trim()) || null,
+        startTime: req.query.startTime ? BigInt(req.query.startTime) : null,
+        endTime: req.query.endTime ? BigInt(req.query.endTime) : null,
+        limit,
+        offset,
+      };
+
+      // Remove undefined values to avoid issues
+      Object.keys(filters).forEach((key) => {
+        if (filters[key] === undefined) {
+          filters[key] = null;
+        }
+      });
+
+      const requests = queryRequests(db, filters);
+      res.json(serializeBigInt(requests));
+    } catch (error) {
+      console.error('Error in getRequests:', error);
+      res.status(500).json({ error: 'Failed to query requests', details: error.message });
+    }
   };
 
   router.getRequest = (req, res) => {
@@ -36,6 +60,15 @@ export function createRequestsRoutes(db) {
 
   router.exportRequests = (req, res) => {
     try {
+      // Sanitize search parameter - convert empty strings to null
+      let search = req.query.search;
+      if (search !== undefined && search !== null) {
+        search = String(search).trim();
+        search = search.length > 0 ? search : null;
+      } else {
+        search = null;
+      }
+
       const filters = {
         sessionId: req.query.sessionId || null,
         direction: req.query.direction || null,
@@ -43,7 +76,7 @@ export function createRequestsRoutes(db) {
         jsonrpcMethod: req.query.jsonrpcMethod || null,
         statusCode: req.query.statusCode ? parseInt(req.query.statusCode) : null,
         jsonrpcId: req.query.jsonrpcId || null,
-        search: req.query.search || null,
+        search: search,
         serverName: req.query.serverName || null,
         startTime: req.query.startTime ? BigInt(req.query.startTime) : null,
         endTime: req.query.endTime ? BigInt(req.query.endTime) : null,

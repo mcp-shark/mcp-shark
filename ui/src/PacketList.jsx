@@ -1,10 +1,12 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { colors, fonts } from './theme';
 import RequestRow from './components/RequestRow';
 import TableHeader from './components/TableHeader';
 import ViewModeTabs from './components/ViewModeTabs';
 import { GroupedBySessionView, GroupedByServerView } from './components/GroupedViews';
 import { groupByServerAndSession, groupBySessionAndServer } from './utils/groupingUtils.js';
+import { staggerIn } from './utils/animations';
+import anime from 'animejs';
 
 function RequestList({ requests, selected, onSelect, firstRequestTime }) {
   const [viewMode, setViewMode] = useState('general');
@@ -25,10 +27,32 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
   const [expandedServers, setExpandedServers] = useState(new Map());
   const [expandedServersFirst, setExpandedServersFirst] = useState(new Set());
   const [expandedSessionsInServer, setExpandedSessionsInServer] = useState(new Map());
+  const tbodyRef = useRef(null);
+  const prevRequestsLengthRef = useRef(0);
 
   const groupedByServerAndSession = useMemo(() => groupByServerAndSession(requests), [requests]);
 
   const groupedBySessionAndServer = useMemo(() => groupBySessionAndServer(requests), [requests]);
+
+  // Animate rows when requests change
+  useEffect(() => {
+    if (tbodyRef.current && requests.length > 0) {
+      const rows = tbodyRef.current.querySelectorAll('tr');
+      if (rows.length > 0) {
+        // Only animate new rows if the list has grown
+        if (requests.length > prevRequestsLengthRef.current) {
+          const newRows = Array.from(rows).slice(prevRequestsLengthRef.current);
+          if (newRows.length > 0) {
+            staggerIn(newRows, { delay: 30, duration: 300 });
+          }
+        } else {
+          // Animate all rows if the list was reset
+          staggerIn(rows, { delay: 20, duration: 300 });
+        }
+        prevRequestsLengthRef.current = requests.length;
+      }
+    }
+  }, [requests]);
 
   useEffect(() => {
     if (viewMode === 'groupedBySession') {
@@ -147,7 +171,7 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
   };
 
   const renderGeneralView = () => (
-    <tbody>
+    <tbody ref={tbodyRef}>
       {requests.map((request) => (
         <RequestRow
           key={request.frame_number}

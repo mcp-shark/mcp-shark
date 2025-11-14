@@ -7,6 +7,7 @@ import {
   getInfo,
   getRequestColor,
 } from '../utils/requestUtils.js';
+import anime from 'animejs';
 
 function RequestRow({ request, selected, firstRequestTime, onSelect }) {
   const isSelected = selected?.frame_number === request.frame_number;
@@ -25,12 +26,24 @@ function RequestRow({ request, selected, firstRequestTime, onSelect }) {
       }}
       onMouseEnter={(e) => {
         if (!isSelected) {
-          e.currentTarget.style.background = `${colors.accentBlue}15`;
+          anime({
+            targets: e.currentTarget,
+            background: `${colors.accentBlue}15`,
+            scale: [1, 1.01],
+            duration: 200,
+            easing: 'easeOutQuad',
+          });
         }
       }}
       onMouseLeave={(e) => {
         if (!isSelected) {
-          e.currentTarget.style.background = color;
+          anime({
+            targets: e.currentTarget,
+            background: color,
+            scale: [1.01, 1],
+            duration: 200,
+            easing: 'easeOutQuad',
+          });
         }
       }}
     >

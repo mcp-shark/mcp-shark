@@ -1,5 +1,7 @@
+import { useEffect, useRef } from 'react';
 import { colors, fonts } from './theme';
 import { SharkLogo } from './components/SharkLogo';
+import anime from 'animejs';
 
 // SVG Icon Components
 const NetworkIcon = ({ size = 16, color = 'currentColor' }) => (
@@ -80,6 +82,23 @@ function TabNavigation({ activeTab, onTabChange }) {
     },
   ];
 
+  const tabRefs = useRef({});
+  const indicatorRef = useRef(null);
+
+  useEffect(() => {
+    const activeTabElement = tabRefs.current[activeTab];
+    if (activeTabElement && indicatorRef.current) {
+      const { offsetLeft, offsetWidth } = activeTabElement;
+      anime({
+        targets: indicatorRef.current,
+        left: offsetLeft,
+        width: offsetWidth,
+        duration: 400,
+        easing: 'easeOutExpo',
+      });
+    }
+  }, [activeTab]);
+
   return (
     <div
       style={{
@@ -117,63 +136,87 @@ function TabNavigation({ activeTab, onTabChange }) {
             MCP Shark
           </span>
         </div>
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            data-tour={
-              tab.id === 'traffic' ? 'traffic-tab' : tab.id === 'logs' ? 'logs-tab' : 'setup-tab'
-            }
-            onClick={() => onTabChange(tab.id)}
-            style={{
-              padding: '14px 24px',
-              background: activeTab === tab.id ? colors.bgSecondary : 'transparent',
-              border: 'none',
-              borderBottom:
-                activeTab === tab.id ? `3px solid ${colors.accentBlue}` : '3px solid transparent',
-              color: activeTab === tab.id ? colors.textPrimary : colors.textSecondary,
-              cursor: 'pointer',
-              fontSize: '13px',
-              fontFamily: fonts.body,
-              fontWeight: activeTab === tab.id ? '600' : '400',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-start',
-              gap: '4px',
-              transition: 'all 0.2s',
-              position: 'relative',
-              borderRadius: '8px 8px 0 0',
-            }}
-            onMouseEnter={(e) => {
-              if (activeTab !== tab.id) {
-                e.currentTarget.style.background = colors.bgHover;
-                e.currentTarget.style.color = colors.textPrimary;
+        <div style={{ position: 'relative', display: 'flex', flex: 1 }}>
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              ref={(el) => (tabRefs.current[tab.id] = el)}
+              data-tour={
+                tab.id === 'traffic' ? 'traffic-tab' : tab.id === 'logs' ? 'logs-tab' : 'setup-tab'
               }
-            }}
-            onMouseLeave={(e) => {
-              if (activeTab !== tab.id) {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = colors.textSecondary;
-              }
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', color: 'currentColor' }}>
-                <tab.icon size={16} />
-              </div>
-              <span>{tab.label}</span>
-            </div>
-            <div
+              onClick={() => onTabChange(tab.id)}
               style={{
-                fontSize: '11px',
-                color: activeTab === tab.id ? colors.textSecondary : colors.textTertiary,
-                fontWeight: '400',
+                padding: '14px 24px',
+                background: activeTab === tab.id ? colors.bgSecondary : 'transparent',
+                border: 'none',
+                borderBottom: '3px solid transparent',
+                color: activeTab === tab.id ? colors.textPrimary : colors.textSecondary,
+                cursor: 'pointer',
+                fontSize: '13px',
                 fontFamily: fonts.body,
+                fontWeight: activeTab === tab.id ? '600' : '400',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                gap: '4px',
+                position: 'relative',
+                borderRadius: '8px 8px 0 0',
+                zIndex: 1,
+              }}
+              onMouseEnter={(e) => {
+                if (activeTab !== tab.id) {
+                  anime({
+                    targets: e.currentTarget,
+                    background: colors.bgHover,
+                    color: colors.textPrimary,
+                    duration: 200,
+                    easing: 'easeOutQuad',
+                  });
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeTab !== tab.id) {
+                  anime({
+                    targets: e.currentTarget,
+                    background: 'transparent',
+                    color: colors.textSecondary,
+                    duration: 200,
+                    easing: 'easeOutQuad',
+                  });
+                }
               }}
             >
-              {tab.description}
-            </div>
-          </button>
-        ))}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', color: 'currentColor' }}>
+                  <tab.icon size={16} />
+                </div>
+                <span>{tab.label}</span>
+              </div>
+              <div
+                style={{
+                  fontSize: '11px',
+                  color: activeTab === tab.id ? colors.textSecondary : colors.textTertiary,
+                  fontWeight: '400',
+                  fontFamily: fonts.body,
+                }}
+              >
+                {tab.description}
+              </div>
+            </button>
+          ))}
+          <div
+            ref={indicatorRef}
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              height: '3px',
+              background: colors.accentBlue,
+              borderRadius: '3px 3px 0 0',
+              zIndex: 2,
+              pointerEvents: 'none',
+            }}
+          />
+        </div>
       </div>
     </div>
   );
