@@ -1,12 +1,14 @@
-import { useState, useEffect, useCallback } from 'react';
-import { colors, fonts } from './theme';
-import DetectedPathsList from './components/DetectedPathsList';
-import FileInput from './components/FileInput';
-import ServiceSelector from './components/ServiceSelector';
+import { useState, useEffect } from 'react';
+import { colors } from './theme';
+import SetupHeader from './components/SetupHeader';
+import ConfigFileSection from './components/ConfigFileSection';
+import WhatThisDoesSection from './components/WhatThisDoesSection';
 import ServerControl from './components/ServerControl';
 import MessageDisplay from './components/MessageDisplay';
 import BackupList from './components/BackupList';
 import ConfigViewerModal from './components/ConfigViewerModal';
+import { useServiceExtraction } from './hooks/useServiceExtraction';
+import { useConfigManagement } from './hooks/useConfigManagement';
 
 function CompositeSetup() {
   const [fileContent, setFileContent] = useState('');
@@ -16,92 +18,32 @@ function CompositeSetup() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
-  const [detectedPaths, setDetectedPaths] = useState([]);
-  const [detecting, setDetecting] = useState(true);
-  const [viewingConfig, setViewingConfig] = useState(null);
-  const [configContent, setConfigContent] = useState(null);
-  const [loadingConfig, setLoadingConfig] = useState(false);
-  const [backups, setBackups] = useState([]);
-  const [loadingBackups, setLoadingBackups] = useState(false);
-  const [services, setServices] = useState([]);
-  const [selectedServices, setSelectedServices] = useState(new Set());
-  const [loadingServices, setLoadingServices] = useState(false);
 
-  const extractServices = useCallback(async () => {
-    if (!fileContent && !filePath) {
-      setServices([]);
-      setSelectedServices(new Set());
-      return;
-    }
+  const { services, selectedServices, setSelectedServices } = useServiceExtraction(
+    fileContent,
+    filePath
+  );
 
-    setLoadingServices(true);
-    try {
-      const payload = fileContent ? { fileContent } : { filePath };
-      const res = await fetch('/api/config/services', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-      if (res.ok && data.services) {
-        setServices(data.services);
-        setSelectedServices(new Set(data.services.map((s) => s.name)));
-      } else {
-        setServices([]);
-        setSelectedServices(new Set());
-      }
-    } catch (err) {
-      console.error('Failed to extract services:', err);
-      setServices([]);
-      setSelectedServices(new Set());
-    } finally {
-      setLoadingServices(false);
-    }
-  }, [fileContent, filePath]);
+  const {
+    detectedPaths,
+    detecting,
+    detectConfigPaths,
+    backups,
+    loadingBackups,
+    loadBackups,
+    viewingConfig,
+    configContent,
+    loadingConfig,
+    handleViewConfig,
+    setViewingConfig,
+    setConfigContent,
+  } = useConfigManagement();
 
   useEffect(() => {
     fetchStatus();
     const interval = setInterval(fetchStatus, 2000);
-    detectConfigPaths();
-    loadBackups();
     return () => clearInterval(interval);
   }, []);
-
-  useEffect(() => {
-    if (fileContent || filePath) {
-      extractServices();
-    } else {
-      setServices([]);
-      setSelectedServices(new Set());
-    }
-  }, [fileContent, filePath, extractServices]);
-
-  const detectConfigPaths = async () => {
-    setDetecting(true);
-    try {
-      const res = await fetch('/api/config/detect');
-      const data = await res.json();
-      setDetectedPaths(data.detected || []);
-    } catch (err) {
-      console.error('Failed to detect config paths:', err);
-    } finally {
-      setDetecting(false);
-    }
-  };
-
-  const loadBackups = async () => {
-    setLoadingBackups(true);
-    try {
-      const res = await fetch('/api/config/backups');
-      const data = await res.json();
-      setBackups(data.backups || []);
-    } catch (err) {
-      console.error('Failed to load backups:', err);
-    } finally {
-      setLoadingBackups(false);
-    }
-  };
 
   const handleRestore = async (backupPath) => {
     if (
@@ -132,26 +74,6 @@ function CompositeSetup() {
     } catch (err) {
       setError(err.message || 'Failed to restore backup');
       setMessage(null);
-    }
-  };
-
-  const handleViewConfig = async (filePath) => {
-    setLoadingConfig(true);
-    setViewingConfig(filePath);
-    try {
-      const res = await fetch(`/api/config/read?filePath=${encodeURIComponent(filePath)}`);
-      const data = await res.json();
-      if (res.ok) {
-        setConfigContent(data);
-      } else {
-        setError(data.error || 'Failed to read config file');
-        setConfigContent(null);
-      }
-    } catch (err) {
-      setError(err.message || 'Failed to read config file');
-      setConfigContent(null);
-    } finally {
-      setLoadingConfig(false);
     }
   };
 
@@ -214,7 +136,6 @@ function CompositeSetup() {
         setFileContent('');
         setFilePath('');
         setUpdatePath('');
-        setServices([]);
         setSelectedServices(new Set());
         setTimeout(fetchStatus, 1000);
       } else {
@@ -280,94 +201,28 @@ function CompositeSetup() {
           boxSizing: 'border-box',
         }}
       >
-        <div style={{ marginBottom: '24px' }}>
-          <h2
-            style={{
-              fontSize: '20px',
-              fontWeight: '600',
-              marginBottom: '8px',
-              color: colors.textPrimary,
-              fontFamily: fonts.body,
-            }}
-          >
-            MCP Shark Server Setup
-          </h2>
-          <p
-            style={{
-              fontSize: '14px',
-              color: colors.textSecondary,
-              lineHeight: '1.6',
-              fontFamily: fonts.body,
-            }}
-          >
-            Convert your MCP configuration file and start the MCP Shark server to aggregate multiple
-            MCP servers into a single endpoint.
-          </p>
-        </div>
+        <SetupHeader />
 
-        <div
-          style={{
-            background: colors.bgCard,
-            border: `1px solid ${colors.borderLight}`,
-            borderRadius: '6px',
-            padding: '20px',
-            marginBottom: '20px',
+        <ConfigFileSection
+          detectedPaths={detectedPaths}
+          detecting={detecting}
+          onDetect={detectConfigPaths}
+          onPathSelect={(path) => {
+            setFilePath(path);
+            setFileContent('');
+            setUpdatePath(path);
           }}
-        >
-          <div style={{ marginBottom: '16px' }}>
-            <h3
-              style={{
-                fontSize: '15px',
-                fontWeight: '600',
-                marginBottom: '8px',
-                color: colors.textPrimary,
-                fontFamily: fonts.body,
-              }}
-            >
-              Configuration File
-            </h3>
-            <p
-              style={{
-                fontSize: '13px',
-                color: colors.textSecondary,
-                lineHeight: '1.5',
-                fontFamily: fonts.body,
-              }}
-            >
-              Select your MCP configuration file or provide a file path. The file will be converted
-              to MCP Shark format and used to start the server.
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <DetectedPathsList
-              detectedPaths={detectedPaths}
-              detecting={detecting}
-              onDetect={detectConfigPaths}
-              onSelect={(path) => {
-                setFilePath(path);
-                setFileContent('');
-                setUpdatePath(path);
-              }}
-              onView={handleViewConfig}
-            />
-
-            <FileInput
-              filePath={filePath}
-              fileContent={fileContent}
-              updatePath={updatePath}
-              onFileSelect={handleFileSelect}
-              onPathChange={handlePathInput}
-              onUpdatePathChange={handleUpdatePathInput}
-            />
-
-            <ServiceSelector
-              services={services}
-              selectedServices={selectedServices}
-              onSelectionChange={setSelectedServices}
-            />
-          </div>
-        </div>
+          onViewConfig={handleViewConfig}
+          filePath={filePath}
+          fileContent={fileContent}
+          updatePath={updatePath}
+          onFileSelect={handleFileSelect}
+          onPathChange={handlePathInput}
+          onUpdatePathChange={handleUpdatePathInput}
+          services={services}
+          selectedServices={selectedServices}
+          onSelectionChange={setSelectedServices}
+        />
 
         <ServerControl
           status={status}
@@ -386,49 +241,7 @@ function CompositeSetup() {
           onRestore={handleRestore}
         />
 
-        <div
-          style={{
-            background: colors.bgCard,
-            border: `1px solid ${colors.borderLight}`,
-            borderRadius: '6px',
-            padding: '20px',
-          }}
-        >
-          <h3
-            style={{ fontSize: '14px', fontWeight: '500', marginBottom: '12px', color: '#d4d4d4' }}
-          >
-            What This Does
-          </h3>
-          <ul
-            style={{
-              margin: 0,
-              paddingLeft: '20px',
-              fontSize: '13px',
-              color: colors.textSecondary,
-              lineHeight: '1.8',
-            }}
-          >
-            <li>
-              Converts your MCP config (<code style={{ color: '#dcdcaa' }}>mcpServers</code>) to MCP
-              Shark format (<code style={{ color: '#dcdcaa' }}>servers</code>)
-            </li>
-            <li>
-              Starts the MCP Shark server on{' '}
-              <code style={{ color: '#4ec9b0' }}>http://localhost:9851/mcp</code>
-            </li>
-            <li>
-              {filePath || updatePath
-                ? 'Updates your original config file to point to the MCP Shark server (creates a backup first)'
-                : 'Note: Provide a file path to update your original config file automatically'}
-            </li>
-            {(filePath || updatePath) && (
-              <li style={{ color: '#89d185', marginTop: '4px' }}>
-                ✓ Original config will be automatically restored when you stop the server or close
-                the UI
-              </li>
-            )}
-          </ul>
-        </div>
+        <WhatThisDoesSection filePath={filePath} updatePath={updatePath} />
       </div>
 
       <ConfigViewerModal

@@ -1,4 +1,4 @@
-.PHONY: help install install-all start stop start-ui stop-ui start-server stop-server dev-ui build-ui clean clean-node-modules
+.PHONY: help install install-all start stop start-ui stop-ui start-server stop-server dev-ui build-ui clean clean-node-modules kill-all-node
 
 # Default target
 help:
@@ -25,6 +25,7 @@ help:
 	@echo "Other:"
 	@echo "  make clean            - Clean build artifacts and log files"
 	@echo "  make clean-node-modules - Remove all node_modules and package-lock.json files"
+	@echo "  make kill-all-node    - Kill all running npm and node processes"
 	@echo "  make help             - Show this help message"
 
 # Installation
@@ -210,4 +211,28 @@ clean-node-modules:
 	fi
 	@echo "All node_modules folders and package-lock.json files removed!"
 	@echo "Run 'make install-all' to reinstall dependencies."
+
+# Kill all running npm and node processes
+kill-all-node:
+	@echo "Killing all npm and node processes..."
+	@PIDS=$$(pgrep -f "node|npm" 2>/dev/null || true); \
+	if [ -z "$$PIDS" ]; then \
+		echo "No npm or node processes found."; \
+	else \
+		echo "Found processes: $$PIDS"; \
+		for PID in $$PIDS; do \
+			if ps -p $$PID > /dev/null 2>&1; then \
+				echo "  Killing process $$PID..."; \
+				kill -TERM $$PID 2>/dev/null || true; \
+			fi; \
+		done; \
+		sleep 2; \
+		for PID in $$PIDS; do \
+			if ps -p $$PID > /dev/null 2>&1; then \
+				echo "  Force killing process $$PID..."; \
+				kill -9 $$PID 2>/dev/null || true; \
+			fi; \
+		done; \
+		echo "All npm and node processes killed."; \
+	fi
 
