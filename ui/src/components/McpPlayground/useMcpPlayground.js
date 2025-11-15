@@ -68,6 +68,9 @@ export function useMcpPlayground() {
   const checkServerStatus = async () => {
     try {
       const res = await fetch('/api/composite/status');
+      if (!res.ok) {
+        throw new Error('Server not available');
+      }
       const data = await res.json();
       const wasRunning = serverStatus?.running;
       setServerStatus(data);
@@ -80,7 +83,11 @@ export function useMcpPlayground() {
         setShowLoadingModal(false);
       }
     } catch (err) {
+      // Silently handle connection errors - server is not running
       setServerStatus({ running: false });
+      if (!showLoadingModal) {
+        setShowLoadingModal(true);
+      }
     }
   };
 

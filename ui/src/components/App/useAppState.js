@@ -70,23 +70,40 @@ export function useAppState() {
     const wsUrl = import.meta.env.DEV
       ? 'ws://localhost:9853'
       : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`;
-    const ws = new WebSocket(wsUrl);
-    wsRef.current = ws;
 
-    ws.onmessage = (e) => {
-      const msg = JSON.parse(e.data);
-      if (msg.type === 'update') {
-        setRequests(msg.data);
-        if (msg.data.length > 0) {
-          const oldest = msg.data[msg.data.length - 1]?.timestamp_iso;
-          if (oldest) {
-            setFirstRequestTime(oldest);
+    try {
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
+
+      ws.onmessage = (e) => {
+        const msg = JSON.parse(e.data);
+        if (msg.type === 'update') {
+          setRequests(msg.data);
+          if (msg.data.length > 0) {
+            const oldest = msg.data[msg.data.length - 1]?.timestamp_iso;
+            if (oldest) {
+              setFirstRequestTime(oldest);
+            }
           }
         }
+      };
+
+      ws.onerror = () => {
+        // Silently handle WebSocket errors - server may not be running
+      };
+
+      ws.onclose = () => {
+        // Connection closed - will attempt to reconnect on next mount if needed
+      };
+    } catch (err) {
+      // Silently handle WebSocket creation errors
+    }
+
+    return () => {
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.close();
       }
     };
-
-    return () => ws.close();
   }, []);
 
   useEffect(() => {
