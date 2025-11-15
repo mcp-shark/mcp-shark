@@ -1,0 +1,112 @@
+import { useState, useEffect, useRef } from 'react';
+
+export function useAppState() {
+  const [activeTab, setActiveTab] = useState('traffic');
+  const [requests, setRequests] = useState([]);
+  const [selected, setSelected] = useState(null);
+  const [filters, setFilters] = useState({});
+  const [stats, setStats] = useState(null);
+  const [firstRequestTime, setFirstRequestTime] = useState(null);
+  const [showTour, setShowTour] = useState(false);
+  const [tourDismissed, setTourDismissed] = useState(true);
+  const wsRef = useRef(null);
+  const prevTabRef = useRef(activeTab);
+
+  const loadRequests = async () => {
+    try {
+      const queryParams = new URLSearchParams();
+      if (filters.search) queryParams.append('search', filters.search);
+      if (filters.serverName) queryParams.append('serverName', filters.serverName);
+      if (filters.sessionId) queryParams.append('sessionId', filters.sessionId);
+      if (filters.direction) queryParams.append('direction', filters.direction);
+      if (filters.method) queryParams.append('method', filters.method);
+      if (filters.jsonrpcMethod) queryParams.append('jsonrpcMethod', filters.jsonrpcMethod);
+      if (filters.statusCode) queryParams.append('statusCode', filters.statusCode);
+      if (filters.jsonrpcId) queryParams.append('jsonrpcId', filters.jsonrpcId);
+      queryParams.append('limit', '5000');
+
+      const response = await fetch(`/api/requests?${queryParams}`);
+      const data = await response.json();
+      setRequests(data);
+
+      if (data.length > 0) {
+        const oldest = data[data.length - 1]?.timestamp_iso;
+        if (oldest) {
+          setFirstRequestTime(oldest);
+        }
+      }
+
+      const statsResponse = await fetch(`/api/statistics?${queryParams}`);
+      const statsData = await statsResponse.json();
+      setStats(statsData);
+    } catch (error) {
+      console.error('Failed to load requests:', error);
+    }
+  };
+
+  useEffect(() => {
+    const checkTourState = async () => {
+      try {
+        const response = await fetch('/api/help/state');
+        const data = await response.json();
+        setTourDismissed(data.dismissed || data.tourCompleted);
+        if (!data.dismissed && !data.tourCompleted) {
+          setTimeout(() => {
+            setShowTour(true);
+          }, 500);
+        }
+      } catch (error) {
+        console.error('Failed to load tour state:', error);
+        setTimeout(() => {
+          setShowTour(true);
+        }, 500);
+        setTourDismissed(false);
+      }
+    };
+
+    checkTourState();
+    loadRequests();
+
+    const wsUrl = import.meta.env.DEV
+      ? 'ws://localhost:9853'
+      : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`;
+    const ws = new WebSocket(wsUrl);
+    wsRef.current = ws;
+
+    ws.onmessage = (e) => {
+      const msg = JSON.parse(e.data);
+      if (msg.type === 'update') {
+        setRequests(msg.data);
+        if (msg.data.length > 0) {
+          const oldest = msg.data[msg.data.length - 1]?.timestamp_iso;
+          if (oldest) {
+            setFirstRequestTime(oldest);
+          }
+        }
+      }
+    };
+
+    return () => ws.close();
+  }, []);
+
+  useEffect(() => {
+    loadRequests();
+  }, [filters]);
+
+  return {
+    activeTab,
+    setActiveTab,
+    requests,
+    selected,
+    setSelected,
+    filters,
+    setFilters,
+    stats,
+    firstRequestTime,
+    showTour,
+    setShowTour,
+    tourDismissed,
+    prevTabRef,
+    wsRef,
+  };
+}
