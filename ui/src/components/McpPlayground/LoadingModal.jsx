@@ -4,7 +4,6 @@ import anime from 'animejs';
 
 export default function LoadingModal({ show }) {
   const loadingModalRef = useRef(null);
-  const spinnerRef = useRef(null);
   const dotsRef = useRef([]);
 
   useEffect(() => {
@@ -16,16 +15,6 @@ export default function LoadingModal({ show }) {
         duration: 400,
         easing: 'easeOutExpo',
       });
-
-      if (spinnerRef.current) {
-        anime({
-          targets: spinnerRef.current,
-          rotate: 360,
-          duration: 2000,
-          loop: true,
-          easing: 'linear',
-        });
-      }
 
       if (dotsRef.current.length > 0) {
         anime({
@@ -84,67 +73,17 @@ export default function LoadingModal({ show }) {
           textAlign: 'center',
         }}
       >
-        <div
-          ref={spinnerRef}
-          style={{
-            width: '48px',
-            height: '48px',
-            margin: '0 auto 20px',
-            position: 'relative',
-          }}
-        >
-          <svg
-            width="48"
-            height="48"
-            viewBox="0 0 64 64"
-            style={{ position: 'absolute', top: 0, left: 0 }}
-          >
-            <circle
-              cx="32"
-              cy="32"
-              r="28"
-              fill="none"
-              stroke={colors.accentBlue}
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeDasharray="44 132"
-              opacity="0.3"
-            />
-            <circle
-              cx="32"
-              cy="32"
-              r="28"
-              fill="none"
-              stroke={colors.accentBlue}
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeDasharray="22 132"
-              strokeDashoffset="11"
-            />
-          </svg>
-        </div>
-
         <h3
           style={{
             fontSize: '16px',
             fontWeight: '600',
             color: colors.textPrimary,
             fontFamily: fonts.body,
-            marginBottom: '8px',
-          }}
-        >
-          Waiting for MCP Server
-        </h3>
-        <p
-          style={{
-            fontSize: '13px',
-            color: colors.textSecondary,
-            fontFamily: fonts.body,
             marginBottom: '20px',
           }}
         >
-          Waiting till MCP server starts...
-        </p>
+          Waiting for MCP server to start
+        </h3>
 
         <div
           style={{
