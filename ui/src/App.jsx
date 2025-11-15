@@ -4,6 +4,7 @@ import RequestDetail from './PacketDetail';
 import RequestFilters from './PacketFilters';
 import CompositeSetup from './CompositeSetup';
 import CompositeLogs from './CompositeLogs';
+import McpPlayground from './components/McpPlayground';
 import TabNavigation from './TabNavigation';
 import IntroTour from './IntroTour';
 import { colors, fonts } from './theme';
@@ -287,6 +288,15 @@ function App() {
           style={{ flex: 1, overflow: 'hidden', width: '100%', height: '100%' }}
         >
           <CompositeSetup />
+        </div>
+      )}
+
+      {activeTab === 'playground' && (
+        <div
+          data-tab-content
+          style={{ flex: 1, overflow: 'hidden', width: '100%', height: '100%' }}
+        >
+          <McpPlayground />
         </div>
       )}
     </div>

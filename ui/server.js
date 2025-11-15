@@ -21,6 +21,7 @@ import { createLogsRoutes } from './server/routes/logs.js';
 import { createConfigRoutes } from './server/routes/config.js';
 import { createCompositeRoutes } from './server/routes/composite.js';
 import { createHelpRoutes } from './server/routes/help.js';
+import { createPlaygroundRoutes } from './server/routes/playground.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -77,6 +78,7 @@ export function createUIServer() {
     broadcastLogUpdate
   );
   const helpRoutes = createHelpRoutes();
+  const playgroundRoutes = createPlaygroundRoutes();
 
   app.get('/api/requests', requestsRoutes.getRequests);
   app.get('/api/packets', requestsRoutes.getRequests);
@@ -113,6 +115,8 @@ export function createUIServer() {
   app.get('/api/help/state', helpRoutes.getState);
   app.post('/api/help/dismiss', helpRoutes.dismiss);
   app.post('/api/help/reset', helpRoutes.reset);
+
+  app.post('/api/playground/proxy', playgroundRoutes.proxyRequest);
 
   const cleanup = () => {
     if (processState.mcpSharkProcess) {

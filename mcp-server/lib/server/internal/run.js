@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 
 import { withSession } from './session.js';
 
@@ -11,6 +12,15 @@ export function getInternalServer(
 
   // Parse JSON body for POST requests
   app.use(express.json());
+  app.use(
+    '/mcp',
+    cors({
+      origin: ['*'],
+      methods: ['*'],
+      allowedHeaders: ['*'],
+      exposedHeaders: ['*'],
+    })
+  );
 
   app.all('/mcp', async (req, res) => {
     await withSession(

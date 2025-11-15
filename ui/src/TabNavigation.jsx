@@ -60,6 +60,23 @@ const SettingsIcon = ({ size = 16, color = 'currentColor' }) => (
   </svg>
 );
 
+const PlaygroundIcon = ({ size = 16, color = 'currentColor' }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polygon points="12 2 2 7 12 12 22 7 12 2" />
+    <polyline points="2 17 12 22 22 17" />
+    <polyline points="2 12 12 17 22 12" />
+  </svg>
+);
+
 function TabNavigation({ activeTab, onTabChange }) {
   const tabs = [
     {
@@ -79,6 +96,12 @@ function TabNavigation({ activeTab, onTabChange }) {
       label: 'MCP Server Setup',
       icon: SettingsIcon,
       description: 'Configure and manage MCP Shark server',
+    },
+    {
+      id: 'playground',
+      label: 'MCP Playground',
+      icon: PlaygroundIcon,
+      description: 'Test and interact with MCP tools, prompts, and resources',
     },
   ];
 
@@ -142,7 +165,13 @@ function TabNavigation({ activeTab, onTabChange }) {
               key={tab.id}
               ref={(el) => (tabRefs.current[tab.id] = el)}
               data-tour={
-                tab.id === 'traffic' ? 'traffic-tab' : tab.id === 'logs' ? 'logs-tab' : 'setup-tab'
+                tab.id === 'traffic'
+                  ? 'traffic-tab'
+                  : tab.id === 'logs'
+                    ? 'logs-tab'
+                    : tab.id === 'setup'
+                      ? 'setup-tab'
+                      : 'playground-tab'
               }
               onClick={() => onTabChange(tab.id)}
               style={{
