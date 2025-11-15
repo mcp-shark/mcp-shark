@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { colors, fonts } from '../theme';
+import anime from 'animejs';
 
 function McpPlayground() {
   const [activeSection, setActiveSection] = useState('tools');
@@ -18,12 +19,73 @@ function McpPlayground() {
   const [resourceResult, setResourceResult] = useState(null);
   const [serverStatus, setServerStatus] = useState(null);
   const [sessionId, setSessionId] = useState(null);
+  const [showLoadingModal, setShowLoadingModal] = useState(false);
+  const [toolsLoading, setToolsLoading] = useState(false);
+  const [promptsLoading, setPromptsLoading] = useState(false);
+  const [resourcesLoading, setResourcesLoading] = useState(false);
+  const [toolsLoaded, setToolsLoaded] = useState(false);
+  const [promptsLoaded, setPromptsLoaded] = useState(false);
+  const [resourcesLoaded, setResourcesLoaded] = useState(false);
+  const loadingModalRef = useRef(null);
+  const spinnerRef = useRef(null);
+  const dotsRef = useRef([]);
 
   useEffect(() => {
     checkServerStatus();
     const interval = setInterval(checkServerStatus, 2000);
     return () => clearInterval(interval);
   }, []);
+
+  // Animate loading modal
+  useEffect(() => {
+    if (showLoadingModal && loadingModalRef.current) {
+      // Fade in modal
+      anime({
+        targets: loadingModalRef.current,
+        opacity: [0, 1],
+        scale: [0.9, 1],
+        duration: 400,
+        easing: 'easeOutExpo',
+      });
+
+      // Animate spinner
+      if (spinnerRef.current) {
+        anime({
+          targets: spinnerRef.current,
+          rotate: 360,
+          duration: 2000,
+          loop: true,
+          easing: 'linear',
+        });
+      }
+
+      // Animate dots
+      if (dotsRef.current.length > 0) {
+        anime({
+          targets: dotsRef.current,
+          translateY: [0, -10, 0],
+          duration: 1200,
+          delay: anime.stagger(200),
+          loop: true,
+          easing: 'easeInOutQuad',
+        });
+      }
+    } else if (!showLoadingModal && loadingModalRef.current) {
+      // Fade out modal
+      anime({
+        targets: loadingModalRef.current,
+        opacity: [1, 0],
+        scale: [1, 0.9],
+        duration: 300,
+        easing: 'easeInExpo',
+        complete: () => {
+          if (loadingModalRef.current) {
+            loadingModalRef.current.style.display = 'none';
+          }
+        },
+      });
+    }
+  }, [showLoadingModal]);
 
   // Wait a bit after server becomes ready before auto-loading
   useEffect(() => {
@@ -40,9 +102,23 @@ function McpPlayground() {
     try {
       const res = await fetch('/api/composite/status');
       const data = await res.json();
+      const wasRunning = serverStatus?.running;
       setServerStatus(data);
+
+      // Show loading modal if server is not running (user might be starting it)
+      // Hide it when server becomes ready
+      if (!data.running) {
+        // Only show if we haven't shown it yet or if it was running before (restarting)
+        if (!showLoadingModal || wasRunning) {
+          setShowLoadingModal(true);
+        }
+      } else if (data.running && showLoadingModal) {
+        // Hide loading modal when server is ready
+        setShowLoadingModal(false);
+      }
     } catch (err) {
       setServerStatus({ running: false });
+      // Don't show modal on fetch errors, just update status
     }
   };
 
@@ -88,29 +164,53 @@ function McpPlayground() {
   };
 
   const loadTools = async () => {
+    setToolsLoading(true);
+    setError(null);
     try {
       const result = await makeMcpRequest('tools/list');
       setTools(result?.tools || []);
+      setToolsLoaded(true);
     } catch (err) {
+      const errorMsg = err.message || 'Failed to load tools';
+      setError(`tools: ${errorMsg}`);
+      setToolsLoaded(true);
       console.error('Failed to load tools:', err);
+    } finally {
+      setToolsLoading(false);
     }
   };
 
   const loadPrompts = async () => {
+    setPromptsLoading(true);
+    setError(null);
     try {
       const result = await makeMcpRequest('prompts/list');
       setPrompts(result?.prompts || []);
+      setPromptsLoaded(true);
     } catch (err) {
+      const errorMsg = err.message || 'Failed to load prompts';
+      setError(`prompts: ${errorMsg}`);
+      setPromptsLoaded(true);
       console.error('Failed to load prompts:', err);
+    } finally {
+      setPromptsLoading(false);
     }
   };
 
   const loadResources = async () => {
+    setResourcesLoading(true);
+    setError(null);
     try {
       const result = await makeMcpRequest('resources/list');
       setResources(result?.resources || []);
+      setResourcesLoaded(true);
     } catch (err) {
+      const errorMsg = err.message || 'Failed to load resources';
+      setError(`resources: ${errorMsg}`);
+      setResourcesLoaded(true);
       console.error('Failed to load resources:', err);
+    } finally {
+      setResourcesLoading(false);
     }
   };
 
@@ -175,44 +275,57 @@ function McpPlayground() {
   };
 
   useEffect(() => {
-    // Only auto-load if server is running
+    // Auto-load when switching to a section if server is running and not already loaded
     if (!serverStatus?.running) return;
 
-    if (activeSection === 'tools' && tools.length === 0) {
-      // Don't auto-load tools - let user click the button after server is ready
-      // loadTools();
-    } else if (activeSection === 'prompts' && prompts.length === 0) {
-      // Don't auto-load prompts
-      // loadPrompts();
-    } else if (activeSection === 'resources' && resources.length === 0) {
-      // Don't auto-load resources
-      // loadResources();
-    }
-  }, [activeSection, serverStatus?.running]);
+    // Small delay to ensure tab switch animation completes
+    const timer = setTimeout(() => {
+      if (activeSection === 'tools' && !toolsLoaded && !toolsLoading) {
+        loadTools();
+      } else if (activeSection === 'prompts' && !promptsLoaded && !promptsLoading) {
+        loadPrompts();
+      } else if (activeSection === 'resources' && !resourcesLoaded && !resourcesLoading) {
+        loadResources();
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [
+    activeSection,
+    serverStatus?.running,
+    toolsLoaded,
+    promptsLoaded,
+    resourcesLoaded,
+    toolsLoading,
+    promptsLoading,
+    resourcesLoading,
+  ]);
 
   const renderTools = () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '100%' }}>
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
         <button
           onClick={loadTools}
-          disabled={loading}
+          disabled={loading || toolsLoading}
           style={{
             padding: '8px 16px',
             background: colors.buttonPrimary,
             color: colors.textInverse,
             border: 'none',
             borderRadius: '6px',
-            cursor: loading ? 'not-allowed' : 'pointer',
+            cursor: loading || toolsLoading ? 'not-allowed' : 'pointer',
             fontFamily: fonts.body,
             fontSize: '13px',
             fontWeight: '500',
-            opacity: loading ? 0.6 : 1,
+            opacity: loading || toolsLoading ? 0.6 : 1,
           }}
         >
-          {loading ? 'Loading...' : 'Refresh Tools'}
+          {toolsLoading ? 'Loading...' : 'Refresh Tools'}
         </button>
         <span style={{ color: colors.textSecondary, fontSize: '13px' }}>
-          {tools.length} tool{tools.length !== 1 ? 's' : ''} available
+          {toolsLoading
+            ? 'Loading tools...'
+            : `${tools.length} tool${tools.length !== 1 ? 's' : ''} available`}
         </span>
       </div>
 
@@ -244,9 +357,65 @@ function McpPlayground() {
               flex: 1,
               overflow: 'auto',
               background: colors.bgCard,
+              position: 'relative',
             }}
           >
-            {tools.length === 0 ? (
+            {!serverStatus?.running ? (
+              <div
+                style={{
+                  padding: '40px',
+                  textAlign: 'center',
+                  color: colors.textSecondary,
+                  fontSize: '13px',
+                }}
+              >
+                <div
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    margin: '0 auto 16px',
+                    border: `3px solid ${colors.borderLight}`,
+                    borderTop: `3px solid ${colors.accentBlue}`,
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                  }}
+                />
+                Waiting for MCP server to start...
+              </div>
+            ) : toolsLoading || !toolsLoaded ? (
+              <div
+                style={{
+                  padding: '40px',
+                  textAlign: 'center',
+                  color: colors.textSecondary,
+                  fontSize: '13px',
+                }}
+              >
+                <div
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    margin: '0 auto 16px',
+                    border: `3px solid ${colors.borderLight}`,
+                    borderTop: `3px solid ${colors.accentBlue}`,
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                  }}
+                />
+                Loading tools...
+              </div>
+            ) : error && error.includes('tools:') ? (
+              <div
+                style={{
+                  padding: '24px',
+                  textAlign: 'center',
+                  color: colors.error,
+                  fontSize: '13px',
+                }}
+              >
+                Error loading tools: {error.replace('tools: ', '')}
+              </div>
+            ) : tools.length === 0 ? (
               <div
                 style={{
                   padding: '24px',
@@ -255,7 +424,7 @@ function McpPlayground() {
                   fontSize: '13px',
                 }}
               >
-                No tools available. Make sure the MCP server is running.
+                No tools available.
               </div>
             ) : (
               tools.map((tool, idx) => (
@@ -443,24 +612,26 @@ function McpPlayground() {
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
         <button
           onClick={loadPrompts}
-          disabled={loading}
+          disabled={loading || promptsLoading}
           style={{
             padding: '8px 16px',
             background: colors.buttonPrimary,
             color: colors.textInverse,
             border: 'none',
             borderRadius: '6px',
-            cursor: loading ? 'not-allowed' : 'pointer',
+            cursor: loading || promptsLoading ? 'not-allowed' : 'pointer',
             fontFamily: fonts.body,
             fontSize: '13px',
             fontWeight: '500',
-            opacity: loading ? 0.6 : 1,
+            opacity: loading || promptsLoading ? 0.6 : 1,
           }}
         >
-          {loading ? 'Loading...' : 'Refresh Prompts'}
+          {promptsLoading ? 'Loading...' : 'Refresh Prompts'}
         </button>
         <span style={{ color: colors.textSecondary, fontSize: '13px' }}>
-          {prompts.length} prompt{prompts.length !== 1 ? 's' : ''} available
+          {promptsLoading
+            ? 'Loading prompts...'
+            : `${prompts.length} prompt${prompts.length !== 1 ? 's' : ''} available`}
         </span>
       </div>
 
@@ -492,9 +663,65 @@ function McpPlayground() {
               flex: 1,
               overflow: 'auto',
               background: colors.bgCard,
+              position: 'relative',
             }}
           >
-            {prompts.length === 0 ? (
+            {!serverStatus?.running ? (
+              <div
+                style={{
+                  padding: '40px',
+                  textAlign: 'center',
+                  color: colors.textSecondary,
+                  fontSize: '13px',
+                }}
+              >
+                <div
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    margin: '0 auto 16px',
+                    border: `3px solid ${colors.borderLight}`,
+                    borderTop: `3px solid ${colors.accentBlue}`,
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                  }}
+                />
+                Waiting for MCP server to start...
+              </div>
+            ) : promptsLoading || !promptsLoaded ? (
+              <div
+                style={{
+                  padding: '40px',
+                  textAlign: 'center',
+                  color: colors.textSecondary,
+                  fontSize: '13px',
+                }}
+              >
+                <div
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    margin: '0 auto 16px',
+                    border: `3px solid ${colors.borderLight}`,
+                    borderTop: `3px solid ${colors.accentBlue}`,
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                  }}
+                />
+                Loading prompts...
+              </div>
+            ) : error && error.includes('prompts:') ? (
+              <div
+                style={{
+                  padding: '24px',
+                  textAlign: 'center',
+                  color: colors.error,
+                  fontSize: '13px',
+                }}
+              >
+                Error loading prompts: {error.replace('prompts: ', '')}
+              </div>
+            ) : prompts.length === 0 ? (
               <div
                 style={{
                   padding: '24px',
@@ -503,7 +730,7 @@ function McpPlayground() {
                   fontSize: '13px',
                 }}
               >
-                No prompts available. Make sure the MCP server is running.
+                No prompts available.
               </div>
             ) : (
               prompts.map((prompt, idx) => (
@@ -690,24 +917,26 @@ function McpPlayground() {
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
         <button
           onClick={loadResources}
-          disabled={loading}
+          disabled={loading || resourcesLoading}
           style={{
             padding: '8px 16px',
             background: colors.buttonPrimary,
             color: colors.textInverse,
             border: 'none',
             borderRadius: '6px',
-            cursor: loading ? 'not-allowed' : 'pointer',
+            cursor: loading || resourcesLoading ? 'not-allowed' : 'pointer',
             fontFamily: fonts.body,
             fontSize: '13px',
             fontWeight: '500',
-            opacity: loading ? 0.6 : 1,
+            opacity: loading || resourcesLoading ? 0.6 : 1,
           }}
         >
-          {loading ? 'Loading...' : 'Refresh Resources'}
+          {resourcesLoading ? 'Loading...' : 'Refresh Resources'}
         </button>
         <span style={{ color: colors.textSecondary, fontSize: '13px' }}>
-          {resources.length} resource{resources.length !== 1 ? 's' : ''} available
+          {resourcesLoading
+            ? 'Loading resources...'
+            : `${resources.length} resource${resources.length !== 1 ? 's' : ''} available`}
         </span>
       </div>
 
@@ -739,9 +968,65 @@ function McpPlayground() {
               flex: 1,
               overflow: 'auto',
               background: colors.bgCard,
+              position: 'relative',
             }}
           >
-            {resources.length === 0 ? (
+            {!serverStatus?.running ? (
+              <div
+                style={{
+                  padding: '40px',
+                  textAlign: 'center',
+                  color: colors.textSecondary,
+                  fontSize: '13px',
+                }}
+              >
+                <div
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    margin: '0 auto 16px',
+                    border: `3px solid ${colors.borderLight}`,
+                    borderTop: `3px solid ${colors.accentBlue}`,
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                  }}
+                />
+                Waiting for MCP server to start...
+              </div>
+            ) : resourcesLoading || !resourcesLoaded ? (
+              <div
+                style={{
+                  padding: '40px',
+                  textAlign: 'center',
+                  color: colors.textSecondary,
+                  fontSize: '13px',
+                }}
+              >
+                <div
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    margin: '0 auto 16px',
+                    border: `3px solid ${colors.borderLight}`,
+                    borderTop: `3px solid ${colors.accentBlue}`,
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                  }}
+                />
+                Loading resources...
+              </div>
+            ) : error && error.includes('resources:') ? (
+              <div
+                style={{
+                  padding: '24px',
+                  textAlign: 'center',
+                  color: colors.error,
+                  fontSize: '13px',
+                }}
+              >
+                Error loading resources: {error.replace('resources: ', '')}
+              </div>
+            ) : resources.length === 0 ? (
               <div
                 style={{
                   padding: '24px',
@@ -750,7 +1035,7 @@ function McpPlayground() {
                   fontSize: '13px',
                 }}
               >
-                No resources available. Make sure the MCP server is running.
+                No resources available.
               </div>
             ) : (
               resources.map((resource, idx) => (
@@ -907,83 +1192,201 @@ function McpPlayground() {
   );
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        background: colors.bgPrimary,
-        padding: '20px',
-        gap: '16px',
-      }}
-    >
-      {!serverStatus?.running && (
-        <div
-          style={{
-            padding: '12px 16px',
-            background: colors.warning,
-            color: colors.textInverse,
-            borderRadius: '6px',
-            fontSize: '13px',
-            fontFamily: fonts.body,
-          }}
-        >
-          ⚠️ MCP server is not running. Please start it from the Setup tab.
-        </div>
-      )}
-
-      {error && (
-        <div
-          style={{
-            padding: '12px 16px',
-            background: colors.error,
-            color: colors.textInverse,
-            borderRadius: '6px',
-            fontSize: '13px',
-            fontFamily: fonts.body,
-          }}
-        >
-          Error: {error}
-        </div>
-      )}
-
+    <>
+      <style>
+        {`
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+        `}
+      </style>
       <div
         style={{
           display: 'flex',
-          gap: '8px',
-          borderBottom: `1px solid ${colors.borderLight}`,
+          flexDirection: 'column',
+          height: '100%',
+          background: colors.bgPrimary,
+          padding: '20px',
+          gap: '16px',
+          position: 'relative',
         }}
       >
-        {['tools', 'prompts', 'resources'].map((section) => (
-          <button
-            key={section}
-            onClick={() => setActiveSection(section)}
+        {/* Loading Modal */}
+        {showLoadingModal && (
+          <div
+            ref={loadingModalRef}
             style={{
-              padding: '10px 18px',
-              background: activeSection === section ? colors.bgSecondary : 'transparent',
-              border: 'none',
-              borderBottom: `2px solid ${activeSection === section ? colors.accentBlue : 'transparent'}`,
-              color: activeSection === section ? colors.textPrimary : colors.textSecondary,
-              cursor: 'pointer',
-              fontSize: '13px',
-              fontFamily: fonts.body,
-              fontWeight: activeSection === section ? '500' : '400',
-              textTransform: 'capitalize',
-              borderRadius: '6px 6px 0 0',
-              transition: 'all 0.2s',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(245, 243, 240, 0.9)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+              borderRadius: '8px',
+              backdropFilter: 'blur(2px)',
             }}
           >
-            {section}
-          </button>
-        ))}
-      </div>
+            <div
+              style={{
+                background: colors.bgCard,
+                borderRadius: '16px',
+                padding: '32px',
+                boxShadow: `0 8px 32px ${colors.shadowMd}`,
+                maxWidth: '320px',
+                width: '90%',
+                textAlign: 'center',
+              }}
+            >
+              {/* Animated Spinner */}
+              <div
+                ref={spinnerRef}
+                style={{
+                  width: '48px',
+                  height: '48px',
+                  margin: '0 auto 20px',
+                  position: 'relative',
+                }}
+              >
+                <svg
+                  width="48"
+                  height="48"
+                  viewBox="0 0 64 64"
+                  style={{ position: 'absolute', top: 0, left: 0 }}
+                >
+                  <circle
+                    cx="32"
+                    cy="32"
+                    r="28"
+                    fill="none"
+                    stroke={colors.accentBlue}
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeDasharray="44 132"
+                    opacity="0.3"
+                  />
+                  <circle
+                    cx="32"
+                    cy="32"
+                    r="28"
+                    fill="none"
+                    stroke={colors.accentBlue}
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeDasharray="22 132"
+                    strokeDashoffset="11"
+                  />
+                </svg>
+              </div>
 
-      <div style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
-        {activeSection === 'tools' && renderTools()}
-        {activeSection === 'prompts' && renderPrompts()}
-        {activeSection === 'resources' && renderResources()}
+              {/* Loading Text */}
+              <h3
+                style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: colors.textPrimary,
+                  fontFamily: fonts.body,
+                  marginBottom: '8px',
+                }}
+              >
+                Waiting for MCP Server
+              </h3>
+              <p
+                style={{
+                  fontSize: '13px',
+                  color: colors.textSecondary,
+                  fontFamily: fonts.body,
+                  marginBottom: '20px',
+                }}
+              >
+                Waiting till MCP server starts...
+              </p>
+
+              {/* Animated Dots */}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  gap: '8px',
+                }}
+              >
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    ref={(el) => {
+                      if (el) dotsRef.current[i] = el;
+                    }}
+                    style={{
+                      width: '12px',
+                      height: '12px',
+                      borderRadius: '50%',
+                      background: colors.accentBlue,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Only show top-level error if it's not section-specific */}
+        {error && !error.includes(':') && (
+          <div
+            style={{
+              padding: '12px 16px',
+              background: colors.error,
+              color: colors.textInverse,
+              borderRadius: '6px',
+              fontSize: '13px',
+              fontFamily: fonts.body,
+            }}
+          >
+            Error: {error}
+          </div>
+        )}
+
+        <div
+          style={{
+            display: 'flex',
+            gap: '8px',
+            borderBottom: `1px solid ${colors.borderLight}`,
+          }}
+        >
+          {['tools', 'prompts', 'resources'].map((section) => (
+            <button
+              key={section}
+              onClick={() => setActiveSection(section)}
+              style={{
+                padding: '10px 18px',
+                background: activeSection === section ? colors.bgSecondary : 'transparent',
+                border: 'none',
+                borderBottom: `2px solid ${activeSection === section ? colors.accentBlue : 'transparent'}`,
+                color: activeSection === section ? colors.textPrimary : colors.textSecondary,
+                cursor: 'pointer',
+                fontSize: '13px',
+                fontFamily: fonts.body,
+                fontWeight: activeSection === section ? '500' : '400',
+                textTransform: 'capitalize',
+                borderRadius: '6px 6px 0 0',
+                transition: 'all 0.2s',
+              }}
+            >
+              {section}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
+          {activeSection === 'tools' && renderTools()}
+          {activeSection === 'prompts' && renderPrompts()}
+          {activeSection === 'resources' && renderResources()}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
