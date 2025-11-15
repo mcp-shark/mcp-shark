@@ -1,6 +1,6 @@
 import { colors, fonts } from '../theme';
 
-function BackupList({ backups, loadingBackups, onRefresh, onRestore }) {
+function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onDelete }) {
   if (backups.length === 0) {
     return null;
   }
@@ -50,7 +50,8 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore }) {
           lineHeight: '1.4',
         }}
       >
-        Restore your original MCP configuration files from backups created when starting MCP Shark.
+        View, restore, or delete backups of your MCP configuration files. Backups are created
+        automatically when starting MCP Shark.
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {backups.map((backup, idx) => (
@@ -78,31 +79,86 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore }) {
                 {backup.displayPath}
               </div>
               <div style={{ color: '#858585', fontSize: '11px' }}>
-                Created: {new Date(backup.createdAt).toLocaleString()} • Size:{' '}
+                Created: {new Date(backup.modifiedAt || backup.createdAt).toLocaleString()} • Size:{' '}
                 {(backup.size / 1024).toFixed(2)} KB
               </div>
             </div>
-            <button
-              onClick={() => onRestore(backup.backupPath)}
-              style={{
-                padding: '6px 12px',
-                background: '#0e639c',
-                border: '1px solid #0e639c',
-                color: '#ffffff',
-                cursor: 'pointer',
-                fontSize: '12px',
-                borderRadius: '4px',
-                fontWeight: '500',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#1177bb';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#0e639c';
-              }}
-            >
-              Restore
-            </button>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button
+                onClick={() => onView(backup.backupPath)}
+                style={{
+                  padding: '6px 12px',
+                  background: 'transparent',
+                  border: `1px solid ${colors.borderMedium}`,
+                  color: colors.textSecondary,
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  borderRadius: '4px',
+                  fontWeight: '500',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = colors.bgCard;
+                  e.currentTarget.style.borderColor = colors.borderLight;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.borderColor = colors.borderMedium;
+                }}
+                title="View backup content"
+              >
+                View
+              </button>
+              <button
+                onClick={() => {
+                  if (confirm('Are you sure you want to delete this backup?')) {
+                    onDelete(backup.backupPath);
+                  }
+                }}
+                style={{
+                  padding: '6px 12px',
+                  background: 'transparent',
+                  border: `1px solid ${colors.borderMedium}`,
+                  color: '#f48771',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  borderRadius: '4px',
+                  fontWeight: '500',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#3a1f1a';
+                  e.currentTarget.style.borderColor = '#f48771';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.borderColor = colors.borderMedium;
+                }}
+                title="Delete backup"
+              >
+                Delete
+              </button>
+              <button
+                onClick={() => onRestore(backup.backupPath, backup.originalPath)}
+                style={{
+                  padding: '6px 12px',
+                  background: '#0e639c',
+                  border: '1px solid #0e639c',
+                  color: '#ffffff',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  borderRadius: '4px',
+                  fontWeight: '500',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#1177bb';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#0e639c';
+                }}
+                title="Restore this backup"
+              >
+                Restore
+              </button>
+            </div>
           </div>
         ))}
       </div>

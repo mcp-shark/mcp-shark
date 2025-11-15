@@ -140,7 +140,7 @@ export function createCompositeRoutes(
         console.log('MCP Shark server is ready!');
 
         const selectedServiceNames = getSelectedServiceNames(originalConfig, selectedServices);
-        const updatedConfig = updateConfigFile(
+        const { updatedConfig, backupPath: createdBackupPath } = updateConfigFile(
           originalConfig,
           selectedServiceNames,
           fileData.resolvedFilePath,
@@ -159,7 +159,7 @@ export function createCompositeRoutes(
           convertedConfig,
           updatedConfig,
           filePath: fileData.resolvedFilePath || null,
-          backupPath: fileData.resolvedFilePath ? `${fileData.resolvedFilePath}.backup` : null,
+          backupPath: createdBackupPath || null,
         });
       } catch (waitError) {
         console.error('MCP Shark server did not start in time:', waitError);

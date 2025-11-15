@@ -37,6 +37,13 @@ function CompositeSetup() {
     handleViewConfig,
     setViewingConfig,
     setConfigContent,
+    viewingBackup,
+    backupContent,
+    loadingBackup,
+    handleViewBackup,
+    handleDeleteBackup,
+    setViewingBackup,
+    setBackupContent,
   } = useConfigManagement();
 
   useEffect(() => {
@@ -45,7 +52,7 @@ function CompositeSetup() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleRestore = async (backupPath) => {
+  const handleRestore = async (backupPath, originalPath) => {
     if (
       !confirm(
         'Are you sure you want to restore this backup? This will overwrite the current config file.'
@@ -58,7 +65,7 @@ function CompositeSetup() {
       const res = await fetch('/api/config/restore', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ backupPath }),
+        body: JSON.stringify({ backupPath, originalPath }),
       });
 
       const data = await res.json();
@@ -73,6 +80,17 @@ function CompositeSetup() {
       }
     } catch (err) {
       setError(err.message || 'Failed to restore backup');
+      setMessage(null);
+    }
+  };
+
+  const handleDelete = async (backupPath) => {
+    const success = await handleDeleteBackup(backupPath);
+    if (success) {
+      setMessage('Backup deleted successfully');
+      setError(null);
+    } else {
+      setError('Failed to delete backup');
       setMessage(null);
     }
   };
@@ -239,6 +257,8 @@ function CompositeSetup() {
           loadingBackups={loadingBackups}
           onRefresh={loadBackups}
           onRestore={handleRestore}
+          onView={handleViewBackup}
+          onDelete={handleDelete}
         />
 
         <WhatThisDoesSection filePath={filePath} updatePath={updatePath} />
@@ -248,9 +268,14 @@ function CompositeSetup() {
         viewingConfig={viewingConfig}
         configContent={configContent}
         loadingConfig={loadingConfig}
+        viewingBackup={viewingBackup}
+        backupContent={backupContent}
+        loadingBackup={loadingBackup}
         onClose={() => {
           setViewingConfig(null);
           setConfigContent(null);
+          setViewingBackup(null);
+          setBackupContent(null);
         }}
       />
     </div>

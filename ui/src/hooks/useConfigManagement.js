@@ -8,6 +8,9 @@ export function useConfigManagement() {
   const [viewingConfig, setViewingConfig] = useState(null);
   const [configContent, setConfigContent] = useState(null);
   const [loadingConfig, setLoadingConfig] = useState(false);
+  const [viewingBackup, setViewingBackup] = useState(null);
+  const [backupContent, setBackupContent] = useState(null);
+  const [loadingBackup, setLoadingBackup] = useState(false);
 
   const detectConfigPaths = async () => {
     setDetecting(true);
@@ -53,6 +56,45 @@ export function useConfigManagement() {
     }
   };
 
+  const handleViewBackup = async (backupPath) => {
+    setLoadingBackup(true);
+    setViewingBackup(backupPath);
+    try {
+      const res = await fetch(
+        `/api/config/backup/view?backupPath=${encodeURIComponent(backupPath)}`
+      );
+      const data = await res.json();
+      if (res.ok) {
+        setBackupContent(data);
+      } else {
+        setBackupContent(null);
+      }
+    } catch (err) {
+      setBackupContent(null);
+    } finally {
+      setLoadingBackup(false);
+    }
+  };
+
+  const handleDeleteBackup = async (backupPath) => {
+    try {
+      const res = await fetch('/api/config/backup/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ backupPath }),
+      });
+
+      if (res.ok) {
+        await loadBackups();
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Failed to delete backup:', err);
+      return false;
+    }
+  };
+
   useEffect(() => {
     detectConfigPaths();
     loadBackups();
@@ -71,5 +113,12 @@ export function useConfigManagement() {
     handleViewConfig,
     setViewingConfig,
     setConfigContent,
+    viewingBackup,
+    backupContent,
+    loadingBackup,
+    handleViewBackup,
+    handleDeleteBackup,
+    setViewingBackup,
+    setBackupContent,
   };
 }

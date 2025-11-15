@@ -1,9 +1,24 @@
 import { colors, fonts } from '../theme';
 
-function ConfigViewerModal({ viewingConfig, configContent, loadingConfig, onClose }) {
-  if (!viewingConfig) {
+function ConfigViewerModal({
+  viewingConfig,
+  configContent,
+  loadingConfig,
+  onClose,
+  viewingBackup,
+  backupContent,
+  loadingBackup,
+}) {
+  const isViewingBackup = viewingBackup !== null;
+  const isViewingConfig = viewingConfig !== null;
+
+  if (!isViewingConfig && !isViewingBackup) {
     return null;
   }
+
+  const content = isViewingBackup ? backupContent : configContent;
+  const loading = isViewingBackup ? loadingBackup : loadingConfig;
+  const title = isViewingBackup ? 'Backup File' : 'MCP Configuration File';
 
   return (
     <div
@@ -54,10 +69,17 @@ function ConfigViewerModal({ viewingConfig, configContent, loadingConfig, onClos
                 color: colors.textPrimary,
               }}
             >
-              MCP Configuration File
+              {title}
             </h3>
-            {configContent && (
-              <div style={{ fontSize: '12px', color: '#858585' }}>{configContent.displayPath}</div>
+            {content && (
+              <div style={{ fontSize: '12px', color: '#858585' }}>
+                {content.displayPath}
+                {isViewingBackup && content.createdAt && (
+                  <span style={{ marginLeft: '12px', color: '#666' }}>
+                    Created: {new Date(content.createdAt).toLocaleString()}
+                  </span>
+                )}
+              </div>
             )}
           </div>
           <button
@@ -86,9 +108,9 @@ function ConfigViewerModal({ viewingConfig, configContent, loadingConfig, onClos
             padding: '20px',
           }}
         >
-          {loadingConfig ? (
+          {loading ? (
             <div style={{ color: '#858585', textAlign: 'center', padding: '40px' }}>Loading...</div>
-          ) : configContent ? (
+          ) : content ? (
             <pre
               style={{
                 background: colors.bgPrimary,
@@ -103,7 +125,7 @@ function ConfigViewerModal({ viewingConfig, configContent, loadingConfig, onClos
                 margin: 0,
               }}
             >
-              {configContent.content}
+              {content.content}
             </pre>
           ) : (
             <div style={{ color: '#f48771', textAlign: 'center', padding: '40px' }}>

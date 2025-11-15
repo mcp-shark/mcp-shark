@@ -2,6 +2,7 @@ import * as path from 'node:path';
 import * as fs from 'node:fs';
 import { homedir } from 'node:os';
 import { extractServices, convertMcpServersToServers } from '../utils/config.js';
+import { createBackupRoutes } from './backups.js';
 
 export function createConfigRoutes() {
   const router = {};
@@ -163,115 +164,12 @@ export function createConfigRoutes() {
     });
   };
 
-  router.listBackups = (req, res) => {
-    try {
-      const backups = [];
-      const homeDir = homedir();
-
-      const commonPaths = [
-        path.join(homeDir, '.cursor', 'mcp.json'),
-        path.join(homeDir, '.codeium', 'windsurf', 'mcp_config.json'),
-      ];
-
-      commonPaths.forEach((configPath) => {
-        const backupPath = `${configPath}.backup`;
-        if (fs.existsSync(backupPath)) {
-          const stats = fs.statSync(backupPath);
-          backups.push({
-            originalPath: configPath,
-            backupPath: backupPath,
-            createdAt: stats.birthtime.toISOString(),
-            size: stats.size,
-            displayPath: configPath.replace(homeDir, '~'),
-          });
-        }
-      });
-
-      const backupDirs = [
-        path.join(homeDir, '.cursor'),
-        path.join(homeDir, '.codeium', 'windsurf'),
-      ];
-
-      backupDirs.forEach((dir) => {
-        if (fs.existsSync(dir)) {
-          const files = fs.readdirSync(dir);
-          files
-            .filter((file) => file.endsWith('.backup'))
-            .forEach((file) => {
-              const backupPath = path.join(dir, file);
-              const originalPath = backupPath.replace('.backup', '');
-              if (!backups.find((b) => b.backupPath === backupPath)) {
-                const stats = fs.statSync(backupPath);
-                backups.push({
-                  originalPath: originalPath,
-                  backupPath: backupPath,
-                  createdAt: stats.birthtime.toISOString(),
-                  size: stats.size,
-                  displayPath: originalPath.replace(homeDir, '~'),
-                });
-              }
-            });
-        }
-      });
-
-      res.json({ backups: backups.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) });
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to list backups', details: error.message });
-    }
-  };
-
-  router.restoreBackup = (req, res, mcpSharkLogs, broadcastLogUpdate) => {
-    try {
-      const { backupPath } = req.body;
-
-      if (!backupPath) {
-        return res.status(400).json({ error: 'backupPath is required' });
-      }
-
-      const resolvedBackupPath = backupPath.startsWith('~')
-        ? path.join(homedir(), backupPath.slice(1))
-        : backupPath;
-
-      if (!fs.existsSync(resolvedBackupPath)) {
-        return res.status(404).json({ error: 'Backup file not found', path: resolvedBackupPath });
-      }
-
-      const originalPath = resolvedBackupPath.replace('.backup', '');
-      const backupContent = fs.readFileSync(resolvedBackupPath, 'utf8');
-      fs.writeFileSync(originalPath, backupContent);
-
-      const timestamp = new Date().toISOString();
-      const restoreLog = {
-        timestamp,
-        type: 'stdout',
-        line: `[RESTORE] Restored config from backup: ${originalPath.replace(homedir(), '~')}`,
-      };
-      mcpSharkLogs.push(restoreLog);
-      if (mcpSharkLogs.length > 10000) {
-        mcpSharkLogs.shift();
-      }
-      broadcastLogUpdate(restoreLog);
-
-      res.json({
-        success: true,
-        message: 'Config file restored from backup',
-        originalPath: originalPath.replace(homedir(), '~'),
-      });
-    } catch (error) {
-      const timestamp = new Date().toISOString();
-      const errorLog = {
-        timestamp,
-        type: 'error',
-        line: `[RESTORE ERROR] Failed to restore: ${error.message}`,
-      };
-      mcpSharkLogs.push(errorLog);
-      if (mcpSharkLogs.length > 10000) {
-        mcpSharkLogs.shift();
-      }
-      broadcastLogUpdate(errorLog);
-      res.status(500).json({ error: 'Failed to restore backup', details: error.message });
-    }
-  };
+  // Delegate backup routes to separate module
+  const backupRoutes = createBackupRoutes();
+  router.listBackups = backupRoutes.listBackups;
+  router.restoreBackup = backupRoutes.restoreBackup;
+  router.viewBackup = backupRoutes.viewBackup;
+  router.deleteBackup = backupRoutes.deleteBackup;
 
   return router;
 }

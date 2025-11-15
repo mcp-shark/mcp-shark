@@ -19,6 +19,7 @@ import { createSessionsRoutes } from './server/routes/sessions.js';
 import { createStatisticsRoutes } from './server/routes/statistics.js';
 import { createLogsRoutes } from './server/routes/logs.js';
 import { createConfigRoutes } from './server/routes/config.js';
+import { createBackupRoutes } from './server/routes/backups.js';
 import { createCompositeRoutes } from './server/routes/composite.js';
 import { createHelpRoutes } from './server/routes/help.js';
 import { createPlaygroundRoutes } from './server/routes/playground.js';
@@ -70,6 +71,7 @@ export function createUIServer() {
   const statisticsRoutes = createStatisticsRoutes(db);
   const logsRoutes = createLogsRoutes(mcpSharkLogs, broadcastLogUpdate);
   const configRoutes = createConfigRoutes();
+  const backupRoutes = createBackupRoutes();
   const getMcpSharkProcess = () => processState.mcpSharkProcess;
   const compositeRoutes = createCompositeRoutes(
     getMcpSharkProcess,
@@ -101,9 +103,13 @@ export function createUIServer() {
   app.post('/api/config/services', configRoutes.extractServices);
   app.get('/api/config/read', configRoutes.readConfig);
   app.get('/api/config/detect', configRoutes.detectConfig);
-  app.get('/api/config/backups', configRoutes.listBackups);
+  app.get('/api/config/backups', backupRoutes.listBackups);
+  app.get('/api/config/backup/view', backupRoutes.viewBackup);
   app.post('/api/config/restore', (req, res) => {
-    configRoutes.restoreBackup(req, res, mcpSharkLogs, broadcastLogUpdate);
+    backupRoutes.restoreBackup(req, res, mcpSharkLogs, broadcastLogUpdate);
+  });
+  app.post('/api/config/backup/delete', (req, res) => {
+    backupRoutes.deleteBackup(req, res, mcpSharkLogs, broadcastLogUpdate);
   });
 
   app.post('/api/composite/setup', compositeRoutes.setup);
