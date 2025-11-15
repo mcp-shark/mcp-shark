@@ -62,9 +62,14 @@ export async function runExternalServer({ logger, name, config }) {
     resources,
     prompts,
     callTool: args => client.callTool.bind(client)(args),
-    readResource: resourceUri =>
-      client.resources.bind(client).read(resourceUri),
-    getPrompt: (promptName, args) =>
-      client.prompts.bind(client).get(promptName, args),
+    readResource: resourceUri => {
+      return client.readResource.bind(client)(resourceUri);
+    },
+    getPrompt: (promptName, args) => {
+      return client.getPrompt.bind(client)({
+        name: promptName,
+        arguments: args,
+      });
+    },
   };
 }
