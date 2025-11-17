@@ -1,5 +1,9 @@
 # MCP Shark
 
+## Mac desktop app: [download](https://github.com/mcp-shark/mcp-shark-app/releases/download/v1.2.0/MCP.Shark-1.2.0-arm64-mac.zip)
+## Windows Desktop app: [download](https://github.com/mcp-shark/mcp-shark-app/releases/download/v1.2.0/MCP.Shark.Setup.1.2.0.exe)
+## Linux: [download](https://github.com/mcp-shark/mcp-shark-app/releases/download/v1.2.0/mcp-shark-app_1.2.0_arm64.deb)
+
 > **⚠️ ALPHA VERSION - STILL TESTING**  
 > This is an alpha version of MCP Shark. The software is still under active development and testing. Features may change, and there may be bugs or incomplete functionality. Use at your own risk.
 
