@@ -1,6 +1,6 @@
 # MCP Shark
 
-## Mac desktop app: [download](https://github.com/mcp-shark/mcp-shark-app/releases/download/v1.2.0/MCP.Shark-1.2.0-arm64-mac.zip)
+## Mac OS desktop app: [download](https://github.com/mcp-shark/mcp-shark-app/releases/download/v1.2.0/MCP.Shark-1.2.0-arm64-mac.zip)
 ## Windows Desktop app: [download](https://github.com/mcp-shark/mcp-shark-app/releases/download/v1.2.0/MCP.Shark.Setup.1.2.0.exe)
 ## Linux: [download](https://github.com/mcp-shark/mcp-shark-app/releases/download/v1.2.0/mcp-shark-app_1.2.0_arm64.deb)
 
