@@ -15,6 +15,12 @@
 
 MCP Shark is a complete solution for aggregating multiple MCP servers (both HTTP and stdio-based) into one cohesive endpoint, with a real-time web interface for monitoring and inspecting all communications. Think of it as **Wireshark for MCP** - providing deep visibility into every request and response.
 
+### How It Works
+
+![MCP Shark Architecture](images/architecture.svg)
+
+### Quick View of Traffic
+
 ![MCP Shark Overview](images/traffic.png)
 
 ## Table of Contents
@@ -422,37 +428,22 @@ Each request/response includes:
 
 ## Architecture
 
-```
-┌─────────────────┐
-│   MCP Client    │
-│   (Your IDE)    │
-└────────┬────────┘
-         │ HTTP
-         ▼
-┌─────────────────────────────────┐
-│   MCP Shark UI (Port 9853)       │
-│   - Real-time monitoring         │
-│   - Server management            │
-│   - Log inspection               │
-│   - Configuration management     │
-│   - MCP Playground               │
-│   - WebSocket updates            │
-│   └──► Manages & starts          │
-└──────────┬───────────────────────┘
-           │ spawns
-           ▼
-┌─────────────────────────────────┐
-│   MCP Shark Server (Port 9851)  │
-│   - Aggregates MCP servers      │
-│   - HTTP & stdio transport      │
-│   - Audit logging (SQLite)      │
-│   - Session management           │
-│   - Request correlation          │
-└──────────┬───────────────────────┘
-           │
-           ├──► HTTP MCP Servers
-           └──► stdio MCP Servers
-```
+![MCP Shark Architecture](images/architecture.svg)
+
+The diagram above illustrates how MCP Shark works:
+
+1. **Your IDE** (Cursor, Windsurf, etc.) connects to MCP Shark Server via HTTP
+2. **MCP Shark Server** (Port 9851) acts as a gateway, aggregating multiple MCP servers
+3. **MCP Servers** (GitHub, Filesystem, Database, Custom) handle the actual requests
+4. **SQLite Database** stores all traffic for audit logging
+5. **MCP Shark UI** (Port 9853) reads from the database and provides real-time monitoring
+
+**Data Flow:**
+
+- Requests flow from IDE → MCP Shark Server → MCP Servers
+- Responses flow back through the same path
+- All traffic is logged to SQLite Database
+- UI reads from database and can control the server
 
 ## Project Structure
 
