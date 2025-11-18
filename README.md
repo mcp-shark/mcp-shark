@@ -1,8 +1,12 @@
 # MCP Shark
 
-### Mac OS desktop app: [download](https://github.com/mcp-shark/mcp-shark-app/releases/download/v1.2.0/MCP.Shark-1.2.0-arm64-mac.zip)
-### Windows Desktop app: [download](https://github.com/mcp-shark/mcp-shark-app/releases/download/v1.2.0/MCP.Shark.Setup.1.2.0.exe)
-### Linux Desktop app: [download](https://github.com/mcp-shark/mcp-shark-app/releases/download/v1.2.0/mcp-shark-app_1.2.0_arm64.deb)
+## Download Desktop App
+
+| Platform    | Download                                                                                                                  |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **macOS**   | [Download (ARM64)](https://github.com/mcp-shark/mcp-shark-app/releases/download/v1.2.0/MCP.Shark-1.2.0-arm64-mac.zip)     |
+| **Windows** | [Download (Installer)](https://github.com/mcp-shark/mcp-shark-app/releases/download/v1.2.0/MCP.Shark.Setup.1.2.0.exe)     |
+| **Linux**   | [Download (ARM64 DEB)](https://github.com/mcp-shark/mcp-shark-app/releases/download/v1.2.0/mcp-shark-app_1.2.0_arm64.deb) |
 
 > **⚠️ ALPHA VERSION - STILL TESTING**  
 > This is an alpha version of MCP Shark. The software is still under active development and testing. Features may change, and there may be bugs or incomplete functionality. Use at your own risk.
@@ -10,6 +14,8 @@
 > **Aggregate multiple Model Context Protocol (MCP) servers into a single unified interface with a powerful monitoring UI**
 
 MCP Shark is a complete solution for aggregating multiple MCP servers (both HTTP and stdio-based) into one cohesive endpoint, with a real-time web interface for monitoring and inspecting all communications. Think of it as **Wireshark for MCP** - providing deep visibility into every request and response.
+
+![MCP Shark Overview](images/traffic.png)
 
 ## Table of Contents
 
@@ -104,6 +110,8 @@ No manual configuration editing required - MCP Shark handles everything for you.
 
 **The MCP Playground is one of MCP Shark's most powerful features** — an interactive testing environment that lets you explore, test, and experiment with all your MCP servers directly from the web UI.
 
+![MCP Playground - Tools](images/playground-tools.png)
+
 ### Interactive Tool Testing
 
 Test any tool from any connected server with custom arguments:
@@ -117,6 +125,8 @@ Test any tool from any connected server with custom arguments:
 ### Prompt Exploration
 
 Explore and test prompts interactively:
+
+![MCP Playground - Prompts](images/playground-prompts.png)
 
 - List all prompts from all connected servers
 - View prompt descriptions and argument schemas
@@ -136,6 +146,8 @@ Browse and read resources from all servers:
 ### Session Management
 
 The Playground maintains session state for stateful interactions:
+
+![MCP Playground - Tool Calls](images/playground-tool-calls.png)
 
 - Automatic session tracking
 - Maintains context across multiple tool calls
@@ -172,6 +184,8 @@ Access the Playground from the "MCP Playground" tab in the UI after starting you
 - **Advanced Filtering** — Filter by method, status, protocol, session, server, direction, and more
 - **Full-Text Search** — Search across all fields including URLs, endpoints, and JSON-RPC methods
 
+![Traffic Monitoring](images/traffic.png)
+
 ### Analytics & Statistics
 
 - **Traffic Statistics** — View request counts, unique sessions, and server activity
@@ -204,6 +218,8 @@ Access the Playground from the "MCP Playground" tab in the UI after starting you
 - **Service Filtering** — Selectively enable/disable specific servers
 
 ## Quick Start
+
+![Quick Start Guide](images/start-server.png)
 
 ### Installation
 
@@ -275,6 +291,8 @@ npm run install:all # Install all dependencies
 
 The main monitoring interface with Wireshark-like capabilities:
 
+![Traffic Capture Interface](images/traffic.png)
+
 - **Real-time Updates**: See requests and responses as they happen
 - **Multiple Views**:
   - **General List**: Flat chronological view of all traffic
@@ -322,6 +340,8 @@ This is the perfect place to explore your MCP servers, test tools, and understan
 
 Server console output and debugging:
 
+![MCP Shark Logs](images/sever-logs.png)
+
 - **Real-time Logs**: See server output as it happens
 - **Log Filtering**: Filter by log type (stdout, stderr, error)
 - **Export Logs**: Export logs as text files
@@ -331,6 +351,8 @@ Server console output and debugging:
 #### MCP Server Setup
 
 Configuration and server management:
+
+![MCP Server Setup](images/start-server.png)
 
 - **Config Detection** — Automatically detects config files from:
   - Cursor: `~/.cursor/mcp.json`
