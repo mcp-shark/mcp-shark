@@ -67,6 +67,22 @@ const CheckIcon = ({ size = 16, color = 'currentColor' }) => (
   </svg>
 );
 
+const CacheIcon = ({ size = 16, color = 'currentColor' }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="10" />
+    <path d="M12 6v6l4 2" />
+  </svg>
+);
+
 const LoadingSpinner = ({ size = 16, color = colors.accentBlue }) => (
   <div
     style={{
@@ -435,7 +451,28 @@ function SmartScan() {
                   letterSpacing: '-0.2px',
                 }}
               >
-                Smart Scan
+                <a
+                  href="https://smart.mcpshark.sh/#get-started"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: colors.textPrimary,
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'color 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = colors.accentBlue;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = colors.textPrimary;
+                  }}
+                >
+                  Smart Scan
+                  <ExternalLinkIcon size={12} color="currentColor" />
+                </a>
               </h1>
               <p
                 style={{
@@ -446,7 +483,7 @@ function SmartScan() {
                   lineHeight: '1.3',
                 }}
               >
-                Security analysis
+                AI-powered security analysis for Model Context Protocol (MCP) servers
               </p>
             </div>
           </div>
@@ -540,7 +577,7 @@ function SmartScan() {
                 )}
               </div>
               <a
-                href="https://smart-scan.mcp-shark.org/tokens"
+                href="https://smart.mcpshark.sh/tokens"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
@@ -1057,9 +1094,10 @@ function SmartScan() {
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '4px',
+                        fontFamily: fonts.body,
                       }}
                     >
-                      <span>📦</span>
+                      <CacheIcon size={12} color={colors.textSecondary} />
                       <span>{scanResults.filter((r) => r.cached).length} cached</span>
                     </span>
                   )}
@@ -1126,13 +1164,17 @@ function SmartScan() {
                               fontSize: '11px',
                               fontWeight: '600',
                               fontFamily: fonts.body,
-                              background: colors.bgTertiary,
+                              background: colors.bgSecondary,
                               color: colors.textSecondary,
                               border: `1px solid ${colors.borderLight}`,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
                             }}
                             title="This result was retrieved from cache"
                           >
-                            📦 Cached
+                            <CacheIcon size={12} color={colors.textSecondary} />
+                            <span>Cached</span>
                           </span>
                         )}
                         <span
@@ -1467,7 +1509,7 @@ function SmartScan() {
                 }}
               >
                 <a
-                  href={`https://smart-scan.mcp-shark.org/scan-results?id=${scanResult.scan_id}`}
+                  href={`https://smart.mcpshark.sh/scan-results?id=${scanResult.scan_id}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
