@@ -108,6 +108,22 @@ export const tourSteps = [
     position: 'bottom',
   },
   {
+    target: '[data-tour="smart-scan-tab"]',
+    title: 'Smart Scan - Security Analysis',
+    content: (
+      <div>
+        <p style={{ margin: '0 0 8px 0' }}>
+          The <strong>Smart Scan</strong> tab provides AI-powered security analysis for your MCP
+          servers. Discover servers, run security scans, and get detailed vulnerability reports.
+        </p>
+        <p style={{ margin: 0, fontSize: '12px', color: '#858585' }}>
+          Scan results are cached automatically, so you won't waste API calls on unchanged servers.
+        </p>
+      </div>
+    ),
+    position: 'bottom',
+  },
+  {
     target: '[data-tour="help-button"]',
     title: 'Need Help?',
     content: (

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import CompositeSetup from './CompositeSetup';
 import CompositeLogs from './CompositeLogs';
 import McpPlayground from './components/McpPlayground';
@@ -27,6 +27,7 @@ function App() {
     setShowTour,
     prevTabRef,
   } = useAppState();
+  const [tourKey, setTourKey] = useState(0);
 
   useEffect(() => {
     if (prevTabRef.current !== activeTab) {
@@ -49,6 +50,7 @@ function App() {
     >
       {showTour && (
         <IntroTour
+          key={tourKey}
           steps={tourSteps}
           onComplete={() => setShowTour(false)}
           onSkip={() => setShowTour(false)}
@@ -68,6 +70,10 @@ function App() {
                 if (activeTab !== 'traffic') {
                   setActiveTab('traffic');
                 }
+              } else if (step.target === '[data-tour="smart-scan-tab"]') {
+                if (activeTab !== 'smart-scan') {
+                  setActiveTab('smart-scan');
+                }
               }
             }
           }}
@@ -75,8 +81,21 @@ function App() {
       )}
       <div style={{ position: 'relative' }} data-tour="tabs">
         <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
-        <HelpButton onClick={() => setShowTour(true)} />
       </div>
+      <HelpButton
+        onClick={() => {
+          if (showTour) {
+            setShowTour(false);
+            setTourKey((prev) => prev + 1);
+            setTimeout(() => {
+              setShowTour(true);
+            }, 100);
+          } else {
+            setTourKey((prev) => prev + 1);
+            setShowTour(true);
+          }
+        }}
+      />
 
       {activeTab === 'traffic' && (
         <TrafficTab
