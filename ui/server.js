@@ -23,6 +23,7 @@ import { createBackupRoutes } from './server/routes/backups.js';
 import { createCompositeRoutes } from './server/routes/composite.js';
 import { createHelpRoutes } from './server/routes/help.js';
 import { createPlaygroundRoutes } from './server/routes/playground.js';
+import { createSmartScanRoutes } from './server/routes/smartscan.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -81,6 +82,7 @@ export function createUIServer() {
   );
   const helpRoutes = createHelpRoutes();
   const playgroundRoutes = createPlaygroundRoutes();
+  const smartScanRoutes = createSmartScanRoutes();
 
   app.get('/api/requests', requestsRoutes.getRequests);
   app.get('/api/packets', requestsRoutes.getRequests);
@@ -123,6 +125,13 @@ export function createUIServer() {
   app.post('/api/help/reset', helpRoutes.reset);
 
   app.post('/api/playground/proxy', playgroundRoutes.proxyRequest);
+
+  app.post('/api/smartscan/scans', smartScanRoutes.createScan);
+  app.get('/api/smartscan/scans/:scanId', smartScanRoutes.getScan);
+  app.get('/api/smartscan/token', smartScanRoutes.getToken);
+  app.post('/api/smartscan/token', smartScanRoutes.saveToken);
+  app.get('/api/smartscan/discover', smartScanRoutes.discoverServers);
+  app.post('/api/smartscan/scans/batch', smartScanRoutes.createBatchScans);
 
   const cleanup = () => {
     if (processState.mcpSharkProcess) {

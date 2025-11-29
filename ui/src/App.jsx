@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import CompositeSetup from './CompositeSetup';
 import CompositeLogs from './CompositeLogs';
 import McpPlayground from './components/McpPlayground';
+import SmartScan from './SmartScan';
 import TabNavigation from './TabNavigation';
 import IntroTour from './IntroTour';
 import HelpButton from './components/App/HelpButton';
@@ -113,6 +114,12 @@ function App() {
           style={{ flex: 1, overflow: 'hidden', width: '100%', height: '100%' }}
         >
           <McpPlayground />
+        </div>
+      )}
+
+      {activeTab === 'smart-scan' && (
+        <div data-tab-content style={{ flex: 1, overflow: 'auto', width: '100%', height: '100%' }}>
+          <SmartScan />
         </div>
       )}
     </div>
