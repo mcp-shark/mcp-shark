@@ -11,7 +11,12 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { WebSocketClientTransport } from '@modelcontextprotocol/sdk/client/websocket.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { convertMcpServersToServers } from '../utils/config.js';
-import { computeMcpHash, getCachedScanResult, storeScanResult } from '../utils/scan-cache.js';
+import {
+  computeMcpHash,
+  getCachedScanResult,
+  storeScanResult,
+  getCachedScanResultsForServer,
+} from '../utils/scan-cache.js';
 
 const API_BASE_URL = 'https://smart.mcpshark.sh';
 
@@ -323,6 +328,57 @@ export function createSmartScanRoutes() {
       console.error('Error discovering servers:', error);
       return res.status(500).json({
         error: 'Failed to discover servers',
+        message: error.message,
+      });
+    }
+  };
+
+  /**
+   * Get cached scan results for discovered servers
+   * POST /api/smartscan/cached-results
+   */
+  router.getCachedResults = async (req, res) => {
+    try {
+      const { servers } = req.body;
+
+      if (!servers || !Array.isArray(servers) || servers.length === 0) {
+        return res.status(400).json({
+          error: 'Servers array is required',
+        });
+      }
+
+      // Get cached results for each server
+      const cachedResults = servers.map((serverData) => {
+        const hash = computeMcpHash(serverData);
+        const cachedResult = getCachedScanResult(hash);
+
+        if (cachedResult) {
+          return {
+            serverName: serverData.name,
+            success: true,
+            data: cachedResult,
+            cached: true,
+            hash,
+          };
+        }
+
+        return {
+          serverName: serverData.name,
+          success: false,
+          data: null,
+          cached: false,
+          hash,
+        };
+      });
+
+      return res.json({
+        success: true,
+        results: cachedResults,
+      });
+    } catch (error) {
+      console.error('Error getting cached results:', error);
+      return res.status(500).json({
+        error: 'Failed to get cached results',
         message: error.message,
       });
     }

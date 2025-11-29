@@ -245,6 +245,34 @@ function SmartScan() {
       // Auto-select all discovered servers
       if (data.servers.length > 0) {
         setSelectedServers(new Set(data.servers.map((s) => s.name)));
+
+        // Load cached results for discovered servers
+        try {
+          const cachedResponse = await fetch('/api/smartscan/cached-results', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              servers: data.servers,
+            }),
+          });
+
+          if (cachedResponse.ok) {
+            const cachedData = await cachedResponse.json();
+            if (cachedData.success && cachedData.results) {
+              // Filter to only successful cached results
+              const validCachedResults = cachedData.results.filter((r) => r.success && r.cached);
+              if (validCachedResults.length > 0) {
+                // Set cached results to display
+                setScanResults(validCachedResults);
+              }
+            }
+          }
+        } catch (err) {
+          // Silently fail - cached results are optional
+          console.debug('Could not load cached results:', err);
+        }
       }
 
       // For backward compatibility, also set mcpData to first server
@@ -981,17 +1009,32 @@ function SmartScan() {
                 marginBottom: '24px',
               }}
             >
-              <h2
-                style={{
-                  fontSize: '20px',
-                  fontWeight: '600',
-                  color: colors.textPrimary,
-                  fontFamily: fonts.body,
-                  margin: 0,
-                }}
-              >
-                Scan Results ({scanResults.length} server{scanResults.length !== 1 ? 's' : ''})
-              </h2>
+              <div>
+                <h2
+                  style={{
+                    fontSize: '20px',
+                    fontWeight: '600',
+                    color: colors.textPrimary,
+                    fontFamily: fonts.body,
+                    margin: 0,
+                    marginBottom: '4px',
+                  }}
+                >
+                  Scan Results ({scanResults.length} server{scanResults.length !== 1 ? 's' : ''})
+                </h2>
+                {scanResults.every((r) => r.cached) && (
+                  <p
+                    style={{
+                      fontSize: '12px',
+                      color: colors.textTertiary,
+                      fontFamily: fonts.body,
+                      margin: 0,
+                    }}
+                  >
+                    Showing cached results. Run a new scan to get the latest analysis.
+                  </p>
+                )}
+              </div>
               {scanResults.length > 0 && (
                 <div
                   style={{

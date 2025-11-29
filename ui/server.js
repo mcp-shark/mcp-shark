@@ -132,6 +132,7 @@ export function createUIServer() {
   app.post('/api/smartscan/token', smartScanRoutes.saveToken);
   app.get('/api/smartscan/discover', smartScanRoutes.discoverServers);
   app.post('/api/smartscan/scans/batch', smartScanRoutes.createBatchScans);
+  app.post('/api/smartscan/cached-results', smartScanRoutes.getCachedResults);
 
   const cleanup = () => {
     if (processState.mcpSharkProcess) {
