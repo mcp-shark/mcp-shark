@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { colors, fonts } from './theme';
+import anime from 'animejs';
 
 const ShieldIcon = ({ size = 24, color = 'currentColor' }) => (
   <svg
@@ -66,6 +67,36 @@ const CheckIcon = ({ size = 16, color = 'currentColor' }) => (
   </svg>
 );
 
+const LoadingSpinner = ({ size = 16, color = colors.accentBlue }) => (
+  <div
+    style={{
+      width: size,
+      height: size,
+      border: `2px solid ${colors.borderLight}`,
+      borderTop: `2px solid ${color}`,
+      borderRadius: '50%',
+      animation: 'spin 0.8s linear infinite',
+    }}
+  />
+);
+
+const EmptyStateIcon = () => (
+  <svg
+    width={64}
+    height={64}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={colors.textTertiary}
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{ opacity: 0.5 }}
+  >
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <path d="M9 12l2 2 4-4" />
+  </svg>
+);
+
 function getRiskLevelColor(riskLevel) {
   if (!riskLevel) return colors.textTertiary;
   switch (riskLevel.toLowerCase()) {
@@ -89,6 +120,7 @@ function SmartScan() {
   const [serverStatus, setServerStatus] = useState(null);
   const [mcpData, setMcpData] = useState(null);
   const [discoveredServers, setDiscoveredServers] = useState([]);
+  const [selectedServers, setSelectedServers] = useState(new Set());
   const [loadingData, setLoadingData] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [scanResult, setScanResult] = useState(null);
@@ -210,6 +242,11 @@ function SmartScan() {
 
       setDiscoveredServers(data.servers);
 
+      // Auto-select all discovered servers
+      if (data.servers.length > 0) {
+        setSelectedServers(new Set(data.servers.map((s) => s.name)));
+      }
+
       // For backward compatibility, also set mcpData to first server
       if (data.servers.length > 0) {
         const firstServer = data.servers[0];
@@ -241,10 +278,18 @@ function SmartScan() {
       return;
     }
 
+    if (selectedServers.size === 0) {
+      setError('Please select at least one server to scan');
+      return;
+    }
+
     setScanning(true);
     setError(null);
     setScanResult(null);
     setScanResults([]);
+
+    // Filter to only selected servers
+    const serversToScan = discoveredServers.filter((server) => selectedServers.has(server.name));
 
     try {
       // Send batch scan requests (one per server)
@@ -255,7 +300,7 @@ function SmartScan() {
         },
         body: JSON.stringify({
           apiToken,
-          servers: discoveredServers,
+          servers: serversToScan,
         }),
       });
 
@@ -304,150 +349,404 @@ function SmartScan() {
       data-tab-content
       style={{
         flex: 1,
-        overflow: 'auto',
-        padding: '48px 32px',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
         background: colors.bgPrimary,
       }}
     >
+      {/* Top Bar - Controls */}
       <div
         style={{
-          maxWidth: '1200px',
-          margin: '0 auto',
+          background: colors.bgCard,
+          borderBottom: `1px solid ${colors.borderLight}`,
+          padding: '16px 24px',
+          boxShadow: `0 2px 4px ${colors.shadowSm}`,
         }}
       >
-        {/* Header */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '24px',
-            marginBottom: '48px',
+            flexWrap: 'wrap',
+          }}
+        >
+          {/* Header */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              marginRight: 'auto',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '40px',
+                height: '40px',
+                borderRadius: '10px',
+                background: `linear-gradient(135deg, ${colors.accentBlue}20, ${colors.accentGreen}20)`,
+                border: `2px solid ${colors.accentBlue}40`,
+                flexShrink: 0,
+              }}
+            >
+              <ShieldIcon size={20} color={colors.accentBlue} />
+            </div>
+            <div>
+              <h1
+                style={{
+                  fontSize: '18px',
+                  fontWeight: '700',
+                  color: colors.textPrimary,
+                  fontFamily: fonts.body,
+                  margin: 0,
+                  letterSpacing: '-0.2px',
+                }}
+              >
+                Smart Scan
+              </h1>
+              <p
+                style={{
+                  fontSize: '11px',
+                  color: colors.textSecondary,
+                  fontFamily: fonts.body,
+                  margin: 0,
+                  lineHeight: '1.3',
+                }}
+              >
+                Security analysis
+              </p>
+            </div>
+          </div>
+
+          {/* Controls Container */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '20px',
+              flexWrap: 'wrap',
+              flex: 1,
+              justifyContent: 'flex-end',
+            }}
+          >
+            {/* API Token Section */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <label
+                style={{
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: colors.textSecondary,
+                  fontFamily: fonts.body,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                API Token:
+              </label>
+              <div style={{ position: 'relative', width: '200px' }}>
+                <input
+                  type="password"
+                  value={apiToken}
+                  onChange={(e) => {
+                    const newToken = e.target.value;
+                    setApiToken(newToken);
+                    // Save token when changed (debounced)
+                    if (saveTokenTimeoutRef.current) {
+                      clearTimeout(saveTokenTimeoutRef.current);
+                    }
+                    if (newToken) {
+                      saveTokenTimeoutRef.current = setTimeout(() => {
+                        saveToken(newToken);
+                      }, 1000);
+                    } else {
+                      // Clear token if input is empty
+                      saveToken('');
+                    }
+                  }}
+                  placeholder="sk_..."
+                  style={{
+                    width: '100%',
+                    padding: '8px 10px',
+                    paddingRight: apiToken ? '28px' : '10px',
+                    border: `1px solid ${apiToken ? colors.accentGreen : colors.borderMedium}`,
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    fontFamily: fonts.body,
+                    background: colors.bgSecondary,
+                    color: colors.textPrimary,
+                    boxSizing: 'border-box',
+                    transition: 'all 0.2s ease',
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = colors.accentBlue;
+                    e.currentTarget.style.boxShadow = `0 0 0 2px ${colors.accentBlue}20`;
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = apiToken
+                      ? colors.accentGreen
+                      : colors.borderMedium;
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                />
+                {apiToken && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      right: '8px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                    }}
+                  >
+                    <CheckIcon size={12} color={colors.accentGreen} />
+                  </div>
+                )}
+              </div>
+              <a
+                href="https://smart-scan.mcp-shark.org/tokens"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '11px',
+                  color: colors.accentBlue,
+                  textDecoration: 'none',
+                  fontFamily: fonts.body,
+                  fontWeight: '500',
+                  whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.textDecoration = 'underline';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.textDecoration = 'none';
+                }}
+              >
+                <span>Get token</span>
+                <ExternalLinkIcon size={10} color={colors.accentBlue} />
+              </a>
+            </div>
+
+            {/* Discover MCP Data Section */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <label
+                style={{
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: colors.textSecondary,
+                  fontFamily: fonts.body,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Servers:
+              </label>
+              <button
+                onClick={discoverMcpData}
+                disabled={loadingData}
+                style={{
+                  padding: '8px 14px',
+                  background: !loadingData ? colors.buttonPrimary : colors.buttonSecondary,
+                  color: !loadingData ? colors.textInverse : colors.textTertiary,
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  fontFamily: fonts.body,
+                  cursor: !loadingData ? 'pointer' : 'not-allowed',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={(e) => {
+                  if (!loadingData) {
+                    e.currentTarget.style.background = colors.buttonPrimaryHover;
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!loadingData) {
+                    e.currentTarget.style.background = colors.buttonPrimary;
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }
+                }}
+              >
+                {loadingData ? (
+                  <>
+                    <LoadingSpinner size={12} />
+                    <span>Discovering...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckIcon size={12} color={colors.textInverse} />
+                    <span>Discover</span>
+                  </>
+                )}
+              </button>
+              {discoveredServers.length > 0 && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '6px 10px',
+                    background: colors.bgTertiary,
+                    borderRadius: '6px',
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    color: colors.textPrimary,
+                    fontFamily: fonts.body,
+                  }}
+                >
+                  <CheckIcon size={12} color={colors.accentGreen} />
+                  <span>
+                    {discoveredServers.length} server{discoveredServers.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Discovered Servers Selection Row */}
+      {discoveredServers.length > 0 && (
+        <div
+          style={{
+            background: colors.bgSecondary,
+            borderBottom: `1px solid ${colors.borderLight}`,
+            padding: '12px 24px',
           }}
         >
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              width: '80px',
-              height: '80px',
-              borderRadius: '16px',
-              background: `linear-gradient(135deg, ${colors.accentBlue}20, ${colors.accentGreen}20)`,
-              border: `2px solid ${colors.accentBlue}40`,
+              gap: '16px',
+              flexWrap: 'wrap',
             }}
           >
-            <ShieldIcon size={40} color={colors.accentBlue} />
-          </div>
-          <div>
-            <h1
+            <div
               style={{
-                fontSize: '36px',
-                fontWeight: '700',
-                color: colors.textPrimary,
-                fontFamily: fonts.body,
-                margin: 0,
-                marginBottom: '12px',
-                letterSpacing: '-0.5px',
-              }}
-            >
-              Smart Scan
-            </h1>
-            <p
-              style={{
-                fontSize: '18px',
+                fontSize: '12px',
+                fontWeight: '600',
                 color: colors.textSecondary,
                 fontFamily: fonts.body,
-                margin: 0,
-                lineHeight: '1.6',
+                whiteSpace: 'nowrap',
               }}
             >
-              AI-powered security analysis for MCP servers
-            </p>
-          </div>
-        </div>
-
-        {/* API Token Section */}
-        <div
-          style={{
-            background: colors.bgCard,
-            border: `1px solid ${colors.borderLight}`,
-            borderRadius: '12px',
-            padding: '20px 24px',
-            marginBottom: '20px',
-            boxShadow: `0 2px 8px ${colors.shadowSm}`,
-          }}
-        >
-          <h2
-            style={{
-              fontSize: '16px',
-              fontWeight: '600',
-              color: colors.textPrimary,
-              fontFamily: fonts.body,
-              marginBottom: '12px',
-            }}
-          >
-            API Token
-          </h2>
-          <div
-            style={{
-              display: 'flex',
-              gap: '12px',
-              alignItems: 'flex-start',
-              flexWrap: 'wrap',
-              marginBottom: '8px',
-            }}
-          >
-            <div style={{ flex: 1, minWidth: '280px' }}>
-              <input
-                type="password"
-                value={apiToken}
-                onChange={(e) => {
-                  const newToken = e.target.value;
-                  setApiToken(newToken);
-                  // Save token when changed (debounced)
-                  if (saveTokenTimeoutRef.current) {
-                    clearTimeout(saveTokenTimeoutRef.current);
-                  }
-                  if (newToken) {
-                    saveTokenTimeoutRef.current = setTimeout(() => {
-                      saveToken(newToken);
-                    }, 1000);
-                  } else {
-                    // Clear token if input is empty
-                    saveToken('');
-                  }
-                }}
-                placeholder="Enter your Smart Scan API token (sk_...)"
-                style={{
-                  width: '100%',
-                  padding: '10px 14px',
-                  border: `1px solid ${colors.borderMedium}`,
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  fontFamily: fonts.body,
-                  background: colors.bgSecondary,
-                  color: colors.textPrimary,
-                  boxSizing: 'border-box',
-                }}
-              />
+              Select servers to scan:
             </div>
-            <a
-              href="https://smart-scan.mcp-shark.org/tokens"
-              target="_blank"
-              rel="noopener noreferrer"
+            <div
               style={{
-                display: 'inline-flex',
+                display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
-                padding: '10px 18px',
+                gap: '12px',
+                flexWrap: 'wrap',
+                flex: 1,
+              }}
+            >
+              {discoveredServers.map((server, idx) => {
+                const isSelected = selectedServers.has(server.name);
+                return (
+                  <label
+                    key={idx}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 12px',
+                      background: isSelected ? colors.bgCard : colors.bgTertiary,
+                      border: `1px solid ${isSelected ? colors.accentBlue : colors.borderLight}`,
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      fontSize: '12px',
+                      fontFamily: fonts.body,
+                      fontWeight: isSelected ? '600' : '500',
+                      color: isSelected ? colors.textPrimary : colors.textSecondary,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = colors.accentBlue;
+                      e.currentTarget.style.boxShadow = `0 2px 4px ${colors.shadowSm}`;
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isSelected) {
+                        e.currentTarget.style.borderColor = colors.borderLight;
+                        e.currentTarget.style.boxShadow = 'none';
+                      }
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={(e) => {
+                        const newSelected = new Set(selectedServers);
+                        if (e.target.checked) {
+                          newSelected.add(server.name);
+                        } else {
+                          newSelected.delete(server.name);
+                        }
+                        setSelectedServers(newSelected);
+                      }}
+                      style={{
+                        width: '16px',
+                        height: '16px',
+                        cursor: 'pointer',
+                        accentColor: colors.accentBlue,
+                      }}
+                    />
+                    <span>{server.name}</span>
+                    <span
+                      style={{
+                        fontSize: '10px',
+                        color: colors.textTertiary,
+                        fontWeight: '400',
+                      }}
+                    >
+                      ({server.tools?.length || 0} tools, {server.resources?.length || 0} resources,{' '}
+                      {server.prompts?.length || 0} prompts)
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+            <button
+              onClick={() => {
+                if (selectedServers.size === discoveredServers.length) {
+                  setSelectedServers(new Set());
+                } else {
+                  setSelectedServers(new Set(discoveredServers.map((s) => s.name)));
+                }
+              }}
+              style={{
+                padding: '6px 12px',
                 background: colors.buttonSecondary,
                 color: colors.textPrimary,
                 border: `1px solid ${colors.borderMedium}`,
-                borderRadius: '8px',
-                textDecoration: 'none',
-                fontSize: '14px',
+                borderRadius: '6px',
+                fontSize: '11px',
                 fontWeight: '600',
                 fontFamily: fonts.body,
+                cursor: 'pointer',
                 transition: 'all 0.2s ease',
                 whiteSpace: 'nowrap',
               }}
@@ -458,200 +757,125 @@ function SmartScan() {
                 e.currentTarget.style.background = colors.buttonSecondary;
               }}
             >
-              <span>Get Token</span>
-              <ExternalLinkIcon size={12} color={colors.textPrimary} />
-            </a>
-          </div>
-          <p
-            style={{
-              fontSize: '12px',
-              color: colors.textTertiary,
-              fontFamily: fonts.body,
-              marginTop: '8px',
-              marginBottom: 0,
-              lineHeight: '1.5',
-            }}
-          >
-            Don't have a token? Sign up at{' '}
-            <a
-              href="https://smart-scan.mcp-shark.org"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: colors.accentBlue, textDecoration: 'none' }}
-            >
-              smart-scan.mcp-shark.org
-            </a>{' '}
-            to get your API token.
-          </p>
-        </div>
-
-        {/* Discover MCP Data Section */}
-        <div
-          style={{
-            background: colors.bgCard,
-            border: `1px solid ${colors.borderLight}`,
-            borderRadius: '12px',
-            padding: '20px 24px',
-            marginBottom: '20px',
-            boxShadow: `0 2px 8px ${colors.shadowSm}`,
-          }}
-        >
-          <h2
-            style={{
-              fontSize: '16px',
-              fontWeight: '600',
-              color: colors.textPrimary,
-              fontFamily: fonts.body,
-              marginBottom: '12px',
-            }}
-          >
-            MCP Server Data
-          </h2>
-          <div
-            style={{
-              display: 'flex',
-              gap: '12px',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              marginBottom: '8px',
-            }}
-          >
+              {selectedServers.size === discoveredServers.length ? 'Deselect All' : 'Select All'}
+            </button>
             <button
-              onClick={discoverMcpData}
-              disabled={loadingData}
+              onClick={runScan}
+              disabled={!apiToken || selectedServers.size === 0 || scanning}
               style={{
-                padding: '10px 20px',
-                background: !loadingData ? colors.buttonPrimary : colors.buttonSecondary,
-                color: !loadingData ? colors.textInverse : colors.textTertiary,
+                padding: '8px 16px',
+                background:
+                  apiToken && selectedServers.size > 0 && !scanning
+                    ? colors.buttonPrimary
+                    : colors.buttonSecondary,
+                color:
+                  apiToken && selectedServers.size > 0 && !scanning
+                    ? colors.textInverse
+                    : colors.textTertiary,
                 border: 'none',
-                borderRadius: '8px',
-                fontSize: '14px',
+                borderRadius: '6px',
+                fontSize: '13px',
                 fontWeight: '600',
                 fontFamily: fonts.body,
-                cursor: !loadingData ? 'pointer' : 'not-allowed',
+                cursor:
+                  apiToken && selectedServers.size > 0 && !scanning ? 'pointer' : 'not-allowed',
                 transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                whiteSpace: 'nowrap',
               }}
               onMouseEnter={(e) => {
-                if (!loadingData) {
+                if (apiToken && selectedServers.size > 0 && !scanning) {
                   e.currentTarget.style.background = colors.buttonPrimaryHover;
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = `0 4px 12px ${colors.shadowMd}`;
                 }
               }}
               onMouseLeave={(e) => {
-                if (!loadingData) {
+                if (apiToken && selectedServers.size > 0 && !scanning) {
                   e.currentTarget.style.background = colors.buttonPrimary;
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'none';
                 }
               }}
             >
-              {loadingData ? 'Discovering...' : 'Discover from Config'}
-            </button>
-            {discoveredServers.length > 0 && (
-              <div
-                style={{
-                  display: 'flex',
-                  gap: '12px',
-                  alignItems: 'center',
-                  fontSize: '13px',
-                  color: colors.textSecondary,
-                  fontFamily: fonts.body,
-                  flexWrap: 'wrap',
-                }}
-              >
-                <span style={{ fontWeight: '500' }}>
-                  ✓ {discoveredServers.length} server{discoveredServers.length !== 1 ? 's' : ''}
-                </span>
-                {discoveredServers.map((server, idx) => (
-                  <span
-                    key={idx}
-                    style={{
-                      padding: '4px 10px',
-                      background: colors.bgTertiary,
-                      borderRadius: '6px',
-                      fontSize: '12px',
-                      border: `1px solid ${colors.borderLight}`,
-                    }}
-                  >
-                    {server.name}: {server.tools?.length || 0} tools,{' '}
-                    {server.resources?.length || 0} resources, {server.prompts?.length || 0} prompts
+              {scanning ? (
+                <>
+                  <LoadingSpinner size={14} color={colors.textInverse} />
+                  <span>
+                    Scanning {selectedServers.size} server{selectedServers.size !== 1 ? 's' : ''}...
                   </span>
-                ))}
-              </div>
-            )}
+                </>
+              ) : (
+                <>
+                  <ShieldIcon
+                    size={14}
+                    color={
+                      apiToken && selectedServers.size > 0
+                        ? colors.textInverse
+                        : colors.textTertiary
+                    }
+                  />
+                  <span>Run Scan ({selectedServers.size})</span>
+                </>
+              )}
+            </button>
           </div>
-          {discoveredServers.length === 0 && !loadingData && (
-            <p
+        </div>
+      )}
+
+      {/* Right Content Area - Results */}
+      <div
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          padding: '32px',
+          background: colors.bgPrimary,
+        }}
+      >
+        {/* Empty State */}
+        {!error && scanResults.length === 0 && !scanResult && !scanning && (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: '400px',
+              textAlign: 'center',
+              padding: '40px',
+            }}
+          >
+            <div style={{ marginBottom: '24px', opacity: 0.6 }}>
+              <EmptyStateIcon />
+            </div>
+            <h3
               style={{
-                fontSize: '13px',
-                color: colors.textTertiary,
+                fontSize: '20px',
+                fontWeight: '600',
+                color: colors.textPrimary,
                 fontFamily: fonts.body,
-                marginTop: '12px',
-                marginBottom: 0,
+                marginBottom: '8px',
               }}
             >
-              Click "Discover from Config" to scan all MCP servers from your configuration file.
+              Ready to Scan
+            </h3>
+            <p
+              style={{
+                fontSize: '14px',
+                color: colors.textSecondary,
+                fontFamily: fonts.body,
+                maxWidth: '400px',
+                lineHeight: '1.6',
+              }}
+            >
+              Configure your API token and discover MCP servers to start security scanning. Results
+              will appear here.
             </p>
-          )}
-        </div>
-
-        {/* Run Scan Section */}
-        <div
-          style={{
-            background: colors.bgCard,
-            border: `1px solid ${colors.borderLight}`,
-            borderRadius: '12px',
-            padding: '20px 24px',
-            marginBottom: '20px',
-            boxShadow: `0 2px 8px ${colors.shadowSm}`,
-          }}
-        >
-          <h2
-            style={{
-              fontSize: '16px',
-              fontWeight: '600',
-              color: colors.textPrimary,
-              fontFamily: fonts.body,
-              marginBottom: '12px',
-            }}
-          >
-            Run Security Scan
-          </h2>
-          <button
-            onClick={runScan}
-            disabled={!apiToken || discoveredServers.length === 0 || scanning}
-            style={{
-              padding: '10px 20px',
-              background:
-                apiToken && discoveredServers.length > 0 && !scanning
-                  ? colors.buttonPrimary
-                  : colors.buttonSecondary,
-              color:
-                apiToken && discoveredServers.length > 0 && !scanning
-                  ? colors.textInverse
-                  : colors.textTertiary,
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontWeight: '600',
-              fontFamily: fonts.body,
-              cursor:
-                apiToken && discoveredServers.length > 0 && !scanning ? 'pointer' : 'not-allowed',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              if (apiToken && discoveredServers.length > 0 && !scanning) {
-                e.currentTarget.style.background = colors.buttonPrimaryHover;
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (apiToken && discoveredServers.length > 0 && !scanning) {
-                e.currentTarget.style.background = colors.buttonPrimary;
-              }
-            }}
-          >
-            {scanning
-              ? `Scanning ${discoveredServers.length} server${discoveredServers.length !== 1 ? 's' : ''}...`
-              : `Run Scan (${discoveredServers.length} server${discoveredServers.length !== 1 ? 's' : ''})`}
-          </button>
-        </div>
+          </div>
+        )}
 
         {/* Error Display */}
         {error && (
@@ -659,39 +883,81 @@ function SmartScan() {
             style={{
               background: colors.bgCard,
               border: `1px solid ${colors.error}`,
-              borderRadius: '16px',
-              padding: '20px 24px',
-              marginBottom: '32px',
+              borderRadius: '12px',
+              padding: '16px 20px',
+              marginBottom: '24px',
               display: 'flex',
-              gap: '16px',
+              gap: '12px',
               alignItems: 'flex-start',
             }}
           >
-            <AlertIcon size={22} color={colors.error} style={{ flexShrink: 0, marginTop: '2px' }} />
+            <AlertIcon size={20} color={colors.error} style={{ flexShrink: 0, marginTop: '2px' }} />
             <div style={{ flex: 1 }}>
               <p
                 style={{
-                  fontSize: '16px',
+                  fontSize: '14px',
                   color: colors.error,
                   fontFamily: fonts.body,
                   margin: 0,
                   fontWeight: '600',
-                  marginBottom: '6px',
+                  marginBottom: '4px',
                 }}
               >
                 Error
               </p>
               <p
                 style={{
-                  fontSize: '14px',
+                  fontSize: '13px',
                   color: colors.textSecondary,
                   fontFamily: fonts.body,
                   margin: 0,
-                  lineHeight: '1.6',
+                  lineHeight: '1.5',
                 }}
               >
                 {error}
               </p>
+            </div>
+          </div>
+        )}
+
+        {/* Scanning Progress Indicator */}
+        {scanning && (
+          <div
+            style={{
+              background: colors.bgCard,
+              border: `1px solid ${colors.borderLight}`,
+              borderRadius: '12px',
+              padding: '24px',
+              marginBottom: '24px',
+              boxShadow: `0 2px 8px ${colors.shadowSm}`,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <LoadingSpinner size={20} />
+              <div style={{ flex: 1 }}>
+                <p
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.textPrimary,
+                    fontFamily: fonts.body,
+                    margin: 0,
+                    marginBottom: '4px',
+                  }}
+                >
+                  Scanning {selectedServers.size} server{selectedServers.size !== 1 ? 's' : ''}...
+                </p>
+                <p
+                  style={{
+                    fontSize: '12px',
+                    color: colors.textSecondary,
+                    fontFamily: fonts.body,
+                    margin: 0,
+                  }}
+                >
+                  Analyzing security vulnerabilities and risks
+                </p>
+              </div>
             </div>
           </div>
         )}
@@ -702,9 +968,9 @@ function SmartScan() {
             style={{
               background: colors.bgCard,
               border: `1px solid ${colors.borderLight}`,
-              borderRadius: '16px',
-              padding: '32px',
-              boxShadow: `0 4px 12px ${colors.shadowSm}`,
+              borderRadius: '12px',
+              padding: '24px',
+              boxShadow: `0 2px 8px ${colors.shadowSm}`,
             }}
           >
             <div
@@ -738,11 +1004,39 @@ function SmartScan() {
                   }}
                 >
                   {scanResults.filter((r) => r.cached).length > 0 && (
-                    <span>📦 {scanResults.filter((r) => r.cached).length} cached</span>
+                    <span
+                      style={{
+                        padding: '6px 10px',
+                        background: colors.bgTertiary,
+                        borderRadius: '6px',
+                        fontSize: '11px',
+                        fontWeight: '600',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}
+                    >
+                      <span>📦</span>
+                      <span>{scanResults.filter((r) => r.cached).length} cached</span>
+                    </span>
                   )}
                   {scanResults.filter((r) => r.success && !r.cached).length > 0 && (
-                    <span>
-                      ✓ {scanResults.filter((r) => r.success && !r.cached).length} scanned
+                    <span
+                      style={{
+                        padding: '6px 10px',
+                        background: colors.bgTertiary,
+                        borderRadius: '6px',
+                        fontSize: '11px',
+                        fontWeight: '600',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}
+                    >
+                      <CheckIcon size={12} color={colors.accentGreen} />
+                      <span>
+                        {scanResults.filter((r) => r.success && !r.cached).length} scanned
+                      </span>
                     </span>
                   )}
                 </div>
