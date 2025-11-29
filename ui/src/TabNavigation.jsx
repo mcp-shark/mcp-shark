@@ -1,97 +1,15 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { colors, fonts } from './theme';
 import { SharkLogo } from './components/SharkLogo';
-import anime from 'animejs';
-
-// SVG Icon Components
-const NetworkIcon = ({ size = 16, color = 'currentColor' }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke={color}
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="12" cy="12" r="10" />
-    <line x1="2" y1="12" x2="22" y2="12" />
-    <line x1="12" y1="2" x2="12" y2="22" />
-    <path d="M17.5 6.5c-2.5 2.5-6.5 6.5-11 11" />
-    <path d="M6.5 17.5c2.5-2.5 6.5-6.5 11-11" />
-    <path d="M17.5 17.5c-2.5-2.5-6.5-6.5-11-11" />
-    <path d="M6.5 6.5c2.5 2.5 6.5 6.5 11 11" />
-  </svg>
-);
-
-const LogsIcon = ({ size = 16, color = 'currentColor' }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke={color}
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-    <polyline points="14 2 14 8 20 8" />
-    <line x1="16" y1="13" x2="8" y2="13" />
-    <line x1="16" y1="17" x2="8" y2="17" />
-    <polyline points="10 9 9 9 8 9" />
-  </svg>
-);
-
-const SettingsIcon = ({ size = 16, color = 'currentColor' }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke={color}
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="12" cy="12" r="3" />
-    <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24" />
-  </svg>
-);
-
-const PlaygroundIcon = ({ size = 16, color = 'currentColor' }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke={color}
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <polygon points="12 2 2 7 12 12 22 7 12 2" />
-    <polyline points="2 17 12 22 22 17" />
-    <polyline points="2 12 12 17 22 12" />
-  </svg>
-);
-
-const ShieldIcon = ({ size = 16, color = 'currentColor' }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke={color}
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-    <path d="M9 12l2 2 4-4" />
-  </svg>
-);
+import {
+  NetworkIcon,
+  LogsIcon,
+  SettingsIcon,
+  PlaygroundIcon,
+  ShieldIcon,
+} from './components/TabNavigationIcons';
+import MobileDropdown from './components/TabNavigation/MobileDropdown';
+import DesktopTabs from './components/TabNavigation/DesktopTabs';
 
 function TabNavigation({ activeTab, onTabChange }) {
   const tabs = [
@@ -129,20 +47,38 @@ function TabNavigation({ activeTab, onTabChange }) {
 
   const tabRefs = useRef({});
   const indicatorRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
+  // Check window size and handle resize
   useEffect(() => {
-    const activeTabElement = tabRefs.current[activeTab];
-    if (activeTabElement && indicatorRef.current) {
-      const { offsetLeft, offsetWidth } = activeTabElement;
-      anime({
-        targets: indicatorRef.current,
-        left: offsetLeft,
-        width: offsetWidth,
-        duration: 400,
-        easing: 'easeOutExpo',
-      });
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1200);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
     }
-  }, [activeTab]);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
 
   return (
     <div
@@ -181,95 +117,24 @@ function TabNavigation({ activeTab, onTabChange }) {
             MCP Shark
           </span>
         </div>
-        <div style={{ position: 'relative', display: 'flex', flex: 1 }}>
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              ref={(el) => (tabRefs.current[tab.id] = el)}
-              data-tour={
-                tab.id === 'traffic'
-                  ? 'traffic-tab'
-                  : tab.id === 'logs'
-                    ? 'logs-tab'
-                    : tab.id === 'setup'
-                      ? 'setup-tab'
-                      : tab.id === 'playground'
-                        ? 'playground-tab'
-                        : 'smart-scan-tab'
-              }
-              onClick={() => onTabChange(tab.id)}
-              style={{
-                padding: '14px 24px',
-                background: activeTab === tab.id ? colors.bgSecondary : 'transparent',
-                border: 'none',
-                borderBottom: '3px solid transparent',
-                color: activeTab === tab.id ? colors.textPrimary : colors.textSecondary,
-                cursor: 'pointer',
-                fontSize: '13px',
-                fontFamily: fonts.body,
-                fontWeight: activeTab === tab.id ? '600' : '400',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                gap: '4px',
-                position: 'relative',
-                borderRadius: '8px 8px 0 0',
-                zIndex: 1,
-              }}
-              onMouseEnter={(e) => {
-                if (activeTab !== tab.id) {
-                  anime({
-                    targets: e.currentTarget,
-                    background: colors.bgHover,
-                    color: colors.textPrimary,
-                    duration: 200,
-                    easing: 'easeOutQuad',
-                  });
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (activeTab !== tab.id) {
-                  anime({
-                    targets: e.currentTarget,
-                    background: 'transparent',
-                    color: colors.textSecondary,
-                    duration: 200,
-                    easing: 'easeOutQuad',
-                  });
-                }
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', color: 'currentColor' }}>
-                  <tab.icon size={16} />
-                </div>
-                <span>{tab.label}</span>
-              </div>
-              <div
-                style={{
-                  fontSize: '11px',
-                  color: activeTab === tab.id ? colors.textSecondary : colors.textTertiary,
-                  fontWeight: '400',
-                  fontFamily: fonts.body,
-                }}
-              >
-                {tab.description}
-              </div>
-            </button>
-          ))}
-          <div
-            ref={indicatorRef}
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              height: '3px',
-              background: colors.accentBlue,
-              borderRadius: '3px 3px 0 0',
-              zIndex: 2,
-              pointerEvents: 'none',
-            }}
+        {isMobile ? (
+          <MobileDropdown
+            tabs={tabs}
+            activeTab={activeTab}
+            onTabChange={onTabChange}
+            isDropdownOpen={isDropdownOpen}
+            setIsDropdownOpen={setIsDropdownOpen}
+            dropdownRef={dropdownRef}
           />
-        </div>
+        ) : (
+          <DesktopTabs
+            tabs={tabs}
+            activeTab={activeTab}
+            onTabChange={onTabChange}
+            tabRefs={tabRefs}
+            indicatorRef={indicatorRef}
+          />
+        )}
       </div>
     </div>
   );
