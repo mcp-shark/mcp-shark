@@ -35,6 +35,10 @@ MCP Shark is a complete solution for aggregating multiple MCP servers (both HTTP
   - [Resource Browsing](#resource-browsing)
   - [Session Management](#session-management)
   - [Use Cases](#use-cases)
+- [Smart Scan](#smart-scan)
+  - [AI-Powered Security Analysis](#ai-powered-security-analysis)
+  - [Batch Scanning](#batch-scanning)
+  - [Risk Assessment](#risk-assessment)
 - [Key Features](#key-features)
   - [Multi-Server Aggregation](#multi-server-aggregation)
   - [Real-Time Monitoring & Analysis](#real-time-monitoring--analysis)
@@ -50,6 +54,7 @@ MCP Shark is a complete solution for aggregating multiple MCP servers (both HTTP
   - [UI Tabs Overview](#ui-tabs-overview)
     - [Traffic Capture](#traffic-capture)
     - [MCP Playground](#mcp-playground-1)
+    - [Smart Scan](#smart-scan-1)
     - [MCP Shark Logs](#mcp-shark-logs)
     - [MCP Server Setup](#mcp-server-setup)
   - [Advanced Features](#advanced-features)
@@ -170,6 +175,46 @@ The Playground maintains session state for stateful interactions:
 
 Access the Playground from the "MCP Playground" tab in the UI after starting your MCP Shark server.
 
+## Smart Scan
+
+**AI-powered security analysis for MCP servers** — automatically scan and analyze your MCP servers for potential security risks and vulnerabilities.
+
+### AI-Powered Security Analysis
+
+Smart Scan uses advanced AI analysis to evaluate MCP servers for security concerns:
+
+- **Automated Scanning** — Discover and scan multiple MCP servers automatically
+- **Security Risk Assessment** — Get overall risk levels (LOW, MEDIUM, HIGH) for each server
+- **Detailed Findings** — View comprehensive security analysis including:
+  - Tool security analysis
+  - Prompt injection risks
+  - Resource access patterns
+  - Overall security recommendations
+- **Cached Results** — Results are cached for quick access without re-scanning
+
+### Batch Scanning
+
+Scan multiple servers simultaneously:
+
+- **Server Discovery** — Automatically discover MCP servers from your configuration
+- **Selective Scanning** — Choose which servers to scan
+- **Batch Processing** — Scan multiple servers in parallel
+- **Progress Tracking** — Monitor scan progress in real-time
+
+### Risk Assessment
+
+Each scan provides:
+
+- **Overall Risk Level** — Quick visual indicator of security posture
+- **Detailed Findings** — Comprehensive list of security concerns
+- **Recommendations** — Actionable security recommendations
+- **Full Report Access** — View complete analysis reports with detailed findings
+  - Click "view results" button in the scan results to open full reports
+  - Reports are available at [https://smart.mcpshark.sh](https://smart.mcpshark.sh)
+  - Each scan result includes a direct link to its detailed analysis page
+
+Access Smart Scan from the "Smart Scan" tab in the UI. You'll need to provide an API token for the security analysis service. View full scan reports and detailed analysis at [https://smart.mcpshark.sh](https://smart.mcpshark.sh).
+
 ## Key Features
 
 ### Multi-Server Aggregation
@@ -211,9 +256,12 @@ Access the Playground from the "MCP Playground" tab in the UI after starting you
 - **Dark Theme** — Developer-friendly dark interface
 - **Interactive Tour** — Built-in onboarding guide for first-time users
 - **Responsive Design** — Works seamlessly across different screen sizes
+  - **Adaptive Navigation** — Dropdown menu for smaller windows (< 1200px)
+  - **Compact Views** — Optimized layouts for mobile and tablet devices
 - **Animated Transitions** — Smooth animations for better user experience
 - **Hex View** — Binary data inspection with hex viewer
 - **Raw/JSON View** — Multiple payload viewing modes (Raw, JSON, Hex)
+- **Compact Scan Results** — Single-row display for scan results with quick access to full reports
 
 ### Configuration Management
 
@@ -341,6 +389,31 @@ Interactive testing environment for MCP servers — **one of MCP Shark's standou
 - **Session Management**: Maintains session state for stateful interactions
 
 This is the perfect place to explore your MCP servers, test tools, and understand what capabilities are available.
+
+#### Smart Scan
+
+AI-powered security analysis for your MCP servers:
+
+- **Server Discovery** — Automatically discover MCP servers from your configuration
+- **Batch Scanning** — Scan multiple servers simultaneously
+- **Risk Assessment** — Get overall risk levels (LOW, MEDIUM, HIGH) for each server
+- **Compact Results View** — Single-row display showing:
+  - Server name
+  - Risk level badge (e.g., "medium risk", "low risk")
+  - Quick "view results" button to access full reports
+  - Status indicators (Cached, Success)
+- **Detailed Analysis** — View comprehensive security findings including:
+  - Tool security analysis
+  - Prompt injection risks
+  - Resource access patterns
+  - Security recommendations
+- **Cached Results** — Results are cached for quick access without re-scanning
+- **Full Report Access** — Click "view results" to see complete analysis with detailed findings
+  - Opens full reports in a new tab at [https://smart.mcpshark.sh](https://smart.mcpshark.sh)
+  - View comprehensive security analysis, findings, and recommendations
+  - Access historical scan results and compare scans over time
+
+Smart Scan helps you identify potential security issues in your MCP servers before they become problems. View detailed scan reports and analysis at [https://smart.mcpshark.sh](https://smart.mcpshark.sh).
 
 #### MCP Shark Logs
 
