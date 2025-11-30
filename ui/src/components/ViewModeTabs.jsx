@@ -14,38 +14,6 @@ function ViewModeTabs({ viewMode, onViewModeChange }) {
       }}
     >
       <button
-        onClick={() => onViewModeChange('groupedByMcp')}
-        style={{
-          padding: '10px 18px',
-          background: viewMode === 'groupedByMcp' ? colors.bgCard : 'transparent',
-          fontFamily: fonts.body,
-          border: 'none',
-          borderBottom:
-            viewMode === 'groupedByMcp'
-              ? `2px solid ${colors.accentBlue}`
-              : '2px solid transparent',
-          color: viewMode === 'groupedByMcp' ? colors.textPrimary : colors.textSecondary,
-          cursor: 'pointer',
-          fontSize: '12px',
-          fontWeight: viewMode === 'groupedByMcp' ? '500' : 'normal',
-          borderRadius: '8px 8px 0 0',
-        }}
-        onMouseEnter={(e) => {
-          if (viewMode !== 'groupedByMcp') {
-            e.currentTarget.style.background = colors.bgHover;
-            e.currentTarget.style.color = colors.textPrimary;
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (viewMode !== 'groupedByMcp') {
-            e.currentTarget.style.background = 'transparent';
-            e.currentTarget.style.color = colors.textSecondary;
-          }
-        }}
-      >
-        MCP Protocol View
-      </button>
-      <button
         onClick={() => onViewModeChange('general')}
         style={{
           padding: '10px 18px',
@@ -76,68 +44,36 @@ function ViewModeTabs({ viewMode, onViewModeChange }) {
         General List
       </button>
       <button
-        onClick={() => onViewModeChange('groupedBySession')}
+        onClick={() => onViewModeChange('groupedByMcp')}
         style={{
           padding: '10px 18px',
-          background: viewMode === 'groupedBySession' ? colors.bgCard : 'transparent',
+          background: viewMode === 'groupedByMcp' ? colors.bgCard : 'transparent',
           fontFamily: fonts.body,
           border: 'none',
           borderBottom:
-            viewMode === 'groupedBySession'
+            viewMode === 'groupedByMcp'
               ? `2px solid ${colors.accentBlue}`
               : '2px solid transparent',
-          color: viewMode === 'groupedBySession' ? colors.textPrimary : colors.textSecondary,
+          color: viewMode === 'groupedByMcp' ? colors.textPrimary : colors.textSecondary,
           cursor: 'pointer',
           fontSize: '12px',
-          fontWeight: viewMode === 'groupedBySession' ? '500' : 'normal',
+          fontWeight: viewMode === 'groupedByMcp' ? '500' : 'normal',
           borderRadius: '8px 8px 0 0',
         }}
         onMouseEnter={(e) => {
-          if (viewMode !== 'groupedBySession') {
+          if (viewMode !== 'groupedByMcp') {
             e.currentTarget.style.background = colors.bgHover;
             e.currentTarget.style.color = colors.textPrimary;
           }
         }}
         onMouseLeave={(e) => {
-          if (viewMode !== 'groupedBySession') {
+          if (viewMode !== 'groupedByMcp') {
             e.currentTarget.style.background = 'transparent';
             e.currentTarget.style.color = colors.textSecondary;
           }
         }}
       >
-        Grouped by Session & Server
-      </button>
-      <button
-        onClick={() => onViewModeChange('groupedByServer')}
-        style={{
-          padding: '10px 18px',
-          background: viewMode === 'groupedByServer' ? colors.bgCard : 'transparent',
-          fontFamily: fonts.body,
-          border: 'none',
-          borderBottom:
-            viewMode === 'groupedByServer'
-              ? `2px solid ${colors.accentBlue}`
-              : '2px solid transparent',
-          color: viewMode === 'groupedByServer' ? colors.textPrimary : colors.textSecondary,
-          cursor: 'pointer',
-          fontSize: '12px',
-          fontWeight: viewMode === 'groupedByServer' ? '500' : 'normal',
-          borderRadius: '8px 8px 0 0',
-        }}
-        onMouseEnter={(e) => {
-          if (viewMode !== 'groupedByServer') {
-            e.currentTarget.style.background = colors.bgHover;
-            e.currentTarget.style.color = colors.textPrimary;
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (viewMode !== 'groupedByServer') {
-            e.currentTarget.style.background = 'transparent';
-            e.currentTarget.style.color = colors.textSecondary;
-          }
-        }}
-      >
-        Grouped by Server & Session
+        MCP Protocol View
       </button>
     </div>
   );

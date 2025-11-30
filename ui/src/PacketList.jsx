@@ -3,17 +3,14 @@ import { colors, fonts } from './theme';
 import RequestRow from './components/RequestRow';
 import TableHeader from './components/TableHeader';
 import ViewModeTabs from './components/ViewModeTabs';
-import GroupedBySessionView from './components/GroupedBySessionView';
-import GroupedByServerView from './components/GroupedByServerView';
 import GroupedByMcpView from './components/GroupedByMcpView';
-import { groupByServerAndSession, groupBySessionAndServer } from './utils/groupingUtils.js';
 import { groupByMcpSessionAndCategory } from './utils/mcpGroupingUtils.js';
 import { pairRequestsWithResponses } from './utils/requestUtils.js';
 import { staggerIn } from './utils/animations';
 import anime from 'animejs';
 
 function RequestList({ requests, selected, onSelect, firstRequestTime }) {
-  const [viewMode, setViewMode] = useState('groupedByMcp');
+  const [viewMode, setViewMode] = useState('general');
   const [columnWidths] = useState({
     frame: 60,
     time: 120,
@@ -27,19 +24,11 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
     length: 80,
     info: 400,
   });
-  const [expandedSessions, setExpandedSessions] = useState(new Set());
-  const [expandedServers, setExpandedServers] = useState(new Map());
-  const [expandedServersFirst, setExpandedServersFirst] = useState(new Set());
-  const [expandedSessionsInServer, setExpandedSessionsInServer] = useState(new Map());
   const [expandedResponses, setExpandedResponses] = useState(new Set());
   const [expandedMcpSessions, setExpandedMcpSessions] = useState(new Set());
   const [expandedMcpCategories, setExpandedMcpCategories] = useState(new Set());
   const tbodyRef = useRef(null);
   const prevRequestsLengthRef = useRef(0);
-
-  const groupedByServerAndSession = useMemo(() => groupByServerAndSession(requests), [requests]);
-
-  const groupedBySessionAndServer = useMemo(() => groupBySessionAndServer(requests), [requests]);
 
   const groupedByMcp = useMemo(() => groupByMcpSessionAndCategory(requests), [requests]);
 
@@ -64,57 +53,7 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
   }, [requests]);
 
   useEffect(() => {
-    if (viewMode === 'groupedBySession') {
-      const allSessionIds = new Set(
-        groupedBySessionAndServer.map((g) => g.sessionId || '__NO_SESSION__')
-      );
-      setExpandedSessions((prev) => {
-        const updated = new Set(prev);
-        allSessionIds.forEach((id) => updated.add(id));
-        return updated;
-      });
-
-      setExpandedServers((prev) => {
-        const updated = new Map(prev);
-        groupedBySessionAndServer.forEach((sessionGroup) => {
-          const sessionKey = sessionGroup.sessionId || '__NO_SESSION__';
-          if (!updated.has(sessionKey)) {
-            updated.set(sessionKey, new Set());
-          }
-          const serverSet = updated.get(sessionKey);
-          sessionGroup.servers.forEach((server) => {
-            const serverKey = server.serverName || '__UNKNOWN_SERVER__';
-            serverSet.add(serverKey);
-          });
-        });
-        return updated;
-      });
-    } else if (viewMode === 'groupedByServer') {
-      const allServerNames = new Set(
-        groupedByServerAndSession.map((g) => g.serverName || '__UNKNOWN_SERVER__')
-      );
-      setExpandedServersFirst((prev) => {
-        const updated = new Set(prev);
-        allServerNames.forEach((name) => updated.add(name));
-        return updated;
-      });
-
-      setExpandedSessionsInServer((prev) => {
-        const updated = new Map(prev);
-        groupedByServerAndSession.forEach((serverGroup) => {
-          const serverKey = serverGroup.serverName || '__UNKNOWN_SERVER__';
-          if (!updated.has(serverKey)) {
-            updated.set(serverKey, new Set());
-          }
-          const sessionSet = updated.get(serverKey);
-          serverGroup.sessions.forEach((session) => {
-            const sessionKey = session.sessionId || '__NO_SESSION__';
-            sessionSet.add(sessionKey);
-          });
-        });
-        return updated;
-      });
-    } else if (viewMode === 'groupedByMcp') {
+    if (viewMode === 'groupedByMcp') {
       // Auto-expand all MCP sessions and categories
       const allSessionIds = new Set(groupedByMcp.map((g) => g.sessionId || '__NO_SESSION__'));
       setExpandedMcpSessions((prev) => {
@@ -134,69 +73,7 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
         return updated;
       });
     }
-  }, [groupedBySessionAndServer, groupedByServerAndSession, groupedByMcp, viewMode]);
-
-  const toggleSession = (sessionId) => {
-    const key = sessionId || '__NO_SESSION__';
-    setExpandedSessions((prev) => {
-      const updated = new Set(prev);
-      if (updated.has(key)) {
-        updated.delete(key);
-      } else {
-        updated.add(key);
-      }
-      return updated;
-    });
-  };
-
-  const toggleServer = (sessionId, serverName) => {
-    const sessionKey = sessionId || '__NO_SESSION__';
-    const serverKey = serverName || '__UNKNOWN_SERVER__';
-    setExpandedServers((prev) => {
-      const updated = new Map(prev);
-      if (!updated.has(sessionKey)) {
-        updated.set(sessionKey, new Set());
-      }
-      const serverSet = updated.get(sessionKey);
-      if (serverSet.has(serverKey)) {
-        serverSet.delete(serverKey);
-      } else {
-        serverSet.add(serverKey);
-      }
-      return updated;
-    });
-  };
-
-  const toggleServerFirst = (serverName) => {
-    const serverKey = serverName || '__UNKNOWN_SERVER__';
-    setExpandedServersFirst((prev) => {
-      const updated = new Set(prev);
-      if (updated.has(serverKey)) {
-        updated.delete(serverKey);
-      } else {
-        updated.add(serverKey);
-      }
-      return updated;
-    });
-  };
-
-  const toggleSessionInServer = (serverName, sessionId) => {
-    const serverKey = serverName || '__UNKNOWN_SERVER__';
-    const sessionKey = sessionId || '__NO_SESSION__';
-    setExpandedSessionsInServer((prev) => {
-      const updated = new Map(prev);
-      if (!updated.has(serverKey)) {
-        updated.set(serverKey, new Set());
-      }
-      const sessionSet = updated.get(serverKey);
-      if (sessionSet.has(sessionKey)) {
-        sessionSet.delete(sessionKey);
-      } else {
-        sessionSet.add(sessionKey);
-      }
-      return updated;
-    });
-  };
+  }, [groupedByMcp, viewMode]);
 
   const toggleMcpSession = (sessionKey) => {
     setExpandedMcpSessions((prev) => {
@@ -287,28 +164,6 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
           <TableHeader columnWidths={columnWidths} />
           {viewMode === 'general' ? (
             renderGeneralView()
-          ) : viewMode === 'groupedBySession' ? (
-            <GroupedBySessionView
-              groupedData={groupedBySessionAndServer}
-              expandedSessions={expandedSessions}
-              expandedServers={expandedServers}
-              onToggleSession={toggleSession}
-              onToggleServer={toggleServer}
-              selected={selected}
-              firstRequestTime={firstRequestTime}
-              onSelect={onSelect}
-            />
-          ) : viewMode === 'groupedByServer' ? (
-            <GroupedByServerView
-              groupedData={groupedByServerAndSession}
-              expandedServersFirst={expandedServersFirst}
-              expandedSessionsInServer={expandedSessionsInServer}
-              onToggleServerFirst={toggleServerFirst}
-              onToggleSessionInServer={toggleSessionInServer}
-              selected={selected}
-              firstRequestTime={firstRequestTime}
-              onSelect={onSelect}
-            />
           ) : (
             <GroupedByMcpView
               groupedData={groupedByMcp}

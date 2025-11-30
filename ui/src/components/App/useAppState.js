@@ -12,6 +12,25 @@ export function useAppState() {
   const wsRef = useRef(null);
   const prevTabRef = useRef(activeTab);
 
+  const loadStatistics = async () => {
+    try {
+      const queryParams = new URLSearchParams();
+      if (filters.search) queryParams.append('search', filters.search);
+      if (filters.serverName) queryParams.append('serverName', filters.serverName);
+      if (filters.sessionId) queryParams.append('sessionId', filters.sessionId);
+      if (filters.method) queryParams.append('method', filters.method);
+      if (filters.jsonrpcMethod) queryParams.append('jsonrpcMethod', filters.jsonrpcMethod);
+      if (filters.statusCode) queryParams.append('statusCode', filters.statusCode);
+      if (filters.jsonrpcId) queryParams.append('jsonrpcId', filters.jsonrpcId);
+
+      const statsResponse = await fetch(`/api/statistics?${queryParams}`);
+      const statsData = await statsResponse.json();
+      setStats(statsData);
+    } catch (error) {
+      console.error('Failed to load statistics:', error);
+    }
+  };
+
   const loadRequests = async () => {
     try {
       const queryParams = new URLSearchParams();
@@ -35,9 +54,8 @@ export function useAppState() {
         }
       }
 
-      const statsResponse = await fetch(`/api/statistics?${queryParams}`);
-      const statsData = await statsResponse.json();
-      setStats(statsData);
+      // Also load statistics when loading requests
+      await loadStatistics();
     } catch (error) {
       console.error('Failed to load requests:', error);
     }
@@ -84,6 +102,8 @@ export function useAppState() {
               setFirstRequestTime(oldest);
             }
           }
+          // Update statistics when new data arrives via WebSocket
+          loadStatistics();
         }
       };
 
@@ -108,6 +128,20 @@ export function useAppState() {
   useEffect(() => {
     loadRequests();
   }, [filters]);
+
+  // Periodically update statistics when on traffic tab
+  useEffect(() => {
+    if (activeTab !== 'traffic') {
+      return;
+    }
+
+    // Update statistics every 2 seconds
+    const interval = setInterval(() => {
+      loadStatistics();
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [activeTab, filters]);
 
   return {
     activeTab,
