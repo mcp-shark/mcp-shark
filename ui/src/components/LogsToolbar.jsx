@@ -38,7 +38,7 @@ export default function LogsToolbar({
           fontSize: '13px',
           fontFamily: fonts.body,
           width: '300px',
-          borderRadius: '6px',
+          borderRadius: '8px',
           transition: 'all 0.2s',
         }}
         onFocus={(e) => {
@@ -61,7 +61,7 @@ export default function LogsToolbar({
           color: colors.textPrimary,
           fontSize: '13px',
           fontFamily: fonts.body,
-          borderRadius: '6px',
+          borderRadius: '8px',
           cursor: 'pointer',
           transition: 'all 0.2s',
         }}
@@ -112,7 +112,7 @@ export default function LogsToolbar({
           fontFamily: fonts.body,
           fontWeight: '500',
           cursor: 'pointer',
-          borderRadius: '6px',
+          borderRadius: '8px',
           transition: 'all 0.2s',
           boxShadow: `0 2px 4px ${colors.shadowSm}`,
         }}
@@ -139,7 +139,7 @@ export default function LogsToolbar({
           fontFamily: fonts.body,
           fontWeight: '500',
           cursor: 'pointer',
-          borderRadius: '6px',
+          borderRadius: '8px',
           transition: 'all 0.2s',
           boxShadow: `0 2px 4px ${colors.shadowSm}`,
         }}

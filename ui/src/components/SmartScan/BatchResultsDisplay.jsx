@@ -10,9 +10,9 @@ export default function BatchResultsDisplay({ scanResults }) {
       style={{
         background: colors.bgCard,
         border: `1px solid ${colors.borderLight}`,
-        borderRadius: '12px',
-        padding: '16px',
-        boxShadow: `0 2px 8px ${colors.shadowSm}`,
+        borderRadius: '8px',
+        padding: '20px',
+        boxShadow: `0 1px 3px ${colors.shadowSm}`,
       }}
     >
       <div
@@ -26,7 +26,7 @@ export default function BatchResultsDisplay({ scanResults }) {
         <div>
           <h2
             style={{
-              fontSize: '16px',
+              fontSize: '14px',
               fontWeight: '600',
               color: colors.textPrimary,
               fontFamily: fonts.body,

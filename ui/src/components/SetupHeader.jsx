@@ -5,9 +5,9 @@ export default function SetupHeader() {
     <div style={{ marginBottom: '24px' }}>
       <h2
         style={{
-          fontSize: '20px',
-          fontWeight: '600',
-          marginBottom: '8px',
+          fontSize: '24px',
+          fontWeight: '700',
+          marginBottom: '12px',
           color: colors.textPrimary,
           fontFamily: fonts.body,
         }}
@@ -16,7 +16,7 @@ export default function SetupHeader() {
       </h2>
       <p
         style={{
-          fontSize: '14px',
+          fontSize: '15px',
           color: colors.textSecondary,
           lineHeight: '1.6',
           fontFamily: fonts.body,

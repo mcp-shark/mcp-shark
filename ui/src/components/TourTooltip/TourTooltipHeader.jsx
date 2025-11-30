@@ -1,3 +1,4 @@
+import { colors, fonts } from '../../theme';
 import { CloseIcon } from './TourTooltipIcons';
 
 export default function TourTooltipHeader({ step, currentStep, totalSteps, isDragging, onSkip }) {
@@ -11,10 +12,25 @@ export default function TourTooltipHeader({ step, currentStep, totalSteps, isDra
       }}
     >
       <div style={{ flex: 1, pointerEvents: 'none' }}>
-        <h3 style={{ margin: 0, color: '#4ec9b0', fontSize: '16px', fontWeight: '600' }}>
+        <h3
+          style={{
+            margin: 0,
+            color: colors.accentBlue,
+            fontSize: '16px',
+            fontWeight: '600',
+            fontFamily: fonts.body,
+          }}
+        >
           {step.title}
         </h3>
-        <p style={{ margin: '4px 0 0 0', color: '#858585', fontSize: '12px' }}>
+        <p
+          style={{
+            margin: '4px 0 0 0',
+            color: colors.textTertiary,
+            fontSize: '12px',
+            fontFamily: fonts.body,
+          }}
+        >
           Step {currentStep + 1} of {totalSteps}
           {isDragging && <span style={{ marginLeft: '8px', fontSize: '11px' }}>• Dragging</span>}
         </p>
@@ -28,22 +44,22 @@ export default function TourTooltipHeader({ step, currentStep, totalSteps, isDra
         style={{
           background: 'transparent',
           border: 'none',
-          color: '#858585',
+          color: colors.textTertiary,
           cursor: 'pointer',
           padding: '4px',
           display: 'flex',
           alignItems: 'center',
-          borderRadius: '4px',
+          borderRadius: '8px',
           marginLeft: '12px',
           pointerEvents: 'auto',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = '#3e3e42';
-          e.currentTarget.style.color = '#d4d4d4';
+          e.currentTarget.style.background = colors.bgHover;
+          e.currentTarget.style.color = colors.textPrimary;
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.background = 'transparent';
-          e.currentTarget.style.color = '#858585';
+          e.currentTarget.style.color = colors.textTertiary;
         }}
         title="Skip tour"
       >

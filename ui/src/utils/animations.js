@@ -60,6 +60,20 @@ export const slideInRight = (selector, options = {}) => {
 };
 
 /**
+ * Slide in from left
+ */
+export const slideInLeft = (selector, options = {}) => {
+  return anime({
+    targets: selector,
+    translateX: [-(options.width || 600), 0],
+    opacity: [0, 1],
+    duration: options.duration || 400,
+    easing: options.easing || 'easeOutExpo',
+    ...options,
+  });
+};
+
+/**
  * Slide out to right
  */
 export const slideOutRight = (selector, options = {}) => {

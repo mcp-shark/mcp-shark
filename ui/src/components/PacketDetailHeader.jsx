@@ -1,6 +1,6 @@
 import { colors, fonts } from '../theme';
 
-function PacketDetailHeader({ request, onClose }) {
+function PacketDetailHeader({ request, onClose, matchingPair }) {
   const formatBytes = (bytes) => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
@@ -31,6 +31,18 @@ function PacketDetailHeader({ request, onClose }) {
         >
           #{request.frame_number}:{' '}
           {request.direction === 'request' ? 'HTTP Request' : 'HTTP Response'}
+          {matchingPair && (
+            <span
+              style={{
+                fontSize: '11px',
+                color: colors.textTertiary,
+                fontWeight: '400',
+                marginLeft: '8px',
+              }}
+            >
+              (with #{matchingPair.frame_number})
+            </span>
+          )}
         </h3>
         <span
           style={{
@@ -38,7 +50,7 @@ function PacketDetailHeader({ request, onClose }) {
             color: colors.textSecondary,
             padding: '4px 8px',
             background: colors.bgSecondary,
-            borderRadius: '6px',
+            borderRadius: '8px',
             fontFamily: fonts.mono,
           }}
         >
@@ -54,7 +66,7 @@ function PacketDetailHeader({ request, onClose }) {
           cursor: 'pointer',
           fontSize: '20px',
           padding: '4px 8px',
-          borderRadius: '4px',
+          borderRadius: '8px',
           transition: 'all 0.2s',
         }}
         onMouseEnter={(e) => {

@@ -10,9 +10,10 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onD
       style={{
         background: colors.bgCard,
         border: `1px solid ${colors.borderLight}`,
-        borderRadius: '6px',
-        padding: '20px',
+        borderRadius: '12px',
+        padding: '24px',
         marginBottom: '20px',
+        boxShadow: `0 2px 4px ${colors.shadowSm}`,
       }}
     >
       <div
@@ -23,7 +24,16 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onD
           marginBottom: '12px',
         }}
       >
-        <h3 style={{ fontSize: '14px', fontWeight: '500', color: '#d4d4d4' }}>Backup Files</h3>
+        <h3
+          style={{
+            fontSize: '15px',
+            fontWeight: '600',
+            color: colors.textPrimary,
+            fontFamily: fonts.body,
+          }}
+        >
+          Backup Files
+        </h3>
         <button
           onClick={onRefresh}
           disabled={loadingBackups}
@@ -34,7 +44,7 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onD
             color: colors.textSecondary,
             cursor: loadingBackups ? 'not-allowed' : 'pointer',
             fontSize: '11px',
-            borderRadius: '4px',
+            borderRadius: '8px',
             opacity: loadingBackups ? 0.5 : 1,
           }}
           title="Refresh backups"
@@ -61,7 +71,7 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onD
               padding: '12px',
               background: colors.bgPrimary,
               border: `1px solid ${colors.borderMedium}`,
-              borderRadius: '4px',
+              borderRadius: '8px',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
@@ -78,7 +88,7 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onD
               >
                 {backup.displayPath}
               </div>
-              <div style={{ color: '#858585', fontSize: '11px' }}>
+              <div style={{ color: colors.textTertiary, fontSize: '11px', fontFamily: fonts.body }}>
                 Created: {new Date(backup.modifiedAt || backup.createdAt).toLocaleString()} • Size:{' '}
                 {(backup.size / 1024).toFixed(2)} KB
               </div>
@@ -93,7 +103,7 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onD
                   color: colors.textSecondary,
                   cursor: 'pointer',
                   fontSize: '12px',
-                  borderRadius: '4px',
+                  borderRadius: '8px',
                   fontWeight: '500',
                 }}
                 onMouseEnter={(e) => {
@@ -118,15 +128,16 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onD
                   padding: '6px 12px',
                   background: 'transparent',
                   border: `1px solid ${colors.borderMedium}`,
-                  color: '#f48771',
+                  color: colors.error,
                   cursor: 'pointer',
                   fontSize: '12px',
-                  borderRadius: '4px',
+                  borderRadius: '8px',
                   fontWeight: '500',
+                  fontFamily: fonts.body,
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#3a1f1a';
-                  e.currentTarget.style.borderColor = '#f48771';
+                  e.currentTarget.style.background = colors.error + '15';
+                  e.currentTarget.style.borderColor = colors.error;
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = 'transparent';
@@ -140,19 +151,20 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onD
                 onClick={() => onRestore(backup.backupPath, backup.originalPath)}
                 style={{
                   padding: '6px 12px',
-                  background: '#0e639c',
-                  border: '1px solid #0e639c',
-                  color: '#ffffff',
+                  background: colors.buttonPrimary,
+                  border: `1px solid ${colors.buttonPrimary}`,
+                  color: colors.textInverse,
                   cursor: 'pointer',
                   fontSize: '12px',
-                  borderRadius: '4px',
+                  borderRadius: '8px',
                   fontWeight: '500',
+                  fontFamily: fonts.body,
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#1177bb';
+                  e.currentTarget.style.background = colors.buttonPrimaryHover;
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#0e639c';
+                  e.currentTarget.style.background = colors.buttonPrimary;
                 }}
                 title="Restore this backup"
               >

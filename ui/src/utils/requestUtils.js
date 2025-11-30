@@ -134,3 +134,52 @@ export function getRequestColor(request) {
   }
   return '#f0f8f0';
 }
+
+export function pairRequestsWithResponses(requests) {
+  const pairs = [];
+  const processed = new Set();
+
+  requests.forEach((request) => {
+    if (processed.has(request.frame_number)) return;
+
+    if (request.direction === 'request') {
+      // Find matching response
+      const response = requests.find(
+        (r) =>
+          r.direction === 'response' &&
+          !processed.has(r.frame_number) &&
+          (r.session_id === request.session_id || r.jsonrpc_id === request.jsonrpc_id) &&
+          r.frame_number > request.frame_number
+      );
+
+      if (response) {
+        pairs.push({ request, response, frame_number: request.frame_number });
+        processed.add(request.frame_number);
+        processed.add(response.frame_number);
+      } else {
+        // Request without response
+        pairs.push({ request, response: null, frame_number: request.frame_number });
+        processed.add(request.frame_number);
+      }
+    } else if (request.direction === 'response') {
+      // Find matching request
+      const matchingRequest = requests.find(
+        (r) =>
+          r.direction === 'request' &&
+          !processed.has(r.frame_number) &&
+          (r.session_id === request.session_id || r.jsonrpc_id === request.jsonrpc_id) &&
+          r.frame_number < request.frame_number
+      );
+
+      if (!matchingRequest) {
+        // Response without request (orphaned)
+        pairs.push({ request: null, response: request, frame_number: request.frame_number });
+        processed.add(request.frame_number);
+      }
+      // If matching request exists, it will be handled when we iterate over it
+    }
+  });
+
+  // Sort by frame number (descending - latest first)
+  return pairs.sort((a, b) => b.frame_number - a.frame_number);
+}

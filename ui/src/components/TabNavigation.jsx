@@ -25,8 +25,11 @@ function TabNavigation({ tabs, activeTab, onTabChange }) {
       style={{
         display: 'flex',
         borderBottom: `1px solid ${colors.borderLight}`,
-        background: colors.bgCard,
+        background: `${colors.bgCard}CC`, // 80% opacity for backdrop blur effect
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
         position: 'relative',
+        boxShadow: `0 1px 3px ${colors.shadowSm}`,
       }}
     >
       {tabs.map((tab) => (
@@ -45,7 +48,7 @@ function TabNavigation({ tabs, activeTab, onTabChange }) {
             fontFamily: fonts.body,
             fontWeight: activeTab === tab ? '500' : '400',
             textTransform: 'capitalize',
-            borderRadius: '6px 6px 0 0',
+            borderRadius: '8px 8px 0 0',
             transition: 'all 0.2s',
             position: 'relative',
             zIndex: 1,

@@ -24,9 +24,10 @@ export default function ConfigFileSection({
       style={{
         background: colors.bgCard,
         border: `1px solid ${colors.borderLight}`,
-        borderRadius: '6px',
-        padding: '20px',
+        borderRadius: '12px',
+        padding: '24px',
         marginBottom: '20px',
+        boxShadow: `0 2px 4px ${colors.shadowSm}`,
       }}
     >
       <div style={{ marginBottom: '16px' }}>

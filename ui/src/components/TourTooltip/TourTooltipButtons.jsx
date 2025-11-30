@@ -1,3 +1,4 @@
+import { colors, fonts } from '../../theme';
 import { ChevronLeft, ChevronRight } from './TourTooltipIcons';
 
 export default function TourTooltipButtons({
@@ -25,24 +26,25 @@ export default function TourTooltipButtons({
         onMouseDown={(e) => e.stopPropagation()}
         style={{
           background: 'transparent',
-          border: '1px solid #3e3e42',
-          color: '#858585',
+          border: `1px solid ${colors.borderMedium}`,
+          color: colors.textSecondary,
           padding: '8px 16px',
-          borderRadius: '4px',
+          borderRadius: '8px',
           cursor: 'pointer',
           fontSize: '13px',
+          fontFamily: fonts.body,
           flex: 1,
           pointerEvents: 'auto',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = '#2d2d30';
-          e.currentTarget.style.color = '#d4d4d4';
-          e.currentTarget.style.borderColor = '#3e3e42';
+          e.currentTarget.style.background = colors.bgHover;
+          e.currentTarget.style.color = colors.textPrimary;
+          e.currentTarget.style.borderColor = colors.borderMedium;
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.background = 'transparent';
-          e.currentTarget.style.color = '#858585';
-          e.currentTarget.style.borderColor = '#3e3e42';
+          e.currentTarget.style.color = colors.textSecondary;
+          e.currentTarget.style.borderColor = colors.borderMedium;
         }}
       >
         Skip Tour
@@ -56,22 +58,23 @@ export default function TourTooltipButtons({
             }}
             onMouseDown={(e) => e.stopPropagation()}
             style={{
-              background: '#2d2d30',
-              border: '1px solid #3e3e42',
-              color: '#d4d4d4',
+              background: colors.buttonSecondary,
+              border: `1px solid ${colors.borderMedium}`,
+              color: colors.textPrimary,
               padding: '8px 12px',
-              borderRadius: '4px',
+              borderRadius: '8px',
               cursor: 'pointer',
               fontSize: '13px',
+              fontFamily: fonts.body,
               display: 'flex',
               alignItems: 'center',
               gap: '4px',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#3a3a3a';
+              e.currentTarget.style.background = colors.buttonSecondaryHover;
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = '#2d2d30';
+              e.currentTarget.style.background = colors.buttonSecondary;
             }}
           >
             <ChevronLeft size={14} />
@@ -85,23 +88,24 @@ export default function TourTooltipButtons({
           }}
           onMouseDown={(e) => e.stopPropagation()}
           style={{
-            background: '#0e639c',
+            background: colors.buttonPrimary,
             border: 'none',
-            color: '#ffffff',
+            color: colors.textInverse,
             padding: '8px 16px',
-            borderRadius: '4px',
+            borderRadius: '8px',
             cursor: 'pointer',
             fontSize: '13px',
+            fontFamily: fonts.body,
             display: 'flex',
             alignItems: 'center',
             gap: '4px',
             fontWeight: '500',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = '#1177bb';
+            e.currentTarget.style.background = colors.buttonPrimaryHover;
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = '#0e639c';
+            e.currentTarget.style.background = colors.buttonPrimary;
           }}
         >
           {currentStep === totalSteps - 1 ? 'Finish' : 'Next'}

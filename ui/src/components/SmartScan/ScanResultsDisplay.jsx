@@ -18,7 +18,7 @@ export default function ScanResultsDisplay({
         flex: 1,
         overflowY: 'auto',
         overflowX: 'hidden',
-        padding: '32px',
+        padding: '24px',
         background: colors.bgPrimary,
       }}
     >

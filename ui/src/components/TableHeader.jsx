@@ -14,16 +14,19 @@ function TableHeader({ columnWidths }) {
       <tr>
         <th
           style={{
-            padding: '4px 8px',
+            padding: '12px 16px',
             textAlign: 'left',
-            borderBottom: `2px solid ${colors.borderMedium}`,
+            borderBottom: `1px solid ${colors.borderLight}`,
             borderRight: `1px solid ${colors.borderLight}`,
             width: `${columnWidths.frame}px`,
             minWidth: `${columnWidths.frame}px`,
-            color: colors.textPrimary,
+            color: colors.textSecondary,
             fontWeight: '600',
             fontFamily: fonts.body,
-            fontSize: '12px',
+            fontSize: '11px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            background: colors.bgCard,
           }}
         >
           No.
@@ -32,14 +35,14 @@ function TableHeader({ columnWidths }) {
           style={{
             padding: '4px 8px',
             textAlign: 'left',
-            borderBottom: `2px solid ${colors.borderMedium}`,
+            borderBottom: `1px solid ${colors.borderLight}`,
             borderRight: `1px solid ${colors.borderLight}`,
             width: `${columnWidths.time}px`,
             minWidth: `${columnWidths.time}px`,
             color: colors.textPrimary,
             fontWeight: '600',
             fontFamily: fonts.body,
-            fontSize: '12px',
+            fontSize: '11px',
           }}
         >
           Time
@@ -48,14 +51,14 @@ function TableHeader({ columnWidths }) {
           style={{
             padding: '4px 8px',
             textAlign: 'left',
-            borderBottom: `2px solid ${colors.borderMedium}`,
+            borderBottom: `1px solid ${colors.borderLight}`,
             borderRight: `1px solid ${colors.borderLight}`,
             width: `${columnWidths.datetime}px`,
             minWidth: `${columnWidths.datetime}px`,
             color: colors.textPrimary,
             fontWeight: '600',
             fontFamily: fonts.body,
-            fontSize: '12px',
+            fontSize: '11px',
           }}
         >
           Date/Time
@@ -64,14 +67,14 @@ function TableHeader({ columnWidths }) {
           style={{
             padding: '4px 8px',
             textAlign: 'left',
-            borderBottom: `2px solid ${colors.borderMedium}`,
+            borderBottom: `1px solid ${colors.borderLight}`,
             borderRight: `1px solid ${colors.borderLight}`,
             width: `${columnWidths.source}px`,
             minWidth: `${columnWidths.source}px`,
             color: colors.textPrimary,
             fontWeight: '600',
             fontFamily: fonts.body,
-            fontSize: '12px',
+            fontSize: '11px',
           }}
         >
           Source
@@ -80,14 +83,14 @@ function TableHeader({ columnWidths }) {
           style={{
             padding: '4px 8px',
             textAlign: 'left',
-            borderBottom: `2px solid ${colors.borderMedium}`,
+            borderBottom: `1px solid ${colors.borderLight}`,
             borderRight: `1px solid ${colors.borderLight}`,
             width: `${columnWidths.destination}px`,
             minWidth: `${columnWidths.destination}px`,
             color: colors.textPrimary,
             fontWeight: '600',
             fontFamily: fonts.body,
-            fontSize: '12px',
+            fontSize: '11px',
           }}
         >
           Destination
@@ -96,14 +99,14 @@ function TableHeader({ columnWidths }) {
           style={{
             padding: '4px 8px',
             textAlign: 'left',
-            borderBottom: `2px solid ${colors.borderMedium}`,
+            borderBottom: `1px solid ${colors.borderLight}`,
             borderRight: `1px solid ${colors.borderLight}`,
             width: `${columnWidths.protocol}px`,
             minWidth: `${columnWidths.protocol}px`,
             color: colors.textPrimary,
             fontWeight: '600',
             fontFamily: fonts.body,
-            fontSize: '12px',
+            fontSize: '11px',
           }}
         >
           Protocol
@@ -112,14 +115,14 @@ function TableHeader({ columnWidths }) {
           style={{
             padding: '4px 8px',
             textAlign: 'left',
-            borderBottom: `2px solid ${colors.borderMedium}`,
+            borderBottom: `1px solid ${colors.borderLight}`,
             borderRight: `1px solid ${colors.borderLight}`,
             width: `${columnWidths.method}px`,
             minWidth: `${columnWidths.method}px`,
             color: colors.textPrimary,
             fontWeight: '600',
             fontFamily: fonts.body,
-            fontSize: '12px',
+            fontSize: '11px',
           }}
         >
           Method
@@ -128,14 +131,14 @@ function TableHeader({ columnWidths }) {
           style={{
             padding: '4px 8px',
             textAlign: 'left',
-            borderBottom: `2px solid ${colors.borderMedium}`,
+            borderBottom: `1px solid ${colors.borderLight}`,
             borderRight: `1px solid ${colors.borderLight}`,
             width: `${columnWidths.status}px`,
             minWidth: `${columnWidths.status}px`,
             color: colors.textPrimary,
             fontWeight: '600',
             fontFamily: fonts.body,
-            fontSize: '12px',
+            fontSize: '11px',
           }}
         >
           Status
@@ -144,14 +147,14 @@ function TableHeader({ columnWidths }) {
           style={{
             padding: '4px 8px',
             textAlign: 'left',
-            borderBottom: `2px solid ${colors.borderMedium}`,
+            borderBottom: `1px solid ${colors.borderLight}`,
             borderRight: `1px solid ${colors.borderLight}`,
             width: `${columnWidths.endpoint}px`,
             minWidth: `${columnWidths.endpoint}px`,
             color: colors.textPrimary,
             fontWeight: '600',
             fontFamily: fonts.body,
-            fontSize: '12px',
+            fontSize: '11px',
           }}
         >
           Endpoint
@@ -160,14 +163,14 @@ function TableHeader({ columnWidths }) {
           style={{
             padding: '4px 8px',
             textAlign: 'right',
-            borderBottom: `2px solid ${colors.borderMedium}`,
+            borderBottom: `1px solid ${colors.borderLight}`,
             borderRight: `1px solid ${colors.borderLight}`,
             width: `${columnWidths.length}px`,
             minWidth: `${columnWidths.length}px`,
             color: colors.textPrimary,
             fontWeight: '600',
             fontFamily: fonts.body,
-            fontSize: '12px',
+            fontSize: '11px',
           }}
         >
           Length
@@ -176,11 +179,11 @@ function TableHeader({ columnWidths }) {
           style={{
             padding: '4px 8px',
             textAlign: 'left',
-            borderBottom: `2px solid ${colors.borderMedium}`,
+            borderBottom: `1px solid ${colors.borderLight}`,
             color: colors.textPrimary,
             fontWeight: '600',
             fontFamily: fonts.body,
-            fontSize: '12px',
+            fontSize: '11px',
           }}
         >
           Info

@@ -6,6 +6,7 @@ import ViewModeTabs from './components/ViewModeTabs';
 import GroupedBySessionView from './components/GroupedBySessionView';
 import GroupedByServerView from './components/GroupedByServerView';
 import { groupByServerAndSession, groupBySessionAndServer } from './utils/groupingUtils.js';
+import { pairRequestsWithResponses } from './utils/requestUtils.js';
 import { staggerIn } from './utils/animations';
 import anime from 'animejs';
 
@@ -28,6 +29,7 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
   const [expandedServers, setExpandedServers] = useState(new Map());
   const [expandedServersFirst, setExpandedServersFirst] = useState(new Set());
   const [expandedSessionsInServer, setExpandedSessionsInServer] = useState(new Map());
+  const [expandedResponses, setExpandedResponses] = useState(new Set());
   const tbodyRef = useRef(null);
   const prevRequestsLengthRef = useRef(0);
 
@@ -171,15 +173,31 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
     });
   };
 
+  const pairedRequests = useMemo(() => pairRequestsWithResponses(requests), [requests]);
+
+  const toggleResponse = (frameNumber) => {
+    setExpandedResponses((prev) => {
+      const updated = new Set(prev);
+      if (updated.has(frameNumber)) {
+        updated.delete(frameNumber);
+      } else {
+        updated.add(frameNumber);
+      }
+      return updated;
+    });
+  };
+
   const renderGeneralView = () => (
     <tbody ref={tbodyRef}>
-      {requests.map((request) => (
+      {pairedRequests.map((pair) => (
         <RequestRow
-          key={request.frame_number}
-          request={request}
+          key={pair.frame_number}
+          pair={pair}
           selected={selected}
           firstRequestTime={firstRequestTime}
           onSelect={onSelect}
+          isExpanded={expandedResponses.has(pair.frame_number)}
+          onToggleExpand={() => toggleResponse(pair.frame_number)}
         />
       ))}
     </tbody>
@@ -210,9 +228,11 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
         <table
           style={{
             width: '100%',
-            borderCollapse: 'collapse',
+            borderCollapse: 'separate',
+            borderSpacing: 0,
             fontSize: '12px',
-            fontFamily: fonts.mono,
+            fontFamily: fonts.body,
+            background: colors.bgCard,
           }}
         >
           <TableHeader columnWidths={columnWidths} />

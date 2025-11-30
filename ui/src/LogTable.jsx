@@ -1,9 +1,11 @@
+import { colors, fonts } from './theme';
+
 function LogTable({ logs, selected, onSelect }) {
   const getStatusColor = (status) => {
-    if (status === 'error') return '#f48771';
-    if (status === 'success') return '#89d185';
-    if (status === 'pending') return '#dcdcaa';
-    return '#888';
+    if (status === 'error') return colors.error;
+    if (status === 'success') return colors.success;
+    if (status === 'pending') return colors.warning;
+    return colors.textTertiary;
   };
 
   const formatTime = (iso) => {
@@ -11,29 +13,128 @@ function LogTable({ logs, selected, onSelect }) {
   };
 
   return (
-    <div style={{ flex: 1, overflow: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
-        <thead style={{ position: 'sticky', top: 0, background: '#252526', zIndex: 1 }}>
+    <div style={{ flex: 1, overflow: 'auto', background: colors.bgPrimary }}>
+      <table
+        style={{
+          width: '100%',
+          borderCollapse: 'collapse',
+          fontSize: '12px',
+          fontFamily: fonts.body,
+        }}
+      >
+        <thead
+          style={{
+            position: 'sticky',
+            top: 0,
+            background: colors.bgCard,
+            zIndex: 1,
+            boxShadow: `0 2px 4px ${colors.shadowSm}`,
+          }}
+        >
           <tr>
-            <th style={{ padding: '6px 8px', textAlign: 'left', borderBottom: '1px solid #333' }}>
+            <th
+              style={{
+                padding: '12px 16px',
+                textAlign: 'left',
+                borderBottom: `1px solid ${colors.borderLight}`,
+                color: colors.textSecondary,
+                fontWeight: '600',
+                fontSize: '11px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                background: colors.bgCard,
+              }}
+            >
               Time
             </th>
-            <th style={{ padding: '6px 8px', textAlign: 'left', borderBottom: '1px solid #333' }}>
+            <th
+              style={{
+                padding: '12px 16px',
+                textAlign: 'left',
+                borderBottom: `1px solid ${colors.borderLight}`,
+                color: colors.textSecondary,
+                fontWeight: '600',
+                fontSize: '11px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                background: colors.bgCard,
+              }}
+            >
               Server
             </th>
-            <th style={{ padding: '6px 8px', textAlign: 'left', borderBottom: '1px solid #333' }}>
+            <th
+              style={{
+                padding: '12px 16px',
+                textAlign: 'left',
+                borderBottom: `1px solid ${colors.borderLight}`,
+                color: colors.textSecondary,
+                fontWeight: '600',
+                fontSize: '11px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                background: colors.bgCard,
+              }}
+            >
               Dir
             </th>
-            <th style={{ padding: '6px 8px', textAlign: 'left', borderBottom: '1px solid #333' }}>
+            <th
+              style={{
+                padding: '12px 16px',
+                textAlign: 'left',
+                borderBottom: `1px solid ${colors.borderLight}`,
+                color: colors.textSecondary,
+                fontWeight: '600',
+                fontSize: '11px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                background: colors.bgCard,
+              }}
+            >
               Method
             </th>
-            <th style={{ padding: '6px 8px', textAlign: 'left', borderBottom: '1px solid #333' }}>
+            <th
+              style={{
+                padding: '12px 16px',
+                textAlign: 'left',
+                borderBottom: `1px solid ${colors.borderLight}`,
+                color: colors.textSecondary,
+                fontWeight: '600',
+                fontSize: '11px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                background: colors.bgCard,
+              }}
+            >
               Status
             </th>
-            <th style={{ padding: '6px 8px', textAlign: 'right', borderBottom: '1px solid #333' }}>
+            <th
+              style={{
+                padding: '12px 16px',
+                textAlign: 'right',
+                borderBottom: `1px solid ${colors.borderLight}`,
+                color: colors.textSecondary,
+                fontWeight: '600',
+                fontSize: '11px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                background: colors.bgCard,
+              }}
+            >
               Duration
             </th>
-            <th style={{ padding: '6px 8px', textAlign: 'right', borderBottom: '1px solid #333' }}>
+            <th
+              style={{
+                padding: '12px 16px',
+                textAlign: 'right',
+                borderBottom: `1px solid ${colors.borderLight}`,
+                color: colors.textSecondary,
+                fontWeight: '600',
+                fontSize: '11px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                background: colors.bgCard,
+              }}
+            >
               Size
             </th>
           </tr>
@@ -45,38 +146,89 @@ function LogTable({ logs, selected, onSelect }) {
               onClick={() => onSelect(log)}
               style={{
                 cursor: 'pointer',
-                background:
-                  selected?.id === log.id ? '#264f78' : log.id % 2 === 0 ? '#1e1e1e' : '#252526',
-                borderBottom: '1px solid #333',
+                background: selected?.id === log.id ? colors.accentBlue + '15' : colors.bgCard,
+                borderBottom: `1px solid ${colors.borderLight}`,
+                transition: 'background-color 0.15s ease',
               }}
               onMouseEnter={(e) => {
-                if (selected?.id !== log.id) e.currentTarget.style.background = '#2a2d2e';
+                if (selected?.id !== log.id) e.currentTarget.style.background = colors.bgHover;
               }}
               onMouseLeave={(e) => {
-                if (selected?.id !== log.id)
-                  e.currentTarget.style.background = log.id % 2 === 0 ? '#1e1e1e' : '#252526';
+                if (selected?.id !== log.id) e.currentTarget.style.background = colors.bgCard;
               }}
             >
-              <td style={{ padding: '4px 8px', color: '#858585', fontFamily: 'monospace' }}>
-                {formatTime(log.timestamp_iso)}
-              </td>
-              <td style={{ padding: '4px 8px' }}>{log.server_name}</td>
               <td
                 style={{
-                  padding: '4px 8px',
-                  color: log.direction === 'request' ? '#4ec9b0' : '#ce9178',
+                  padding: '16px',
+                  color: colors.textTertiary,
+                  fontFamily: fonts.mono,
+                  fontSize: '12px',
+                }}
+              >
+                {formatTime(log.timestamp_iso)}
+              </td>
+              <td
+                style={{
+                  padding: '16px',
+                  color: colors.textPrimary,
+                  fontSize: '12px',
+                  fontFamily: fonts.body,
+                }}
+              >
+                {log.server_name}
+              </td>
+              <td
+                style={{
+                  padding: '16px',
+                  color: log.direction === 'request' ? colors.accentBlue : colors.accentOrange,
+                  fontSize: '12px',
+                  fontWeight: '500',
+                  fontFamily: fonts.body,
                 }}
               >
                 {log.direction}
               </td>
-              <td style={{ padding: '4px 8px', color: '#dcdcaa' }}>{log.method || '-'}</td>
-              <td style={{ padding: '4px 8px', color: getStatusColor(log.status) }}>
+              <td
+                style={{
+                  padding: '16px',
+                  color: colors.textPrimary,
+                  fontSize: '12px',
+                  fontFamily: fonts.body,
+                }}
+              >
+                {log.method || '-'}
+              </td>
+              <td
+                style={{
+                  padding: '16px',
+                  color: getStatusColor(log.status),
+                  fontSize: '12px',
+                  fontWeight: '500',
+                  fontFamily: fonts.body,
+                }}
+              >
                 {log.status || '-'}
               </td>
-              <td style={{ padding: '4px 8px', textAlign: 'right', color: '#858585' }}>
+              <td
+                style={{
+                  padding: '16px',
+                  textAlign: 'right',
+                  color: colors.textSecondary,
+                  fontSize: '12px',
+                  fontFamily: fonts.mono,
+                }}
+              >
                 {log.duration_ms ? `${log.duration_ms.toFixed(2)}ms` : '-'}
               </td>
-              <td style={{ padding: '4px 8px', textAlign: 'right', color: '#858585' }}>
+              <td
+                style={{
+                  padding: '16px',
+                  textAlign: 'right',
+                  color: colors.textSecondary,
+                  fontSize: '12px',
+                  fontFamily: fonts.mono,
+                }}
+              >
                 {log.payload_size ? `${(log.payload_size / 1024).toFixed(1)}KB` : '-'}
               </td>
             </tr>

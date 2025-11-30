@@ -19,7 +19,7 @@ export default function FilterInput({
       type === 'number' || placeholder?.includes('JSON-RPC') || placeholder?.includes('HTTP')
         ? fonts.mono
         : fonts.body,
-    borderRadius: '6px',
+    borderRadius: '8px',
     transition: 'all 0.2s',
     ...style,
   };

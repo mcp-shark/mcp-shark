@@ -48,15 +48,18 @@ export default function TrafficTab({
         <div
           ref={detailPanelRef}
           style={{
-            width: '600px',
+            width: '40%',
+            minWidth: '500px',
+            maxWidth: '700px',
             borderLeft: `1px solid ${colors.borderLight}`,
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
             background: colors.bgCard,
+            flexShrink: 0,
           }}
         >
-          <RequestDetail request={selected} onClose={() => onSelect(null)} />
+          <RequestDetail request={selected} onClose={() => onSelect(null)} requests={requests} />
         </div>
       )}
     </div>

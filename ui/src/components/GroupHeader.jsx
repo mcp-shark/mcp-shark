@@ -38,25 +38,25 @@ export default function GroupHeader({ children, onClick, isExpanded, indent = 0 
       onClick={onClick}
       style={{
         cursor: 'pointer',
-        background: colors.bgSecondary,
-        borderBottom: `2px solid ${colors.borderMedium}`,
-        borderTop: `2px solid ${colors.borderMedium}`,
+        background: colors.bgCard,
+        borderBottom: `1px solid ${colors.borderLight}`,
+        borderTop: `1px solid ${colors.borderLight}`,
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.background = colors.bgHover;
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.background = colors.bgSecondary;
+        e.currentTarget.style.background = colors.bgCard;
       }}
     >
       <td
         colSpan={11}
         style={{
-          padding: indent > 0 ? '6px 12px 6px 32px' : '6px 12px',
+          padding: indent > 0 ? '12px 16px 12px 40px' : '12px 16px',
           color: colors.textPrimary,
           fontFamily: fonts.body,
           fontWeight: '600',
-          fontSize: indent > 0 ? '10px' : '11px',
+          fontSize: indent > 0 ? '11px' : '12px',
         }}
       >
         <span

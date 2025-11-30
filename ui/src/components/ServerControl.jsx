@@ -6,9 +6,10 @@ function ServerControl({ status, loading, onStart, onStop, canStart }) {
       style={{
         background: colors.bgCard,
         border: `1px solid ${colors.borderLight}`,
-        borderRadius: '6px',
-        padding: '20px',
+        borderRadius: '12px',
+        padding: '24px',
         marginBottom: '20px',
+        boxShadow: `0 2px 4px ${colors.shadowSm}`,
       }}
     >
       <div style={{ marginBottom: '16px' }}>
@@ -39,7 +40,7 @@ function ServerControl({ status, loading, onStart, onStop, canStart }) {
               fontSize: '13px',
               fontFamily: fonts.body,
               fontWeight: '500',
-              borderRadius: '6px',
+              borderRadius: '8px',
               opacity: loading ? 0.5 : 1,
               transition: 'all 0.2s',
               boxShadow: `0 2px 4px ${colors.shadowSm}`,
@@ -71,7 +72,7 @@ function ServerControl({ status, loading, onStart, onStop, canStart }) {
               fontSize: '13px',
               fontFamily: fonts.body,
               fontWeight: '500',
-              borderRadius: '6px',
+              borderRadius: '8px',
               opacity: loading || !canStart ? 0.5 : 1,
               transition: 'all 0.2s',
               boxShadow: `0 2px 4px ${colors.shadowSm}`,
@@ -100,7 +101,7 @@ function ServerControl({ status, loading, onStart, onStop, canStart }) {
             padding: '8px 16px',
             background: colors.bgPrimary,
             border: `1px solid ${colors.borderLight}`,
-            borderRadius: '4px',
+            borderRadius: '8px',
           }}
         >
           <div
@@ -108,12 +109,19 @@ function ServerControl({ status, loading, onStart, onStop, canStart }) {
               width: '10px',
               height: '10px',
               borderRadius: '50%',
-              background: status.running ? '#89d185' : '#888',
-              boxShadow: status.running ? '0 0 8px rgba(137, 209, 133, 0.5)' : 'none',
+              background: status.running ? colors.success : colors.textTertiary,
+              boxShadow: status.running ? `0 0 8px ${colors.success}80` : 'none',
               transition: 'all 0.3s',
             }}
           />
-          <span style={{ color: '#d4d4d4', fontSize: '13px', fontWeight: '500' }}>
+          <span
+            style={{
+              color: colors.textPrimary,
+              fontSize: '13px',
+              fontWeight: '500',
+              fontFamily: fonts.body,
+            }}
+          >
             {status.running ? `Running (PID: ${status.pid})` : 'Stopped'}
           </span>
         </div>

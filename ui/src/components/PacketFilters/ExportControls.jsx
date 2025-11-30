@@ -58,7 +58,7 @@ export default function ExportControls({ stats, onExport }) {
             fontSize: '12px',
             fontFamily: fonts.body,
             fontWeight: '500',
-            borderRadius: '6px',
+            borderRadius: '8px',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -112,7 +112,7 @@ export default function ExportControls({ stats, onExport }) {
             color: colors.textPrimary,
             fontSize: '11px',
             fontFamily: fonts.body,
-            borderRadius: '6px',
+            borderRadius: '8px',
             cursor: 'pointer',
             transition: 'all 0.2s',
           }}

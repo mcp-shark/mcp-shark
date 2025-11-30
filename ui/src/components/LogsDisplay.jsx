@@ -6,10 +6,10 @@ export default function LogsDisplay({ logs, filteredLogs, logEndRef, getLogColor
       style={{
         flex: 1,
         overflow: 'auto',
-        padding: '12px',
+        padding: '16px',
         fontFamily: fonts.mono,
         fontSize: '12px',
-        background: colors.bgPrimary,
+        background: colors.bgCard,
       }}
     >
       {filteredLogs.length === 0 ? (
@@ -34,24 +34,42 @@ export default function LogsDisplay({ logs, filteredLogs, logEndRef, getLogColor
               style={{
                 display: 'flex',
                 gap: '12px',
-                padding: '6px 8px',
+                padding: '12px 16px',
                 borderBottom: `1px solid ${colors.borderLight}`,
+                background: colors.bgCard,
+                transition: 'background-color 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = colors.bgHover;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = colors.bgCard;
               }}
             >
-              <span style={{ color: colors.textSecondary, minWidth: '180px', flexShrink: 0 }}>
+              <span
+                style={{
+                  color: colors.textTertiary,
+                  minWidth: '140px',
+                  flexShrink: 0,
+                  fontFamily: fonts.mono,
+                  fontSize: '11px',
+                }}
+              >
                 {new Date(log.timestamp).toLocaleTimeString()}
               </span>
               <span
                 style={{
-                  color: colors.textSecondary,
-                  minWidth: '60px',
+                  color: colors.textTertiary,
+                  minWidth: '70px',
                   flexShrink: 0,
                   textTransform: 'uppercase',
                   fontFamily: fonts.body,
-                  fontSize: '11px',
+                  fontSize: '10px',
+                  fontWeight: '600',
+                  letterSpacing: '0.05em',
                 }}
               >
-                [{log.type}]
+                {log.type}
               </span>
               <span
                 style={{
@@ -59,6 +77,9 @@ export default function LogsDisplay({ logs, filteredLogs, logEndRef, getLogColor
                   whiteSpace: 'pre-wrap',
                   wordBreak: 'break-word',
                   flex: 1,
+                  fontFamily: fonts.mono,
+                  fontSize: '12px',
+                  lineHeight: '1.5',
                 }}
               >
                 {log.line}

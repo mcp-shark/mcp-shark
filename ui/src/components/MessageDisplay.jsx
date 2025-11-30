@@ -1,3 +1,5 @@
+import { colors, fonts } from '../theme';
+
 function MessageDisplay({ message, error }) {
   if (!message && !error) {
     return null;
@@ -8,12 +10,14 @@ function MessageDisplay({ message, error }) {
       style={{
         marginBottom: '20px',
         padding: '12px 16px',
-        background: message ? '#264f78' : '#5a1d1d',
-        border: `1px solid ${message ? '#0e639c' : '#c72e2e'}`,
-        borderRadius: '4px',
-        color: message ? '#d4d4d4' : '#f48771',
+        background: message ? colors.info + '15' : colors.error + '15',
+        border: `1px solid ${message ? colors.info : colors.error}`,
+        borderRadius: '8px',
+        color: message ? colors.textPrimary : colors.error,
         fontSize: '13px',
-        lineHeight: '1.5',
+        lineHeight: '1.6',
+        fontFamily: fonts.body,
+        boxShadow: `0 2px 4px ${colors.shadowSm}`,
       }}
     >
       {message || error}

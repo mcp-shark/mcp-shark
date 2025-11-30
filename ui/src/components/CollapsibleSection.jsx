@@ -27,16 +27,46 @@ function CollapsibleSection({ title, children, titleColor = colors.accentBlue })
           color: titleColor,
           fontWeight: '600',
           fontFamily: fonts.body,
-          marginBottom: '4px',
+          fontSize: '12px',
+          marginBottom: '8px',
           cursor: 'pointer',
           userSelect: 'none',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          padding: '4px 0',
+          transition: 'color 0.15s ease',
         }}
         onClick={() => setIsExpanded(!isExpanded)}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.color =
+            titleColor === colors.accentBlue ? colors.accentBlueHover : titleColor;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.color = titleColor;
+        }}
       >
-        <ChevronDown size={12} /> {title}
+        <span
+          style={{
+            transform: isExpanded ? 'rotate(0deg)' : 'rotate(-90deg)',
+            transition: 'transform 0.2s ease',
+            display: 'inline-block',
+          }}
+        >
+          <ChevronDown size={12} color={titleColor} />
+        </span>
+        {title}
       </div>
       {isExpanded && (
-        <div style={{ paddingLeft: '16px', color: colors.textPrimary, fontFamily: fonts.body }}>
+        <div
+          style={{
+            paddingLeft: '20px',
+            color: colors.textPrimary,
+            fontFamily: fonts.body,
+            fontSize: '12px',
+            lineHeight: '1.6',
+          }}
+        >
           {children}
         </div>
       )}

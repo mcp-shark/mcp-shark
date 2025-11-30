@@ -35,7 +35,7 @@ function DetectedPathsList({ detectedPaths, detecting, onDetect, onSelect, onVie
             color: colors.textSecondary,
             cursor: detecting ? 'not-allowed' : 'pointer',
             fontSize: '11px',
-            borderRadius: '4px',
+            borderRadius: '8px',
             opacity: detecting ? 0.5 : 1,
           }}
           title="Refresh detection"
@@ -64,7 +64,7 @@ function DetectedPathsList({ detectedPaths, detecting, onDetect, onSelect, onVie
               color: colors.textPrimary,
               cursor: 'pointer',
               fontSize: '12px',
-              borderRadius: '4px',
+              borderRadius: '8px',
               textAlign: 'left',
               display: 'flex',
               justifyContent: 'space-between',
@@ -137,7 +137,7 @@ function DetectedPathsList({ detectedPaths, detecting, onDetect, onSelect, onVie
                       padding: '2px 6px',
                       background: colors.success,
                       color: colors.textInverse,
-                      borderRadius: '3px',
+                      borderRadius: '6px',
                       fontWeight: '500',
                     }}
                   >
@@ -154,7 +154,7 @@ function DetectedPathsList({ detectedPaths, detecting, onDetect, onSelect, onVie
                       background: 'transparent',
                       border: `1px solid ${colors.borderMedium}`,
                       color: colors.textSecondary,
-                      borderRadius: '3px',
+                      borderRadius: '6px',
                       cursor: 'pointer',
                     }}
                     title="View file content"

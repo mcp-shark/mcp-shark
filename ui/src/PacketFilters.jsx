@@ -96,7 +96,7 @@ function RequestFilters({ filters, onFilterChange, stats, onExport }) {
           color: colors.textPrimary,
           fontSize: '13px',
           fontFamily: fonts.body,
-          borderRadius: '6px',
+          borderRadius: '8px',
           cursor: 'pointer',
           transition: 'all 0.2s',
         }}

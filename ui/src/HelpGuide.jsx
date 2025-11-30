@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { colors, fonts } from './theme';
 
 // SVG Icon Components
 const HelpIcon = ({ size = 16, color = 'currentColor' }) => (
@@ -67,9 +68,9 @@ function HelpGuide({ onClose }) {
     >
       <div
         style={{
-          background: '#252526',
-          border: '1px solid #3e3e42',
-          borderRadius: '8px',
+          background: colors.bgCard,
+          border: `1px solid ${colors.borderLight}`,
+          borderRadius: '12px',
           maxWidth: '700px',
           width: '100%',
           maxHeight: '90vh',
@@ -82,17 +83,25 @@ function HelpGuide({ onClose }) {
         <div
           style={{
             padding: '20px 24px',
-            borderBottom: '1px solid #3e3e42',
+            borderBottom: `1px solid ${colors.borderLight}`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ color: '#4ec9b0' }}>
+            <div style={{ color: colors.accentBlue }}>
               <HelpIcon size={24} />
             </div>
-            <h2 style={{ margin: 0, color: '#d4d4d4', fontSize: '20px', fontWeight: '600' }}>
+            <h2
+              style={{
+                margin: 0,
+                color: colors.textPrimary,
+                fontSize: '20px',
+                fontWeight: '600',
+                fontFamily: fonts.body,
+              }}
+            >
               Welcome to MCP Shark
             </h2>
           </div>
@@ -101,20 +110,20 @@ function HelpGuide({ onClose }) {
             style={{
               background: 'transparent',
               border: 'none',
-              color: '#858585',
+              color: colors.textTertiary,
               cursor: 'pointer',
               padding: '4px',
               display: 'flex',
               alignItems: 'center',
-              borderRadius: '4px',
+              borderRadius: '8px',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#3e3e42';
-              e.currentTarget.style.color = '#d4d4d4';
+              e.currentTarget.style.background = colors.bgHover;
+              e.currentTarget.style.color = colors.textPrimary;
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = '#858585';
+              e.currentTarget.style.color = colors.textTertiary;
             }}
           >
             <CloseIcon size={20} />
@@ -123,14 +132,27 @@ function HelpGuide({ onClose }) {
 
         {/* Content */}
         <div style={{ padding: '24px' }}>
-          <div style={{ color: '#d4d4d4', lineHeight: '1.6', fontSize: '14px' }}>
+          <div
+            style={{
+              color: colors.textPrimary,
+              lineHeight: '1.6',
+              fontSize: '14px',
+              fontFamily: fonts.body,
+            }}
+          >
             <section style={{ marginBottom: '24px' }}>
               <h3
-                style={{ color: '#4ec9b0', marginTop: 0, marginBottom: '12px', fontSize: '16px' }}
+                style={{
+                  color: colors.accentBlue,
+                  marginTop: 0,
+                  marginBottom: '12px',
+                  fontSize: '16px',
+                  fontFamily: fonts.body,
+                }}
               >
                 What is MCP Shark?
               </h3>
-              <p style={{ margin: 0, color: '#cccccc' }}>
+              <p style={{ margin: 0, color: colors.textSecondary }}>
                 MCP Shark is a powerful tool for monitoring and analyzing Model Context Protocol
                 (MCP) communications. It captures all HTTP requests and responses between your IDE
                 and MCP servers, providing Wireshark-like forensic analysis capabilities.
@@ -139,11 +161,17 @@ function HelpGuide({ onClose }) {
 
             <section style={{ marginBottom: '24px' }}>
               <h3
-                style={{ color: '#4ec9b0', marginTop: 0, marginBottom: '12px', fontSize: '16px' }}
+                style={{
+                  color: colors.accentBlue,
+                  marginTop: 0,
+                  marginBottom: '12px',
+                  fontSize: '16px',
+                  fontFamily: fonts.body,
+                }}
               >
                 Getting Started
               </h3>
-              <ol style={{ margin: 0, paddingLeft: '20px', color: '#cccccc' }}>
+              <ol style={{ margin: 0, paddingLeft: '20px', color: colors.textSecondary }}>
                 <li style={{ marginBottom: '8px' }}>
                   <strong>Setup Tab:</strong> Go to the "MCP Server Setup" tab to configure and
                   start the MCP Shark server
@@ -161,11 +189,17 @@ function HelpGuide({ onClose }) {
 
             <section style={{ marginBottom: '24px' }}>
               <h3
-                style={{ color: '#4ec9b0', marginTop: 0, marginBottom: '12px', fontSize: '16px' }}
+                style={{
+                  color: colors.accentBlue,
+                  marginTop: 0,
+                  marginBottom: '12px',
+                  fontSize: '16px',
+                  fontFamily: fonts.body,
+                }}
               >
                 Traffic Capture Features
               </h3>
-              <ul style={{ margin: 0, paddingLeft: '20px', color: '#cccccc' }}>
+              <ul style={{ margin: 0, paddingLeft: '20px', color: colors.textSecondary }}>
                 <li style={{ marginBottom: '8px' }}>
                   <strong>General List:</strong> View all requests in a flat chronological list
                 </li>
@@ -190,11 +224,17 @@ function HelpGuide({ onClose }) {
 
             <section style={{ marginBottom: '24px' }}>
               <h3
-                style={{ color: '#4ec9b0', marginTop: 0, marginBottom: '12px', fontSize: '16px' }}
+                style={{
+                  color: colors.accentBlue,
+                  marginTop: 0,
+                  marginBottom: '12px',
+                  fontSize: '16px',
+                  fontFamily: fonts.body,
+                }}
               >
                 Tips
               </h3>
-              <ul style={{ margin: 0, paddingLeft: '20px', color: '#cccccc' }}>
+              <ul style={{ margin: 0, paddingLeft: '20px', color: colors.textSecondary }}>
                 <li style={{ marginBottom: '8px' }}>
                   Use the search bar to find requests by method, URL, JSON-RPC method, or any text
                   content
@@ -228,7 +268,7 @@ function HelpGuide({ onClose }) {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                color: '#858585',
+                color: colors.textTertiary,
                 cursor: 'pointer',
                 fontSize: '13px',
               }}

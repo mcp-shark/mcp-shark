@@ -20,7 +20,7 @@ function FileInput({
             color: colors.textInverse,
             cursor: 'pointer',
             fontSize: '13px',
-            borderRadius: '4px',
+            borderRadius: '8px',
             fontWeight: '500',
             whiteSpace: 'nowrap',
             transition: 'background 0.2s',
@@ -57,7 +57,7 @@ function FileInput({
             border: `1px solid ${colors.borderMedium}`,
             color: colors.textPrimary,
             fontSize: '13px',
-            borderRadius: '4px',
+            borderRadius: '8px',
           }}
         />
       </div>
@@ -85,7 +85,7 @@ function FileInput({
               border: `1px solid ${colors.borderMedium}`,
               color: colors.textPrimary,
               fontSize: '13px',
-              borderRadius: '4px',
+              borderRadius: '8px',
             }}
           />
           <div
@@ -117,7 +117,7 @@ function FileInput({
             style={{
               background: colors.bgPrimary,
               padding: '12px',
-              borderRadius: '4px',
+              borderRadius: '8px',
               fontSize: '12px',
               fontFamily: 'monospace',
               color: colors.textPrimary,

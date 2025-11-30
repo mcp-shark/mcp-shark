@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { colors, fonts } from '../theme';
 import TourTooltipHeader from './TourTooltip/TourTooltipHeader';
 import TourTooltipButtons from './TourTooltip/TourTooltipButtons';
 import { useTooltipPosition } from './TourTooltip/useTooltipPosition';
@@ -24,13 +25,13 @@ function TourTooltip({ elementRect, step, currentStep, totalSteps, onNext, onPre
         left: `${position.left}px`,
         top: `${position.top}px`,
         transform: position.transform,
-        background: '#252526',
-        border: '2px solid #0e639c',
-        borderRadius: '8px',
+        background: colors.bgCard,
+        border: `2px solid ${colors.accentBlue}`,
+        borderRadius: '12px',
         padding: '20px',
         maxWidth: '350px',
         minWidth: '300px',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.5)',
+        boxShadow: `0 4px 20px ${colors.shadowLg}`,
         zIndex: 10001,
         pointerEvents: 'auto',
         cursor: isDragging ? 'grabbing' : 'grab',
@@ -57,11 +58,12 @@ function TourTooltip({ elementRect, step, currentStep, totalSteps, onNext, onPre
 
       <div
         style={{
-          color: '#d4d4d4',
+          color: colors.textPrimary,
           fontSize: '14px',
           lineHeight: '1.6',
           marginBottom: '20px',
           pointerEvents: 'none',
+          fontFamily: fonts.body,
         }}
       >
         {step.content}

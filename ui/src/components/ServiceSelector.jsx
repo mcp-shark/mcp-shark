@@ -50,7 +50,7 @@ function ServiceSelector({ services, selectedServices, onSelectionChange }) {
             color: colors.textSecondary,
             cursor: 'pointer',
             fontSize: '12px',
-            borderRadius: '4px',
+            borderRadius: '8px',
           }}
         >
           Select All
@@ -66,7 +66,7 @@ function ServiceSelector({ services, selectedServices, onSelectionChange }) {
             color: colors.textSecondary,
             cursor: 'pointer',
             fontSize: '12px',
-            borderRadius: '4px',
+            borderRadius: '8px',
           }}
         >
           Deselect All
@@ -108,7 +108,7 @@ function ServiceSelector({ services, selectedServices, onSelectionChange }) {
                 padding: '10px',
                 background: isSelected ? `${colors.accentBlue}15` : 'transparent',
                 border: `1px solid ${isSelected ? colors.accentBlue : colors.borderMedium}`,
-                borderRadius: '4px',
+                borderRadius: '8px',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
               }}
@@ -166,7 +166,7 @@ function ServiceSelector({ services, selectedServices, onSelectionChange }) {
                       padding: '2px 6px',
                       background: service.type === 'http' ? '#0e639c' : '#4a9e5f',
                       color: colors.textInverse,
-                      borderRadius: '3px',
+                      borderRadius: '6px',
                       fontSize: '10px',
                       fontWeight: '500',
                     }}
@@ -192,10 +192,10 @@ function ServiceSelector({ services, selectedServices, onSelectionChange }) {
           style={{
             marginTop: '8px',
             padding: '8px 12px',
-            background: '#5a1d1d',
-            border: `1px solid #c72e2e`,
-            borderRadius: '4px',
-            color: '#f48771',
+            background: colors.error + '15',
+            border: `1px solid ${colors.error}`,
+            borderRadius: '8px',
+            color: colors.error,
             fontSize: '12px',
           }}
         >

@@ -23,7 +23,7 @@ function ViewModeTabs({ viewMode, onViewModeChange }) {
           borderBottom:
             viewMode === 'general' ? `2px solid ${colors.accentBlue}` : '2px solid transparent',
           color: viewMode === 'general' ? colors.textPrimary : colors.textSecondary,
-          borderRadius: '6px 6px 0 0',
+          borderRadius: '8px 8px 0 0',
           cursor: 'pointer',
           fontSize: '12px',
           fontWeight: viewMode === 'general' ? '500' : 'normal',
@@ -58,7 +58,7 @@ function ViewModeTabs({ viewMode, onViewModeChange }) {
           cursor: 'pointer',
           fontSize: '12px',
           fontWeight: viewMode === 'groupedBySession' ? '500' : 'normal',
-          borderRadius: '6px 6px 0 0',
+          borderRadius: '8px 8px 0 0',
         }}
         onMouseEnter={(e) => {
           if (viewMode !== 'groupedBySession') {
@@ -90,7 +90,7 @@ function ViewModeTabs({ viewMode, onViewModeChange }) {
           cursor: 'pointer',
           fontSize: '12px',
           fontWeight: viewMode === 'groupedByServer' ? '500' : 'normal',
-          borderRadius: '6px 6px 0 0',
+          borderRadius: '8px 8px 0 0',
         }}
         onMouseEnter={(e) => {
           if (viewMode !== 'groupedByServer') {

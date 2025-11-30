@@ -1,3 +1,5 @@
+import { colors, fonts } from './theme';
+
 function LogDetail({ log, onClose }) {
   const payload = log.payload_json ? JSON.parse(log.payload_json) : null;
 
@@ -6,7 +8,7 @@ function LogDetail({ log, onClose }) {
       <div
         style={{
           padding: '12px',
-          borderBottom: '1px solid #333',
+          borderBottom: `1px solid ${colors.borderLight}`,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -18,7 +20,7 @@ function LogDetail({ log, onClose }) {
           style={{
             background: 'none',
             border: 'none',
-            color: '#d4d4d4',
+            color: colors.textPrimary,
             cursor: 'pointer',
             fontSize: '18px',
           }}
@@ -28,54 +30,81 @@ function LogDetail({ log, onClose }) {
       </div>
       <div style={{ flex: 1, overflow: 'auto', padding: '12px', fontSize: '12px' }}>
         <div style={{ marginBottom: '16px' }}>
-          <div style={{ color: '#858585', marginBottom: '4px' }}>ID</div>
+          <div style={{ color: colors.textTertiary, marginBottom: '4px', fontFamily: fonts.body }}>
+            ID
+          </div>
           <div style={{ fontFamily: 'monospace' }}>{log.id}</div>
         </div>
         <div style={{ marginBottom: '16px' }}>
-          <div style={{ color: '#858585', marginBottom: '4px' }}>Timestamp</div>
+          <div style={{ color: colors.textTertiary, marginBottom: '4px', fontFamily: fonts.body }}>
+            Timestamp
+          </div>
           <div style={{ fontFamily: 'monospace' }}>{log.timestamp_iso}</div>
         </div>
         <div style={{ marginBottom: '16px' }}>
-          <div style={{ color: '#858585', marginBottom: '4px' }}>Server</div>
+          <div style={{ color: colors.textTertiary, marginBottom: '4px', fontFamily: fonts.body }}>
+            Server
+          </div>
           <div>{log.server_name}</div>
         </div>
         <div style={{ marginBottom: '16px' }}>
-          <div style={{ color: '#858585', marginBottom: '4px' }}>Direction</div>
+          <div style={{ color: colors.textTertiary, marginBottom: '4px', fontFamily: fonts.body }}>
+            Direction
+          </div>
           <div>{log.direction}</div>
         </div>
         <div style={{ marginBottom: '16px' }}>
-          <div style={{ color: '#858585', marginBottom: '4px' }}>Method</div>
+          <div style={{ color: colors.textTertiary, marginBottom: '4px', fontFamily: fonts.body }}>
+            Method
+          </div>
           <div>{log.method || '-'}</div>
         </div>
         <div style={{ marginBottom: '16px' }}>
-          <div style={{ color: '#858585', marginBottom: '4px' }}>Status</div>
+          <div style={{ color: colors.textTertiary, marginBottom: '4px', fontFamily: fonts.body }}>
+            Status
+          </div>
           <div>{log.status || '-'}</div>
         </div>
         {log.request_id && (
           <div style={{ marginBottom: '16px' }}>
-            <div style={{ color: '#858585', marginBottom: '4px' }}>Request ID</div>
+            <div
+              style={{ color: colors.textTertiary, marginBottom: '4px', fontFamily: fonts.body }}
+            >
+              Request ID
+            </div>
             <div style={{ fontFamily: 'monospace', fontSize: '11px' }}>{log.request_id}</div>
           </div>
         )}
         {log.duration_ms && (
           <div style={{ marginBottom: '16px' }}>
-            <div style={{ color: '#858585', marginBottom: '4px' }}>Duration</div>
+            <div
+              style={{ color: colors.textTertiary, marginBottom: '4px', fontFamily: fonts.body }}
+            >
+              Duration
+            </div>
             <div>{log.duration_ms.toFixed(2)}ms</div>
           </div>
         )}
         {log.error_message && (
           <div style={{ marginBottom: '16px' }}>
-            <div style={{ color: '#858585', marginBottom: '4px' }}>Error</div>
-            <div style={{ color: '#f48771' }}>{log.error_message}</div>
+            <div
+              style={{ color: colors.textTertiary, marginBottom: '4px', fontFamily: fonts.body }}
+            >
+              Error
+            </div>
+            <div style={{ color: colors.error, fontFamily: fonts.body }}>{log.error_message}</div>
           </div>
         )}
         <div style={{ marginBottom: '16px' }}>
-          <div style={{ color: '#858585', marginBottom: '4px' }}>Payload</div>
+          <div style={{ color: colors.textTertiary, marginBottom: '4px', fontFamily: fonts.body }}>
+            Payload
+          </div>
           <pre
             style={{
-              background: '#1e1e1e',
+              background: colors.bgTertiary,
               padding: '8px',
-              borderRadius: '4px',
+              borderRadius: '8px',
+              border: `1px solid ${colors.borderLight}`,
               overflow: 'auto',
               fontSize: '11px',
               fontFamily: 'monospace',

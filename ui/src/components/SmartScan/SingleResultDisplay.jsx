@@ -10,18 +10,18 @@ export default function SingleResultDisplay({ scanResult }) {
       style={{
         background: colors.bgCard,
         border: `1px solid ${colors.borderLight}`,
-        borderRadius: '12px',
-        padding: '24px',
-        boxShadow: `0 2px 8px ${colors.shadowSm}`,
+        borderRadius: '8px',
+        padding: '20px',
+        boxShadow: `0 1px 3px ${colors.shadowSm}`,
       }}
     >
       <h2
         style={{
-          fontSize: '18px',
+          fontSize: '16px',
           fontWeight: '600',
           color: colors.textPrimary,
           fontFamily: fonts.body,
-          marginBottom: '20px',
+          marginBottom: '16px',
         }}
       >
         Scan Results
