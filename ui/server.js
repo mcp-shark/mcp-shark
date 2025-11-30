@@ -128,6 +128,7 @@ export function createUIServer() {
   app.post('/api/playground/proxy', playgroundRoutes.proxyRequest);
 
   app.post('/api/smartscan/scans', smartScanRoutes.createScan);
+  app.get('/api/smartscan/scans', smartScanRoutes.listScans);
   app.get('/api/smartscan/scans/:scanId', smartScanRoutes.getScan);
   app.get('/api/smartscan/token', smartScanRoutes.getToken);
   app.post('/api/smartscan/token', smartScanRoutes.saveToken);

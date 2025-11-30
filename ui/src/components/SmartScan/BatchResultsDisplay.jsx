@@ -1,8 +1,9 @@
 import { CheckIcon, CacheIcon, ExternalLinkIcon } from '../SmartScanIcons';
+import { IconEye } from '@tabler/icons-react';
 import { colors, fonts } from '../../theme';
 import { getRiskLevelColor } from './utils';
 
-export default function BatchResultsDisplay({ scanResults }) {
+export default function BatchResultsDisplay({ scanResults, onViewScan }) {
   if (scanResults.length === 0) return null;
 
   return (
@@ -149,39 +150,71 @@ export default function BatchResultsDisplay({ scanResults }) {
                     {result.data.data.overall_risk_level.toLowerCase()} risk
                   </span>
                   {result.data?.scan_id && (
-                    <a
-                      href={`https://smart.mcpshark.sh/scan-results?id=${result.data.scan_id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        padding: '4px 10px',
-                        borderRadius: '6px',
-                        background: colors.bgSecondary,
-                        border: `1px solid ${colors.borderLight}`,
-                        color: colors.accentBlue,
-                        textDecoration: 'none',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        fontSize: '11px',
-                        fontWeight: '500',
-                        fontFamily: fonts.body,
-                        whiteSpace: 'nowrap',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = colors.bgTertiary;
-                        e.currentTarget.style.borderColor = colors.accentBlue;
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = colors.bgSecondary;
-                        e.currentTarget.style.borderColor = colors.borderLight;
-                      }}
-                    >
-                      <span>view results</span>
-                      <ExternalLinkIcon size={12} color={colors.accentBlue} />
-                    </a>
+                    <>
+                      {onViewScan && (
+                        <button
+                          onClick={() => onViewScan(result.data)}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            background: colors.buttonPrimary,
+                            border: 'none',
+                            color: colors.textInverse,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            fontSize: '11px',
+                            fontWeight: '500',
+                            fontFamily: fonts.body,
+                            whiteSpace: 'nowrap',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = colors.buttonPrimaryHover;
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = colors.buttonPrimary;
+                          }}
+                        >
+                          <IconEye size={12} stroke={1.5} />
+                          <span>View</span>
+                        </button>
+                      )}
+                      <a
+                        href={`https://smart.mcpshark.sh/scan-results?id=${result.data.scan_id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '4px 10px',
+                          borderRadius: '6px',
+                          background: colors.bgSecondary,
+                          border: `1px solid ${colors.borderLight}`,
+                          color: colors.accentBlue,
+                          textDecoration: 'none',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          fontSize: '11px',
+                          fontWeight: '500',
+                          fontFamily: fonts.body,
+                          whiteSpace: 'nowrap',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = colors.bgTertiary;
+                          e.currentTarget.style.borderColor = colors.accentBlue;
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = colors.bgSecondary;
+                          e.currentTarget.style.borderColor = colors.borderLight;
+                        }}
+                      >
+                        <span>Open</span>
+                        <ExternalLinkIcon size={12} color={colors.accentBlue} />
+                      </a>
+                    </>
                   )}
                 </>
               )}

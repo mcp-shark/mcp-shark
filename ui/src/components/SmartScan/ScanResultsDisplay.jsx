@@ -11,6 +11,7 @@ export default function ScanResultsDisplay({
   selectedServers,
   scanResults,
   scanResult,
+  onViewScan,
 }) {
   return (
     <div
@@ -25,7 +26,9 @@ export default function ScanResultsDisplay({
       {!error && scanResults.length === 0 && !scanResult && !scanning && <EmptyState />}
       <ErrorDisplay error={error} />
       <ScanningProgress scanning={scanning} selectedServers={selectedServers} />
-      {scanResults.length > 0 && <BatchResultsDisplay scanResults={scanResults} />}
+      {scanResults.length > 0 && (
+        <BatchResultsDisplay scanResults={scanResults} onViewScan={onViewScan} />
+      )}
       {scanResult && scanResults.length === 0 && <SingleResultDisplay scanResult={scanResult} />}
     </div>
   );

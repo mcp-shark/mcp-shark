@@ -1,6 +1,6 @@
 {
   "name": "mcp-shark",
-  "version": "1.0.0",
+  "version": "1.4.0",
   "description": "MCP Shark - Aggregate multiple MCP servers with a unified UI",
   "type": "module",
   "private": true,

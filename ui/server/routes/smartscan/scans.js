@@ -259,6 +259,45 @@ export async function createBatchScans(req, res) {
 }
 
 /**
+ * List all scans from Smart Scan API
+ * GET /api/smartscan/scans
+ */
+export async function listScans(req, res) {
+  try {
+    const apiToken = req.headers.authorization?.replace('Bearer ', '') || req.query.token;
+
+    if (!apiToken) {
+      return res.status(401).json({
+        error: 'API token is required',
+      });
+    }
+
+    const queryParams = new URLSearchParams();
+    if (req.query.limit) queryParams.append('limit', req.query.limit);
+    if (req.query.offset) queryParams.append('offset', req.query.offset);
+    if (req.query.status) queryParams.append('status', req.query.status);
+
+    const url = `${API_BASE_URL}/api/scans${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${apiToken}`,
+      },
+    });
+
+    const data = await response.json();
+    return res.status(response.status).json(data);
+  } catch (error) {
+    console.error('Smart Scan API error:', error);
+    return res.status(500).json({
+      error: 'Failed to list scans',
+      message: error.message,
+    });
+  }
+}
+
+/**
  * Clear all cached scan results
  * POST /api/smartscan/cache/clear
  */

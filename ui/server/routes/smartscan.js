@@ -16,6 +16,7 @@ export function createSmartScanRoutes() {
   router.getCachedResults = scanRoutes.getCachedResults;
   router.createScan = scanRoutes.createScan;
   router.getScan = scanRoutes.getScan;
+  router.listScans = scanRoutes.listScans;
   router.createBatchScans = scanRoutes.createBatchScans;
   router.clearCache = scanRoutes.clearCache;
 

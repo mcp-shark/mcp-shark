@@ -13,6 +13,10 @@ export function useSmartScan() {
   const [error, setError] = useState(null);
   const [sessionId, setSessionId] = useState(null);
   const [clearingCache, setClearingCache] = useState(false);
+  const [allScans, setAllScans] = useState([]);
+  const [loadingScans, setLoadingScans] = useState(false);
+  const [selectedScan, setSelectedScan] = useState(null);
+  const [loadingScanDetail, setLoadingScanDetail] = useState(false);
   const saveTokenTimeoutRef = useRef(null);
 
   useEffect(() => {
@@ -288,5 +292,63 @@ export function useSmartScan() {
     },
     clearingCache,
     saveTokenTimeoutRef,
+    allScans,
+    loadingScans,
+    loadAllScans: async () => {
+      if (!apiToken) {
+        setError('Please enter your API token');
+        return;
+      }
+      setLoadingScans(true);
+      setError(null);
+      try {
+        const response = await fetch(`/api/smartscan/scans?token=${encodeURIComponent(apiToken)}`, {
+          method: 'GET',
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setAllScans(data.scans || []);
+        } else {
+          setError(data.error || data.message || 'Failed to load scans');
+        }
+      } catch (err) {
+        setError(err.message || 'Failed to load scans');
+      } finally {
+        setLoadingScans(false);
+      }
+    },
+    selectedScan,
+    setSelectedScan,
+    loadingScanDetail,
+    loadScanDetail: async (scanId) => {
+      if (!apiToken) {
+        setError('Please enter your API token');
+        return;
+      }
+      if (!scanId) {
+        setSelectedScan(null);
+        return;
+      }
+      setLoadingScanDetail(true);
+      setError(null);
+      try {
+        const response = await fetch(`/api/smartscan/scans/${scanId}`, {
+          headers: {
+            Authorization: `Bearer ${apiToken}`,
+          },
+        });
+        const data = await response.json();
+        if (response.ok) {
+          // API returns { result: {...} }, so unwrap it
+          setSelectedScan(data.result || data);
+        } else {
+          setError(data.error || data.message || 'Failed to load scan details');
+        }
+      } catch (err) {
+        setError(err.message || 'Failed to load scan details');
+      } finally {
+        setLoadingScanDetail(false);
+      }
+    },
   };
 }
