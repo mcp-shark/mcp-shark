@@ -1,10 +1,19 @@
 {
   "name": "mcp-shark",
   "version": "1.4.0",
-  "description": "MCP Shark - Aggregate multiple MCP servers with a unified UI",
+  "description": "Aggregate multiple Model Context Protocol (MCP) servers into a single unified interface with a powerful monitoring UI. Wireshark for MCP - providing deep visibility into every request and response.",
   "type": "module",
+  "main": "./bin/mcp-shark.js",
   "bin": {
     "mcp-shark": "./bin/mcp-shark.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mcp-shark/mcp-shark.git"
+  },
+  "homepage": "https://mcpshark.sh",
+  "bugs": {
+    "url": "https://github.com/mcp-shark/mcp-shark/issues"
   },
   "files": [
     "bin",
@@ -43,10 +52,21 @@
     "model-context-protocol",
     "aggregator",
     "server",
-    "ui"
+    "ui",
+    "monitoring",
+    "debugging",
+    "wireshark",
+    "traffic-capture",
+    "mcp-server",
+    "mcp-client",
+    "security",
+    "audit",
+    "logging",
+    "playground",
+    "smart-scan"
   ],
   "author": "",
-  "license": "ISC",
+  "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.20.2",
     "@tabler/icons-react": "^3.0.0",

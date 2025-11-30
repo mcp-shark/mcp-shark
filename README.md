@@ -1,6 +1,13 @@
 # MCP Shark
 
-## Download Desktop App
+> **Aggregate multiple Model Context Protocol (MCP) servers into a single unified interface with a powerful monitoring UI**
+
+[![npm version](https://img.shields.io/npm/v/mcp-shark.svg)](https://www.npmjs.com/package/mcp-shark)
+[![License: Non-Commercial](https://img.shields.io/badge/License-Non--Commercial-red.svg)](LICENSE)
+
+## 📦 Download Desktop App
+
+Prefer a desktop application? Download the native desktop app:
 
 | Platform    | Download                                                                                                                  |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------- |
@@ -11,45 +18,82 @@
 > **⚠️ ALPHA VERSION - STILL TESTING**  
 > This is an alpha version of MCP Shark. The software is still under active development and testing. Features may change, and there may be bugs or incomplete functionality. Use at your own risk.
 
-> **Aggregate multiple Model Context Protocol (MCP) servers into a single unified interface with a powerful monitoring UI**
+## 📦 npm Package
 
-MCP Shark is a complete solution for aggregating multiple MCP servers (both HTTP and stdio-based) into one cohesive endpoint, with a real-time web interface for monitoring and inspecting all communications. Think of it as **Wireshark for MCP** - providing deep visibility into every request and response.
+### Installation
 
-### How It Works
+**Install globally (recommended):**
 
-![MCP Shark Architecture](images/architecture.svg)
+```bash
+npm install -g mcp-shark
+```
 
-### Quick View of Traffic
+**Install locally in your project:**
 
-![MCP Shark Overview](images/traffic.png)
+```bash
+npm install mcp-shark
+```
 
-## Table of Contents
+**Use npx (no installation required):**
 
-- [IDE Support](#ide-support)
-  - [Supported IDEs](#supported-ides)
-  - [Automatic Configuration](#automatic-configuration)
-  - [Zero-Configuration Setup](#zero-configuration-setup)
-- [MCP Playground](#mcp-playground)
-  - [Interactive Tool Testing](#interactive-tool-testing)
-  - [Prompt Exploration](#prompt-exploration)
-  - [Resource Browsing](#resource-browsing)
-  - [Session Management](#session-management)
-  - [Use Cases](#use-cases)
-- [Smart Scan](#smart-scan)
-  - [AI-Powered Security Analysis](#ai-powered-security-analysis)
-  - [Batch Scanning](#batch-scanning)
-  - [Risk Assessment](#risk-assessment)
-- [Key Features](#key-features)
-  - [Multi-Server Aggregation](#multi-server-aggregation)
-  - [Real-Time Monitoring & Analysis](#real-time-monitoring--analysis)
-  - [Analytics & Statistics](#analytics--statistics)
-  - [Data Management](#data-management)
-  - [Modern UI/UX](#modern-uiux)
-  - [Configuration Management](#configuration-management)
-- [Quick Start](#quick-start)
+```bash
+npx mcp-shark
+```
+
+### Usage
+
+After global installation, simply run:
+
+```bash
+mcp-shark
+```
+
+Or with npx:
+
+```bash
+npx mcp-shark
+```
+
+Or if installed locally:
+
+```bash
+npx mcp-shark
+```
+
+The UI will automatically:
+
+- Install dependencies if needed
+- Build the frontend if needed
+- Start the server on `http://localhost:9853`
+
+Open your browser to `http://localhost:9853` to access the MCP Shark interface.
+
+### Package Information
+
+- **Package Name**: `mcp-shark`
+- **npm Registry**: [https://www.npmjs.com/package/mcp-shark](https://www.npmjs.com/package/mcp-shark)
+- **Version**: Check latest version on npm
+- **License**: Source-Available Non-Commercial (see [LICENSE](LICENSE) for details)
+- **Node.js**: Requires Node.js 18+
+
+## 📖 Table of Contents
+
+- [npm Package](#-npm-package)
   - [Installation](#installation)
-  - [Available Commands](#available-commands)
-- [User Guide](#user-guide)
+  - [Usage](#usage)
+  - [Package Information](#package-information)
+- [About](#about)
+- [Key Features](#-key-features)
+  - [Multi-Server Aggregation](#-multi-server-aggregation)
+  - [Real-Time Monitoring & Analysis](#-real-time-monitoring--analysis)
+  - [MCP Playground](#-mcp-playground)
+  - [Smart Scan](#-smart-scan)
+  - [IDE Integration](#-ide-integration)
+  - [Analytics & Statistics](#-analytics--statistics)
+  - [Data Management](#-data-management)
+  - [Modern UI/UX](#-modern-uiux)
+  - [Configuration Management](#-configuration-management)
+- [User Guide](#-user-guide)
   - [Getting Started](#getting-started)
   - [UI Tabs Overview](#ui-tabs-overview)
     - [Traffic Capture](#traffic-capture)
@@ -62,70 +106,74 @@ MCP Shark is a complete solution for aggregating multiple MCP servers (both HTTP
     - [Backup Management](#backup-management)
     - [Session Management](#session-management-1)
     - [Performance Analysis](#performance-analysis)
-- [Architecture](#architecture)
-- [Project Structure](#project-structure)
-- [Supported MCP Methods](#supported-mcp-methods)
-  - [Tool Naming Convention](#tool-naming-convention)
-- [Audit Logging](#audit-logging)
-  - [Database Schema](#database-schema)
-- [Electron App](#electron-app)
-- [Requirements](#requirements)
-- [Configuration](#configuration)
-  - [Automatic Configuration](#automatic-configuration-1)
-  - [Manual Configuration](#manual-configuration)
-- [Use Cases](#use-cases-1)
-  - [Development & Debugging](#development--debugging)
-  - [Testing & QA](#testing--qa)
-  - [Monitoring & Analytics](#monitoring--analytics)
-  - [Learning & Exploration](#learning--exploration)
-- [Contributing](#contributing)
-- [Additional Resources](#additional-resources)
-- [Related Projects](#related-projects)
-- [Troubleshooting](#troubleshooting)
-  - [Server Won't Start](#server-wont-start)
-  - [No Traffic Appearing](#no-traffic-appearing)
-  - [Configuration Issues](#configuration-issues)
-- [License](#license)
+- [Architecture](#-architecture)
+- [Supported MCP Methods](#-supported-mcp-methods)
+- [Audit Logging](#-audit-logging)
+- [Configuration](#-configuration)
+- [Use Cases](#-use-cases)
+- [Requirements](#-requirements)
+- [Troubleshooting](#-troubleshooting)
+- [Contributing](#-contributing)
+- [Related Projects](#-related-projects)
+- [License](#-license)
 
-## IDE Support
+## About
 
-MCP Shark provides seamless integration with popular IDEs and editors:
+MCP Shark is a complete solution for aggregating multiple MCP servers (both HTTP and stdio-based) into one cohesive endpoint, with a real-time web interface for monitoring and inspecting all communications. Think of it as **Wireshark for MCP** - providing deep visibility into every request and response.
 
-### Supported IDEs
+![MCP Shark Architecture](images/architecture.svg)
 
-- **Cursor** — Automatically detects and uses `~/.cursor/mcp.json`
-- **Windsurf** — Automatically detects and uses `~/.codeium/windsurf/mcp_config.json`
-- **Custom Configurations** — Upload and use any MCP configuration file
+## 📦 Desktop App
 
-### Automatic Configuration
+Prefer a desktop application? Download the native desktop app:
 
-MCP Shark automatically:
+| Platform    | Download                                                                                                                  |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **macOS**   | [Download (ARM64)](https://github.com/mcp-shark/mcp-shark-app/releases/download/v1.3.0/MCP.Shark-1.3.0-arm64-mac.zip)     |
+| **Windows** | [Download (Installer)](https://github.com/mcp-shark/mcp-shark-app/releases/download/v1.3.0/MCP.Shark.Setup.1.3.0.exe)     |
+| **Linux**   | [Download (ARM64 DEB)](https://github.com/mcp-shark/mcp-shark-app/releases/download/v1.3.0/mcp-shark-app_1.3.0_arm64.deb) |
 
-- Detects your IDE's MCP configuration files
-- Converts IDE-specific config formats to MCP Shark format
-- Creates backups before making any changes
-- Updates your IDE config to point to MCP Shark server
-- Restores original configuration when you stop the server
+## ✨ Key Features
 
-### Zero-Configuration Setup
+### 🔗 Multi-Server Aggregation
 
-1. Start MCP Shark UI
-2. Select your IDE from the detected list (or upload your config)
-3. Choose which servers to enable (optional)
-4. Click "Start MCP Shark"
-5. Your IDE is now using MCP Shark automatically
+- Connect to multiple MCP servers simultaneously (HTTP and stdio)
+- Unified API for tools, prompts, and resources from all servers
+- Service selection — choose which servers to activate
+- Automatic load balancing and failover
+- Support for both HTTP and stdio-based MCP servers
 
-No manual configuration editing required - MCP Shark handles everything for you.
+### 📊 Real-Time Monitoring & Analysis
 
-## MCP Playground
+**Wireshark-like Interface** — Detailed packet inspection with frame numbers, timestamps, and protocol information
 
-**The MCP Playground is one of MCP Shark's most powerful features** — an interactive testing environment that lets you explore, test, and experiment with all your MCP servers directly from the web UI.
+![Traffic General List View](images/traffic-general-list.png)
+
+**Multiple View Modes:**
+
+- **General List View** — Flat chronological view of all traffic
+- **Grouped by Session & Server** — Organize by conversation sessions
+- **Grouped by Server & Session** — Organize by server activity
+- **Protocol View** — View traffic by protocol type
+
+![Traffic Protocol View](images/traffic-protocol-view.png)
+
+**Advanced Features:**
+
+- **Live Traffic Capture** — WebSocket-powered real-time updates
+- **Advanced Filtering** — Filter by method, status, protocol, session, server, direction, and more
+- **Full-Text Search** — Search across all fields including URLs, endpoints, and JSON-RPC methods
+- **Detailed Packet Inspection** — Click any packet to see full headers, request/response body, timing information, and JSON-RPC details
+
+![Traffic Detail View](images/traffic-detail-view.png)
+
+### 🎮 MCP Playground
+
+**Interactive testing environment for exploring and testing MCP servers** — one of MCP Shark's standout features.
 
 ![MCP Playground - Tools](images/playground-tools.png)
 
-### Interactive Tool Testing
-
-Test any tool from any connected server with custom arguments:
+**Interactive Tool Testing:**
 
 - Browse all available tools from all servers in one place
 - See tool descriptions, parameters, and schemas
@@ -133,11 +181,7 @@ Test any tool from any connected server with custom arguments:
 - View results in real-time with formatted output
 - Test edge cases and different parameter combinations
 
-### Prompt Exploration
-
-Explore and test prompts interactively:
-
-![MCP Playground - Prompts](images/playground-prompts.png)
+**Prompt Exploration:**
 
 - List all prompts from all connected servers
 - View prompt descriptions and argument schemas
@@ -145,27 +189,21 @@ Explore and test prompts interactively:
 - See formatted prompt results
 - Understand how prompts work across different servers
 
-### Resource Browsing
-
-Browse and read resources from all servers:
+**Resource Browsing:**
 
 - Discover all available resources across all servers
 - Read resource contents directly in the UI
 - Explore resource URIs and metadata
 - Understand resource structure and format
 
-### Session Management
-
-The Playground maintains session state for stateful interactions:
-
-![MCP Playground - Tool Calls](images/playground-tool-calls.png)
+**Session Management:**
 
 - Automatic session tracking
 - Maintains context across multiple tool calls
 - Test stateful workflows and conversations
 - Debug session-related issues
 
-### Use Cases
+**Use Cases:**
 
 - **Development**: Test tools before integrating them into your code
 - **Debugging**: Verify tool behavior and troubleshoot issues
@@ -173,15 +211,13 @@ The Playground maintains session state for stateful interactions:
 - **Learning**: Understand how different MCP servers work
 - **Documentation**: Generate examples and test cases
 
-Access the Playground from the "MCP Playground" tab in the UI after starting your MCP Shark server.
-
-## Smart Scan
+### 🔍 Smart Scan
 
 **AI-powered security analysis for MCP servers** — automatically scan and analyze your MCP servers for potential security risks and vulnerabilities.
 
-### AI-Powered Security Analysis
+![Smart Scan Main](images/smart-scan-main.png)
 
-Smart Scan uses advanced AI analysis to evaluate MCP servers for security concerns:
+**AI-Powered Security Analysis:**
 
 - **Automated Scanning** — Discover and scan multiple MCP servers automatically
 - **Security Risk Assessment** — Get overall risk levels (LOW, MEDIUM, HIGH) for each server
@@ -192,18 +228,14 @@ Smart Scan uses advanced AI analysis to evaluate MCP servers for security concer
   - Overall security recommendations
 - **Cached Results** — Results are cached for quick access without re-scanning
 
-### Batch Scanning
-
-Scan multiple servers simultaneously:
+**Batch Scanning:**
 
 - **Server Discovery** — Automatically discover MCP servers from your configuration
 - **Selective Scanning** — Choose which servers to scan
 - **Batch Processing** — Scan multiple servers in parallel
 - **Progress Tracking** — Monitor scan progress in real-time
 
-### Risk Assessment
-
-Each scan provides:
+**Risk Assessment:**
 
 - **Overall Risk Level** — Quick visual indicator of security posture
 - **Detailed Findings** — Comprehensive list of security concerns
@@ -213,45 +245,51 @@ Each scan provides:
   - Reports are available at [https://smart.mcpshark.sh](https://smart.mcpshark.sh)
   - Each scan result includes a direct link to its detailed analysis page
 
-Access Smart Scan from the "Smart Scan" tab in the UI. You'll need to provide an API token for the security analysis service. View full scan reports and detailed analysis at [https://smart.mcpshark.sh](https://smart.mcpshark.sh).
+![Smart Scan Results](images/smart-scan-results.png)
 
-## Key Features
+### 🔌 IDE Integration
 
-### Multi-Server Aggregation
+**Seamless integration with popular IDEs and editors:**
 
-- Connect to multiple MCP servers simultaneously (HTTP and stdio)
-- Unified API for tools, prompts, and resources from all servers
-- Service selection — choose which servers to activate
-- Automatic load balancing and failover
+- **Cursor** — Automatically detects and uses `~/.cursor/mcp.json`
+- **Windsurf** — Automatically detects and uses `~/.codeium/windsurf/mcp_config.json`
+- **Custom Configurations** — Upload and use any MCP configuration file
 
-### Real-Time Monitoring & Analysis
+**Automatic Configuration:**
 
-- **Live Traffic Capture** — WebSocket-powered real-time updates
-- **Wireshark-like Interface** — Detailed packet inspection with frame numbers, timestamps, and protocol information
-- **Multiple View Modes**:
-  - General list view
-  - Grouped by session & server
-  - Grouped by server & session
-- **Advanced Filtering** — Filter by method, status, protocol, session, server, direction, and more
-- **Full-Text Search** — Search across all fields including URLs, endpoints, and JSON-RPC methods
+- Detects your IDE's MCP configuration files
+- Converts IDE-specific config formats to MCP Shark format
+- Creates backups before making any changes
+- Updates your IDE config to point to MCP Shark server
+- Restores original configuration when you stop the server
 
-![Traffic Monitoring](images/traffic.png)
+**Zero-Configuration Setup:**
 
-### Analytics & Statistics
+1. Start MCP Shark UI
+2. Select your IDE from the detected list (or upload your config)
+3. Choose which servers to enable (optional)
+4. Click "Start MCP Shark"
+5. Your IDE is now using MCP Shark automatically
+
+No manual configuration editing required - MCP Shark handles everything for you.
+
+![MCP Server Setup](images/server-setup.png)
+
+### 📈 Analytics & Statistics
 
 - **Traffic Statistics** — View request counts, unique sessions, and server activity
 - **Performance Metrics** — Duration, latency, and timing information for each request
 - **Error Tracking** — Comprehensive error logging with stack traces
 - **Session Analytics** — Track conversations and stateful interactions
 
-### Data Management
+### 💾 Data Management
 
 - **Export Capabilities** — Export captured traffic in JSON, CSV, or TXT formats
 - **Backup Management** — Automatic backups of configuration files with restore functionality
 - **Log Export** — Export server logs as text files
 - **SQLite Database** — Efficient storage with direct database access for advanced analysis
 
-### Modern UI/UX
+### 🎨 Modern UI/UX
 
 - **Dark Theme** — Developer-friendly dark interface
 - **Interactive Tour** — Built-in onboarding guide for first-time users
@@ -263,7 +301,7 @@ Access Smart Scan from the "Smart Scan" tab in the UI. You'll need to provide an
 - **Raw/JSON View** — Multiple payload viewing modes (Raw, JSON, Hex)
 - **Compact Scan Results** — Single-row display for scan results with quick access to full reports
 
-### Configuration Management
+### ⚙️ Configuration Management
 
 - **Auto-Detection** — Automatically detects IDE configuration files
 - **Config Conversion** — Converts IDE config format to MCP Shark format
@@ -271,73 +309,32 @@ Access Smart Scan from the "Smart Scan" tab in the UI. You'll need to provide an
 - **Config Viewer** — View and inspect configuration files and backups
 - **Service Filtering** — Selectively enable/disable specific servers
 
-## Quick Start
-
-![Quick Start Guide](images/start-server.png)
-
-### Installation
-
-1. **Install dependencies:**
-
-```bash
-npm run install:all
-```
-
-Or using Make:
-
-```bash
-make install-all
-```
-
-2. **Start the UI:**
-
-```bash
-make start
-```
-
-Or using npm:
-
-```bash
-npm start
-```
-
-3. **Open your browser:**
-
-Navigate to `http://localhost:9853`
-
-That's it! The interactive tour will guide you through the setup process on first launch.
-
-### Available Commands
-
-**Using Make (Recommended):**
-
-```bash
-make start          # Start the UI server (default)
-make stop           # Stop the UI server
-make dev-ui         # Start UI in development mode with hot reload
-make build-ui       # Build UI for production
-make install-all    # Install all dependencies
-make help           # Show all available commands
-```
-
-**Using npm:**
-
-```bash
-npm start           # Start the UI server
-npm run dev:ui      # Start UI in development mode
-npm run build:ui    # Build UI for production
-npm run install:all # Install all dependencies
-```
-
-## User Guide
+## 📚 User Guide
 
 ### Getting Started
 
-1. **Start the UI**: Run `make start` or `npm start`
-2. **Interactive Tour**: On first launch, you'll see an interactive tour - follow it to get started
-3. **Configure Servers**: Go to the "MCP Server Setup" tab
-4. **Select Configuration**: Choose from detected editors or upload your own config file
-5. **Start Monitoring**: Click "Start MCP Shark" to begin capturing traffic
+1. **Install MCP Shark:**
+
+```bash
+   npm install -g mcp-shark
+```
+
+2. **Start MCP Shark:**
+
+```bash
+   mcp-shark
+```
+
+3. **Open your browser:**
+   Navigate to `http://localhost:9853`
+
+4. **Interactive Tour**: On first launch, you'll see an interactive tour - follow it to get started
+
+5. **Configure Servers**: Go to the "MCP Server Setup" tab
+
+6. **Select Configuration**: Choose from detected editors or upload your own config file
+
+7. **Start Monitoring**: Click "Start MCP Shark" to begin capturing traffic
 
 ### UI Tabs Overview
 
@@ -345,13 +342,12 @@ npm run install:all # Install all dependencies
 
 The main monitoring interface with Wireshark-like capabilities:
 
-![Traffic Capture Interface](images/traffic.png)
-
 - **Real-time Updates**: See requests and responses as they happen
 - **Multiple Views**:
   - **General List**: Flat chronological view of all traffic
   - **Grouped by Session & Server**: Organize by conversation sessions
   - **Grouped by Server & Session**: Organize by server activity
+  - **Protocol View**: View traffic by protocol type
 - **Advanced Filters**:
   - Search across all fields
   - Filter by HTTP method (GET, POST, etc.)
@@ -371,7 +367,7 @@ The main monitoring interface with Wireshark-like capabilities:
 
 #### MCP Playground
 
-Interactive testing environment for MCP servers — **one of MCP Shark's standout features**:
+Interactive testing environment for MCP servers:
 
 - **Tools Section**:
   - Browse all available tools from all servers
@@ -419,8 +415,6 @@ Smart Scan helps you identify potential security issues in your MCP servers befo
 
 Server console output and debugging:
 
-![MCP Shark Logs](images/sever-logs.png)
-
 - **Real-time Logs**: See server output as it happens
 - **Log Filtering**: Filter by log type (stdout, stderr, error)
 - **Export Logs**: Export logs as text files
@@ -430,8 +424,6 @@ Server console output and debugging:
 #### MCP Server Setup
 
 Configuration and server management:
-
-![MCP Server Setup](images/start-server.png)
 
 - **Config Detection** — Automatically detects config files from:
   - Cursor: `~/.cursor/mcp.json`
@@ -499,7 +491,7 @@ Each request/response includes:
 - **Status Codes** — HTTP status codes
 - **Timing Breakdown** — Detailed timing information
 
-## Architecture
+## 🏗️ Architecture
 
 ![MCP Shark Architecture](images/architecture.svg)
 
@@ -518,37 +510,7 @@ The diagram above illustrates how MCP Shark works:
 - All traffic is logged to SQLite Database
 - UI reads from database and can control the server
 
-## Project Structure
-
-```
-mcp-shark/
-├── mcp-server/           # MCP aggregation server
-│   ├── mcp-shark.js      # Main entry point
-│   ├── lib/              # Server implementation
-│   │   ├── server/       # Server logic
-│   │   │   ├── internal/ # Internal MCP server (aggregator)
-│   │   │   └── external/ # External MCP server clients
-│   │   ├── auditor/     # Audit logging
-│   │   └── common/      # Common utilities
-│   └── temp/            # Config and database
-├── ui/                   # Web UI
-│   ├── src/              # React components
-│   │   ├── components/  # UI components
-│   │   │   ├── McpPlayground/ # Playground components
-│   │   │   └── PacketFilters/ # Filter components
-│   │   ├── hooks/        # React hooks
-│   │   ├── utils/       # Utility functions
-│   │   └── config/     # Configuration
-│   ├── server/           # Express server
-│   │   ├── routes/      # API routes
-│   │   └── utils/       # Server utilities
-│   ├── server.js        # Express server entry
-│   └── dist/            # Built frontend
-├── package.json          # Root package.json
-└── README.md             # This file
-```
-
-## Supported MCP Methods
+## 🔧 Supported MCP Methods
 
 MCP Shark supports all standard MCP methods:
 
@@ -566,7 +528,7 @@ When calling tools, prefix with the server name:
 - `github:search_repositories` - Calls `search_repositories` from the `github` server
 - `@21st-dev/magic:create_component` - Calls `create_component` from the `@21st-dev/magic` server
 
-## Audit Logging
+## 📝 Audit Logging
 
 All MCP communications are logged to SQLite (default location: `~/.mcp-shark/db/mcp-shark.sqlite`) with:
 
@@ -587,23 +549,7 @@ The database includes:
 
 The database can be accessed directly for advanced analysis or exported through the UI in JSON, CSV, or TXT formats.
 
-## Electron App
-
-MCP Shark is also available as a desktop application! The [mcp-shark-app](https://github.com/mcp-shark/mcp-shark-app) repository provides an Electron wrapper that packages MCP Shark into a native desktop application for Windows, macOS, and Linux.
-
-**Desktop App Features:**
-
-- Integrated browser window
-- Automatic process management
-- Native OS integration
-- No need to manage ports or processes manually
-
-## Requirements
-
-- **Node.js** 18+ and npm
-- **Git** (for installing dependencies from GitHub)
-
-## Configuration
+## ⚙️ Configuration
 
 ### Automatic Configuration
 
@@ -646,7 +592,7 @@ If you need to configure manually, create a file at `~/.mcp-shark/mcps.json`:
 }
 ```
 
-## Use Cases
+## 🎯 Use Cases
 
 ### Development & Debugging
 
@@ -676,28 +622,19 @@ If you need to configure manually, create a file at `~/.mcp-shark/mcps.json`:
 - Learn how different servers work
 - Experiment with MCP capabilities
 
-## Contributing
+### Security Analysis
 
-We welcome contributions! Please see:
+- Scan MCP servers for security risks
+- Identify potential vulnerabilities
+- Get security recommendations
+- Track security posture over time
 
-- **[CONTRIBUTING.md](./CONTRIBUTING.md)**: Guidelines for contributing
-- **[DEVELOPERS.md](./DEVELOPERS.md)**: Developer guide and setup
-- **[SETUP.md](./SETUP.md)**: Initial setup instructions
+## 📋 Requirements
 
-## Additional Resources
+- **Node.js** 18+ and npm
+- **Git** (for installing dependencies from GitHub, if needed)
 
-- **[DEVELOPERS.md](./DEVELOPERS.md)**: Developer guide and setup instructions
-- **[CONTRIBUTING.md](./CONTRIBUTING.md)**: Guidelines for contributing to the project
-- **[SETUP.md](./SETUP.md)**: Initial setup and git hooks configuration
-- **[LICENSE](./LICENSE)**: License information
-
-## Related Projects
-
-- **[mcp-shark-app](https://github.com/mcp-shark/mcp-shark-app)**: Electron desktop application wrapper
-- **[mcp-shark-site](https://github.com/mcp-shark/mcp-shark-site)**: Official website and documentation
-- **[mcp-shark-common](https://github.com/mcp-shark/mcp-shark-common)**: Shared utilities and common code
-
-## Troubleshooting
+## 🔍 Troubleshooting
 
 ### Server Won't Start
 
@@ -720,10 +657,62 @@ We welcome contributions! Please see:
 - Ensure stdio commands are available in PATH
 - Review backup files if original config was modified
 
-## License
+### Installation Issues
 
-ISC
+If you encounter issues with npm installation:
+
+```bash
+# Clear npm cache
+npm cache clean --force
+
+# Try installing again
+npm install -g mcp-shark
+```
+
+For npx issues:
+
+```bash
+# Ensure you have the latest npm
+npm install -g npm@latest
+
+# Try running again
+npx mcp-shark
+```
+
+## 🤝 Contributing
+
+We welcome contributions! Please see:
+
+- **[CONTRIBUTING.md](./CONTRIBUTING.md)**: Guidelines for contributing
+- **[DEVELOPERS.md](./DEVELOPERS.md)**: Developer guide and setup
+- **[SETUP.md](./SETUP.md)**: Initial setup instructions
+
+## 🔗 Related Projects
+
+- **[mcp-shark-app](https://github.com/mcp-shark/mcp-shark-app)**: Electron desktop application wrapper
+- **[mcp-shark-site](https://github.com/mcp-shark/mcp-shark-site)**: Official website and documentation
+- **[smart-scan-web-app](https://github.com/mcp-shark/smart-scan-web-app)**: Smart Scan web interface
+
+## 📄 License
+
+Source-Available Non-Commercial License
+
+> **Note**: This is **not** an OSI-approved open source license. The source code is available, but **commercial use is prohibited** without a separate commercial agreement.
+
+**Summary:**
+
+- ✅ **Allowed**: View, fork, modify, and run the code for personal, educational, or internal company use
+- ❌ **Not Allowed**:
+  - Sell this project or resell hosted versions
+  - Integrate it into a paid product/service without written permission
+  - Use the name, logo, or branding to imply endorsement
+
+**Commercial Use**: Commercial use requires a separate written commercial license agreement. To inquire about a commercial license, please contact the project maintainers.
+
+See the [LICENSE](LICENSE) file for full terms and conditions.
 
 ---
 
-**Built with the Model Context Protocol SDK**
+**Built with ❤️ for the MCP community**
+
+For more information, visit [https://mcpshark.sh](https://mcpshark.sh)

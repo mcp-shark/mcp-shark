@@ -1,20 +1,85 @@
-Non-Commercial Use License
+# Source-Available Non-Commercial License
 
-Copyright (c) 2024 MCP Shark Contributors
+> This is **not** an OSI-approved open source license.  
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, for non-commercial purposes only, subject to the following conditions:
+> The source code is available, but **commercial use is prohibited** without a separate commercial agreement.
 
-1. The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+---
 
-2. Commercial Use Restriction: The Software may NOT be used for commercial purposes. Commercial purposes include, but are not limited to:
-   - Use in commercial products or services
-   - Use by for-profit organizations
-   - Use in any commercial context where the Software generates revenue
-   - Use as part of a paid service or product
+## Summary (Human-Readable)
 
-3. Attribution: If you use, modify, or distribute the Software, you must include the original copyright notice and this license.
+- ✅ You can view, fork, modify, and run the code.
 
-4. No Warranty: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+- ✅ You can use it for personal, educational, or internal company use.
 
-For Commercial Use: If you wish to use this Software for commercial purposes, please contact the project maintainers to discuss licensing options.
+- ❌ You **cannot** sell this project, resell hosted versions, or integrate it into a paid product/service without written permission.
 
+- ❌ You **cannot** use the name, logo, or branding to imply endorsement.
+
+For the exact legal terms, see below.
+
+---
+
+## Legal Text
+
+Copyright (c) 2025 MCP Shark Contributors
+
+Permission is hereby granted to any person obtaining a copy of this software and
+associated documentation files (the "Software"), to use, modify, and run the
+Software for personal, educational, or internal business purposes, subject to
+the following conditions:
+
+1. Non-Commercial Use Only
+
+   You may NOT:
+   - Sell the Software or any modified version of it.
+   - Use the Software or any modified version of it as part of a paid product
+     or service.
+   - Offer the Software or any modified version of it as a hosted or managed
+     service for a fee.
+   - Use the Software in any way that is primarily intended for commercial
+     advantage or monetary compensation.
+
+2. Redistribution
+
+   You may redistribute the Software, in source or compiled form, provided that:
+   - This license text is included in full and unmodified in all copies
+     or substantial portions of the Software.
+   - You clearly and visibly acknowledge the original author(s) and provide
+     a link to the original repository or project homepage, where reasonable.
+
+3. Derivative Works
+
+   You may create derivative works (forks, modifications, extensions) for
+   personal, educational, or internal business purposes. Any such derivative
+   work is also subject to the Non-Commercial Use restrictions above.
+
+4. No Trademark or Branding Rights
+
+   This license does not grant any rights to use the name, logo, or trademarks
+   of the original author or project, except for reasonable and customary use
+   in describing the origin of the Software. You may not use the name or logo
+   of the project in a way that suggests endorsement or affiliation without
+   prior written permission.
+
+5. Commercial Licensing
+
+   Commercial use of the Software, including but not limited to:
+   - Selling the Software or any modified version,
+   - Offering the Software or any modified version as a paid service,
+   - Integrating the Software into a product or service that is sold
+     or monetized,
+
+   is only permitted under a separate written commercial license agreement
+   with the copyright holder. To inquire about a commercial license, please
+   contact the copyright holder.
+
+6. Disclaimer of Warranty
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+   DEALINGS IN THE SOFTWARE.

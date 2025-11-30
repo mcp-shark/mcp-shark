@@ -1,3 +1,48 @@
+# 🦈 MCP Shark v1.4.0 - npm Package Release
+
+> ⚠️ **ALPHA VERSION** - This is an alpha release. The software is under active development and testing. Features may change, and there may be bugs. Use at your own risk.
+
+## 🎉 What's New in v1.4.0
+
+### 📦 npm Package Release
+
+MCP Shark is now available as an npm package! Install and run it with a single command:
+
+```bash
+npm install -g mcp-shark
+mcp-shark
+```
+
+Or use npx (no installation required):
+
+```bash
+npx mcp-shark
+```
+
+### ✨ Key Improvements
+
+- **npm Package**: Now available on npm registry for easy installation
+- **Simplified Installation**: One-command install and run
+- **Automatic Setup**: Dependencies and UI build automatically on first run
+- **Enhanced Documentation**: Comprehensive README with npm installation instructions
+- **License Update**: Updated to Source-Available Non-Commercial License
+
+### 🔧 Technical Changes
+
+- Updated package.json with proper npm metadata
+- Enhanced bin script for automatic dependency installation
+- Improved error handling and user feedback
+- Better documentation structure with table of contents
+
+### 📚 Documentation Updates
+
+- Complete npm installation guide
+- Updated README with all current features
+- Added comprehensive table of contents
+- Updated license information
+
+---
+
 # 🦈 MCP Shark v1.0.0 - Initial Release
 
 > ⚠️ **ALPHA VERSION** - This is an alpha release. The software is under active development and testing. Features may change, and there may be bugs. Use at your own risk.
