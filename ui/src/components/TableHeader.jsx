@@ -6,7 +6,7 @@ function TableHeader({ columnWidths }) {
       style={{
         position: 'sticky',
         top: 0,
-        background: colors.bgCard,
+        background: colors.bgSecondary,
         zIndex: 10,
         boxShadow: `0 2px 4px ${colors.shadowSm}`,
       }}
@@ -26,7 +26,7 @@ function TableHeader({ columnWidths }) {
             fontSize: '11px',
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
-            background: colors.bgCard,
+            background: colors.bgSecondary,
           }}
         >
           No.

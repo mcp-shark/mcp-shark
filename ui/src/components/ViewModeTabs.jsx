@@ -7,7 +7,7 @@ function ViewModeTabs({ viewMode, onViewModeChange }) {
       style={{
         display: 'flex',
         borderBottom: `1px solid ${colors.borderLight}`,
-        background: colors.bgCard,
+        background: colors.bgSecondary,
         padding: '0 12px',
         boxShadow: `0 1px 3px ${colors.shadowSm}`,
         flexShrink: 0,

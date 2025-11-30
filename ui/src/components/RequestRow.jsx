@@ -1,4 +1,4 @@
-import { colors, fonts } from '../theme';
+import { colors, fonts, withOpacity } from '../theme';
 import {
   formatRelativeTime,
   formatDateTime,
@@ -29,8 +29,27 @@ const ChevronDown = ({ size = 12, color = 'currentColor', rotated = false }) => 
   </svg>
 );
 
-function RequestRow({ pair, selected, firstRequestTime, onSelect, isExpanded, onToggleExpand }) {
-  const { request, response } = pair;
+function RequestRow({
+  pair,
+  request: requestProp,
+  selected,
+  firstRequestTime,
+  onSelect,
+  isExpanded = false,
+  onToggleExpand = () => {},
+}) {
+  // Support both pair prop (new) and request prop (legacy for grouped views)
+  let request, response;
+  if (pair) {
+    request = pair.request;
+    response = pair.response;
+  } else if (requestProp) {
+    request = requestProp;
+    response = null;
+  } else {
+    return null; // No valid data
+  }
+
   if (!request) return null; // Only show rows that have a request
 
   const isSelected = selected?.frame_number === request.frame_number;
@@ -45,19 +64,19 @@ function RequestRow({ pair, selected, firstRequestTime, onSelect, isExpanded, on
         onClick={() => onSelect(request)}
         style={{
           cursor: 'pointer',
-          background: isSelected ? `${colors.accentBlue}15` : colors.bgCard,
+          background: isSelected ? colors.bgSelected : colors.bgSecondary,
           borderBottom: `1px solid ${colors.borderLight}`,
           fontFamily: fonts.body,
           transition: 'background-color 0.15s ease',
         }}
         onMouseEnter={(e) => {
           if (!isSelected) {
-            e.currentTarget.style.background = colors.bgHover;
+            e.currentTarget.style.background = colors.bgCard;
           }
         }}
         onMouseLeave={(e) => {
           if (!isSelected) {
-            e.currentTarget.style.background = colors.bgCard;
+            e.currentTarget.style.background = colors.bgSecondary;
           }
         }}
       >
@@ -253,20 +272,20 @@ function RequestRow({ pair, selected, firstRequestTime, onSelect, isExpanded, on
             cursor: 'pointer',
             background:
               isSelected && selected?.frame_number === response.frame_number
-                ? `${colors.accentGreen}15`
-                : colors.bgSecondary,
+                ? colors.bgSelected
+                : colors.bgTertiary,
             borderBottom: `1px solid ${colors.borderLight}`,
             fontFamily: fonts.body,
             transition: 'background-color 0.15s ease',
           }}
           onMouseEnter={(e) => {
             if (!(isSelected && selected?.frame_number === response.frame_number)) {
-              e.currentTarget.style.background = colors.bgHover;
+              e.currentTarget.style.background = colors.bgSecondary;
             }
           }}
           onMouseLeave={(e) => {
             if (!(isSelected && selected?.frame_number === response.frame_number)) {
-              e.currentTarget.style.background = colors.bgSecondary;
+              e.currentTarget.style.background = colors.bgTertiary;
             }
           }}
         >

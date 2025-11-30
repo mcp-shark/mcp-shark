@@ -107,7 +107,7 @@ export default function ExportControls({ stats, onExport }) {
           value=""
           style={{
             padding: '8px 10px',
-            background: colors.buttonSecondary,
+            background: colors.bgCard,
             border: `1px solid ${colors.borderLight}`,
             color: colors.textPrimary,
             fontSize: '11px',

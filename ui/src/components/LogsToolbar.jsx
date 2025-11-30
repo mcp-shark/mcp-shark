@@ -32,7 +32,7 @@ export default function LogsToolbar({
         onChange={(e) => setFilter(e.target.value)}
         style={{
           padding: '8px 12px',
-          background: colors.bgSecondary,
+          background: colors.bgCard,
           border: `1px solid ${colors.borderLight}`,
           color: colors.textPrimary,
           fontSize: '13px',
@@ -56,7 +56,7 @@ export default function LogsToolbar({
         onChange={(e) => setLogType(e.target.value)}
         style={{
           padding: '8px 12px',
-          background: colors.bgSecondary,
+          background: colors.bgCard,
           border: `1px solid ${colors.borderLight}`,
           color: colors.textPrimary,
           fontSize: '13px',

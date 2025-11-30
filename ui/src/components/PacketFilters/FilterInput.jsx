@@ -11,7 +11,7 @@ export default function FilterInput({
 }) {
   const defaultStyle = {
     padding: '8px 12px',
-    background: colors.bgSecondary,
+    background: colors.bgCard,
     border: `1px solid ${colors.borderLight}`,
     color: colors.textPrimary,
     fontSize: '13px',

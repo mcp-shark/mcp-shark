@@ -53,7 +53,7 @@ function FileInput({
           style={{
             flex: 1,
             padding: '8px 12px',
-            background: colors.bgPrimary,
+            background: colors.bgCard,
             border: `1px solid ${colors.borderMedium}`,
             color: colors.textPrimary,
             fontSize: '13px',
@@ -81,7 +81,7 @@ function FileInput({
             style={{
               width: '100%',
               padding: '8px 12px',
-              background: colors.bgPrimary,
+              background: colors.bgCard,
               border: `1px solid ${colors.borderMedium}`,
               color: colors.textPrimary,
               fontSize: '13px',
@@ -115,7 +115,7 @@ function FileInput({
           </div>
           <pre
             style={{
-              background: colors.bgPrimary,
+              background: colors.bgCard,
               padding: '12px',
               borderRadius: '8px',
               fontSize: '12px',

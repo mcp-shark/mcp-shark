@@ -1,4 +1,4 @@
-import { colors, fonts } from '../theme';
+import { colors, fonts, withOpacity } from '../theme';
 
 function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onDelete }) {
   if (backups.length === 0) {
@@ -136,7 +136,7 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onD
                   fontFamily: fonts.body,
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = colors.error + '15';
+                  e.currentTarget.style.background = withOpacity(colors.error, 0.15);
                   e.currentTarget.style.borderColor = colors.error;
                 }}
                 onMouseLeave={(e) => {

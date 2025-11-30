@@ -18,7 +18,6 @@ export function useAppState() {
       if (filters.search) queryParams.append('search', filters.search);
       if (filters.serverName) queryParams.append('serverName', filters.serverName);
       if (filters.sessionId) queryParams.append('sessionId', filters.sessionId);
-      if (filters.direction) queryParams.append('direction', filters.direction);
       if (filters.method) queryParams.append('method', filters.method);
       if (filters.jsonrpcMethod) queryParams.append('jsonrpcMethod', filters.jsonrpcMethod);
       if (filters.statusCode) queryParams.append('statusCode', filters.statusCode);

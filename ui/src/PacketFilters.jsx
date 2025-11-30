@@ -20,7 +20,6 @@ function RequestFilters({ filters, onFilterChange, stats, onExport }) {
       if (filters.search) queryParams.append('search', filters.search);
       if (filters.serverName) queryParams.append('serverName', filters.serverName);
       if (filters.sessionId) queryParams.append('sessionId', filters.sessionId);
-      if (filters.direction) queryParams.append('direction', filters.direction);
       if (filters.method) queryParams.append('method', filters.method);
       if (filters.jsonrpcMethod) queryParams.append('jsonrpcMethod', filters.jsonrpcMethod);
       if (filters.statusCode) queryParams.append('statusCode', filters.statusCode);
@@ -51,7 +50,7 @@ function RequestFilters({ filters, onFilterChange, stats, onExport }) {
       style={{
         padding: '12px 16px',
         borderBottom: `1px solid ${colors.borderLight}`,
-        background: colors.bgCard,
+        background: colors.bgSecondary,
         display: 'flex',
         gap: '10px',
         alignItems: 'center',
@@ -85,44 +84,6 @@ function RequestFilters({ filters, onFilterChange, stats, onExport }) {
         onChange={(e) => onFilterChange({ ...filters, sessionId: e.target.value || null })}
         style={{ width: '200px' }}
       />
-
-      <select
-        value={filters.direction || ''}
-        onChange={(e) => onFilterChange({ ...filters, direction: e.target.value || null })}
-        style={{
-          padding: '8px 12px',
-          background: colors.bgSecondary,
-          border: `1px solid ${colors.borderLight}`,
-          color: colors.textPrimary,
-          fontSize: '13px',
-          fontFamily: fonts.body,
-          borderRadius: '8px',
-          cursor: 'pointer',
-          transition: 'all 0.2s',
-        }}
-        onFocus={(e) => {
-          anime({
-            targets: e.currentTarget,
-            borderColor: colors.accentBlue,
-            boxShadow: [`0 0 0 0px ${colors.accentBlue}20`, `0 0 0 3px ${colors.accentBlue}20`],
-            duration: 200,
-            easing: 'easeOutQuad',
-          });
-        }}
-        onBlur={(e) => {
-          anime({
-            targets: e.currentTarget,
-            borderColor: colors.borderLight,
-            boxShadow: 'none',
-            duration: 200,
-            easing: 'easeOutQuad',
-          });
-        }}
-      >
-        <option value="">All Directions</option>
-        <option value="request">Request</option>
-        <option value="response">Response</option>
-      </select>
 
       <FilterInput
         type="text"

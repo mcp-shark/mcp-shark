@@ -1,4 +1,4 @@
-import { colors, fonts } from '../theme';
+import { colors, fonts, withOpacity } from '../theme';
 
 function ServiceSelector({ services, selectedServices, onSelectionChange }) {
   if (services.length === 0) {
@@ -106,7 +106,7 @@ function ServiceSelector({ services, selectedServices, onSelectionChange }) {
                 alignItems: 'center',
                 gap: '12px',
                 padding: '10px',
-                background: isSelected ? `${colors.accentBlue}15` : 'transparent',
+                background: isSelected ? colors.bgSelected : 'transparent',
                 border: `1px solid ${isSelected ? colors.accentBlue : colors.borderMedium}`,
                 borderRadius: '8px',
                 cursor: 'pointer',
@@ -192,7 +192,7 @@ function ServiceSelector({ services, selectedServices, onSelectionChange }) {
           style={{
             marginTop: '8px',
             padding: '8px 12px',
-            background: colors.error + '15',
+            background: withOpacity(colors.error, 0.15),
             border: `1px solid ${colors.error}`,
             borderRadius: '8px',
             color: colors.error,

@@ -1,4 +1,4 @@
-import { colors, fonts } from '../theme';
+import { colors, fonts, withOpacity } from '../theme';
 
 function MessageDisplay({ message, error }) {
   if (!message && !error) {
@@ -10,7 +10,7 @@ function MessageDisplay({ message, error }) {
       style={{
         marginBottom: '20px',
         padding: '12px 16px',
-        background: message ? colors.info + '15' : colors.error + '15',
+        background: message ? withOpacity(colors.info, 0.15) : withOpacity(colors.error, 0.15),
         border: `1px solid ${message ? colors.info : colors.error}`,
         borderRadius: '8px',
         color: message ? colors.textPrimary : colors.error,

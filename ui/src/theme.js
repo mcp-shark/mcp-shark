@@ -6,6 +6,7 @@ export const colors = {
   bgTertiary: '#f0ede8', // Light warm gray
   bgCard: '#ffffff', // Pure white for cards
   bgHover: '#f8f6f3', // Subtle hover
+  bgSelected: '#e8f4f8', // Very light blue-gray for selected items
 
   // Text
   textPrimary: '#3a3a3a', // Warm dark gray
@@ -45,6 +46,17 @@ export const colors = {
   shadowMd: 'rgba(0, 0, 0, 0.1)',
   shadowLg: 'rgba(0, 0, 0, 0.15)',
 };
+
+// Helper function to add opacity to hex colors
+export function withOpacity(color, opacity) {
+  // Remove # if present
+  const hex = color.replace('#', '');
+  // Convert to RGB
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+}
 
 export const fonts = {
   body: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",

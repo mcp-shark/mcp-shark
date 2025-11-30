@@ -232,7 +232,7 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
             borderSpacing: 0,
             fontSize: '12px',
             fontFamily: fonts.body,
-            background: colors.bgCard,
+            background: colors.bgPrimary,
           }}
         >
           <TableHeader columnWidths={columnWidths} />

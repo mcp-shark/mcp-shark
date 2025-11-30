@@ -75,7 +75,7 @@ export default function SmartScanControls({
               borderRadius: '8px',
               fontSize: '12px',
               fontFamily: fonts.body,
-              background: colors.bgSecondary,
+              background: colors.bgCard,
               color: colors.textPrimary,
               boxSizing: 'border-box',
               transition: 'all 0.2s ease',

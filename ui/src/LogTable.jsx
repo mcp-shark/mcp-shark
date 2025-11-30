@@ -1,4 +1,4 @@
-import { colors, fonts } from './theme';
+import { colors, fonts, withOpacity } from './theme';
 
 function LogTable({ logs, selected, onSelect }) {
   const getStatusColor = (status) => {
@@ -146,7 +146,7 @@ function LogTable({ logs, selected, onSelect }) {
               onClick={() => onSelect(log)}
               style={{
                 cursor: 'pointer',
-                background: selected?.id === log.id ? colors.accentBlue + '15' : colors.bgCard,
+                background: selected?.id === log.id ? colors.bgSelected : colors.bgCard,
                 borderBottom: `1px solid ${colors.borderLight}`,
                 transition: 'background-color 0.15s ease',
               }}

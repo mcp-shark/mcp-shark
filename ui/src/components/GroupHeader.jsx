@@ -38,15 +38,15 @@ export default function GroupHeader({ children, onClick, isExpanded, indent = 0 
       onClick={onClick}
       style={{
         cursor: 'pointer',
-        background: colors.bgCard,
+        background: colors.bgSecondary,
         borderBottom: `1px solid ${colors.borderLight}`,
         borderTop: `1px solid ${colors.borderLight}`,
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.background = colors.bgHover;
+        e.currentTarget.style.background = colors.bgCard;
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.background = colors.bgCard;
+        e.currentTarget.style.background = colors.bgSecondary;
       }}
     >
       <td
