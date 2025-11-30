@@ -33,7 +33,7 @@ function TableHeader({ columnWidths }) {
         </th>
         <th
           style={{
-            padding: '4px 8px',
+            padding: '8px 12px',
             textAlign: 'left',
             borderBottom: `1px solid ${colors.borderLight}`,
             borderRight: `1px solid ${colors.borderLight}`,
@@ -49,7 +49,7 @@ function TableHeader({ columnWidths }) {
         </th>
         <th
           style={{
-            padding: '4px 8px',
+            padding: '8px 12px',
             textAlign: 'left',
             borderBottom: `1px solid ${colors.borderLight}`,
             borderRight: `1px solid ${colors.borderLight}`,
@@ -65,7 +65,7 @@ function TableHeader({ columnWidths }) {
         </th>
         <th
           style={{
-            padding: '4px 8px',
+            padding: '8px 12px',
             textAlign: 'left',
             borderBottom: `1px solid ${colors.borderLight}`,
             borderRight: `1px solid ${colors.borderLight}`,
@@ -81,7 +81,7 @@ function TableHeader({ columnWidths }) {
         </th>
         <th
           style={{
-            padding: '4px 8px',
+            padding: '8px 12px',
             textAlign: 'left',
             borderBottom: `1px solid ${colors.borderLight}`,
             borderRight: `1px solid ${colors.borderLight}`,
@@ -97,7 +97,7 @@ function TableHeader({ columnWidths }) {
         </th>
         <th
           style={{
-            padding: '4px 8px',
+            padding: '8px 12px',
             textAlign: 'left',
             borderBottom: `1px solid ${colors.borderLight}`,
             borderRight: `1px solid ${colors.borderLight}`,
@@ -113,7 +113,7 @@ function TableHeader({ columnWidths }) {
         </th>
         <th
           style={{
-            padding: '4px 8px',
+            padding: '8px 12px',
             textAlign: 'left',
             borderBottom: `1px solid ${colors.borderLight}`,
             borderRight: `1px solid ${colors.borderLight}`,
@@ -129,7 +129,7 @@ function TableHeader({ columnWidths }) {
         </th>
         <th
           style={{
-            padding: '4px 8px',
+            padding: '8px 12px',
             textAlign: 'left',
             borderBottom: `1px solid ${colors.borderLight}`,
             borderRight: `1px solid ${colors.borderLight}`,
@@ -145,12 +145,9 @@ function TableHeader({ columnWidths }) {
         </th>
         <th
           style={{
-            padding: '4px 8px',
+            padding: '8px 12px',
             textAlign: 'left',
             borderBottom: `1px solid ${colors.borderLight}`,
-            borderRight: `1px solid ${colors.borderLight}`,
-            width: `${columnWidths.endpoint}px`,
-            minWidth: `${columnWidths.endpoint}px`,
             color: colors.textPrimary,
             fontWeight: '600',
             fontFamily: fonts.body,
@@ -158,35 +155,6 @@ function TableHeader({ columnWidths }) {
           }}
         >
           Endpoint
-        </th>
-        <th
-          style={{
-            padding: '4px 8px',
-            textAlign: 'right',
-            borderBottom: `1px solid ${colors.borderLight}`,
-            borderRight: `1px solid ${colors.borderLight}`,
-            width: `${columnWidths.length}px`,
-            minWidth: `${columnWidths.length}px`,
-            color: colors.textPrimary,
-            fontWeight: '600',
-            fontFamily: fonts.body,
-            fontSize: '11px',
-          }}
-        >
-          Length
-        </th>
-        <th
-          style={{
-            padding: '4px 8px',
-            textAlign: 'left',
-            borderBottom: `1px solid ${colors.borderLight}`,
-            color: colors.textPrimary,
-            fontWeight: '600',
-            fontFamily: fonts.body,
-            fontSize: '11px',
-          }}
-        >
-          Info
         </th>
       </tr>
     </thead>

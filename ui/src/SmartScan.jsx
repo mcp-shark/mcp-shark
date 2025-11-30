@@ -98,7 +98,7 @@ function SmartScan() {
               onClick={() => {
                 setViewMode('list');
                 setSelectedScan(null);
-                if (apiToken && allScans.length === 0) {
+                if (allScans.length === 0) {
                   loadAllScans();
                 }
               }}
@@ -230,7 +230,22 @@ function SmartScan() {
               {error}
             </div>
           )}
-          {selectedScan ? (
+          {loadingScans ? (
+            <div
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '24px',
+                background: colors.bgPrimary,
+              }}
+            >
+              <p style={{ color: colors.textSecondary, fontFamily: fonts.body }}>
+                Loading cached scans...
+              </p>
+            </div>
+          ) : selectedScan ? (
             <ScanDetailView
               scan={selectedScan}
               loading={loadingScanDetail}
@@ -240,12 +255,62 @@ function SmartScan() {
               }}
             />
           ) : (
-            <ScanListView
-              scans={allScans}
-              loading={loadingScans}
-              onRefresh={loadAllScans}
-              onSelectScan={(scanId) => {
-                loadScanDetail(scanId);
+            <ScanResultsDisplay
+              error={error}
+              scanning={false}
+              selectedServers={[]}
+              scanResults={(() => {
+                console.log(
+                  '[SmartScan] Passing allScans to ScanResultsDisplay:',
+                  allScans.length,
+                  'items'
+                );
+                console.log(
+                  '[SmartScan] First item:',
+                  allScans[0]
+                    ? { serverName: allScans[0].serverName, scan_id: allScans[0].data?.scan_id }
+                    : null
+                );
+                console.log(
+                  '[SmartScan] Second item:',
+                  allScans[1]
+                    ? { serverName: allScans[1].serverName, scan_id: allScans[1].data?.scan_id }
+                    : null
+                );
+                return allScans;
+              })()}
+              scanResult={null}
+              onViewScan={(scanData) => {
+                // scanData is result.data from BatchResultsDisplay
+                // Structure: { scan_id, data: { ...scan data... } }
+                console.log('onViewScan - scanData:', scanData);
+
+                // Find the server name from allScans array
+                const scanId = scanData.scan_id || scanData.id || scanData.hash;
+                const matchingScan = allScans.find(
+                  (s) => s.data?.scan_id === scanId || s.data?.data?.scan_id === scanId
+                );
+                const serverName =
+                  matchingScan?.serverName || scanData.serverName || 'Unknown Server';
+
+                if (scanData && scanData.data && typeof scanData.data === 'object') {
+                  // Use the nested data if available (from batch scan results)
+                  const actualScan = scanData.data;
+                  setSelectedScan({
+                    ...actualScan,
+                    scan_id: scanId || actualScan.id || actualScan.scan_id || actualScan.hash,
+                    serverName: serverName, // Include server name
+                  });
+                } else if (scanData && typeof scanData === 'object') {
+                  // Use the scan data directly (might already be the scan object)
+                  setSelectedScan({
+                    ...scanData,
+                    scan_id: scanId || scanData.id || scanData.hash,
+                    serverName: serverName, // Include server name
+                  });
+                } else {
+                  console.warn('Invalid scanData structure:', scanData);
+                }
               }}
             />
           )}

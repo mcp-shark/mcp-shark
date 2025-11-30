@@ -17,8 +17,13 @@ const ChevronDown = ({ size = 12, color = 'currentColor' }) => (
   </svg>
 );
 
-function CollapsibleSection({ title, children, titleColor = colors.accentBlue }) {
-  const [isExpanded, setIsExpanded] = useState(true);
+function CollapsibleSection({
+  title,
+  children,
+  titleColor = colors.accentBlue,
+  defaultExpanded = true,
+}) {
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   return (
     <div style={{ marginBottom: '16px' }}>

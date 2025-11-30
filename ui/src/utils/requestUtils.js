@@ -112,14 +112,48 @@ export function getEndpoint(request) {
 
 export function getInfo(request) {
   if (request.direction === 'request') {
-    const method = request.method || 'HTTP';
+    // Use getEndpoint to get the method/endpoint (it already handles extraction from body)
+    const endpoint = getEndpoint(request);
+
+    // Get HTTP method if available
+    const httpMethod = request.method || '';
+
+    // Get URL if available
     const url = request.url || '';
-    const rpc = request.jsonrpc_method ? ` ${request.jsonrpc_method}` : '';
-    return `${method} ${url}${rpc}`;
+
+    // Build info string - prioritize endpoint (JSON-RPC method), then HTTP method + URL, then just method
+    if (endpoint && endpoint !== '-') {
+      // If we have both HTTP method and endpoint, show both
+      if (httpMethod && url) {
+        return `${httpMethod} ${endpoint}`;
+      } else if (httpMethod) {
+        return `${httpMethod} ${endpoint}`;
+      }
+      return endpoint;
+    } else if (httpMethod && url) {
+      return `${httpMethod} ${url}`;
+    } else if (httpMethod) {
+      return httpMethod;
+    } else if (url) {
+      return url;
+    }
+    return 'Request';
   }
+
+  // For responses
   const status = request.status_code || '';
-  const rpc = request.jsonrpc_method ? ` ${request.jsonrpc_method}` : '';
-  return `${status}${rpc}`;
+
+  // Try to get JSON-RPC method if available
+  const rpcMethod = request.jsonrpc_method || getJsonRpcMethod(request);
+
+  if (status && rpcMethod) {
+    return `${status} ${rpcMethod}`;
+  } else if (status) {
+    return `Status: ${status}`;
+  } else if (rpcMethod) {
+    return rpcMethod;
+  }
+  return 'Response';
 }
 
 export function getRequestColor(request) {

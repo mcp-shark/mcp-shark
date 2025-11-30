@@ -12,17 +12,15 @@ import anime from 'animejs';
 function RequestList({ requests, selected, onSelect, firstRequestTime }) {
   const [viewMode, setViewMode] = useState('general');
   const [columnWidths] = useState({
-    frame: 60,
-    time: 120,
-    datetime: 180,
-    source: 120,
-    destination: 120,
-    protocol: 80,
-    method: 80,
-    status: 80,
-    endpoint: 250,
-    length: 80,
-    info: 400,
+    frame: 90, // Frame numbers like "#1234"
+    time: 120, // Relative time like "0.123456"
+    datetime: 180, // Full date/time like "11/30/2024, 19:25:30"
+    source: 200, // IP addresses or hostnames
+    destination: 200, // IP addresses or hostnames
+    protocol: 90, // Usually "HTTP"
+    method: 90, // HTTP methods like "POST", "GET"
+    status: 80, // Status codes like "200", "404"
+    endpoint: 500, // JSON-RPC methods or URLs (most important, needs space)
   });
   const [expandedResponses, setExpandedResponses] = useState(new Set());
   const [expandedMcpSessions, setExpandedMcpSessions] = useState(new Set());
