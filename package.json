@@ -1,11 +1,12 @@
 {
-  "name": "mcp-shark",
+  "name": "@mcp-shark/mcp-shark",
   "version": "1.4.0",
-  "description": "Aggregate multiple Model Context Protocol (MCP) servers into a single unified interface with a powerful monitoring UI. Wireshark for MCP - providing deep visibility into every request and response.",
+  "description": "Aggregate multiple Model Context Protocol (MCP) servers into a single unified interface with a powerful monitoring UI. Prov deep visibility into every request and response.",
   "type": "module",
   "main": "./bin/mcp-shark.js",
   "bin": {
-    "mcp-shark": "./bin/mcp-shark.js"
+    "mcp-shark": "./bin/mcp-shark.js",
+    "@mcp-shark/mcp-shark": "./bin/mcp-shark.js"
   },
   "repository": {
     "type": "git",
@@ -37,7 +38,10 @@
     "lint:fix:all": "(npm run lint:fix:server || true) && (npm run lint:fix:ui || true)",
     "format:all": "(npm run format:server || true) && (npm run format:ui || true)",
     "fix:all": "(npm run lint:fix:all || true) && (npm run format:all || true)",
-    "prepare": "husky install || true"
+    "prepare": "husky install || true",
+    "prepublishOnly": "npm run lint:fix:all && npm run format:all",
+    "publish:public": "npm publish --access public",
+    "publish:dry-run": "npm publish --dry-run"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -67,6 +71,9 @@
   ],
   "author": "",
   "license": "SEE LICENSE IN LICENSE",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.20.2",
     "@tabler/icons-react": "^3.0.0",

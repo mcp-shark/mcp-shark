@@ -2,7 +2,7 @@
 
 > **Aggregate multiple Model Context Protocol (MCP) servers into a single unified interface with a powerful monitoring UI**
 
-[![npm version](https://img.shields.io/npm/v/mcp-shark.svg)](https://www.npmjs.com/package/mcp-shark)
+[![npm version](https://img.shields.io/npm/v/@mcp-shark/mcp-shark.svg)](https://www.npmjs.com/package/@mcp-shark/mcp-shark)
 [![License: Non-Commercial](https://img.shields.io/badge/License-Non--Commercial-red.svg)](LICENSE)
 
 ## 📦 Download Desktop App
@@ -25,19 +25,19 @@ Prefer a desktop application? Download the native desktop app:
 **Install globally (recommended):**
 
 ```bash
-npm install -g mcp-shark
+npm install -g @mcp-shark/mcp-shark
 ```
 
 **Install locally in your project:**
 
 ```bash
-npm install mcp-shark
+npm install @mcp-shark/mcp-shark
 ```
 
 **Use npx (no installation required):**
 
 ```bash
-npx mcp-shark
+npx @mcp-shark/mcp-shark
 ```
 
 ### Usage
@@ -51,13 +51,13 @@ mcp-shark
 Or with npx:
 
 ```bash
-npx mcp-shark
+npx @mcp-shark/mcp-shark
 ```
 
 Or if installed locally:
 
 ```bash
-npx mcp-shark
+npx @mcp-shark/mcp-shark
 ```
 
 The UI will automatically:
@@ -70,8 +70,8 @@ Open your browser to `http://localhost:9853` to access the MCP Shark interface.
 
 ### Package Information
 
-- **Package Name**: `mcp-shark`
-- **npm Registry**: [https://www.npmjs.com/package/mcp-shark](https://www.npmjs.com/package/mcp-shark)
+- **Package Name**: `@mcp-shark/mcp-shark`
+- **npm Registry**: [https://www.npmjs.com/package/@mcp-shark/mcp-shark](https://www.npmjs.com/package/@mcp-shark/mcp-shark)
 - **Version**: Check latest version on npm
 - **License**: Source-Available Non-Commercial (see [LICENSE](LICENSE) for details)
 - **Node.js**: Requires Node.js 18+
@@ -316,7 +316,7 @@ No manual configuration editing required - MCP Shark handles everything for you.
 1. **Install MCP Shark:**
 
 ```bash
-   npm install -g mcp-shark
+   npm install -g @mcp-shark/mcp-shark
 ```
 
 2. **Start MCP Shark:**
@@ -666,7 +666,7 @@ If you encounter issues with npm installation:
 npm cache clean --force
 
 # Try installing again
-npm install -g mcp-shark
+npm install -g @mcp-shark/mcp-shark
 ```
 
 For npx issues:
@@ -676,7 +676,7 @@ For npx issues:
 npm install -g npm@latest
 
 # Try running again
-npx mcp-shark
+npx @mcp-shark/mcp-shark
 ```
 
 ## 🤝 Contributing
