@@ -26,24 +26,5 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@commitlint/cli": "^19.5.0",
-    "@commitlint/config-conventional": "^19.5.0",
-    "@eslint/js": "^9.15.0",
-    "eslint": "^9.15.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.2.1",
-    "husky": "^9.1.6",
-    "lint-staged": "^15.2.10",
-    "prettier": "^3.3.3"
-  },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.20.2",
-    "consola": "^3.4.2",
-    "cors": "^2.8.5",
-    "express": "^4.18.2",
-    "jsonrpc-lite": "^2.2.0",
-    "mcp-shark-common": "github:mcp-shark/mcp-shark-common"
-  }
+  "license": "ISC"
 }

@@ -3,9 +3,18 @@
   "version": "1.4.0",
   "description": "MCP Shark - Aggregate multiple MCP servers with a unified UI",
   "type": "module",
-  "private": true,
+  "bin": {
+    "mcp-shark": "./bin/mcp-shark.js"
+  },
+  "files": [
+    "bin",
+    "ui",
+    "mcp-server",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "install:all": "npm install && cd mcp-server && npm install && cd ../ui && npm install",
+    "install:all": "npm install",
     "start:ui": "cd ui && npm start",
     "start": "npm run start:ui",
     "dev:ui": "cd ui && npm run dev",
@@ -38,11 +47,30 @@
   ],
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.20.2",
+    "@tabler/icons-react": "^3.0.0",
+    "animejs": "^3.2.2",
+    "consola": "^3.4.2",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "jsonrpc-lite": "^2.2.0",
+    "mcp-shark-common": "github:mcp-shark/mcp-shark-common",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "ws": "^8.16.0"
+  },
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
+    "@eslint/js": "^9.15.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^9.15.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
     "husky": "^9.1.6",
     "lint-staged": "^15.2.10",
-    "prettier": "^3.3.3"
+    "prettier": "^3.3.3",
+    "vite": "^5.1.0"
   }
 }
