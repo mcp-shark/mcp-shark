@@ -1,6 +1,12 @@
-# MCP Shark
+<div align="center">
 
-> **Aggregate multiple Model Context Protocol (MCP) servers into a single unified interface with a powerful monitoring UI**
+  <img src="https://smart.mcpshark.sh/icon_512x512.png" alt="MCP Shark Logo" width="128" height="128">
+
+  <h1>@mcp-shark/mcp-shark</h1>
+
+  <p>Aggregate multiple Model Context Protocol (MCP) servers into a single unified interface with a powerful monitoring UI</p>
+
+</div>
 
 [![npm version](https://img.shields.io/npm/v/@mcp-shark/mcp-shark.svg)](https://www.npmjs.com/package/@mcp-shark/mcp-shark)
 [![License: Non-Commercial](https://img.shields.io/badge/License-Non--Commercial-red.svg)](LICENSE)
