@@ -1,4 +1,5 @@
 import { colors, fonts } from '../theme';
+import { IconList, IconNetwork } from '@tabler/icons-react';
 
 function ViewModeTabs({ viewMode, onViewModeChange }) {
   return (
@@ -27,6 +28,9 @@ function ViewModeTabs({ viewMode, onViewModeChange }) {
           cursor: 'pointer',
           fontSize: '12px',
           fontWeight: viewMode === 'general' ? '500' : 'normal',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
         }}
         onMouseEnter={(e) => {
           if (viewMode !== 'general') {
@@ -41,6 +45,7 @@ function ViewModeTabs({ viewMode, onViewModeChange }) {
           }
         }}
       >
+        <IconList size={16} stroke={1.5} />
         General List
       </button>
       <button
@@ -59,6 +64,9 @@ function ViewModeTabs({ viewMode, onViewModeChange }) {
           fontSize: '12px',
           fontWeight: viewMode === 'groupedByMcp' ? '500' : 'normal',
           borderRadius: '8px 8px 0 0',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
         }}
         onMouseEnter={(e) => {
           if (viewMode !== 'groupedByMcp') {
@@ -73,6 +81,7 @@ function ViewModeTabs({ viewMode, onViewModeChange }) {
           }
         }}
       >
+        <IconNetwork size={16} stroke={1.5} />
         MCP Protocol View
       </button>
     </div>
