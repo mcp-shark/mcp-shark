@@ -26,6 +26,7 @@ function App() {
     showTour,
     setShowTour,
     prevTabRef,
+    loadRequests,
   } = useAppState();
   const [tourKey, setTourKey] = useState(0);
 
@@ -106,6 +107,10 @@ function App() {
           onFilterChange={setFilters}
           stats={stats}
           firstRequestTime={firstRequestTime}
+          onClear={() => {
+            setSelected(null);
+            loadRequests();
+          }}
         />
       )}
 

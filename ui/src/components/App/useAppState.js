@@ -124,5 +124,6 @@ export function useAppState() {
     tourDismissed,
     prevTabRef,
     wsRef,
+    loadRequests,
   };
 }

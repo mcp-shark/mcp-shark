@@ -1,50 +1,51 @@
-// Calm, cozy, soft color theme
+// Gmail-inspired clean and minimal color theme
 export const colors = {
-  // Backgrounds
-  bgPrimary: '#f5f3f0', // Warm beige
-  bgSecondary: '#faf9f7', // Soft white
-  bgTertiary: '#f0ede8', // Light warm gray
+  // Backgrounds - Gmail style
+  bgPrimary: '#ffffff', // Pure white (Gmail main background)
+  bgSecondary: '#f8f9fa', // Very light gray (Gmail sidebar/secondary areas)
+  bgTertiary: '#f1f3f4', // Light gray (hover states)
   bgCard: '#ffffff', // Pure white for cards
-  bgHover: '#f8f6f3', // Subtle hover
-  bgSelected: '#e8f4f8', // Very light blue-gray for selected items
+  bgHover: '#f1f3f4', // Gmail hover color
+  bgSelected: '#e8f0fe', // Gmail selected blue tint
+  bgUnpaired: '#fef7e0', // Very light orange/yellow for unpaired requests/responses
 
-  // Text
-  textPrimary: '#3a3a3a', // Warm dark gray
-  textSecondary: '#6b6b6b', // Medium gray
-  textTertiary: '#9a9a9a', // Light gray
+  // Text - Gmail style
+  textPrimary: '#202124', // Gmail primary text (almost black)
+  textSecondary: '#5f6368', // Gmail secondary text (medium gray)
+  textTertiary: '#80868b', // Gmail tertiary text (light gray)
   textInverse: '#ffffff', // White text
 
-  // Borders
-  borderLight: '#e5e3e0', // Soft border
-  borderMedium: '#d5d3d0', // Medium border
-  borderDark: '#c5c3c0', // Darker border
+  // Borders - Gmail style
+  borderLight: '#dadce0', // Gmail light border
+  borderMedium: '#bdc1c6', // Gmail medium border
+  borderDark: '#9aa0a6', // Gmail dark border
 
-  // Accents - Soft pastels
-  accentBlue: '#7db3d3', // Soft blue
-  accentBlueHover: '#6ba3c3', // Darker blue
-  accentGreen: '#9bc4a0', // Soft green
-  accentOrange: '#d4a574', // Warm orange
-  accentPink: '#d4a5b4', // Soft pink
-  accentPurple: '#b4a5d4', // Soft purple
+  // Accents - Gmail/Google Material colors
+  accentBlue: '#1a73e8', // Gmail primary blue
+  accentBlueHover: '#1557b0', // Darker blue on hover
+  accentGreen: '#34a853', // Google green
+  accentOrange: '#ea8600', // Google orange
+  accentPink: '#d44638', // Gmail red (Jasper)
+  accentPurple: '#9334e6', // Google purple
 
-  // Status colors - Muted
-  success: '#7db37d', // Soft green
-  warning: '#d4a574', // Warm orange
-  error: '#d49b9b', // Soft red
-  info: '#7db3d3', // Soft blue
+  // Status colors - Gmail style
+  success: '#34a853', // Google green
+  warning: '#fbbc04', // Google yellow
+  error: '#ea4335', // Google red
+  info: '#1a73e8', // Gmail blue
 
-  // Interactive
-  buttonPrimary: '#7db3d3', // Soft blue
-  buttonPrimaryHover: '#6ba3c3',
-  buttonSecondary: '#e5e3e0', // Light gray
-  buttonSecondaryHover: '#d5d3d0',
-  buttonDanger: '#d49b9b', // Soft red
-  buttonDangerHover: '#c48b8b',
+  // Interactive - Gmail style
+  buttonPrimary: '#1a73e8', // Gmail primary blue
+  buttonPrimaryHover: '#1557b0',
+  buttonSecondary: '#f1f3f4', // Light gray
+  buttonSecondaryHover: '#e8eaed',
+  buttonDanger: '#ea4335', // Google red
+  buttonDangerHover: '#c5221f',
 
-  // Shadows
-  shadowSm: 'rgba(0, 0, 0, 0.05)',
-  shadowMd: 'rgba(0, 0, 0, 0.1)',
-  shadowLg: 'rgba(0, 0, 0, 0.15)',
+  // Shadows - Gmail style (subtle)
+  shadowSm: 'rgba(60, 64, 67, 0.08)', // Gmail subtle shadow
+  shadowMd: 'rgba(60, 64, 67, 0.12)', // Gmail medium shadow
+  shadowLg: 'rgba(60, 64, 67, 0.16)', // Gmail larger shadow
 };
 
 // Helper function to add opacity to hex colors
@@ -59,6 +60,6 @@ export function withOpacity(color, opacity) {
 }
 
 export const fonts = {
-  body: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-  mono: "'JetBrains Mono', 'Fira Code', 'Consolas', monospace",
+  body: "'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  mono: "'Roboto Mono', 'JetBrains Mono', 'Fira Code', 'Consolas', monospace",
 };

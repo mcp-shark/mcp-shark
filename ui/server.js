@@ -89,6 +89,7 @@ export function createUIServer() {
   app.get('/api/requests/:frameNumber', requestsRoutes.getRequest);
   app.get('/api/packets/:frameNumber', requestsRoutes.getRequest);
   app.get('/api/requests/export', requestsRoutes.exportRequests);
+  app.post('/api/requests/clear', requestsRoutes.clearRequests);
 
   app.get('/api/conversations', conversationsRoutes.getConversations);
 

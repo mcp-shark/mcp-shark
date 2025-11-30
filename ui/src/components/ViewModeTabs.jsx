@@ -17,7 +17,7 @@ function ViewModeTabs({ viewMode, onViewModeChange }) {
         onClick={() => onViewModeChange('general')}
         style={{
           padding: '10px 18px',
-          background: viewMode === 'general' ? colors.bgSecondary : 'transparent',
+          background: viewMode === 'general' ? colors.bgCard : 'transparent',
           fontFamily: fonts.body,
           border: 'none',
           borderBottom:
@@ -47,7 +47,7 @@ function ViewModeTabs({ viewMode, onViewModeChange }) {
         onClick={() => onViewModeChange('groupedBySession')}
         style={{
           padding: '10px 18px',
-          background: viewMode === 'groupedBySession' ? colors.bgSecondary : 'transparent',
+          background: viewMode === 'groupedBySession' ? colors.bgCard : 'transparent',
           fontFamily: fonts.body,
           border: 'none',
           borderBottom:
@@ -79,7 +79,7 @@ function ViewModeTabs({ viewMode, onViewModeChange }) {
         onClick={() => onViewModeChange('groupedByServer')}
         style={{
           padding: '10px 18px',
-          background: viewMode === 'groupedByServer' ? colors.bgSecondary : 'transparent',
+          background: viewMode === 'groupedByServer' ? colors.bgCard : 'transparent',
           fontFamily: fonts.body,
           border: 'none',
           borderBottom:

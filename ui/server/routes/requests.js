@@ -58,6 +58,68 @@ export function createRequestsRoutes(db) {
     res.json(serializeBigInt(request));
   };
 
+  router.clearRequests = (req, res) => {
+    try {
+      // Disable foreign key constraints temporarily to avoid constraint violations
+      db.exec('PRAGMA foreign_keys = OFF');
+
+      // Get list of all tables in the database
+      const tablesResult = db
+        .prepare(
+          `
+        SELECT name FROM sqlite_master 
+        WHERE type='table' AND name NOT LIKE 'sqlite_%'
+      `
+        )
+        .all();
+
+      const existingTables = tablesResult.map((row) => row.name);
+
+      // Based on mcp-shark-common schema, these are the traffic-related tables:
+      // - packets: Individual HTTP request/response packets
+      // - conversations: Correlated request/response pairs
+      // - sessions: Session tracking
+      // Clear in order to respect any foreign key dependencies
+      const trafficTables = [
+        'conversations', // Clear conversations first (may reference packets)
+        'packets', // Clear packets (main traffic data)
+        'sessions', // Clear sessions (may reference packets)
+      ];
+
+      // Delete from each table that exists
+      let clearedCount = 0;
+      const clearedTables = [];
+      trafficTables.forEach((table) => {
+        if (existingTables.includes(table)) {
+          try {
+            db.exec(`DELETE FROM ${table}`);
+            clearedCount++;
+            clearedTables.push(table);
+          } catch (err) {
+            console.warn(`Error clearing table ${table}:`, err.message);
+          }
+        }
+      });
+
+      // Re-enable foreign key constraints
+      db.exec('PRAGMA foreign_keys = ON');
+
+      res.json({
+        success: true,
+        message: `Cleared ${clearedCount} table(s): ${clearedTables.join(', ')}. All captured traffic has been cleared.`,
+      });
+    } catch (error) {
+      // Make sure to re-enable foreign keys even if there's an error
+      try {
+        db.exec('PRAGMA foreign_keys = ON');
+      } catch (e) {
+        // Ignore
+      }
+      console.error('Error clearing requests:', error);
+      res.status(500).json({ error: 'Failed to clear traffic', details: error.message });
+    }
+  };
+
   router.exportRequests = (req, res) => {
     try {
       // Sanitize search parameter - convert empty strings to null

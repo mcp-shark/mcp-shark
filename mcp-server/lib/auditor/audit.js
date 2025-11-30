@@ -1,5 +1,6 @@
 import { Readable } from 'node:stream';
 import { parse as parseJsonRpc } from 'jsonrpc-lite';
+import { getSessionFromRequest } from '../server/internal/handlers/common.js';
 
 /* ---------- helpers ---------- */
 
@@ -139,6 +140,10 @@ export async function withAuditRequestResponseHandler(
   const reqBuf = await readBody(req);
   const reqJsonRpc = tryParseJsonRpc(reqBuf);
 
+  // Extract session ID from request
+  // If no session ID exists, it's an initiation request
+  const sessionId = getSessionFromRequest(req);
+
   // Extract request body as string
   const reqBodyStr = reqBuf.toString('utf8');
   const reqBodyJson = (() => {
@@ -157,6 +162,7 @@ export async function withAuditRequestResponseHandler(
     body: reqBodyJson || reqBodyStr,
     userAgent: req.headers['user-agent'] || req.headers['User-Agent'] || null,
     remoteAddress: req.socket?.remoteAddress || null,
+    sessionId: sessionId || null,
   });
 
   const { res: wrappedRes, getBody } = captureResponse(res);
@@ -174,6 +180,10 @@ export async function withAuditRequestResponseHandler(
     : undefined;
 
   // hand over to transport
+  if (!transport || typeof transport.handleRequest !== 'function') {
+    res.status(500).json({ error: 'Transport not available' });
+    return;
+  }
   await transport.handleRequest(replayReq, wrappedRes, parsedForTransport);
 
   // wait until response fully finished (important for SSE / streaming)
@@ -203,6 +213,7 @@ export async function withAuditRequestResponseHandler(
       : null;
 
   // Log response packet to database
+  // Use the same session ID from the request
   auditLogger.logResponsePacket({
     statusCode: wrappedRes.statusCode || 200,
     headers: resHeaders,
@@ -210,6 +221,7 @@ export async function withAuditRequestResponseHandler(
     requestFrameNumber: requestResult?.frameNumber || null,
     requestTimestampNs: requestResult?.timestampNs || null,
     jsonrpcId,
+    sessionId: sessionId || null,
     userAgent: req.headers['user-agent'] || req.headers['User-Agent'] || null,
     remoteAddress: req.socket?.remoteAddress || null,
   });

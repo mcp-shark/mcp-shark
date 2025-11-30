@@ -13,6 +13,7 @@ export default function TrafficTab({
   onFilterChange,
   stats,
   firstRequestTime,
+  onClear,
 }) {
   const detailPanelRef = useRef(null);
 
@@ -36,6 +37,7 @@ export default function TrafficTab({
           onFilterChange={onFilterChange}
           stats={stats}
           onExport={() => {}}
+          onClear={onClear}
         />
         <RequestList
           requests={requests}
