@@ -4,6 +4,7 @@ import { fadeIn } from './utils/animations';
 import FilterInput from './components/PacketFilters/FilterInput';
 import ExportControls from './components/PacketFilters/ExportControls';
 import ConfirmationModal from './components/ConfirmationModal';
+import { IconTrash, IconSearch } from '@tabler/icons-react';
 import anime from 'animejs';
 
 function RequestFilters({ filters, onFilterChange, stats, onExport, onClear }) {
@@ -60,16 +61,32 @@ function RequestFilters({ filters, onFilterChange, stats, onExport, onClear }) {
         boxShadow: `0 1px 3px ${colors.shadowSm}`,
       }}
     >
-      <FilterInput
-        type="text"
-        placeholder="🔍 Search everything (partial match)..."
-        value={filters.search || ''}
-        onChange={(e) => onFilterChange({ ...filters, search: e.target.value || null })}
-        style={{
-          width: '300px',
-          fontWeight: filters.search ? '500' : '400',
-        }}
-      />
+      <div style={{ position: 'relative', width: '300px' }}>
+        <IconSearch
+          size={16}
+          stroke={1.5}
+          style={{
+            position: 'absolute',
+            left: '12px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: colors.textTertiary,
+            pointerEvents: 'none',
+            zIndex: 1,
+          }}
+        />
+        <FilterInput
+          type="text"
+          placeholder="Search everything (partial match)..."
+          value={filters.search || ''}
+          onChange={(e) => onFilterChange({ ...filters, search: e.target.value || null })}
+          style={{
+            width: '100%',
+            fontWeight: filters.search ? '500' : '400',
+            paddingLeft: '36px',
+          }}
+        />
+      </div>
 
       <FilterInput
         type="text"
@@ -167,17 +184,7 @@ function RequestFilters({ filters, onFilterChange, stats, onExport, onClear }) {
         }}
         title="Clear all captured traffic"
       >
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <polyline points="3 6 5 6 21 6" />
-          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-        </svg>
+        <IconTrash size={14} stroke={1.5} />
         Clear
       </button>
 

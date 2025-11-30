@@ -5,13 +5,15 @@ import TableHeader from './components/TableHeader';
 import ViewModeTabs from './components/ViewModeTabs';
 import GroupedBySessionView from './components/GroupedBySessionView';
 import GroupedByServerView from './components/GroupedByServerView';
+import GroupedByMcpView from './components/GroupedByMcpView';
 import { groupByServerAndSession, groupBySessionAndServer } from './utils/groupingUtils.js';
+import { groupByMcpSessionAndCategory } from './utils/mcpGroupingUtils.js';
 import { pairRequestsWithResponses } from './utils/requestUtils.js';
 import { staggerIn } from './utils/animations';
 import anime from 'animejs';
 
 function RequestList({ requests, selected, onSelect, firstRequestTime }) {
-  const [viewMode, setViewMode] = useState('general');
+  const [viewMode, setViewMode] = useState('groupedByMcp');
   const [columnWidths] = useState({
     frame: 60,
     time: 120,
@@ -30,12 +32,16 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
   const [expandedServersFirst, setExpandedServersFirst] = useState(new Set());
   const [expandedSessionsInServer, setExpandedSessionsInServer] = useState(new Map());
   const [expandedResponses, setExpandedResponses] = useState(new Set());
+  const [expandedMcpSessions, setExpandedMcpSessions] = useState(new Set());
+  const [expandedMcpCategories, setExpandedMcpCategories] = useState(new Set());
   const tbodyRef = useRef(null);
   const prevRequestsLengthRef = useRef(0);
 
   const groupedByServerAndSession = useMemo(() => groupByServerAndSession(requests), [requests]);
 
   const groupedBySessionAndServer = useMemo(() => groupBySessionAndServer(requests), [requests]);
+
+  const groupedByMcp = useMemo(() => groupByMcpSessionAndCategory(requests), [requests]);
 
   // Animate rows when requests change
   useEffect(() => {
@@ -108,8 +114,27 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
         });
         return updated;
       });
+    } else if (viewMode === 'groupedByMcp') {
+      // Auto-expand all MCP sessions and categories
+      const allSessionIds = new Set(groupedByMcp.map((g) => g.sessionId || '__NO_SESSION__'));
+      setExpandedMcpSessions((prev) => {
+        const updated = new Set(prev);
+        allSessionIds.forEach((id) => updated.add(id));
+        return updated;
+      });
+
+      setExpandedMcpCategories((prev) => {
+        const updated = new Set(prev);
+        groupedByMcp.forEach((sessionGroup) => {
+          const sessionKey = sessionGroup.sessionId || '__NO_SESSION__';
+          sessionGroup.categories.forEach((category) => {
+            updated.add(`${sessionKey}::${category.category}`);
+          });
+        });
+        return updated;
+      });
     }
-  }, [groupedBySessionAndServer, groupedByServerAndSession, viewMode]);
+  }, [groupedBySessionAndServer, groupedByServerAndSession, groupedByMcp, viewMode]);
 
   const toggleSession = (sessionId) => {
     const key = sessionId || '__NO_SESSION__';
@@ -168,6 +193,30 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
         sessionSet.delete(sessionKey);
       } else {
         sessionSet.add(sessionKey);
+      }
+      return updated;
+    });
+  };
+
+  const toggleMcpSession = (sessionKey) => {
+    setExpandedMcpSessions((prev) => {
+      const updated = new Set(prev);
+      if (updated.has(sessionKey)) {
+        updated.delete(sessionKey);
+      } else {
+        updated.add(sessionKey);
+      }
+      return updated;
+    });
+  };
+
+  const toggleMcpCategory = (categoryKey) => {
+    setExpandedMcpCategories((prev) => {
+      const updated = new Set(prev);
+      if (updated.has(categoryKey)) {
+        updated.delete(categoryKey);
+      } else {
+        updated.add(categoryKey);
       }
       return updated;
     });
@@ -249,13 +298,24 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
               firstRequestTime={firstRequestTime}
               onSelect={onSelect}
             />
-          ) : (
+          ) : viewMode === 'groupedByServer' ? (
             <GroupedByServerView
               groupedData={groupedByServerAndSession}
               expandedServersFirst={expandedServersFirst}
               expandedSessionsInServer={expandedSessionsInServer}
               onToggleServerFirst={toggleServerFirst}
               onToggleSessionInServer={toggleSessionInServer}
+              selected={selected}
+              firstRequestTime={firstRequestTime}
+              onSelect={onSelect}
+            />
+          ) : (
+            <GroupedByMcpView
+              groupedData={groupedByMcp}
+              expandedSessions={expandedMcpSessions}
+              expandedCategories={expandedMcpCategories}
+              onToggleSession={toggleMcpSession}
+              onToggleCategory={toggleMcpCategory}
               selected={selected}
               firstRequestTime={firstRequestTime}
               onSelect={onSelect}

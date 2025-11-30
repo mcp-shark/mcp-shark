@@ -7,26 +7,20 @@ import {
   getInfo,
   getRequestColor,
 } from '../utils/requestUtils.js';
+import { IconChevronDown } from '@tabler/icons-react';
 
 const ChevronDown = ({ size = 12, color = 'currentColor', rotated = false }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke={color}
-    strokeWidth="2.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
+  <IconChevronDown
+    size={size}
+    stroke={1.5}
+    color={color}
     style={{
       display: 'inline-block',
       verticalAlign: 'middle',
       transform: rotated ? 'rotate(-90deg)' : 'rotate(0deg)',
       transition: 'transform 0.2s ease',
     }}
-  >
-    <polyline points="6 9 12 15 18 9" />
-  </svg>
+  />
 );
 
 function RequestRow({

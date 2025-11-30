@@ -2,6 +2,8 @@ import { useState, useRef } from 'react';
 import { colors, fonts } from '../../theme';
 import { CheckIcon, LoadingSpinner, CacheIcon } from '../SmartScanIcons';
 import { ExternalLinkIcon } from '../SmartScanIcons';
+import { IconTrash } from '@tabler/icons-react';
+import ConfirmationModal from '../ConfirmationModal';
 
 export default function SmartScanControls({
   apiToken,
@@ -14,8 +16,11 @@ export default function SmartScanControls({
   setSelectedServers,
   runScan,
   scanning,
+  clearCache,
+  clearingCache,
 }) {
   const saveTokenTimeoutRef = useRef(null);
+  const [showClearCacheModal, setShowClearCacheModal] = useState(false);
 
   const handleTokenChange = (newToken) => {
     setApiToken(newToken);
@@ -216,6 +221,70 @@ export default function SmartScanControls({
           </div>
         )}
       </div>
+
+      {/* Clear Cache Button */}
+      <button
+        onClick={() => setShowClearCacheModal(true)}
+        disabled={clearingCache}
+        style={{
+          padding: '8px 14px',
+          background: colors.buttonSecondary,
+          border: `1px solid ${colors.borderLight}`,
+          color: colors.textSecondary,
+          cursor: clearingCache ? 'not-allowed' : 'pointer',
+          fontSize: '12px',
+          fontWeight: '500',
+          fontFamily: fonts.body,
+          borderRadius: '8px',
+          transition: 'all 0.2s ease',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          whiteSpace: 'nowrap',
+          opacity: clearingCache ? 0.5 : 1,
+        }}
+        onMouseEnter={(e) => {
+          if (!clearingCache) {
+            e.currentTarget.style.background = colors.buttonSecondaryHover;
+            e.currentTarget.style.color = colors.textPrimary;
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!clearingCache) {
+            e.currentTarget.style.background = colors.buttonSecondary;
+            e.currentTarget.style.color = colors.textSecondary;
+          }
+        }}
+        title="Clear cached scan results"
+      >
+        {clearingCache ? (
+          <>
+            <LoadingSpinner size={12} />
+            <span>Clearing...</span>
+          </>
+        ) : (
+          <>
+            <IconTrash size={14} stroke={1.5} />
+            <span>Clear Cache</span>
+          </>
+        )}
+      </button>
+
+      <ConfirmationModal
+        isOpen={showClearCacheModal}
+        onClose={() => setShowClearCacheModal(false)}
+        onConfirm={async () => {
+          const result = await clearCache();
+          if (result.success) {
+            setShowClearCacheModal(false);
+          }
+        }}
+        title="Clear Scan Cache?"
+        message="Are you sure you want to clear all cached scan results? This will force fresh scans for all servers on the next scan."
+        confirmText="Clear Cache"
+        cancelText="Cancel"
+        danger={false}
+      />
     </div>
   );
 }

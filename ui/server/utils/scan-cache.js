@@ -234,3 +234,34 @@ export function clearOldScanResults(maxAgeMs = 30 * 24 * 60 * 60 * 1000) {
     return 0;
   }
 }
+
+/**
+ * Clear all cached scan results
+ * @returns {number} Number of files deleted
+ */
+export function clearAllScanResults() {
+  try {
+    const scanResultsDir = getScanResultsDirectory();
+    if (!existsSync(scanResultsDir)) {
+      return 0;
+    }
+
+    const files = readdirSync(scanResultsDir).filter((f) => f.endsWith('.json'));
+    let deletedCount = 0;
+
+    for (const file of files) {
+      try {
+        const filePath = join(scanResultsDir, file);
+        unlinkSync(filePath);
+        deletedCount++;
+      } catch (error) {
+        console.warn(`Error deleting scan result file ${file}:`, error);
+      }
+    }
+
+    return deletedCount;
+  } catch (error) {
+    console.error('Error clearing all scan results:', error);
+    return 0;
+  }
+}

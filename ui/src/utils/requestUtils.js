@@ -135,20 +135,98 @@ export function getRequestColor(request) {
   return '#f0f8f0';
 }
 
+// Helper function to extract JSON-RPC method from a request or response
+export function getJsonRpcMethod(req) {
+  // First check the jsonrpc_method field (most reliable)
+  if (req.jsonrpc_method) {
+    return req.jsonrpc_method;
+  }
+
+  // For requests, try to extract from body
+  if (req.direction === 'request') {
+    if (req.body_json) {
+      try {
+        const body = typeof req.body_json === 'string' ? JSON.parse(req.body_json) : req.body_json;
+        if (body && typeof body === 'object' && body.method) {
+          return body.method;
+        }
+      } catch (e) {
+        // Failed to parse
+      }
+    }
+    if (req.body_raw) {
+      try {
+        const body = typeof req.body_raw === 'string' ? JSON.parse(req.body_raw) : req.body_raw;
+        if (body && typeof body === 'object' && body.method) {
+          return body.method;
+        }
+      } catch (e) {
+        // Failed to parse
+      }
+    }
+  }
+
+  // For responses, try to extract from body if available
+  if (req.direction === 'response' && req.body_json) {
+    try {
+      const body = typeof req.body_json === 'string' ? JSON.parse(req.body_json) : req.body_json;
+      // Responses don't have a method field, but we can check if it's an error response
+      // For now, we'll rely on jsonrpc_method field
+    } catch (e) {
+      // Failed to parse
+    }
+  }
+
+  return null;
+}
+
 export function pairRequestsWithResponses(requests) {
   const pairs = [];
   const processed = new Set();
+
+  // Helper function to check if two requests match (same session, JSON-RPC method, and optionally jsonrpc_id)
+  const matches = (req, resp) => {
+    // Session ID must match (or both null for initiation)
+    const sessionMatch = req.session_id === resp.session_id;
+    if (!sessionMatch) return false;
+
+    // JSON-RPC Method must match
+    const reqMethod = getJsonRpcMethod(req);
+    const respMethod = getJsonRpcMethod(resp);
+
+    // Both must have a method, and they must match
+    if (!reqMethod || !respMethod) {
+      // If either doesn't have a method, we can't match by method
+      // Fall back to JSON-RPC ID matching only
+      if (req.jsonrpc_id && resp.jsonrpc_id) {
+        return req.jsonrpc_id === resp.jsonrpc_id;
+      }
+      // If no method and no ID, we can't match reliably
+      return false;
+    }
+
+    const methodMatch = reqMethod === respMethod;
+    if (!methodMatch) return false;
+
+    // If JSON-RPC ID exists, it must match (for more precise pairing)
+    if (req.jsonrpc_id && resp.jsonrpc_id) {
+      return req.jsonrpc_id === resp.jsonrpc_id;
+    }
+
+    // If no JSON-RPC ID, match by session and method only
+    return true;
+  };
 
   requests.forEach((request) => {
     if (processed.has(request.frame_number)) return;
 
     if (request.direction === 'request') {
-      // Find matching response
+      // Find matching response - must match session, endpoint, and optionally jsonrpc_id
       const response = requests.find(
         (r) =>
           r.direction === 'response' &&
           !processed.has(r.frame_number) &&
-          (r.session_id === request.session_id || r.jsonrpc_id === request.jsonrpc_id) &&
+          matches(request, r) &&
           r.frame_number > request.frame_number
       );
 
@@ -162,12 +240,12 @@ export function pairRequestsWithResponses(requests) {
         processed.add(request.frame_number);
       }
     } else if (request.direction === 'response') {
-      // Find matching request
+      // Find matching request - must match session, endpoint, and optionally jsonrpc_id
       const matchingRequest = requests.find(
         (r) =>
           r.direction === 'request' &&
           !processed.has(r.frame_number) &&
-          (r.session_id === request.session_id || r.jsonrpc_id === request.jsonrpc_id) &&
+          matches(r, request) &&
           r.frame_number < request.frame_number
       );
 

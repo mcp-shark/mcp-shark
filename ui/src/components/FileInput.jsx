@@ -1,4 +1,5 @@
 import { colors, fonts } from '../theme';
+import { IconFileUpload } from '@tabler/icons-react';
 
 function FileInput({
   filePath,
@@ -32,6 +33,11 @@ function FileInput({
             e.currentTarget.style.background = colors.buttonPrimary;
           }}
         >
+          <IconFileUpload
+            size={14}
+            stroke={1.5}
+            style={{ marginRight: '6px', display: 'inline-block' }}
+          />
           Select File
           <input type="file" accept=".json" onChange={onFileSelect} style={{ display: 'none' }} />
         </label>

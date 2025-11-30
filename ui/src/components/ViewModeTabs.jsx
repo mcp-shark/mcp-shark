@@ -14,6 +14,38 @@ function ViewModeTabs({ viewMode, onViewModeChange }) {
       }}
     >
       <button
+        onClick={() => onViewModeChange('groupedByMcp')}
+        style={{
+          padding: '10px 18px',
+          background: viewMode === 'groupedByMcp' ? colors.bgCard : 'transparent',
+          fontFamily: fonts.body,
+          border: 'none',
+          borderBottom:
+            viewMode === 'groupedByMcp'
+              ? `2px solid ${colors.accentBlue}`
+              : '2px solid transparent',
+          color: viewMode === 'groupedByMcp' ? colors.textPrimary : colors.textSecondary,
+          cursor: 'pointer',
+          fontSize: '12px',
+          fontWeight: viewMode === 'groupedByMcp' ? '500' : 'normal',
+          borderRadius: '8px 8px 0 0',
+        }}
+        onMouseEnter={(e) => {
+          if (viewMode !== 'groupedByMcp') {
+            e.currentTarget.style.background = colors.bgHover;
+            e.currentTarget.style.color = colors.textPrimary;
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (viewMode !== 'groupedByMcp') {
+            e.currentTarget.style.background = 'transparent';
+            e.currentTarget.style.color = colors.textSecondary;
+          }
+        }}
+      >
+        MCP Protocol View
+      </button>
+      <button
         onClick={() => onViewModeChange('general')}
         style={{
           padding: '10px 18px',

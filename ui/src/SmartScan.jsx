@@ -20,6 +20,8 @@ function SmartScan() {
     saveToken,
     discoverMcpData,
     runScan,
+    clearCache,
+    clearingCache,
   } = useSmartScan();
 
   return (
@@ -62,6 +64,8 @@ function SmartScan() {
             setSelectedServers={setSelectedServers}
             runScan={runScan}
             scanning={scanning}
+            clearCache={clearCache}
+            clearingCache={clearingCache}
           />
         </div>
       </div>

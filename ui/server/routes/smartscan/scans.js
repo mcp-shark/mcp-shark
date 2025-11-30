@@ -1,5 +1,10 @@
 const API_BASE_URL = 'https://smart.mcpshark.sh';
-import { computeMcpHash, getCachedScanResult, storeScanResult } from '../../utils/scan-cache.js';
+import {
+  computeMcpHash,
+  getCachedScanResult,
+  storeScanResult,
+  clearAllScanResults,
+} from '../../utils/scan-cache.js';
 
 /**
  * Proxy POST request to create a scan
@@ -248,6 +253,27 @@ export async function createBatchScans(req, res) {
     console.error('Smart Scan batch API error:', error);
     return res.status(500).json({
       error: 'Failed to create batch scans',
+      message: error.message,
+    });
+  }
+}
+
+/**
+ * Clear all cached scan results
+ * POST /api/smartscan/cache/clear
+ */
+export function clearCache(req, res) {
+  try {
+    const deletedCount = clearAllScanResults();
+    return res.json({
+      success: true,
+      message: `Cleared ${deletedCount} cached scan result${deletedCount !== 1 ? 's' : ''}`,
+      deletedCount,
+    });
+  } catch (error) {
+    console.error('Error clearing cache:', error);
+    return res.status(500).json({
+      error: 'Failed to clear cache',
       message: error.message,
     });
   }

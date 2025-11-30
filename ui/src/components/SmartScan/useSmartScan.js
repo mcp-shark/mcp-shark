@@ -12,6 +12,7 @@ export function useSmartScan() {
   const [scanResults, setScanResults] = useState([]);
   const [error, setError] = useState(null);
   const [sessionId, setSessionId] = useState(null);
+  const [clearingCache, setClearingCache] = useState(false);
   const saveTokenTimeoutRef = useRef(null);
 
   useEffect(() => {
@@ -261,6 +262,31 @@ export function useSmartScan() {
     saveToken,
     discoverMcpData,
     runScan,
+    clearCache: async () => {
+      setClearingCache(true);
+      setError(null);
+      try {
+        const response = await fetch('/api/smartscan/cache/clear', {
+          method: 'POST',
+        });
+        const data = await response.json();
+        if (response.ok) {
+          // Refresh discovered servers to clear cached results
+          if (discoveredServers.length > 0) {
+            await discoverMcpData();
+          }
+          return { success: true, message: data.message };
+        } else {
+          throw new Error(data.error || 'Failed to clear cache');
+        }
+      } catch (err) {
+        setError(err.message || 'Failed to clear cache');
+        return { success: false, error: err.message };
+      } finally {
+        setClearingCache(false);
+      }
+    },
+    clearingCache,
     saveTokenTimeoutRef,
   };
 }

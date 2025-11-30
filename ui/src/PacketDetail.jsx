@@ -22,23 +22,83 @@ function RequestDetail({ request, onClose, requests = [] }) {
 
   if (!request) return null;
 
+  // Helper function to extract JSON-RPC method
+  const getJsonRpcMethod = (req) => {
+    // First check the jsonrpc_method field (most reliable)
+    if (req.jsonrpc_method) {
+      return req.jsonrpc_method;
+    }
+
+    // For requests, try to extract from body
+    if (req.direction === 'request') {
+      if (req.body_json) {
+        try {
+          const body =
+            typeof req.body_json === 'string' ? JSON.parse(req.body_json) : req.body_json;
+          if (body && typeof body === 'object' && body.method) {
+            return body.method;
+          }
+        } catch (e) {
+          // Failed to parse
+        }
+      }
+      if (req.body_raw) {
+        try {
+          const body = typeof req.body_raw === 'string' ? JSON.parse(req.body_raw) : req.body_raw;
+          if (body && typeof body === 'object' && body.method) {
+            return body.method;
+          }
+        } catch (e) {
+          // Failed to parse
+        }
+      }
+    }
+
+    return null;
+  };
+
   // Find matching request/response pair
   const findMatchingPair = () => {
+    const matches = (req, resp) => {
+      // Session ID must match
+      if (req.session_id !== resp.session_id) return false;
+
+      // JSON-RPC Method must match
+      const reqMethod = getJsonRpcMethod(req);
+      const respMethod = getJsonRpcMethod(resp);
+
+      // Both must have a method, and they must match
+      if (!reqMethod || !respMethod) {
+        // If either doesn't have a method, we can't match by method
+        // Fall back to JSON-RPC ID matching only
+        if (req.jsonrpc_id && resp.jsonrpc_id) {
+          return req.jsonrpc_id === resp.jsonrpc_id;
+        }
+        // If no method and no ID, we can't match reliably
+        return false;
+      }
+
+      if (reqMethod !== respMethod) return false;
+
+      // If JSON-RPC ID exists, it must match
+      if (req.jsonrpc_id && resp.jsonrpc_id) {
+        return req.jsonrpc_id === resp.jsonrpc_id;
+      }
+
+      return true;
+    };
+
     if (request.direction === 'request') {
       // Find the corresponding response
       return requests.find(
         (r) =>
-          r.direction === 'response' &&
-          (r.session_id === request.session_id || r.jsonrpc_id === request.jsonrpc_id) &&
-          r.frame_number > request.frame_number
+          r.direction === 'response' && matches(request, r) && r.frame_number > request.frame_number
       );
     } else {
       // Find the corresponding request
       return requests.find(
         (r) =>
-          r.direction === 'request' &&
-          (r.session_id === request.session_id || r.jsonrpc_id === request.jsonrpc_id) &&
-          r.frame_number < request.frame_number
+          r.direction === 'request' && matches(r, request) && r.frame_number < request.frame_number
       );
     }
   };

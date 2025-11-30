@@ -1,4 +1,5 @@
 import { colors, fonts, withOpacity } from '../theme';
+import { IconRefresh, IconEye, IconTrash, IconRestore } from '@tabler/icons-react';
 
 function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onDelete }) {
   if (backups.length === 0) {
@@ -49,7 +50,8 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onD
           }}
           title="Refresh backups"
         >
-          {loadingBackups ? 'Loading...' : '🔄 Refresh'}
+          <IconRefresh size={14} stroke={1.5} style={{ marginRight: '4px' }} />
+          {loadingBackups ? 'Loading...' : 'Refresh'}
         </button>
       </div>
       <p
@@ -116,6 +118,7 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onD
                 }}
                 title="View backup content"
               >
+                <IconEye size={14} stroke={1.5} style={{ marginRight: '4px' }} />
                 View
               </button>
               <button
@@ -134,6 +137,9 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onD
                   borderRadius: '8px',
                   fontWeight: '500',
                   fontFamily: fonts.body,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = withOpacity(colors.error, 0.15);
@@ -145,6 +151,7 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onD
                 }}
                 title="Delete backup"
               >
+                <IconTrash size={14} stroke={1.5} />
                 Delete
               </button>
               <button
@@ -159,6 +166,9 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onD
                   borderRadius: '8px',
                   fontWeight: '500',
                   fontFamily: fonts.body,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = colors.buttonPrimaryHover;
@@ -168,6 +178,7 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onD
                 }}
                 title="Restore this backup"
               >
+                <IconRestore size={14} stroke={1.5} />
                 Restore
               </button>
             </div>

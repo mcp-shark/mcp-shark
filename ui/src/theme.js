@@ -34,13 +34,13 @@ export const colors = {
   error: '#ea4335', // Google red
   info: '#1a73e8', // Gmail blue
 
-  // Interactive - Gmail style
-  buttonPrimary: '#1a73e8', // Gmail primary blue
-  buttonPrimaryHover: '#1557b0',
+  // Interactive - Gmail style (lighter, less sharp)
+  buttonPrimary: '#4285f4', // Lighter Google blue
+  buttonPrimaryHover: '#3367d6',
   buttonSecondary: '#f1f3f4', // Light gray
   buttonSecondaryHover: '#e8eaed',
-  buttonDanger: '#ea4335', // Google red
-  buttonDangerHover: '#c5221f',
+  buttonDanger: '#ea4335', // Google red (lighter)
+  buttonDangerHover: '#d33b2c',
 
   // Shadows - Gmail style (subtle)
   shadowSm: 'rgba(60, 64, 67, 0.08)', // Gmail subtle shadow

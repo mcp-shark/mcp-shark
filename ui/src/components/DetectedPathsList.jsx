@@ -1,4 +1,5 @@
 import { colors, fonts } from '../theme';
+import { IconRefresh, IconEye, IconCode, IconClock } from '@tabler/icons-react';
 
 function DetectedPathsList({ detectedPaths, detecting, onDetect, onSelect, onView }) {
   if (detectedPaths.length === 0) {
@@ -28,6 +29,7 @@ function DetectedPathsList({ detectedPaths, detecting, onDetect, onSelect, onVie
         <button
           onClick={onDetect}
           disabled={detecting}
+          title="Refresh detection"
           style={{
             padding: '4px 8px',
             background: 'transparent',
@@ -37,10 +39,26 @@ function DetectedPathsList({ detectedPaths, detecting, onDetect, onSelect, onVie
             fontSize: '11px',
             borderRadius: '8px',
             opacity: detecting ? 0.5 : 1,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
           }}
-          title="Refresh detection"
         >
-          {detecting ? 'Detecting...' : '🔄 Refresh'}
+          {detecting ? (
+            <>
+              <IconRefresh
+                size={12}
+                stroke={1.5}
+                style={{ animation: 'spin 1s linear infinite' }}
+              />
+              <span>Detecting...</span>
+            </>
+          ) : (
+            <>
+              <IconRefresh size={12} stroke={1.5} />
+              <span>Refresh</span>
+            </>
+          )}
         </button>
       </div>
       <div
@@ -85,34 +103,9 @@ function DetectedPathsList({ detectedPaths, detecting, onDetect, onSelect, onVie
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ display: 'inline-flex', alignItems: 'center' }}>
                 {item.editor === 'Cursor' ? (
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                    <path d="M2 17l10 5 10-5" />
-                    <path d="M2 12l10 5 10-5" />
-                  </svg>
+                  <IconCode size={14} stroke={1.5} />
                 ) : (
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M12 6v6l4 2" />
-                  </svg>
+                  <IconClock size={14} stroke={1.5} />
                 )}
               </span>
               <div>
@@ -148,6 +141,7 @@ function DetectedPathsList({ detectedPaths, detecting, onDetect, onSelect, onVie
                       e.stopPropagation();
                       onView(item.path);
                     }}
+                    title="View file content"
                     style={{
                       fontSize: '10px',
                       padding: '2px 6px',
@@ -156,10 +150,13 @@ function DetectedPathsList({ detectedPaths, detecting, onDetect, onSelect, onVie
                       color: colors.textSecondary,
                       borderRadius: '6px',
                       cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
                     }}
-                    title="View file content"
                   >
-                    👁️ View
+                    <IconEye size={10} stroke={1.5} />
+                    <span>View</span>
                   </button>
                 </>
               )}

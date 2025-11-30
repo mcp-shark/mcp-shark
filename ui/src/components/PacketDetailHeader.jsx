@@ -1,4 +1,5 @@
 import { colors, fonts } from '../theme';
+import { IconX } from '@tabler/icons-react';
 
 function PacketDetailHeader({ request, onClose, matchingPair }) {
   const formatBytes = (bytes) => {
@@ -78,7 +79,7 @@ function PacketDetailHeader({ request, onClose, matchingPair }) {
           e.currentTarget.style.color = colors.textSecondary;
         }}
       >
-        ×
+        <IconX size={20} stroke={1.5} />
       </button>
     </div>
   );

@@ -16,7 +16,8 @@
     "ws": "^8.16.0",
     "mcp-shark-common": "github:mcp-shark/mcp-shark-common",
     "animejs": "^3.2.2",
-    "@modelcontextprotocol/sdk": "^1.20.2"
+    "@modelcontextprotocol/sdk": "^1.20.2",
+    "@tabler/icons-react": "^3.0.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
