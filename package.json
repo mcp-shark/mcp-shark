@@ -85,7 +85,9 @@
     "mcp-shark-common": "github:mcp-shark/mcp-shark-common",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "ws": "^8.16.0"
+    "ws": "^8.16.0",
+    "open": "^11.0.0",
+    "commander": "^14.0.2"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",

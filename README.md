@@ -66,11 +66,20 @@ Or if installed locally:
 npx @mcp-shark/mcp-shark
 ```
 
+**Open browser automatically:**
+
+```bash
+mcp-shark --open
+# or
+mcp-shark -o
+```
+
 The UI will automatically:
 
 - Install dependencies if needed
 - Build the frontend if needed
 - Start the server on `http://localhost:9853`
+- Optionally open your browser automatically (with `--open` flag)
 
 Open your browser to `http://localhost:9853` to access the MCP Shark interface.
 
@@ -331,8 +340,14 @@ No manual configuration editing required - MCP Shark handles everything for you.
    mcp-shark
 ```
 
+Or to automatically open your browser:
+
+```bash
+   mcp-shark --open
+```
+
 3. **Open your browser:**
-   Navigate to `http://localhost:9853`
+   Navigate to `http://localhost:9853` (or it will open automatically with `--open` flag)
 
 4. **Interactive Tour**: On first launch, you'll see an interactive tour - follow it to get started
 
