@@ -56,6 +56,105 @@ function findLatestBackup(filePath) {
   }
 }
 
+function shouldCreateBackup(
+  latestBackupPath,
+  resolvedFilePath,
+  content,
+  mcpSharkLogs,
+  broadcastLogUpdate
+) {
+  if (!latestBackupPath || !fs.existsSync(latestBackupPath)) {
+    return true;
+  }
+
+  try {
+    const latestBackupContent = fs.readFileSync(latestBackupPath, 'utf-8');
+    const currentContent = content || fs.readFileSync(resolvedFilePath, 'utf-8');
+
+    // Normalize both contents for comparison (remove whitespace differences)
+    const normalizeContent = (str) => {
+      try {
+        // Try to parse as JSON and re-stringify to normalize
+        return JSON.stringify(JSON.parse(str), null, 2);
+      } catch {
+        // If not valid JSON, just trim
+        return str.trim();
+      }
+    };
+
+    const normalizedBackup = normalizeContent(latestBackupContent);
+    const normalizedCurrent = normalizeContent(currentContent);
+
+    if (normalizedBackup === normalizedCurrent) {
+      const timestamp = new Date().toISOString();
+      const skipLog = {
+        timestamp,
+        type: 'stdout',
+        line: `[BACKUP] Skipped backup (no changes detected): ${resolvedFilePath.replace(homedir(), '~')}`,
+      };
+      mcpSharkLogs.push(skipLog);
+      if (mcpSharkLogs.length > 10000) {
+        mcpSharkLogs.shift();
+      }
+      broadcastLogUpdate(skipLog);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('Error comparing with latest backup:', error);
+    // If comparison fails, create backup to be safe
+    return true;
+  }
+}
+
+function createBackup(resolvedFilePath, content, mcpSharkLogs, broadcastLogUpdate) {
+  // Create backup with new format: .mcp.json-mcpshark.<datetime>.json
+  const datetimeStr = formatDateTimeForBackup();
+  const dir = path.dirname(resolvedFilePath);
+  const basename = path.basename(resolvedFilePath);
+  const backupPath = path.join(dir, `.${basename}-mcpshark.${datetimeStr}.json`);
+  fs.copyFileSync(resolvedFilePath, backupPath);
+  storeOriginalConfig(resolvedFilePath, content, backupPath);
+
+  const timestamp = new Date().toISOString();
+  const backupLog = {
+    timestamp,
+    type: 'stdout',
+    line: `[BACKUP] Created backup: ${backupPath.replace(homedir(), '~')}`,
+  };
+  mcpSharkLogs.push(backupLog);
+  if (mcpSharkLogs.length > 10000) {
+    mcpSharkLogs.shift();
+  }
+  broadcastLogUpdate(backupLog);
+  return backupPath;
+}
+
+function computeBackupPath(resolvedFilePath, content, mcpSharkLogs, broadcastLogUpdate) {
+  if (!resolvedFilePath || !fs.existsSync(resolvedFilePath)) {
+    return null;
+  }
+
+  // Check if we need to create a backup by comparing with latest backup
+  const latestBackupPath = findLatestBackup(resolvedFilePath);
+  const needsBackup = shouldCreateBackup(
+    latestBackupPath,
+    resolvedFilePath,
+    content,
+    mcpSharkLogs,
+    broadcastLogUpdate
+  );
+
+  if (needsBackup) {
+    return createBackup(resolvedFilePath, content, mcpSharkLogs, broadcastLogUpdate);
+  }
+
+  // Still store the original config reference even if we didn't create a new backup
+  // Use the latest backup path if available
+  storeOriginalConfig(resolvedFilePath, content, latestBackupPath);
+  return null;
+}
+
 export function updateConfigFile(
   originalConfig,
   selectedServiceNames,
@@ -64,128 +163,30 @@ export function updateConfigFile(
   mcpSharkLogs,
   broadcastLogUpdate
 ) {
-  const hasMcpServers = originalConfig.mcpServers && typeof originalConfig.mcpServers === 'object';
-  const hasServers = originalConfig.servers && typeof originalConfig.servers === 'object';
-
+  const [serverObject, serverType] = getServerObject(originalConfig);
   const updatedConfig = { ...originalConfig };
 
-  if (hasMcpServers) {
-    const updatedMcpServers = {};
-    if (selectedServiceNames.size > 0) {
-      updatedMcpServers['mcp-shark-server'] = {
-        type: 'http',
-        url: 'http://localhost:9851/mcp',
-      };
-    }
-    Object.entries(originalConfig.mcpServers).forEach(([name, cfg]) => {
-      if (!selectedServiceNames.has(name)) {
-        updatedMcpServers[name] = cfg;
-      }
-    });
-    updatedConfig.mcpServers = updatedMcpServers;
-  } else if (hasServers) {
+  if (serverObject) {
     const updatedServers = {};
-    if (selectedServiceNames.size > 0) {
-      updatedServers['mcp-shark-server'] = {
+    // Transform all original servers to HTTP URLs pointing to MCP shark server
+    // Each server gets its own endpoint to avoid tool name prefixing issues
+    Object.entries(serverObject).forEach(([name, cfg]) => {
+      updatedServers[name] = {
         type: 'http',
-        url: 'http://localhost:9851/mcp',
+        url: `http://localhost:9851/mcp/${encodeURIComponent(name)}`,
       };
-    }
-    Object.entries(originalConfig.servers).forEach(([name, cfg]) => {
-      if (!selectedServiceNames.has(name)) {
-        updatedServers[name] = cfg;
-      }
     });
-    updatedConfig.servers = updatedServers;
-  } else {
-    updatedConfig.mcpServers = {
-      'mcp-shark-server': {
-        type: 'http',
-        url: 'http://localhost:9851/mcp',
-      },
-    };
+    updatedConfig[serverType] = updatedServers;
   }
 
-  let createdBackupPath = null;
+  const createdBackupPath = computeBackupPath(
+    resolvedFilePath,
+    content,
+    mcpSharkLogs,
+    broadcastLogUpdate
+  );
+
   if (resolvedFilePath && fs.existsSync(resolvedFilePath)) {
-    // Check if we need to create a backup by comparing with latest backup
-    const latestBackupPath = findLatestBackup(resolvedFilePath);
-    let shouldCreateBackup = true;
-
-    if (latestBackupPath && fs.existsSync(latestBackupPath)) {
-      try {
-        const latestBackupContent = fs.readFileSync(latestBackupPath, 'utf-8');
-        const currentContent = content || fs.readFileSync(resolvedFilePath, 'utf-8');
-
-        // Normalize both contents for comparison (remove whitespace differences)
-        const normalizeContent = (str) => {
-          try {
-            // Try to parse as JSON and re-stringify to normalize
-            return JSON.stringify(JSON.parse(str), null, 2);
-          } catch {
-            // If not valid JSON, just trim
-            return str.trim();
-          }
-        };
-
-        const normalizedBackup = normalizeContent(latestBackupContent);
-        const normalizedCurrent = normalizeContent(currentContent);
-
-        if (normalizedBackup === normalizedCurrent) {
-          shouldCreateBackup = false;
-          const timestamp = new Date().toISOString();
-          const skipLog = {
-            timestamp,
-            type: 'stdout',
-            line: `[BACKUP] Skipped backup (no changes detected): ${resolvedFilePath.replace(homedir(), '~')}`,
-          };
-          mcpSharkLogs.push(skipLog);
-          if (mcpSharkLogs.length > 10000) {
-            mcpSharkLogs.shift();
-          }
-          broadcastLogUpdate(skipLog);
-        }
-      } catch (error) {
-        console.error('Error comparing with latest backup:', error);
-        // If comparison fails, create backup to be safe
-        shouldCreateBackup = true;
-      }
-    }
-
-    if (shouldCreateBackup) {
-      // Create backup with new format: .mcp.json-mcpshark.<datetime>.json
-      const now = new Date();
-      // Format: YYYY-MM-DD_HH-MM-SS
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      const seconds = String(now.getSeconds()).padStart(2, '0');
-      const datetimeStr = `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
-      const dir = path.dirname(resolvedFilePath);
-      const basename = path.basename(resolvedFilePath);
-      createdBackupPath = path.join(dir, `.${basename}-mcpshark.${datetimeStr}.json`);
-      fs.copyFileSync(resolvedFilePath, createdBackupPath);
-      storeOriginalConfig(resolvedFilePath, content, createdBackupPath);
-
-      const timestamp = new Date().toISOString();
-      const backupLog = {
-        timestamp,
-        type: 'stdout',
-        line: `[BACKUP] Created backup: ${createdBackupPath.replace(homedir(), '~')}`,
-      };
-      mcpSharkLogs.push(backupLog);
-      if (mcpSharkLogs.length > 10000) {
-        mcpSharkLogs.shift();
-      }
-      broadcastLogUpdate(backupLog);
-    } else {
-      // Still store the original config reference even if we didn't create a new backup
-      // Use the latest backup path if available
-      storeOriginalConfig(resolvedFilePath, content, latestBackupPath);
-    }
-
     fs.writeFileSync(resolvedFilePath, JSON.stringify(updatedConfig, null, 2));
     console.log(`Updated config file: ${resolvedFilePath}`);
   }
@@ -209,4 +210,30 @@ export function getSelectedServiceNames(originalConfig, selectedServices) {
   }
 
   return selectedServiceNames;
+}
+
+function getServerObject(originalConfig) {
+  const hasMcpServers = originalConfig.mcpServers && typeof originalConfig.mcpServers === 'object';
+  const hasServers = originalConfig.servers && typeof originalConfig.servers === 'object';
+
+  if (hasMcpServers) {
+    return [originalConfig.mcpServers, 'mcpServers'];
+  }
+
+  if (hasServers) {
+    return [originalConfig.servers, 'servers'];
+  }
+
+  return [null, null];
+}
+
+export function formatDateTimeForBackup() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
 }

@@ -5,8 +5,9 @@ const isAsyncIterable = v => v && typeof v[Symbol.asyncIterator] === 'function';
 
 export function createToolsCallHandler(logger, mcpServers) {
   return async req => {
+    const path = req.path;
     const { name, arguments: args } = req.params;
-    logger.debug('Tool call', name, args);
+    logger.debug('Tool call', path, name, args);
 
     // Extract real server name from concatenated name
     const { typeName } = extractName(name);
