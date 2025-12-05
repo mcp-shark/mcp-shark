@@ -135,7 +135,8 @@ export async function withAuditRequestResponseHandler(
   transport,
   req,
   res,
-  auditLogger
+  auditLogger,
+  requestedMcpServer
 ) {
   const reqBuf = await readBody(req);
   const reqJsonRpc = tryParseJsonRpc(reqBuf);
@@ -161,7 +162,7 @@ export async function withAuditRequestResponseHandler(
     headers: req.headers,
     body: reqBodyJson || reqBodyStr,
     userAgent: req.headers['user-agent'] || req.headers['User-Agent'] || null,
-    remoteAddress: req.socket?.remoteAddress || null,
+    remoteAddress: requestedMcpServer,
     sessionId: sessionId || null,
   });
 
@@ -223,6 +224,6 @@ export async function withAuditRequestResponseHandler(
     jsonrpcId,
     sessionId: sessionId || null,
     userAgent: req.headers['user-agent'] || req.headers['User-Agent'] || null,
-    remoteAddress: req.socket?.remoteAddress || null,
+    remoteAddress: requestedMcpServer || null,
   });
 }

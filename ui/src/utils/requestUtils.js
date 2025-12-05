@@ -1,3 +1,4 @@
+const LLM_SERVER = 'LLM Server';
 export function extractServerName(request) {
   if (request.body_json) {
     try {
@@ -59,13 +60,13 @@ export function formatDateTime(timestampISO) {
 export function getSourceDest(request) {
   if (request.direction === 'request') {
     return {
-      source: request.remote_address || 'Client',
-      dest: request.host || 'Server',
+      source: LLM_SERVER,
+      dest: request.remote_address || 'Unknown MCP Client',
     };
   }
   return {
-    source: request.host || 'Server',
-    dest: request.remote_address || 'Client',
+    source: request.remote_address || 'Unknown MCP Server',
+    dest: LLM_SERVER,
   };
 }
 

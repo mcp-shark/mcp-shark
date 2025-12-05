@@ -32,9 +32,9 @@ export async function withSession(
     await server.connect(transport);
     storeTransportInSession(newSessionId, transport);
     // Session creation will be logged as part of the request packet in audit.js
-    return requestHandler(transport, req, res, auditLogger);
+    return requestHandler(transport, req, res, auditLogger, requestedMcpServer);
   }
 
   const transport = getTransportFromSession(sessionId);
-  return requestHandler(transport, req, res, auditLogger);
+  return requestHandler(transport, req, res, auditLogger, requestedMcpServer);
 }
