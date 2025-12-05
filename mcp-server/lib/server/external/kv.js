@@ -1,14 +1,5 @@
 const kv = new Map();
 
-function buildName(name, typeName) {
-  return `${name}.${typeName}`;
-}
-
-export function extractName(name) {
-  const [serverName, typeName] = name.split('.');
-  return { serverName, typeName };
-}
-
 export function buildKv(downstreamServers) {
   for (const downstreamServer of downstreamServers) {
     const {
@@ -43,16 +34,16 @@ export function buildKv(downstreamServers) {
         resourcesMap,
         promptsMap,
         tools: tools.map(tool => {
-          return { ...tool, name: buildName(name, tool.name) };
+          return { ...tool, name: tool.name };
         }),
         resources: resources.map(resource => {
           return {
             ...resource,
-            name: buildName(name, resource.name),
+            name: resource.name,
           };
         }),
         prompts: prompts.map(prompt => {
-          return { ...prompt, name: buildName(name, prompt.name) };
+          return { ...prompt, name: prompt.name };
         }),
       });
     }
@@ -61,42 +52,40 @@ export function buildKv(downstreamServers) {
   return kv;
 }
 
-export function getBy(database, calledName, action) {
-  const { serverName, typeName } = extractName(calledName);
-  if (!serverName || !typeName) {
-    return null;
-  }
-  const entry = database.get(serverName);
+export function getBy(database, requestedMcpServer, calledName, action) {
+  const entry = database.get(requestedMcpServer);
   if (!entry) {
     return null;
   }
 
   // Type-based lookup
   if (action === 'getTools') {
-    return entry.toolsMap.get(typeName);
+    return entry.toolsMap.get(calledName);
   }
   if (action === 'getResources') {
-    return entry.resourcesMap.get(typeName);
+    return entry.resourcesMap.get(calledName);
   }
   if (action === 'getPrompts') {
-    return entry.promptsMap.get(typeName);
+    return entry.promptsMap.get(calledName);
   }
 
   // Action-based lookup
   if (action === 'callTool') {
-    return entry.toolsMap.get(typeName);
+    return entry.toolsMap.get(calledName);
   }
   if (action === 'readResource') {
-    return entry.resourcesMap.get(typeName);
+    return entry.resourcesMap.get(calledName);
   }
   if (action === 'getPrompt') {
-    return entry.promptsMap.get(typeName);
+    return entry.promptsMap.get(calledName);
   }
   return null;
 }
 
-export function listAll(database, type) {
-  return Array.from(database.values())
-    .map(entry => entry[type])
-    .flat();
+export function listAll(database, requestedMcpServer, type) {
+  const serverEntry = database.get(requestedMcpServer);
+  if (!serverEntry) {
+    return [];
+  }
+  return serverEntry[type];
 }

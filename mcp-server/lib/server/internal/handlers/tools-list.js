@@ -1,11 +1,11 @@
 import { listAll } from '../../external/kv.js';
 
-export function createToolsListHandler(logger, mcpServers) {
+export function createToolsListHandler(logger, mcpServers, requestedMcpServer) {
   return async req => {
     const path = req.path;
     logger.debug('Listing tools', path);
 
-    const res = await listAll(mcpServers, 'tools');
+    const res = await listAll(mcpServers, requestedMcpServer, 'tools');
     logger.debug('Tools list result', res);
 
     const result = Array.isArray(res) ? { tools: res } : res;

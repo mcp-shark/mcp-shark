@@ -15,49 +15,49 @@ import { createPromptsListHandler } from './handlers/prompts-list.js';
 import { createPromptsGetHandler } from './handlers/prompts-get.js';
 import { createResourcesListHandler } from './handlers/resources-list.js';
 import { createResourcesReadHandler } from './handlers/resources-read.js';
-import { SERVER_NAME } from './handlers/common.js';
 
-export function createInternalServer(logger, mcpServers) {
+export function createInternalServer(logger, mcpServers, requestedMcpServer) {
   // create MCP server
   const server = new Server(
-    { name: SERVER_NAME, version: '1.0.0' },
+    { name: requestedMcpServer, version: '1.0.0' },
     { capabilities: { tools: {}, prompts: {}, resources: {} } }
   );
 
   // Register handlers
   server.setRequestHandler(
     ListToolsRequestSchema,
-    createToolsListHandler(logger, mcpServers)
+    createToolsListHandler(logger, mcpServers, requestedMcpServer)
   );
 
   server.setRequestHandler(
     CallToolRequestSchema,
-    createToolsCallHandler(logger, mcpServers)
+    createToolsCallHandler(logger, mcpServers, requestedMcpServer)
   );
 
   server.setRequestHandler(
     ListPromptsRequestSchema,
-    createPromptsListHandler(logger, mcpServers)
+    createPromptsListHandler(logger, mcpServers, requestedMcpServer)
   );
 
   server.setRequestHandler(
     GetPromptRequestSchema,
-    createPromptsGetHandler(logger, mcpServers)
+    createPromptsGetHandler(logger, mcpServers, requestedMcpServer)
   );
 
   server.setRequestHandler(
     ListResourcesRequestSchema,
-    createResourcesListHandler(logger, mcpServers)
+    createResourcesListHandler(logger, mcpServers, requestedMcpServer)
   );
 
   server.setRequestHandler(
     ReadResourceRequestSchema,
-    createResourcesReadHandler(logger, mcpServers)
+    createResourcesReadHandler(logger, mcpServers, requestedMcpServer)
   );
 
   return server;
 }
 
 export function createInternalServerFactory(logger, mcpServers) {
-  return () => createInternalServer(logger, mcpServers);
+  return requestedMcpServer =>
+    createInternalServer(logger, mcpServers, requestedMcpServer);
 }

@@ -20,6 +20,7 @@ export async function withSession(
   res,
   auditLogger
 ) {
+  const requestedMcpServer = req.params[0];
   const sessionId = getSessionFromRequest(req);
   if (!sessionId) {
     const newSessionId = randomUUID();
@@ -27,7 +28,7 @@ export async function withSession(
       sessionIdGenerator: () => newSessionId,
       enableJsonResponse: true,
     });
-    const server = serverFactory();
+    const server = serverFactory(requestedMcpServer);
     await server.connect(transport);
     storeTransportInSession(newSessionId, transport);
     // Session creation will be logged as part of the request packet in audit.js
