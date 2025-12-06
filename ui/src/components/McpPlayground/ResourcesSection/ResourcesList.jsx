@@ -31,14 +31,16 @@ export default function ResourcesList({
       ) : resources.length === 0 ? (
         <EmptyState message="No resources available." />
       ) : (
-        resources.map((resource, idx) => (
-          <ResourceItem
-            key={idx}
-            resource={resource}
-            isSelected={selectedResource?.uri === resource.uri}
-            onClick={() => onSelectResource(resource)}
-          />
-        ))
+        <div style={{ padding: '8px 0' }}>
+          {resources.map((resource, idx) => (
+            <ResourceItem
+              key={idx}
+              resource={resource}
+              isSelected={selectedResource?.uri === resource.uri}
+              onClick={() => onSelectResource(resource)}
+            />
+          ))}
+        </div>
       )}
     </div>
   );

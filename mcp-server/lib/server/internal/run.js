@@ -22,7 +22,7 @@ export function getInternalServer(
     })
   );
 
-  app.all('/mcp', async (req, res) => {
+  app.all('/mcp/*', async (req, res) => {
     await withSession(
       serverFactory,
       withAuditRequestResponseHandler,

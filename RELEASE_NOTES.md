@@ -1,3 +1,35 @@
+# 🦈 MCP Shark v1.4.2 - Playground Improvements
+
+> ⚠️ **ALPHA VERSION** - This is an alpha release. The software is under active development and testing. Features may change, and there may be bugs. Use at your own risk.
+
+## 🎉 What's New in v1.4.2
+
+### 🎮 MCP Playground Enhancements
+
+- **Per-Server Routing Support** — Fixed 404 errors by implementing proper per-server routing (`/mcp/{serverName}`)
+- **Server Selector UI** — Added clickable button list for easy server selection
+- **Improved List Items** — Enhanced tools, prompts, and resources lists with card-style design and better hover states
+- **Better Error Handling** — Fixed "No server selected" errors and improved error messages
+- **Code Quality** — Refactored playground hooks into smaller, more maintainable modules (all files under 300 LOC)
+
+### 🐛 Bug Fixes
+
+- Fixed MCP playground 404 error when connecting to servers
+- Resolved circular dependency issues in playground hooks
+- Fixed server selection not updating tools/prompts/resources lists
+- Improved session management when switching between servers
+
+### 🔧 Technical Improvements
+
+- Split `useMcpPlayground` hook into focused modules:
+  - `useMcpRequest` — MCP request logic and session management
+  - `useMcpServerStatus` — Server status checking and server list management
+  - `useMcpDataLoader` — Data loading for tools, prompts, and resources
+- Added `/api/composite/servers` endpoint to get available servers
+- Enhanced playground UI with better visual feedback and interactions
+
+---
+
 # 🦈 MCP Shark v1.4.0 - npm Package Release
 
 > ⚠️ **ALPHA VERSION** - This is an alpha release. The software is under active development and testing. Features may change, and there may be bugs. Use at your own risk.

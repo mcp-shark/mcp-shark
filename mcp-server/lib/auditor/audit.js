@@ -135,14 +135,22 @@ export async function withAuditRequestResponseHandler(
   transport,
   req,
   res,
-  auditLogger
+  auditLogger,
+  requestedMcpServer,
+  initialSessionId
 ) {
   const reqBuf = await readBody(req);
   const reqJsonRpc = tryParseJsonRpc(reqBuf);
 
   // Extract session ID from request
   // If no session ID exists, it's an initiation request
-  const sessionId = getSessionFromRequest(req);
+  const sessionIdFromRequest = getSessionFromRequest(req);
+  const sessionId =
+    sessionIdFromRequest === null ||
+    sessionIdFromRequest === undefined ||
+    sessionIdFromRequest === ''
+      ? initialSessionId
+      : sessionIdFromRequest;
 
   // Extract request body as string
   const reqBodyStr = reqBuf.toString('utf8');
@@ -161,7 +169,7 @@ export async function withAuditRequestResponseHandler(
     headers: req.headers,
     body: reqBodyJson || reqBodyStr,
     userAgent: req.headers['user-agent'] || req.headers['User-Agent'] || null,
-    remoteAddress: req.socket?.remoteAddress || null,
+    remoteAddress: requestedMcpServer,
     sessionId: sessionId || null,
   });
 
@@ -223,6 +231,6 @@ export async function withAuditRequestResponseHandler(
     jsonrpcId,
     sessionId: sessionId || null,
     userAgent: req.headers['user-agent'] || req.headers['User-Agent'] || null,
-    remoteAddress: req.socket?.remoteAddress || null,
+    remoteAddress: requestedMcpServer || null,
   });
 }

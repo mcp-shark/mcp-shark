@@ -31,14 +31,16 @@ export default function PromptsList({
       ) : prompts.length === 0 ? (
         <EmptyState message="No prompts available." />
       ) : (
-        prompts.map((prompt, idx) => (
-          <PromptItem
-            key={idx}
-            prompt={prompt}
-            isSelected={selectedPrompt?.name === prompt.name}
-            onClick={() => onSelectPrompt(prompt)}
-          />
-        ))
+        <div style={{ padding: '8px 0' }}>
+          {prompts.map((prompt, idx) => (
+            <PromptItem
+              key={idx}
+              prompt={prompt}
+              isSelected={selectedPrompt?.name === prompt.name}
+              onClick={() => onSelectPrompt(prompt)}
+            />
+          ))}
+        </div>
       )}
     </div>
   );

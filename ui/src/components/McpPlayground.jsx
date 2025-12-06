@@ -41,6 +41,9 @@ function McpPlayground() {
     handleCallTool,
     handleGetPrompt,
     handleReadResource,
+    availableServers,
+    selectedServer,
+    setSelectedServer,
   } = useMcpPlayground();
 
   return (
@@ -84,32 +87,108 @@ function McpPlayground() {
         <div
           style={{
             display: 'flex',
-            gap: '8px',
-            borderBottom: `1px solid ${colors.borderLight}`,
+            flexDirection: 'column',
+            gap: '12px',
           }}
         >
-          {['tools', 'prompts', 'resources'].map((section) => (
-            <button
-              key={section}
-              onClick={() => setActiveSection(section)}
+          {availableServers.length > 0 && (
+            <div
               style={{
-                padding: '10px 18px',
-                background: activeSection === section ? colors.bgSecondary : 'transparent',
-                border: 'none',
-                borderBottom: `2px solid ${activeSection === section ? colors.accentBlue : 'transparent'}`,
-                color: activeSection === section ? colors.textPrimary : colors.textSecondary,
-                cursor: 'pointer',
-                fontSize: '13px',
-                fontFamily: fonts.body,
-                fontWeight: activeSection === section ? '500' : '400',
-                textTransform: 'capitalize',
-                borderRadius: '6px 6px 0 0',
-                transition: 'all 0.2s',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
               }}
             >
-              {section}
-            </button>
-          ))}
+              <label
+                style={{
+                  fontSize: '13px',
+                  fontFamily: fonts.body,
+                  color: colors.textSecondary,
+                  fontWeight: '500',
+                }}
+              >
+                Server:
+              </label>
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '8px',
+                }}
+              >
+                {availableServers.map((server) => (
+                  <button
+                    key={server}
+                    onClick={() => setSelectedServer(server)}
+                    style={{
+                      padding: '10px 18px',
+                      background:
+                        selectedServer === server ? colors.accentBlue : colors.bgSecondary,
+                      border:
+                        selectedServer === server
+                          ? `2px solid ${colors.accentBlue}`
+                          : `1px solid ${colors.borderLight}`,
+                      borderRadius: '8px',
+                      color: selectedServer === server ? colors.textInverse : colors.textPrimary,
+                      fontSize: '13px',
+                      fontFamily: fonts.body,
+                      fontWeight: selectedServer === server ? '600' : '500',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      boxShadow:
+                        selectedServer === server ? `0 2px 4px ${colors.shadowSm}` : 'none',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedServer !== server) {
+                        e.currentTarget.style.background = colors.bgHover;
+                        e.currentTarget.style.borderColor = colors.borderMedium;
+                        e.currentTarget.style.boxShadow = `0 2px 4px ${colors.shadowSm}`;
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedServer !== server) {
+                        e.currentTarget.style.background = colors.bgSecondary;
+                        e.currentTarget.style.borderColor = colors.borderLight;
+                        e.currentTarget.style.boxShadow = 'none';
+                      }
+                    }}
+                  >
+                    {server}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          <div
+            style={{
+              display: 'flex',
+              gap: '8px',
+              borderBottom: `1px solid ${colors.borderLight}`,
+            }}
+          >
+            {['tools', 'prompts', 'resources'].map((section) => (
+              <button
+                key={section}
+                onClick={() => setActiveSection(section)}
+                style={{
+                  padding: '10px 18px',
+                  background: activeSection === section ? colors.bgSecondary : 'transparent',
+                  border: 'none',
+                  borderBottom: `2px solid ${activeSection === section ? colors.accentBlue : 'transparent'}`,
+                  color: activeSection === section ? colors.textPrimary : colors.textSecondary,
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  fontFamily: fonts.body,
+                  fontWeight: activeSection === section ? '500' : '400',
+                  textTransform: 'capitalize',
+                  borderRadius: '6px 6px 0 0',
+                  transition: 'all 0.2s',
+                }}
+              >
+                {section}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>

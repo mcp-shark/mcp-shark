@@ -15,12 +15,6 @@ function GroupedByMcpView({
   onToggleSession,
   onToggleCategory,
 }) {
-  const getJsonRpcMethodFromPair = (pair) => {
-    const request = pair.request || pair.response;
-    if (!request) return null;
-    return getJsonRpcMethod(request);
-  };
-
   return (
     <tbody>
       {groupedData.map((sessionGroup) => {

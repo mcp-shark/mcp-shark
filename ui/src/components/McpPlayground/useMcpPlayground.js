@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useMcpRequest } from './hooks/useMcpRequest';
+import { useMcpServerStatus } from './hooks/useMcpServerStatus';
+import { useMcpDataLoader } from './hooks/useMcpDataLoader';
 
 export function useMcpPlayground() {
   const [activeSection, setActiveSection] = useState('tools');
-  const [tools, setTools] = useState([]);
-  const [prompts, setPrompts] = useState([]);
-  const [resources, setResources] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [selectedTool, setSelectedTool] = useState(null);
   const [toolArgs, setToolArgs] = useState('{}');
   const [toolResult, setToolResult] = useState(null);
@@ -15,33 +13,77 @@ export function useMcpPlayground() {
   const [promptResult, setPromptResult] = useState(null);
   const [selectedResource, setSelectedResource] = useState(null);
   const [resourceResult, setResourceResult] = useState(null);
-  const [serverStatus, setServerStatus] = useState(null);
-  const [sessionId, setSessionId] = useState(null);
-  const [showLoadingModal, setShowLoadingModal] = useState(false);
-  const [toolsLoading, setToolsLoading] = useState(false);
-  const [promptsLoading, setPromptsLoading] = useState(false);
-  const [resourcesLoading, setResourcesLoading] = useState(false);
-  const [toolsLoaded, setToolsLoaded] = useState(false);
-  const [promptsLoaded, setPromptsLoaded] = useState(false);
-  const [resourcesLoaded, setResourcesLoaded] = useState(false);
+
+  const { serverStatus, showLoadingModal, availableServers, selectedServer, setSelectedServer } =
+    useMcpServerStatus();
+
+  const { makeMcpRequest, loading, error, setError, resetSession } = useMcpRequest(selectedServer);
+
+  const {
+    tools,
+    prompts,
+    resources,
+    toolsLoading,
+    promptsLoading,
+    resourcesLoading,
+    toolsLoaded,
+    promptsLoaded,
+    resourcesLoaded,
+    loadTools,
+    loadPrompts,
+    loadResources,
+    resetData,
+  } = useMcpDataLoader(makeMcpRequest, selectedServer, setError);
+
+  // Reset and reload data when server changes
+  useEffect(() => {
+    if (!selectedServer || !serverStatus?.running) {
+      return;
+    }
+
+    resetData();
+    setSelectedTool(null);
+    setSelectedPrompt(null);
+    setSelectedResource(null);
+    setToolResult(null);
+    setPromptResult(null);
+    setResourceResult(null);
+    setToolArgs('{}');
+    setPromptArgs('{}');
+    resetSession();
+    setError(null);
+
+    const timer = setTimeout(() => {
+      if (activeSection === 'tools') {
+        loadTools();
+      } else if (activeSection === 'prompts') {
+        loadPrompts();
+      } else if (activeSection === 'resources') {
+        loadResources();
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedServer, serverStatus?.running, activeSection]);
 
   useEffect(() => {
-    checkServerStatus();
-    const interval = setInterval(checkServerStatus, 2000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    if (serverStatus?.running && activeSection === 'tools' && tools.length === 0) {
+    if (
+      serverStatus?.running &&
+      activeSection === 'tools' &&
+      tools.length === 0 &&
+      selectedServer
+    ) {
       const timer = setTimeout(() => {
         loadTools();
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [serverStatus?.running]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [serverStatus?.running, selectedServer, activeSection, tools.length]);
 
   useEffect(() => {
-    if (!serverStatus?.running) return;
+    if (!serverStatus?.running || !selectedServer) return;
 
     const timer = setTimeout(() => {
       if (activeSection === 'tools' && !toolsLoaded && !toolsLoading) {
@@ -54,9 +96,11 @@ export function useMcpPlayground() {
     }, 100);
 
     return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     activeSection,
     serverStatus?.running,
+    selectedServer,
     toolsLoaded,
     promptsLoaded,
     resourcesLoaded,
@@ -64,122 +108,6 @@ export function useMcpPlayground() {
     promptsLoading,
     resourcesLoading,
   ]);
-
-  const checkServerStatus = async () => {
-    try {
-      const res = await fetch('/api/composite/status');
-      if (!res.ok) {
-        throw new Error('Server not available');
-      }
-      const data = await res.json();
-      const wasRunning = serverStatus?.running;
-      setServerStatus(data);
-
-      if (!data.running) {
-        if (!showLoadingModal || wasRunning) {
-          setShowLoadingModal(true);
-        }
-      } else if (data.running && showLoadingModal) {
-        setShowLoadingModal(false);
-      }
-    } catch (err) {
-      // Silently handle connection errors - server is not running
-      setServerStatus({ running: false });
-      if (!showLoadingModal) {
-        setShowLoadingModal(true);
-      }
-    }
-  };
-
-  const makeMcpRequest = async (method, params = {}) => {
-    setError(null);
-    setLoading(true);
-
-    try {
-      const headers = { 'Content-Type': 'application/json' };
-      if (sessionId) {
-        headers['Mcp-Session-Id'] = sessionId;
-      }
-
-      const response = await fetch('/api/playground/proxy', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ method, params }),
-      });
-
-      const data = await response.json();
-
-      const responseSessionId =
-        response.headers.get('Mcp-Session-Id') ||
-        response.headers.get('mcp-session-id') ||
-        data._sessionId;
-      if (responseSessionId && responseSessionId !== sessionId) {
-        setSessionId(responseSessionId);
-      }
-
-      if (!response.ok) {
-        throw new Error(data.error?.message || data.message || 'Request failed');
-      }
-
-      return data.result || data;
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadTools = async () => {
-    setToolsLoading(true);
-    setError(null);
-    try {
-      const result = await makeMcpRequest('tools/list');
-      setTools(result?.tools || []);
-      setToolsLoaded(true);
-    } catch (err) {
-      const errorMsg = err.message || 'Failed to load tools';
-      setError(`tools: ${errorMsg}`);
-      setToolsLoaded(true);
-      console.error('Failed to load tools:', err);
-    } finally {
-      setToolsLoading(false);
-    }
-  };
-
-  const loadPrompts = async () => {
-    setPromptsLoading(true);
-    setError(null);
-    try {
-      const result = await makeMcpRequest('prompts/list');
-      setPrompts(result?.prompts || []);
-      setPromptsLoaded(true);
-    } catch (err) {
-      const errorMsg = err.message || 'Failed to load prompts';
-      setError(`prompts: ${errorMsg}`);
-      setPromptsLoaded(true);
-      console.error('Failed to load prompts:', err);
-    } finally {
-      setPromptsLoading(false);
-    }
-  };
-
-  const loadResources = async () => {
-    setResourcesLoading(true);
-    setError(null);
-    try {
-      const result = await makeMcpRequest('resources/list');
-      setResources(result?.resources || []);
-      setResourcesLoaded(true);
-    } catch (err) {
-      const errorMsg = err.message || 'Failed to load resources';
-      setError(`resources: ${errorMsg}`);
-      setResourcesLoaded(true);
-      console.error('Failed to load resources:', err);
-    } finally {
-      setResourcesLoading(false);
-    }
-  };
 
   const handleCallTool = async () => {
     if (!selectedTool) return;
@@ -276,5 +204,8 @@ export function useMcpPlayground() {
     handleCallTool,
     handleGetPrompt,
     handleReadResource,
+    availableServers,
+    selectedServer,
+    setSelectedServer,
   };
 }
