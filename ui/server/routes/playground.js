@@ -1,19 +1,30 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 
-const MCP_SERVER_URL = 'http://localhost:9851/mcp';
+const MCP_SERVER_BASE_URL = 'http://localhost:9851/mcp';
 
-// Store client connections per session
+// Store client connections per server and session
 const clientSessions = new Map();
+
+function getSessionKey(serverName, sessionId) {
+  return `${serverName}:${sessionId}`;
+}
 
 export function createPlaygroundRoutes() {
   const router = {};
 
-  // Get or create client for a session
-  async function getClient(sessionId) {
-    if (clientSessions.has(sessionId)) {
-      return clientSessions.get(sessionId);
+  // Get or create client for a session and server
+  async function getClient(serverName, sessionId) {
+    const sessionKey = getSessionKey(serverName, sessionId);
+    if (clientSessions.has(sessionKey)) {
+      return clientSessions.get(sessionKey);
     }
+
+    if (!serverName) {
+      throw new Error('Server name is required');
+    }
+
+    const mcpServerUrl = `${MCP_SERVER_BASE_URL}/${encodeURIComponent(serverName)}`;
 
     const client = new Client(
       { name: 'mcp-shark-playground', version: '1.0.0' },
@@ -26,7 +37,7 @@ export function createPlaygroundRoutes() {
       }
     );
 
-    const transport = new StreamableHTTPClientTransport(new URL(MCP_SERVER_URL));
+    const transport = new StreamableHTTPClientTransport(new URL(mcpServerUrl));
     await client.connect(transport);
 
     const clientWrapper = {
@@ -38,18 +49,25 @@ export function createPlaygroundRoutes() {
       },
     };
 
-    clientSessions.set(sessionId, clientWrapper);
+    clientSessions.set(sessionKey, clientWrapper);
     return clientWrapper;
   }
 
   router.proxyRequest = async (req, res) => {
     try {
-      const { method, params } = req.body;
+      const { method, params, serverName } = req.body;
 
       if (!method) {
         return res.status(400).json({
           error: 'Invalid request',
           message: 'method field is required',
+        });
+      }
+
+      if (!serverName) {
+        return res.status(400).json({
+          error: 'Invalid request',
+          message: 'serverName field is required',
         });
       }
 
@@ -59,7 +77,7 @@ export function createPlaygroundRoutes() {
         req.headers['x-mcp-session-id'] ||
         `playground-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-      const { client } = await getClient(sessionId);
+      const { client } = await getClient(serverName, sessionId);
 
       let result;
       switch (method) {
@@ -140,10 +158,23 @@ export function createPlaygroundRoutes() {
   // Cleanup endpoint to close client connections
   router.cleanup = async (req, res) => {
     const sessionId = req.headers['mcp-session-id'] || req.headers['x-mcp-session-id'];
-    if (sessionId && clientSessions.has(sessionId)) {
-      const clientWrapper = clientSessions.get(sessionId);
-      await clientWrapper.close();
-      clientSessions.delete(sessionId);
+    const { serverName } = req.body || {};
+
+    if (serverName && sessionId) {
+      const sessionKey = getSessionKey(serverName, sessionId);
+      if (clientSessions.has(sessionKey)) {
+        const clientWrapper = clientSessions.get(sessionKey);
+        await clientWrapper.close();
+        clientSessions.delete(sessionKey);
+      }
+    } else if (sessionId) {
+      // Cleanup all sessions for this sessionId across all servers
+      for (const [key, clientWrapper] of clientSessions.entries()) {
+        if (key.endsWith(`:${sessionId}`)) {
+          await clientWrapper.close();
+          clientSessions.delete(key);
+        }
+      }
     }
     res.json({ success: true });
   };

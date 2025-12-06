@@ -23,16 +23,23 @@ export async function withSession(
   const requestedMcpServer = req.params[0];
   const sessionId = getSessionFromRequest(req);
   if (!sessionId) {
-    const newSessionId = randomUUID();
+    const initialSessionId = randomUUID();
     const transport = new StreamableHTTPServerTransport({
-      sessionIdGenerator: () => newSessionId,
+      sessionIdGenerator: () => initialSessionId,
       enableJsonResponse: true,
     });
     const server = serverFactory(requestedMcpServer);
     await server.connect(transport);
-    storeTransportInSession(newSessionId, transport);
+    storeTransportInSession(initialSessionId, transport);
     // Session creation will be logged as part of the request packet in audit.js
-    return requestHandler(transport, req, res, auditLogger, requestedMcpServer);
+    return requestHandler(
+      transport,
+      req,
+      res,
+      auditLogger,
+      requestedMcpServer,
+      initialSessionId
+    );
   }
 
   const transport = getTransportFromSession(sessionId);

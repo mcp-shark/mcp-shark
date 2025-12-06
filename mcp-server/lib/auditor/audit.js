@@ -136,14 +136,17 @@ export async function withAuditRequestResponseHandler(
   req,
   res,
   auditLogger,
-  requestedMcpServer
+  requestedMcpServer,
+  initialSessionId
 ) {
   const reqBuf = await readBody(req);
   const reqJsonRpc = tryParseJsonRpc(reqBuf);
 
   // Extract session ID from request
   // If no session ID exists, it's an initiation request
-  const sessionId = getSessionFromRequest(req);
+  const sessionIdFromRequest = getSessionFromRequest(req);
+  const sessionId =
+    sessionIdFromRequest === null ? initialSessionId : sessionIdFromRequest;
 
   // Extract request body as string
   const reqBodyStr = reqBuf.toString('utf8');

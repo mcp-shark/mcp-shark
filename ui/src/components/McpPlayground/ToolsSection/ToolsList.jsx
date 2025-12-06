@@ -31,14 +31,16 @@ export default function ToolsList({
       ) : tools.length === 0 ? (
         <EmptyState message="No tools available." />
       ) : (
-        tools.map((tool, idx) => (
-          <ToolItem
-            key={idx}
-            tool={tool}
-            isSelected={selectedTool?.name === tool.name}
-            onClick={() => onSelectTool(tool)}
-          />
-        ))
+        <div style={{ padding: '8px 0' }}>
+          {tools.map((tool, idx) => (
+            <ToolItem
+              key={idx}
+              tool={tool}
+              isSelected={selectedTool?.name === tool.name}
+              onClick={() => onSelectTool(tool)}
+            />
+          ))}
+        </div>
       )}
     </div>
   );
