@@ -146,7 +146,11 @@ export async function withAuditRequestResponseHandler(
   // If no session ID exists, it's an initiation request
   const sessionIdFromRequest = getSessionFromRequest(req);
   const sessionId =
-    sessionIdFromRequest === null ? initialSessionId : sessionIdFromRequest;
+    sessionIdFromRequest === null ||
+    sessionIdFromRequest === undefined ||
+    sessionIdFromRequest === ''
+      ? initialSessionId
+      : sessionIdFromRequest;
 
   // Extract request body as string
   const reqBodyStr = reqBuf.toString('utf8');
