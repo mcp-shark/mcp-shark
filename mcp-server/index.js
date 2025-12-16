@@ -41,8 +41,18 @@ export async function startMcpSharkServer(options = {}) {
     const externalServersResult = await runAllExternalServers(serverLogger, configPath);
 
     if (isError(externalServersResult)) {
+      serverLogger.error(
+        {
+          error: externalServersResult,
+          message: externalServersResult.message,
+          stack: externalServersResult.stack,
+        },
+        `[MCP-Shark] ${externalServersResult.message}`
+      );
       const error = new Error(JSON.stringify(externalServersResult));
-      if (onError) onError(error);
+      if (onError) {
+        onError(error);
+      }
       throw error;
     }
 
@@ -58,14 +68,23 @@ export async function startMcpSharkServer(options = {}) {
     const httpServer = createServer(app);
 
     const server = await new Promise((resolve, reject) => {
-      httpServer.on('error', (err) => {
-        if (onError) onError(err);
-        reject(err);
+      httpServer.on('error', (error) => {
+        serverLogger.error(
+          { error, message: error.message, stack: error.stack },
+          `[MCP-Shark] ${error.message}`
+        );
+        if (onError) {
+          onError(error);
+        }
+
+        reject(error);
       });
 
       httpServer.listen(port, '0.0.0.0', () => {
         serverLogger.info(`MCP proxy HTTP server listening on http://localhost:${port}/mcp`);
-        if (onReady) onReady();
+        if (onReady) {
+          onReady();
+        }
         resolve(httpServer);
       });
     });
@@ -76,8 +95,11 @@ export async function startMcpSharkServer(options = {}) {
         if (serverInfo?.client && !isError(serverInfo)) {
           try {
             await serverInfo.client.close();
-          } catch (err) {
-            serverLogger.warn({ error: err.message }, 'Error closing external server client');
+          } catch (error) {
+            serverLogger.warn(
+              { error, message: error.message },
+              'Error closing external server client'
+            );
           }
         }
       }
@@ -104,8 +126,13 @@ export async function startMcpSharkServer(options = {}) {
     };
   } catch (error) {
     const errorMsg = 'Error starting MCP server';
-    serverLogger.error({ error: error.message, stack: error.stack }, `[MCP-Shark] ${errorMsg}`);
-    if (onError) onError(error);
+    serverLogger.error(
+      { error, message: error.message, stack: error.stack },
+      `[MCP-Shark] ${errorMsg}`
+    );
+    if (onError) {
+      onError(error);
+    }
     throw error;
   }
 }
