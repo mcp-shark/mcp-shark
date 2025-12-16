@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMcpDataLoader } from './hooks/useMcpDataLoader';
 import { useMcpRequest } from './hooks/useMcpRequest';
 import { useMcpServerStatus } from './hooks/useMcpServerStatus';
@@ -35,7 +35,10 @@ export function useMcpPlayground() {
     resetData,
   } = useMcpDataLoader(makeMcpRequest, selectedServer, setError);
 
-  // Reset and reload data when server changes
+  const activeSectionRef = useRef(activeSection);
+  activeSectionRef.current = activeSection;
+
+  // Reset and reload data when server changes (not when section changes)
   useEffect(() => {
     if (!selectedServer || !serverStatus?.running) {
       return;
@@ -54,11 +57,12 @@ export function useMcpPlayground() {
     setError(null);
 
     const timer = setTimeout(() => {
-      if (activeSection === 'tools') {
+      const currentSection = activeSectionRef.current;
+      if (currentSection === 'tools') {
         loadTools();
-      } else if (activeSection === 'prompts') {
+      } else if (currentSection === 'prompts') {
         loadPrompts();
-      } else if (activeSection === 'resources') {
+      } else if (currentSection === 'resources') {
         loadResources();
       }
     }, 100);
@@ -67,7 +71,6 @@ export function useMcpPlayground() {
   }, [
     selectedServer,
     serverStatus?.running,
-    activeSection,
     resetData,
     loadTools,
     loadPrompts,
@@ -76,12 +79,13 @@ export function useMcpPlayground() {
     setError,
   ]);
 
-  // Load data when section changes or when server becomes available
+  // Load data when section changes (only if not already loaded)
   useEffect(() => {
     if (!serverStatus?.running || !selectedServer) {
       return;
     }
 
+    // Only load if we haven't loaded this section yet and we're not currently loading
     if (activeSection === 'tools' && !toolsLoaded && !toolsLoading) {
       const timer = setTimeout(() => {
         loadTools();

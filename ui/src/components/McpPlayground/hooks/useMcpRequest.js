@@ -1,9 +1,13 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 export function useMcpRequest(selectedServer) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [sessionId, setSessionId] = useState(null);
+  const sessionIdRef = useRef(sessionId);
+
+  // Keep ref in sync with state
+  sessionIdRef.current = sessionId;
 
   const makeMcpRequest = useCallback(
     async (method, params = {}) => {
@@ -16,8 +20,9 @@ export function useMcpRequest(selectedServer) {
 
       try {
         const headers = { 'Content-Type': 'application/json' };
-        if (sessionId) {
-          headers['Mcp-Session-Id'] = sessionId;
+        const currentSessionId = sessionIdRef.current;
+        if (currentSessionId) {
+          headers['Mcp-Session-Id'] = currentSessionId;
         }
 
         const response = await fetch('/api/playground/proxy', {
@@ -32,7 +37,7 @@ export function useMcpRequest(selectedServer) {
           response.headers.get('Mcp-Session-Id') ||
           response.headers.get('mcp-session-id') ||
           data._sessionId;
-        if (responseSessionId && responseSessionId !== sessionId) {
+        if (responseSessionId && responseSessionId !== currentSessionId) {
           setSessionId(responseSessionId);
         }
 
@@ -48,7 +53,7 @@ export function useMcpRequest(selectedServer) {
         setLoading(false);
       }
     },
-    [selectedServer, sessionId]
+    [selectedServer]
   );
 
   const resetSession = useCallback(() => {

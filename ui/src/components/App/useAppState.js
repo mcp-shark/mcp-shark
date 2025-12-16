@@ -35,6 +35,7 @@ export function useAppState() {
   const [tourDismissed, setTourDismissed] = useState(true);
   const wsRef = useRef(null);
   const prevTabRef = useRef(activeTab);
+  const filtersRef = useRef(filters);
 
   const loadStatistics = async () => {
     try {
@@ -208,6 +209,11 @@ export function useAppState() {
     fetchData();
   }, [filters]);
 
+  // Keep filters ref up to date
+  useEffect(() => {
+    filtersRef.current = filters;
+  }, [filters]);
+
   // Periodically update statistics when on traffic tab
   useEffect(() => {
     if (activeTab !== 'traffic') {
@@ -218,7 +224,7 @@ export function useAppState() {
     const interval = setInterval(async () => {
       try {
         const queryParams = new URLSearchParams();
-        appendFilterParams(queryParams, filters);
+        appendFilterParams(queryParams, filtersRef.current);
 
         const statsResponse = await fetch(`/api/statistics?${queryParams}`);
         const statsData = await statsResponse.json();
@@ -229,7 +235,7 @@ export function useAppState() {
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [activeTab, filters]);
+  }, [activeTab]);
 
   return {
     activeTab,
