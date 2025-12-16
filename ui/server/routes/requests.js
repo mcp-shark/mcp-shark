@@ -1,4 +1,5 @@
 import { queryRequests } from 'mcp-shark-common/db/query.js';
+import logger from '../utils/logger.js';
 import { serializeBigInt } from '../utils/serialization.js';
 
 const sanitizeSearch = (value) => {
@@ -46,7 +47,7 @@ export function createRequestsRoutes(db) {
       const requests = queryRequests(db, filters);
       res.json(serializeBigInt(requests));
     } catch (error) {
-      console.error('Error in getRequests:', error);
+      logger.error({ error: error.message }, 'Error in getRequests');
       res.status(500).json({ error: 'Failed to query requests', details: error.message });
     }
   };
@@ -99,7 +100,7 @@ export function createRequestsRoutes(db) {
                 tables: [...acc.tables, table],
               };
             } catch (err) {
-              console.warn(`Error clearing table ${table}:`, err.message);
+              logger.warn({ table, error: err.message }, 'Error clearing table');
             }
           }
           return acc;
@@ -123,7 +124,7 @@ export function createRequestsRoutes(db) {
       } catch (_e) {
         // Ignore
       }
-      console.error('Error clearing requests:', error);
+      logger.error({ error: error.message }, 'Error clearing requests');
       res.status(500).json({ error: 'Failed to clear traffic', details: error.message });
     }
   };

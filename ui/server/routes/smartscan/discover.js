@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { getMcpConfigPath } from 'mcp-shark-common/configs/index.js';
 import { convertMcpServersToServers } from '../../utils/config.js';
+import logger from '../../utils/logger.js';
 import { createTransport } from './transport.js';
 
 /**
@@ -90,7 +91,7 @@ export async function discoverServers(_req, res) {
       try {
         return await discoverServer(serverName, serverConfig);
       } catch (error) {
-        console.error(`Error discovering server ${serverName}:`, error);
+        logger.error({ serverName, error: error.message }, 'Error discovering server');
         return {
           name: serverName,
           tools: [],
@@ -108,7 +109,7 @@ export async function discoverServers(_req, res) {
       servers: discoveredServers,
     });
   } catch (error) {
-    console.error('Error discovering servers:', error);
+    logger.error({ error: error.message }, 'Error discovering servers');
     return res.status(500).json({
       error: 'Failed to discover servers',
       message: error.message,

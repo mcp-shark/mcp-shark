@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import logger from '../logger.js';
 import { getScanResultsDirectory } from './directory.js';
 
 /**
@@ -41,25 +42,29 @@ function extractServerName(data, scanData) {
 function processScanFile(file, scanResultsDir) {
   try {
     const filePath = join(scanResultsDir, file);
-    console.log(`[getAllCachedScanResults] Reading file: ${file}`);
+    logger.debug({ file }, 'Reading cached scan result file');
 
     const fileContent = readFileSync(filePath, 'utf8');
     const data = JSON.parse(fileContent);
 
     // Validate that this is a scan result file
     if (!data || typeof data !== 'object') {
-      console.warn(`[getAllCachedScanResults] Invalid data in file ${file}: not an object`);
+      logger.warn({ file }, 'Invalid data in file: not an object');
       return null;
     }
 
     // Debug: Log the structure to understand what we're working with
-    console.log(`[getAllCachedScanResults] File ${file} structure:`, {
-      hasServerName: !!data.serverName,
-      serverName: data.serverName,
-      hasScanData: !!data.scanData,
-      scanDataKeys: data.scanData ? Object.keys(data.scanData) : [],
-      topLevelKeys: Object.keys(data),
-    });
+    logger.debug(
+      {
+        file,
+        hasServerName: !!data.serverName,
+        serverName: data.serverName,
+        hasScanData: !!data.scanData,
+        scanDataKeys: data.scanData ? Object.keys(data.scanData) : [],
+        topLevelKeys: Object.keys(data),
+      },
+      'File structure'
+    );
 
     // Create a scan-like object with id, server name, and scan data
     const scanData = data.scanData || data;
@@ -68,17 +73,16 @@ function processScanFile(file, scanResultsDir) {
 
     // Log if we couldn't find server name
     if (serverName === 'Unknown Server') {
-      console.warn(`[getAllCachedScanResults] Could not find server name in ${file}`);
-      console.warn(`[getAllCachedScanResults] data.serverName: ${data.serverName}`);
-      console.warn(`[getAllCachedScanResults] data keys: ${Object.keys(data || {}).join(', ')}`);
-      console.warn(
-        `[getAllCachedScanResults] scanData keys: ${Object.keys(scanData || {}).join(', ')}`
+      logger.warn(
+        {
+          file,
+          dataServerName: data.serverName,
+          dataKeys: Object.keys(data || {}).join(', '),
+          scanDataKeys: Object.keys(scanData || {}).join(', '),
+          scanDataDataKeys: scanData?.data ? Object.keys(scanData.data || {}).join(', ') : null,
+        },
+        'Could not find server name in file'
       );
-      if (scanData?.data) {
-        console.warn(
-          `[getAllCachedScanResults] scanData.data keys: ${Object.keys(scanData.data || {}).join(', ')}`
-        );
-      }
     }
 
     const scanResult = {
@@ -100,17 +104,18 @@ function processScanFile(file, scanResultsDir) {
       result: scanData,
     };
 
-    console.log(`[getAllCachedScanResults] Successfully loaded scan: ${serverName} (${scanId})`);
+    logger.debug({ serverName, scanId }, 'Successfully loaded scan');
     return scanResult;
   } catch (error) {
-    console.warn(
-      `[getAllCachedScanResults] Error reading scan result file ${file}:`,
-      error.message
+    logger.warn(
+      {
+        file,
+        filePath: join(scanResultsDir, file),
+        error: error.message,
+        stack: error.stack,
+      },
+      'Error reading scan result file'
     );
-    console.warn(`[getAllCachedScanResults] File path: ${join(scanResultsDir, file)}`);
-    if (error.stack) {
-      console.warn(`[getAllCachedScanResults] Stack: ${error.stack}`);
-    }
     return null;
   }
 }
@@ -122,29 +127,24 @@ function processScanFile(file, scanResultsDir) {
 export function getAllCachedScanResults() {
   try {
     const scanResultsDir = getScanResultsDirectory();
-    console.log('[getAllCachedScanResults] Reading cached scans from directory:', scanResultsDir);
+    logger.debug({ scanResultsDir }, 'Reading cached scans from directory');
 
     // Check if directory exists (don't create it, just check)
     if (!existsSync(scanResultsDir)) {
-      console.log(
-        '[getAllCachedScanResults] Scan results directory does not exist:',
-        scanResultsDir
-      );
+      logger.debug({ scanResultsDir }, 'Scan results directory does not exist');
       return [];
     }
 
     // Read all files in the directory
     const allFiles = readdirSync(scanResultsDir);
-    console.log(`[getAllCachedScanResults] Total files in directory: ${allFiles.length}`);
+    logger.debug({ count: allFiles.length }, 'Total files in directory');
 
     // Filter for JSON files only
     const jsonFiles = allFiles.filter((f) => f.endsWith('.json'));
-    console.log(
-      `[getAllCachedScanResults] Found ${jsonFiles.length} JSON files in ${scanResultsDir}`
-    );
+    logger.debug({ count: jsonFiles.length, scanResultsDir }, 'Found JSON files');
 
     if (jsonFiles.length === 0) {
-      console.log('[getAllCachedScanResults] No cached scan JSON files found');
+      logger.debug('No cached scan JSON files found');
       return [];
     }
 
@@ -175,13 +175,23 @@ export function getAllCachedScanResults() {
       return bTime - aTime;
     });
 
-    console.log(
-      `[getAllCachedScanResults] Summary: ${successCount} successful, ${errorCount} errors, ${results.length} total scans loaded`
+    logger.info(
+      {
+        successCount,
+        errorCount,
+        total: results.length,
+      },
+      'Summary: cached scans loaded'
     );
     return results;
   } catch (error) {
-    console.error('[getAllCachedScanResults] Fatal error getting all cached scan results:', error);
-    console.error('[getAllCachedScanResults] Error stack:', error.stack);
+    logger.error(
+      {
+        error: error.message,
+        stack: error.stack,
+      },
+      'Fatal error getting all cached scan results'
+    );
     return [];
   }
 }

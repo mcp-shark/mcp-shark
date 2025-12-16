@@ -1,4 +1,5 @@
 import * as fs from 'node:fs';
+import logger from './logger.js';
 
 const state = { originalConfigData: null };
 
@@ -14,14 +15,14 @@ export function restoreOriginalConfig(mcpSharkLogs, broadcastLogUpdate) {
           state.originalConfigData.filePath,
           state.originalConfigData.originalContent
         );
-        console.log(`Restored original config to: ${state.originalConfigData.filePath}`);
+        logger.info({ path: state.originalConfigData.filePath }, 'Restored original config');
         state.originalConfigData = null;
         return true;
       }
       state.originalConfigData = null;
       return false;
     } catch (error) {
-      console.error('Failed to restore original config:', error);
+      logger.error({ error: error.message }, 'Failed to restore original config');
       const timestamp = new Date().toISOString();
       const errorLog = {
         timestamp,

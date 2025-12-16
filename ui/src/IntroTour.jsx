@@ -101,7 +101,9 @@ function IntroTour({ steps, onComplete, onSkip, onStepChange }) {
 
   const handleSkip = () => {
     handleComplete();
-    if (onSkip) onSkip();
+    if (onSkip) {
+      onSkip();
+    }
   };
 
   if (steps.length === 0 || currentStep >= steps.length) {

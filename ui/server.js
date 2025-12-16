@@ -9,8 +9,8 @@ import { openDb } from 'mcp-shark-common/db/init.js';
 import { queryRequests } from 'mcp-shark-common/db/query.js';
 import { restoreOriginalConfig } from './server/utils/config.js';
 
-import { createBackupRoutes } from './server/routes/backups.js';
-import { createCompositeRoutes } from './server/routes/composite.js';
+import { createBackupRoutes } from './server/routes/backups/index.js';
+import { createCompositeRoutes } from './server/routes/composite/index.js';
 import { createConfigRoutes } from './server/routes/config.js';
 import { createConversationsRoutes } from './server/routes/conversations.js';
 import { createHelpRoutes } from './server/routes/help.js';
@@ -18,6 +18,7 @@ import { createLogsRoutes } from './server/routes/logs.js';
 import { createPlaygroundRoutes } from './server/routes/playground.js';
 import { createRequestsRoutes } from './server/routes/requests.js';
 import { createSessionsRoutes } from './server/routes/sessions.js';
+import { createSettingsRoutes } from './server/routes/settings.js';
 import { createSmartScanRoutes } from './server/routes/smartscan.js';
 import { createStatisticsRoutes } from './server/routes/statistics.js';
 import { serializeBigInt } from './server/utils/serialization.js';
@@ -80,6 +81,7 @@ export function createUIServer() {
   const helpRoutes = createHelpRoutes();
   const playgroundRoutes = createPlaygroundRoutes();
   const smartScanRoutes = createSmartScanRoutes();
+  const settingsRoutes = createSettingsRoutes();
 
   app.get('/api/requests', requestsRoutes.getRequests);
   app.get('/api/packets', requestsRoutes.getRequests);
@@ -134,6 +136,8 @@ export function createUIServer() {
   app.post('/api/smartscan/scans/batch', smartScanRoutes.createBatchScans);
   app.post('/api/smartscan/cached-results', smartScanRoutes.getCachedResults);
   app.post('/api/smartscan/cache/clear', smartScanRoutes.clearCache);
+
+  app.get('/api/settings', settingsRoutes.getSettings);
 
   const staticPath = path.join(__dirname, 'dist');
   app.use(express.static(staticPath));

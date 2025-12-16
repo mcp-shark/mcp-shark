@@ -1,5 +1,6 @@
 import { readFileSync, readdirSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
+import logger from '../logger.js';
 import { ensureScanResultsDirectory } from './directory.js';
 
 /**
@@ -30,7 +31,7 @@ export function getCachedScanResultsForServer(serverName) {
         }
       } catch (error) {
         // Skip files that can't be parsed
-        console.warn(`Error reading scan result file ${file}:`, error);
+        logger.warn({ file, error: error.message }, 'Error reading scan result file');
       }
     }
 
@@ -39,7 +40,7 @@ export function getCachedScanResultsForServer(serverName) {
 
     return results;
   } catch (error) {
-    console.error('Error getting cached scan results for server:', error);
+    logger.error({ error: error.message }, 'Error getting cached scan results for server');
     return [];
   }
 }
@@ -68,14 +69,17 @@ export function clearOldScanResults(maxAgeMs = 30 * 24 * 60 * 60 * 1000) {
         return count;
       } catch (error) {
         // Skip files that can't be parsed
-        console.warn(`Error processing scan result file ${file} for cleanup:`, error);
+        logger.warn(
+          { file, error: error.message },
+          'Error processing scan result file for cleanup'
+        );
         return count;
       }
     }, 0);
 
     return deletedCount;
   } catch (error) {
-    console.error('Error clearing old scan results:', error);
+    logger.error({ error: error.message }, 'Error clearing old scan results');
     return 0;
   }
 }

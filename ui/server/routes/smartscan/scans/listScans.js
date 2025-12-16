@@ -1,3 +1,4 @@
+import logger from '../../../utils/logger.js';
 import { getAllCachedScanResults } from '../../../utils/scan-cache.js';
 
 /**
@@ -6,16 +7,16 @@ import { getAllCachedScanResults } from '../../../utils/scan-cache.js';
  */
 export async function listScans(_req, res) {
   try {
-    console.log('[listScans] Loading cached scans from local storage...');
+    logger.info('Loading cached scans from local storage');
     const cachedScans = getAllCachedScanResults();
-    console.log(`[listScans] Returning ${cachedScans.length} cached scans`);
+    logger.info({ count: cachedScans.length }, 'Returning cached scans');
     return res.json({
       scans: cachedScans,
       cached: true,
       count: cachedScans.length,
     });
   } catch (error) {
-    console.error('[listScans] Error loading cached scans:', error);
+    logger.error({ error: error.message }, 'Error loading cached scans');
     return res.status(500).json({
       error: 'Failed to load cached scans',
       message: error.message,

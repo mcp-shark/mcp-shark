@@ -1,4 +1,5 @@
 import { queryRequests } from 'mcp-shark-common/db/query.js';
+import logger from '../utils/logger.js';
 import { serializeBigInt } from '../utils/serialization.js';
 
 const sanitizeSearch = (value) => {
@@ -76,7 +77,7 @@ export function createStatisticsRoutes(db) {
 
       res.json(serializeBigInt(stats));
     } catch (error) {
-      console.error('Error in getStatistics:', error);
+      logger.error({ error: error.message }, 'Error in getStatistics');
       res.status(500).json({ error: 'Failed to get statistics', details: error.message });
     }
   };

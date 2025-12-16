@@ -98,7 +98,9 @@ export default function LoadingModal({ show }) {
             <div
               key={i}
               ref={(el) => {
-                if (el) dotsRef.current[i] = el;
+                if (el) {
+                  dotsRef.current[i] = el;
+                }
               }}
               style={{
                 width: '12px',

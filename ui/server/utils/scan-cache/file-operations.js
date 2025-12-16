@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import logger from '../logger.js';
 import { getScanResultFilePath, getScanResultsDirectory } from './directory.js';
 
 /**
@@ -26,7 +27,7 @@ export function getCachedScanResult(hash) {
       serverName: data.serverName,
     };
   } catch (error) {
-    console.error('Error getting cached scan result:', error);
+    logger.error({ hash, error: error.message }, 'Error getting cached scan result');
     return null;
   }
 }
@@ -69,7 +70,7 @@ export function storeScanResult(serverName, hash, scanData) {
     writeFileSync(filePath, JSON.stringify(dataToStore, null, 2), 'utf8');
     return true;
   } catch (error) {
-    console.error('Error storing scan result:', error);
+    logger.error({ serverName, hash, error: error.message }, 'Error storing scan result');
     return false;
   }
 }
@@ -93,14 +94,14 @@ export function clearAllScanResults() {
         unlinkSync(filePath);
         return count + 1;
       } catch (error) {
-        console.warn(`Error deleting scan result file ${file}:`, error);
+        logger.warn({ file, error: error.message }, 'Error deleting scan result file');
         return count;
       }
     }, 0);
 
     return deletedCount;
   } catch (error) {
-    console.error('Error clearing all scan results:', error);
+    logger.error({ error: error.message }, 'Error clearing all scan results');
     return 0;
   }
 }

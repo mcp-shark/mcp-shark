@@ -2,7 +2,7 @@ import * as fs from 'node:fs';
 import { homedir } from 'node:os';
 import * as path from 'node:path';
 import { extractServices } from '../utils/config.js';
-import { createBackupRoutes } from './backups.js';
+import { createBackupRoutes } from './backups/index.js';
 
 function readFileContent(filePath) {
   const resolvedFilePath = filePath.startsWith('~')

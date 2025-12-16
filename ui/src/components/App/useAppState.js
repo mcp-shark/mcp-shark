@@ -1,5 +1,29 @@
 import { useEffect, useRef, useState } from 'react';
 
+function appendFilterParams(queryParams, filters) {
+  if (filters.search) {
+    queryParams.append('search', filters.search);
+  }
+  if (filters.serverName) {
+    queryParams.append('serverName', filters.serverName);
+  }
+  if (filters.sessionId) {
+    queryParams.append('sessionId', filters.sessionId);
+  }
+  if (filters.method) {
+    queryParams.append('method', filters.method);
+  }
+  if (filters.jsonrpcMethod) {
+    queryParams.append('jsonrpcMethod', filters.jsonrpcMethod);
+  }
+  if (filters.statusCode) {
+    queryParams.append('statusCode', filters.statusCode);
+  }
+  if (filters.jsonrpcId) {
+    queryParams.append('jsonrpcId', filters.jsonrpcId);
+  }
+}
+
 export function useAppState() {
   const [activeTab, setActiveTab] = useState('traffic');
   const [requests, setRequests] = useState([]);
@@ -15,13 +39,7 @@ export function useAppState() {
   const loadStatistics = async () => {
     try {
       const queryParams = new URLSearchParams();
-      if (filters.search) queryParams.append('search', filters.search);
-      if (filters.serverName) queryParams.append('serverName', filters.serverName);
-      if (filters.sessionId) queryParams.append('sessionId', filters.sessionId);
-      if (filters.method) queryParams.append('method', filters.method);
-      if (filters.jsonrpcMethod) queryParams.append('jsonrpcMethod', filters.jsonrpcMethod);
-      if (filters.statusCode) queryParams.append('statusCode', filters.statusCode);
-      if (filters.jsonrpcId) queryParams.append('jsonrpcId', filters.jsonrpcId);
+      appendFilterParams(queryParams, filters);
 
       const statsResponse = await fetch(`/api/statistics?${queryParams}`);
       const statsData = await statsResponse.json();
@@ -34,13 +52,7 @@ export function useAppState() {
   const loadRequests = async () => {
     try {
       const queryParams = new URLSearchParams();
-      if (filters.search) queryParams.append('search', filters.search);
-      if (filters.serverName) queryParams.append('serverName', filters.serverName);
-      if (filters.sessionId) queryParams.append('sessionId', filters.sessionId);
-      if (filters.method) queryParams.append('method', filters.method);
-      if (filters.jsonrpcMethod) queryParams.append('jsonrpcMethod', filters.jsonrpcMethod);
-      if (filters.statusCode) queryParams.append('statusCode', filters.statusCode);
-      if (filters.jsonrpcId) queryParams.append('jsonrpcId', filters.jsonrpcId);
+      appendFilterParams(queryParams, filters);
       queryParams.append('limit', '5000');
 
       const response = await fetch(`/api/requests?${queryParams}`);
@@ -84,13 +96,7 @@ export function useAppState() {
     const initData = async () => {
       try {
         const queryParams = new URLSearchParams();
-        if (filters.search) queryParams.append('search', filters.search);
-        if (filters.serverName) queryParams.append('serverName', filters.serverName);
-        if (filters.sessionId) queryParams.append('sessionId', filters.sessionId);
-        if (filters.method) queryParams.append('method', filters.method);
-        if (filters.jsonrpcMethod) queryParams.append('jsonrpcMethod', filters.jsonrpcMethod);
-        if (filters.statusCode) queryParams.append('statusCode', filters.statusCode);
-        if (filters.jsonrpcId) queryParams.append('jsonrpcId', filters.jsonrpcId);
+        appendFilterParams(queryParams, filters);
         queryParams.append('limit', '5000');
 
         const response = await fetch(`/api/requests?${queryParams}`);
@@ -106,13 +112,7 @@ export function useAppState() {
 
         // Also load statistics
         const statsQueryParams = new URLSearchParams();
-        if (filters.search) statsQueryParams.append('search', filters.search);
-        if (filters.serverName) statsQueryParams.append('serverName', filters.serverName);
-        if (filters.sessionId) statsQueryParams.append('sessionId', filters.sessionId);
-        if (filters.method) statsQueryParams.append('method', filters.method);
-        if (filters.jsonrpcMethod) statsQueryParams.append('jsonrpcMethod', filters.jsonrpcMethod);
-        if (filters.statusCode) statsQueryParams.append('statusCode', filters.statusCode);
-        if (filters.jsonrpcId) statsQueryParams.append('jsonrpcId', filters.jsonrpcId);
+        appendFilterParams(statsQueryParams, filters);
 
         const statsResponse = await fetch(`/api/statistics?${statsQueryParams}`);
         const statsData = await statsResponse.json();
@@ -146,13 +146,7 @@ export function useAppState() {
           // Update statistics when new data arrives via WebSocket
           try {
             const queryParams = new URLSearchParams();
-            if (filters.search) queryParams.append('search', filters.search);
-            if (filters.serverName) queryParams.append('serverName', filters.serverName);
-            if (filters.sessionId) queryParams.append('sessionId', filters.sessionId);
-            if (filters.method) queryParams.append('method', filters.method);
-            if (filters.jsonrpcMethod) queryParams.append('jsonrpcMethod', filters.jsonrpcMethod);
-            if (filters.statusCode) queryParams.append('statusCode', filters.statusCode);
-            if (filters.jsonrpcId) queryParams.append('jsonrpcId', filters.jsonrpcId);
+            appendFilterParams(queryParams, filters);
 
             const statsResponse = await fetch(`/api/statistics?${queryParams}`);
             const statsData = await statsResponse.json();
@@ -185,13 +179,7 @@ export function useAppState() {
     const fetchData = async () => {
       try {
         const queryParams = new URLSearchParams();
-        if (filters.search) queryParams.append('search', filters.search);
-        if (filters.serverName) queryParams.append('serverName', filters.serverName);
-        if (filters.sessionId) queryParams.append('sessionId', filters.sessionId);
-        if (filters.method) queryParams.append('method', filters.method);
-        if (filters.jsonrpcMethod) queryParams.append('jsonrpcMethod', filters.jsonrpcMethod);
-        if (filters.statusCode) queryParams.append('statusCode', filters.statusCode);
-        if (filters.jsonrpcId) queryParams.append('jsonrpcId', filters.jsonrpcId);
+        appendFilterParams(queryParams, filters);
         queryParams.append('limit', '5000');
 
         const response = await fetch(`/api/requests?${queryParams}`);
@@ -207,13 +195,7 @@ export function useAppState() {
 
         // Also load statistics
         const statsQueryParams = new URLSearchParams();
-        if (filters.search) statsQueryParams.append('search', filters.search);
-        if (filters.serverName) statsQueryParams.append('serverName', filters.serverName);
-        if (filters.sessionId) statsQueryParams.append('sessionId', filters.sessionId);
-        if (filters.method) statsQueryParams.append('method', filters.method);
-        if (filters.jsonrpcMethod) statsQueryParams.append('jsonrpcMethod', filters.jsonrpcMethod);
-        if (filters.statusCode) statsQueryParams.append('statusCode', filters.statusCode);
-        if (filters.jsonrpcId) statsQueryParams.append('jsonrpcId', filters.jsonrpcId);
+        appendFilterParams(statsQueryParams, filters);
 
         const statsResponse = await fetch(`/api/statistics?${statsQueryParams}`);
         const statsData = await statsResponse.json();
@@ -236,13 +218,7 @@ export function useAppState() {
     const interval = setInterval(async () => {
       try {
         const queryParams = new URLSearchParams();
-        if (filters.search) queryParams.append('search', filters.search);
-        if (filters.serverName) queryParams.append('serverName', filters.serverName);
-        if (filters.sessionId) queryParams.append('sessionId', filters.sessionId);
-        if (filters.method) queryParams.append('method', filters.method);
-        if (filters.jsonrpcMethod) queryParams.append('jsonrpcMethod', filters.jsonrpcMethod);
-        if (filters.statusCode) queryParams.append('statusCode', filters.statusCode);
-        if (filters.jsonrpcId) queryParams.append('jsonrpcId', filters.jsonrpcId);
+        appendFilterParams(queryParams, filters);
 
         const statsResponse = await fetch(`/api/statistics?${queryParams}`);
         const statsData = await statsResponse.json();

@@ -165,10 +165,14 @@ function LogTable({ logs, selected, onSelect }) {
                 transition: 'background-color 0.15s ease',
               }}
               onMouseEnter={(e) => {
-                if (selected?.id !== log.id) e.currentTarget.style.background = colors.bgHover;
+                if (selected?.id !== log.id) {
+                  e.currentTarget.style.background = colors.bgHover;
+                }
               }}
               onMouseLeave={(e) => {
-                if (selected?.id !== log.id) e.currentTarget.style.background = colors.bgCard;
+                if (selected?.id !== log.id) {
+                  e.currentTarget.style.background = colors.bgCard;
+                }
               }}
             >
               <td

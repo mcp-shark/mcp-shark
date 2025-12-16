@@ -1,3 +1,4 @@
+import logger from '../../../utils/logger.js';
 import { computeMcpHash, getCachedScanResult } from '../../../utils/scan-cache.js';
 
 /**
@@ -42,7 +43,7 @@ export function getCachedResults(req, res) {
       results: cachedResults,
     });
   } catch (error) {
-    console.error('Error getting cached results:', error);
+    logger.error({ error: error.message }, 'Error getting cached results');
     return res.status(500).json({
       error: 'Failed to get cached results',
       message: error.message,

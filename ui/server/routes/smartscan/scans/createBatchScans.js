@@ -1,4 +1,5 @@
 const API_BASE_URL = 'https://smart.mcpshark.sh';
+import logger from '../../../utils/logger.js';
 import { computeMcpHash, getCachedScanResult, storeScanResult } from '../../../utils/scan-cache.js';
 
 /**
@@ -25,7 +26,7 @@ export async function createBatchScans(req, res) {
       const hash = computeMcpHash(serverData);
       const cachedResult = getCachedScanResult(hash);
       if (cachedResult) {
-        console.log(`Using cached scan result for server: ${serverData.name}`);
+        logger.info({ serverName: serverData.name }, 'Using cached scan result for server');
         return {
           serverName: serverData.name,
           success: true,
@@ -91,7 +92,7 @@ export async function createBatchScans(req, res) {
 
         if (response.ok && data) {
           storeScanResult(serverData.name, hash, data);
-          console.log(`Stored scan result in cache for server: ${serverData.name}`);
+          logger.info({ serverName: serverData.name }, 'Stored scan result in cache for server');
         }
 
         return result;
@@ -114,7 +115,7 @@ export async function createBatchScans(req, res) {
       results,
     });
   } catch (error) {
-    console.error('Smart Scan batch API error:', error);
+    logger.error({ error: error.message }, 'Smart Scan batch API error');
     return res.status(500).json({
       error: 'Failed to create batch scans',
       message: error.message,

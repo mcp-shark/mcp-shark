@@ -1,3 +1,4 @@
+import logger from '../../utils/logger.js';
 import { readSmartScanToken, writeSmartScanToken } from '../../utils/smartscan-token.js';
 
 /**
@@ -12,7 +13,7 @@ export function getToken(_req, res) {
       token: token || null,
     });
   } catch (error) {
-    console.error('Error reading Smart Scan token:', error);
+    logger.error({ error: error.message }, 'Error reading Smart Scan token');
     return res.status(500).json({
       error: 'Failed to read token',
       message: error.message,
@@ -47,7 +48,7 @@ export function saveToken(req, res) {
       message: 'Token saved successfully',
     });
   } catch (error) {
-    console.error('Error saving Smart Scan token:', error);
+    logger.error({ error: error.message }, 'Error saving Smart Scan token');
     return res.status(500).json({
       error: 'Failed to save token',
       message: error.message,

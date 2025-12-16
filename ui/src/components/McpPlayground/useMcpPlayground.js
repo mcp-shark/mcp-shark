@@ -76,36 +76,30 @@ export function useMcpPlayground() {
     setError,
   ]);
 
-  useEffect(() => {
-    if (
-      serverStatus?.running &&
-      activeSection === 'tools' &&
-      tools.length === 0 &&
-      selectedServer
-    ) {
-      const timer = setTimeout(() => {
-        loadTools();
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [serverStatus?.running, selectedServer, activeSection, tools.length, loadTools]);
-
+  // Load data when section changes or when server becomes available
   useEffect(() => {
     if (!serverStatus?.running || !selectedServer) {
       return;
     }
 
-    const timer = setTimeout(() => {
-      if (activeSection === 'tools' && !toolsLoaded && !toolsLoading) {
+    if (activeSection === 'tools' && !toolsLoaded && !toolsLoading) {
+      const timer = setTimeout(() => {
         loadTools();
-      } else if (activeSection === 'prompts' && !promptsLoaded && !promptsLoading) {
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+    if (activeSection === 'prompts' && !promptsLoaded && !promptsLoading) {
+      const timer = setTimeout(() => {
         loadPrompts();
-      } else if (activeSection === 'resources' && !resourcesLoaded && !resourcesLoading) {
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+    if (activeSection === 'resources' && !resourcesLoaded && !resourcesLoading) {
+      const timer = setTimeout(() => {
         loadResources();
-      }
-    }, 100);
-
-    return () => clearTimeout(timer);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
   }, [
     activeSection,
     serverStatus?.running,

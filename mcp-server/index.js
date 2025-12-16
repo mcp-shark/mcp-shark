@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
-import { consola } from 'consola';
 
+import serverLogger from '../shared/logger.js';
 import { isError } from './lib/common/error.js';
 import { runAllExternalServers } from './lib/server/external/all.js';
 
@@ -15,8 +15,8 @@ import { withAuditRequestResponseHandler } from './lib/auditor/audit.js';
 import { getInternalServer } from './lib/server/internal/run.js';
 import { createInternalServerFactory } from './lib/server/internal/server.js';
 
-function initAuditLogger(logger) {
-  logger.info('Initializing audit logger at', getDatabaseFile());
+function initAuditLogger(serverLogger) {
+  serverLogger.info({ path: getDatabaseFile() }, 'Initializing audit logger at');
   return getLogger(initDb(getDatabaseFile()));
 }
 
@@ -25,33 +25,24 @@ function initAuditLogger(logger) {
  * @param {Object} options - Configuration options
  * @param {string} [options.configPath] - Path to MCP config file (defaults to getMcpConfigPath())
  * @param {number} [options.port=9851] - Port to listen on
- * @param {Object} [options.logger] - Logger instance (defaults to consola)
  * @param {Function} [options.onError] - Error callback
  * @param {Function} [options.onReady] - Ready callback
  * @returns {Promise<{app: Express, server: http.Server, stop: Function}>} Server instance
  */
 export async function startMcpSharkServer(options = {}) {
-  const {
-    configPath = getMcpConfigPath(),
-    port = 9851,
-    logger = consola,
-    onError,
-    onReady,
-  } = options;
-
-  logger.level = 'info';
+  const { configPath = getMcpConfigPath(), port = 9851, onError, onReady } = options;
 
   prepareAppDataSpaces();
 
-  logger.info('[MCP-Shark] Starting MCP server...');
-  logger.info(`[MCP-Shark] Config path: ${configPath}`);
-  logger.info(`[MCP-Shark] Database path: ${getDatabaseFile()}`);
-  logger.info(`[MCP-Shark] Working directory: ${process.cwd()}`);
-  logger.info(`[MCP-Shark] PATH: ${process.env.PATH}`);
+  serverLogger.info('[MCP-Shark] Starting MCP server...');
+  serverLogger.info(`[MCP-Shark] Config path: ${configPath}`);
+  serverLogger.info(`[MCP-Shark] Database path: ${getDatabaseFile()}`);
+  serverLogger.info(`[MCP-Shark] Working directory: ${process.cwd()}`);
+  serverLogger.info(`[MCP-Shark] PATH: ${process.env.PATH}`);
 
   try {
-    const auditLogger = initAuditLogger(logger);
-    const externalServersResult = await runAllExternalServers(logger, configPath);
+    const auditLogger = initAuditLogger(serverLogger);
+    const externalServersResult = await runAllExternalServers(serverLogger, configPath);
 
     if (isError(externalServersResult)) {
       const error = new Error(JSON.stringify(externalServersResult));
@@ -61,7 +52,7 @@ export async function startMcpSharkServer(options = {}) {
 
     const { kv, servers: externalServers } = externalServersResult;
 
-    const internalServerFactory = createInternalServerFactory(logger, kv);
+    const internalServerFactory = createInternalServerFactory(serverLogger, kv);
     const app = getInternalServer(
       internalServerFactory,
       auditLogger,
@@ -77,7 +68,7 @@ export async function startMcpSharkServer(options = {}) {
       });
 
       httpServer.listen(port, '0.0.0.0', () => {
-        logger.info(`MCP proxy HTTP server listening on http://localhost:${port}/mcp`);
+        serverLogger.info(`MCP proxy HTTP server listening on http://localhost:${port}/mcp`);
         if (onReady) onReady();
         resolve(httpServer);
       });
@@ -90,7 +81,7 @@ export async function startMcpSharkServer(options = {}) {
           try {
             await serverInfo.client.close();
           } catch (err) {
-            logger.warn('Error closing external server client:', err);
+            serverLogger.warn({ error: err.message }, 'Error closing external server client');
           }
         }
       }
@@ -103,7 +94,7 @@ export async function startMcpSharkServer(options = {}) {
       // Close the server
       return new Promise((resolve) => {
         server.close(() => {
-          logger.info('MCP Shark server stopped');
+          serverLogger.info('MCP Shark server stopped');
           resolve();
         });
       });
@@ -117,11 +108,7 @@ export async function startMcpSharkServer(options = {}) {
     };
   } catch (error) {
     const errorMsg = 'Error starting MCP server';
-    logger.error(`[MCP-Shark] ${errorMsg}:`, error);
-    logger.error(`[MCP-Shark] Error message: ${error.message}`);
-    if (error.stack) {
-      logger.error('[MCP-Shark] Error stack:', error.stack);
-    }
+    serverLogger.error({ error: error.message, stack: error.stack }, `[MCP-Shark] ${errorMsg}`);
     if (onError) onError(error);
     throw error;
   }

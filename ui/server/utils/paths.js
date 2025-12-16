@@ -3,6 +3,7 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import logger from './logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -87,7 +88,7 @@ function getSystemPath() {
           const pathOutput = getPathOutput(shell, shellName);
           const systemPath = pathOutput.trim();
           if (systemPath) {
-            console.log(`[Server Manager] Got PATH from ${shell} (${shellName})`);
+            logger.info({ shell, shellName }, 'Got PATH from shell');
             return systemPath;
           }
         } catch (_e) {}
@@ -124,14 +125,14 @@ function getSystemPath() {
           );
           const systemPath = pathOutput.trim();
           if (systemPath && systemPath.length > 10) {
-            console.log(`[Server Manager] Got PATH from ${file}`);
+            logger.info({ file }, 'Got PATH from file');
             return systemPath;
           }
         } catch (_e) {}
       }
     }
   } catch (error) {
-    console.warn('[Server Manager] Could not get system PATH:', error.message);
+    logger.warn({ error: error.message }, 'Could not get system PATH');
   }
   return null;
 }
@@ -146,7 +147,7 @@ export function enhancePath(originalPath) {
 
   const systemPath = getSystemPath();
   if (systemPath) {
-    console.log('[Server Manager] Using system PATH from host machine');
+    logger.info('Using system PATH from host machine');
     const userPaths = [
       path.join(homeDir, '.local', 'bin'),
       path.join(homeDir, '.npm-global', 'bin'),
@@ -180,7 +181,7 @@ export function enhancePath(originalPath) {
     return [systemPath, ...userPaths, originalPath || ''].filter((p) => p).join(pathSeparator);
   }
 
-  console.log('[Server Manager] Could not get system PATH, adding common locations');
+  logger.info('Could not get system PATH, adding common locations');
   const pathsToAdd = [
     '/usr/local/bin',
     '/usr/bin',

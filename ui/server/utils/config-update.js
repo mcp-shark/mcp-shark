@@ -2,6 +2,7 @@ import * as fs from 'node:fs';
 import { homedir } from 'node:os';
 import * as path from 'node:path';
 import { storeOriginalConfig } from './config.js';
+import logger from './logger.js';
 
 function findLatestBackup(filePath) {
   const dir = path.dirname(filePath);
@@ -51,7 +52,7 @@ function findLatestBackup(filePath) {
     backups.sort((a, b) => b.modifiedAt - a.modifiedAt);
     return backups[0].backupPath;
   } catch (error) {
-    console.error('Error finding latest backup:', error);
+    logger.error({ error: error.message }, 'Error finding latest backup');
     return null;
   }
 }
@@ -101,7 +102,7 @@ function shouldCreateBackup(
     }
     return true;
   } catch (error) {
-    console.error('Error comparing with latest backup:', error);
+    logger.error({ error: error.message }, 'Error comparing with latest backup');
     // If comparison fails, create backup to be safe
     return true;
   }
@@ -188,7 +189,7 @@ export function updateConfigFile(
 
   if (resolvedFilePath && fs.existsSync(resolvedFilePath)) {
     fs.writeFileSync(resolvedFilePath, JSON.stringify(updatedConfig, null, 2));
-    console.log(`Updated config file: ${resolvedFilePath}`);
+    logger.info({ path: resolvedFilePath }, 'Updated config file');
   }
 
   return { updatedConfig, backupPath: createdBackupPath };

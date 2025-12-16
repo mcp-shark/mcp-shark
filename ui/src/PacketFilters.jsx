@@ -20,13 +20,27 @@ function RequestFilters({ filters, onFilterChange, stats, onClear }) {
   const handleExport = async (format = 'json') => {
     try {
       const queryParams = new URLSearchParams();
-      if (filters.search) queryParams.append('search', filters.search);
-      if (filters.serverName) queryParams.append('serverName', filters.serverName);
-      if (filters.sessionId) queryParams.append('sessionId', filters.sessionId);
-      if (filters.method) queryParams.append('method', filters.method);
-      if (filters.jsonrpcMethod) queryParams.append('jsonrpcMethod', filters.jsonrpcMethod);
-      if (filters.statusCode) queryParams.append('statusCode', filters.statusCode);
-      if (filters.jsonrpcId) queryParams.append('jsonrpcId', filters.jsonrpcId);
+      if (filters.search) {
+        queryParams.append('search', filters.search);
+      }
+      if (filters.serverName) {
+        queryParams.append('serverName', filters.serverName);
+      }
+      if (filters.sessionId) {
+        queryParams.append('sessionId', filters.sessionId);
+      }
+      if (filters.method) {
+        queryParams.append('method', filters.method);
+      }
+      if (filters.jsonrpcMethod) {
+        queryParams.append('jsonrpcMethod', filters.jsonrpcMethod);
+      }
+      if (filters.statusCode) {
+        queryParams.append('statusCode', filters.statusCode);
+      }
+      if (filters.jsonrpcId) {
+        queryParams.append('jsonrpcId', filters.jsonrpcId);
+      }
       queryParams.append('format', format);
 
       const response = await fetch(`/api/requests/export?${queryParams}`);

@@ -13,23 +13,35 @@ export function useMcpServerStatus() {
         throw new Error('Server not available');
       }
       const data = await res.json();
-      const wasRunning = serverStatus?.running;
-      setServerStatus(data);
-
-      if (!data.running) {
-        if (!showLoadingModal || wasRunning) {
-          setShowLoadingModal(true);
+      setServerStatus((prevStatus) => {
+        const wasRunning = prevStatus?.running;
+        if (!data.running) {
+          setShowLoadingModal((prevModal) => {
+            if (!prevModal || wasRunning) {
+              return true;
+            }
+            return prevModal;
+          });
+        } else {
+          setShowLoadingModal((prevModal) => {
+            if (prevModal) {
+              return false;
+            }
+            return prevModal;
+          });
         }
-      } else if (data.running && showLoadingModal) {
-        setShowLoadingModal(false);
-      }
+        return data;
+      });
     } catch (_err) {
       setServerStatus({ running: false });
-      if (!showLoadingModal) {
-        setShowLoadingModal(true);
-      }
+      setShowLoadingModal((prevModal) => {
+        if (!prevModal) {
+          return true;
+        }
+        return prevModal;
+      });
     }
-  }, [serverStatus, showLoadingModal]);
+  }, []);
 
   const loadAvailableServers = useCallback(async () => {
     try {
@@ -37,21 +49,29 @@ export function useMcpServerStatus() {
       if (res.ok) {
         const data = await res.json();
         setAvailableServers(data.servers || []);
-        if (data.servers && data.servers.length > 0 && !selectedServer) {
-          setSelectedServer(data.servers[0]);
-        }
+        setSelectedServer((current) => {
+          if (!current && data.servers && data.servers.length > 0) {
+            return data.servers[0];
+          }
+          return current;
+        });
       }
     } catch (err) {
       console.error('Failed to load servers:', err);
     }
-  }, [selectedServer]);
+  }, []);
 
+  // Load servers once on mount
+  useEffect(() => {
+    loadAvailableServers();
+  }, [loadAvailableServers]);
+
+  // Poll server status every 2 seconds
   useEffect(() => {
     checkServerStatus();
-    loadAvailableServers();
     const interval = setInterval(checkServerStatus, 2000);
     return () => clearInterval(interval);
-  }, [checkServerStatus, loadAvailableServers]);
+  }, [checkServerStatus]);
 
   useEffect(() => {
     if (availableServers.length > 0 && !selectedServer) {

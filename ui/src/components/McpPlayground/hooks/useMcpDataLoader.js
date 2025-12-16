@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 export function useMcpDataLoader(makeMcpRequest, selectedServer, setError) {
   const [tools, setTools] = useState([]);
@@ -11,7 +11,7 @@ export function useMcpDataLoader(makeMcpRequest, selectedServer, setError) {
   const [promptsLoaded, setPromptsLoaded] = useState(false);
   const [resourcesLoaded, setResourcesLoaded] = useState(false);
 
-  const loadTools = async () => {
+  const loadTools = useCallback(async () => {
     if (!selectedServer) {
       setError('tools: No server selected');
       setToolsLoaded(true);
@@ -32,9 +32,9 @@ export function useMcpDataLoader(makeMcpRequest, selectedServer, setError) {
     } finally {
       setToolsLoading(false);
     }
-  };
+  }, [selectedServer, makeMcpRequest, setError]);
 
-  const loadPrompts = async () => {
+  const loadPrompts = useCallback(async () => {
     if (!selectedServer) {
       setError('prompts: No server selected');
       setPromptsLoaded(true);
@@ -55,9 +55,9 @@ export function useMcpDataLoader(makeMcpRequest, selectedServer, setError) {
     } finally {
       setPromptsLoading(false);
     }
-  };
+  }, [selectedServer, makeMcpRequest, setError]);
 
-  const loadResources = async () => {
+  const loadResources = useCallback(async () => {
     if (!selectedServer) {
       setError('resources: No server selected');
       setResourcesLoaded(true);
@@ -78,16 +78,16 @@ export function useMcpDataLoader(makeMcpRequest, selectedServer, setError) {
     } finally {
       setResourcesLoading(false);
     }
-  };
+  }, [selectedServer, makeMcpRequest, setError]);
 
-  const resetData = () => {
+  const resetData = useCallback(() => {
     setToolsLoaded(false);
     setPromptsLoaded(false);
     setResourcesLoaded(false);
     setTools([]);
     setPrompts([]);
     setResources([]);
-  };
+  }, []);
 
   return {
     tools,

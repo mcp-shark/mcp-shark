@@ -6,6 +6,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 import open from 'open';
+import logger from './shared/logger.js';
 
 const SERVER_URL = 'http://localhost:9853';
 const BROWSER_OPEN_DELAY = 1000;
@@ -34,7 +35,7 @@ function displayWelcomeBanner() {
    Version: ${version} | Homepage: https://mcpshark.sh
 `;
 
-  console.log(banner);
+  logger.log(banner);
 }
 
 const uiDir = join(rootDir, 'ui');
@@ -70,12 +71,12 @@ function runCommand(command, args, options) {
  * Install dependencies in the root directory
  */
 async function installDependencies() {
-  console.log('Installing dependencies...');
+  logger.info('Installing dependencies...');
   try {
     await runCommand('npm', ['install'], { cwd: rootDir });
-    console.log('Dependencies installed successfully!\n');
+    logger.info('Dependencies installed successfully!\n');
   } catch (error) {
-    console.error('Failed to install dependencies:', error.message);
+    logger.error({ error: error.message }, 'Failed to install dependencies');
     process.exit(1);
   }
 }
@@ -84,11 +85,11 @@ async function installDependencies() {
  * Build the UI for production
  */
 async function buildUI() {
-  console.log('Building UI for production...');
+  logger.info('Building UI for production...');
   try {
     await runCommand('vite', ['build'], { cwd: uiDir });
   } catch (error) {
-    console.error('Failed to build UI:', error.message);
+    logger.error({ error: error.message }, 'Failed to build UI');
     process.exit(1);
   }
 }
@@ -105,9 +106,9 @@ async function openBrowser() {
  * Start the UI server
  */
 async function startServer(shouldOpenBrowser = false) {
-  console.log('Starting MCP Shark UI server...');
-  console.log(`Open ${SERVER_URL} in your browser`);
-  console.log('Press Ctrl+C to stop\n');
+  logger.info('Starting MCP Shark UI server...');
+  logger.info(`Open ${SERVER_URL} in your browser`);
+  logger.info('Press Ctrl+C to stop\n');
 
   const serverProcess = spawn('node', ['server.js'], {
     cwd: uiDir,
@@ -119,12 +120,12 @@ async function startServer(shouldOpenBrowser = false) {
     await openBrowser();
   }
 
-  let isShuttingDown = false;
+  const shutdownState = { isShuttingDown: false };
 
   serverProcess.on('close', (code) => {
-    if (!isShuttingDown) {
+    if (!shutdownState.isShuttingDown) {
       if (code !== 0 && code !== null) {
-        console.error(`Server exited with code ${code}`);
+        logger.error({ code }, 'Server exited with code');
         process.exit(code);
       }
     } else {
@@ -134,19 +135,19 @@ async function startServer(shouldOpenBrowser = false) {
 
   // Handle process termination
   const shutdown = async (signal) => {
-    if (isShuttingDown) {
+    if (shutdownState.isShuttingDown) {
       return;
     }
-    isShuttingDown = true;
+    shutdownState.isShuttingDown = true;
 
-    console.log('Shutting down...');
+    logger.info('Shutting down...');
 
     // Send signal to child process
     serverProcess.kill(signal);
 
     // Wait for child process to exit, with timeout
     const timeout = setTimeout(() => {
-      console.log('Forcefully terminating server process...');
+      logger.info('Forcefully terminating server process...');
       serverProcess.kill('SIGKILL');
       process.exit(1);
     }, 5000);
@@ -166,7 +167,7 @@ async function startServer(shouldOpenBrowser = false) {
  */
 function validateDirectories() {
   if (!existsSync(uiDir)) {
-    console.error('Error: UI directory not found. Please ensure you are in the correct directory.');
+    logger.error('Error: UI directory not found. Please ensure you are in the correct directory.');
     process.exit(1);
   }
 }
@@ -216,6 +217,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error('Unexpected error:', error);
+  logger.error({ error: error.message }, 'Unexpected error');
   process.exit(1);
 });

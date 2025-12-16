@@ -1,5 +1,6 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import logger from '../utils/logger.js';
 
 const MCP_SERVER_BASE_URL = 'http://localhost:9851/mcp';
 
@@ -134,7 +135,7 @@ export function createPlaygroundRoutes() {
         _sessionId: sessionId,
       });
     } catch (error) {
-      console.error('Error in playground proxy:', error);
+      logger.error({ error: error.message }, 'Error in playground proxy');
 
       // Check if it's a connection error
       if (error.message?.includes('ECONNREFUSED') || error.message?.includes('connect')) {

@@ -1,3 +1,4 @@
+import logger from '../../../utils/logger.js';
 import { clearAllScanResults } from '../../../utils/scan-cache.js';
 
 /**
@@ -13,7 +14,7 @@ export function clearCache(_req, res) {
       deletedCount,
     });
   } catch (error) {
-    console.error('Error clearing cache:', error);
+    logger.error({ error: error.message }, 'Error clearing cache');
     return res.status(500).json({
       error: 'Failed to clear cache',
       message: error.message,

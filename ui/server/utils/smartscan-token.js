@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { getWorkingDirectory, prepareAppDataSpaces } from 'mcp-shark-common/configs/index.js';
+import logger from './logger.js';
 
 const SMART_SCAN_TOKEN_NAME = 'smart-scan-token.json';
 
@@ -18,7 +19,7 @@ export function readSmartScanToken() {
     }
     return null;
   } catch (error) {
-    console.error('Error reading Smart Scan token:', error);
+    logger.error({ error: error.message }, 'Error reading Smart Scan token');
     return null;
   }
 }
@@ -36,7 +37,7 @@ export function writeSmartScanToken(token) {
     writeFileSync(tokenPath, JSON.stringify(data, null, 2), { mode: 0o600 }); // Read/write for owner only
     return true;
   } catch (error) {
-    console.error('Error writing Smart Scan token:', error);
+    logger.error({ error: error.message }, 'Error writing Smart Scan token');
     return false;
   }
 }
