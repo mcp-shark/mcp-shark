@@ -40,46 +40,6 @@ function displayWelcomeBanner() {
 
 const uiDir = join(rootDir, 'ui');
 const distDir = join(uiDir, 'dist');
-const rootNodeModules = join(rootDir, 'node_modules');
-
-/**
- * Run a command and return a promise that resolves when it completes
- */
-function runCommand(command, args, options) {
-  return new Promise((resolve, reject) => {
-    const process = spawn(command, args, {
-      ...options,
-      stdio: 'inherit',
-      shell: true,
-    });
-
-    process.on('close', (code) => {
-      if (code !== 0) {
-        reject(new Error(`Command failed with exit code ${code}`));
-      } else {
-        resolve();
-      }
-    });
-
-    process.on('error', (error) => {
-      reject(error);
-    });
-  });
-}
-
-/**
- * Install dependencies in the root directory
- */
-async function installDependencies() {
-  logger.info('Installing dependencies...');
-  try {
-    await runCommand('npm', ['install'], { cwd: rootDir });
-    logger.info('Dependencies installed successfully!\n');
-  } catch (error) {
-    logger.error({ error: error.message }, 'Failed to install dependencies');
-    process.exit(1);
-  }
-}
 
 /**
  * Validate that UI dist directory exists
@@ -173,15 +133,6 @@ function validateDirectories() {
 }
 
 /**
- * Ensure dependencies are installed
- */
-async function ensureDependencies() {
-  if (!existsSync(rootNodeModules)) {
-    await installDependencies();
-  }
-}
-
-/**
  * Main execution function
  */
 async function main() {
@@ -196,9 +147,6 @@ async function main() {
 
   // Validate environment
   validateDirectories();
-
-  // Ensure dependencies are installed
-  await ensureDependencies();
 
   // Validate UI is built (pre-built files should be included in package)
   validateUIBuilt();
