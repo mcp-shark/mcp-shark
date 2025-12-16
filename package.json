@@ -22,9 +22,9 @@
   },
   "files": ["bin", "ui", "mcp-server", "README.md", "LICENSE", "package.json"],
   "scripts": {
-    "prestart": "npm run build:ui",
     "start": "node scripts/start-ui.js",
-    "dev": "bash -c 'cd ui && vite'",
+    "predev": "npm run build:ui",
+    "dev": "node scripts/start-ui.js'",
     "build": "bash -c 'cd ui && vite build'",
     "build:ui": "bash -c 'cd ui && vite build'",
     "lint": "biome lint .",
@@ -33,7 +33,7 @@
     "check": "biome check .",
     "check:fix": "biome check --write .",
     "prepare": "husky install || true",
-    "prepublishOnly": "npm run check:fix",
+    "prepublishOnly": "npm run check:fix && npm run build:ui",
     "publish:public": "npm publish --access public",
     "publish:dry-run": "npm publish --dry-run"
   },

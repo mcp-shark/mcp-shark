@@ -6,7 +6,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 import open from 'open';
-import logger from './shared/logger.js';
+import logger from '../shared/logger.js';
 
 const SERVER_URL = 'http://localhost:9853';
 const BROWSER_OPEN_DELAY = 1000;
@@ -82,14 +82,14 @@ async function installDependencies() {
 }
 
 /**
- * Build the UI for production
+ * Validate that UI dist directory exists
  */
-async function buildUI() {
-  logger.info('Building UI for production...');
-  try {
-    await runCommand('vite', ['build'], { cwd: uiDir });
-  } catch (error) {
-    logger.error({ error: error.message }, 'Failed to build UI');
+function validateUIBuilt() {
+  if (!existsSync(distDir)) {
+    logger.error(
+      'Error: UI build not found. The package should include pre-built UI files.\n' +
+        'If you are developing, run: npm run build:ui'
+    );
     process.exit(1);
   }
 }
@@ -182,15 +182,6 @@ async function ensureDependencies() {
 }
 
 /**
- * Ensure UI is built
- */
-async function ensureUIBuilt() {
-  if (!existsSync(distDir)) {
-    await buildUI();
-  }
-}
-
-/**
  * Main execution function
  */
 async function main() {
@@ -209,8 +200,8 @@ async function main() {
   // Ensure dependencies are installed
   await ensureDependencies();
 
-  // Ensure UI is built
-  await ensureUIBuilt();
+  // Validate UI is built (pre-built files should be included in package)
+  validateUIBuilt();
 
   // Start the server
   await startServer(options.open);
