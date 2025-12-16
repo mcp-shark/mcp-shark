@@ -1,6 +1,60 @@
-# 🦈 MCP Shark v1.4.2 - Playground Improvements
+# 🦈 MCP Shark v1.5.0 - Documentation & Stability Improvements
 
-> ⚠️ **ALPHA VERSION** - This is an alpha release. The software is under active development and testing. Features may change, and there may be bugs. Use at your own risk.
+## 🎉 What's New in v1.5.0
+
+### 📚 Comprehensive Documentation Restructure
+
+- **New Documentation System** — Complete documentation split into organized sections in `docs/` folder
+- **Desktop App First** — README now prioritizes desktop application downloads for better marketing
+- **Professional Documentation** — 8 comprehensive guides covering all aspects of MCP Shark:
+  - Getting Started Guide
+  - Features Documentation
+  - User Guide
+  - Architecture Documentation
+  - API Reference
+  - Configuration Guide
+  - Troubleshooting Guide
+  - Development Guide
+- **Improved README** — Concise, professional README (154 lines vs 912 lines) with clear navigation
+
+### 🐛 Critical Bug Fixes
+
+- **Playground Infinite Loops** — Fixed continuous refreshing and infinite request loops in MCP Playground
+- **Statistics Polling** — Resolved excessive status calls that prevented tools/resources from loading
+- **Session Management** — Fixed session ID handling to prevent callback recreation loops
+- **Server Status** — Improved server status checking to prevent unnecessary re-renders
+
+### 🔧 Technical Improvements
+
+- **Unified Logger** — Implemented shared logger using `consola` across entire codebase
+- **Settings Endpoint** — New `/api/settings` endpoint exposing all application paths and configuration
+- **Start Script Refactoring** — Pure Node.js start script without shell commands or process execution
+- **Code Compliance** — All files now comply with coding rules (0 linting violations)
+- **File Organization** — Split large files to comply with size limits (backend: 250 lines, frontend: 300 lines)
+
+### 🎮 Playground Enhancements
+
+- **Stable Data Loading** — Fixed infinite loops in data loading hooks
+- **Memoized Callbacks** — Proper use of `useCallback` to prevent unnecessary re-renders
+- **Ref-based State** — Used refs for state values that shouldn't trigger effects
+- **Improved UX** — Playground now loads tools, prompts, and resources reliably
+
+### 📦 Package Improvements
+
+- **npx Support** — Enhanced npx usage with `--open` flag support
+- **Pre-start Hook** — Added `prestart` script for automatic UI build
+- **Better Error Handling** — Improved error messages and user feedback
+
+### 🧹 Code Quality
+
+- **Zero Lint Disables** — Removed all lint disable comments, fixed all issues properly
+- **Coding Rules Compliance** — All files follow strict coding standards
+- **Accessibility** — Improved accessibility with semantic HTML and ARIA labels
+- **React Best Practices** — Proper hook dependencies and memoization throughout
+
+---
+
+# 🦈 MCP Shark v1.4.2 - Playground Improvements
 
 ## 🎉 What's New in v1.4.2
 
@@ -31,8 +85,6 @@
 ---
 
 # 🦈 MCP Shark v1.4.0 - npm Package Release
-
-> ⚠️ **ALPHA VERSION** - This is an alpha release. The software is under active development and testing. Features may change, and there may be bugs. Use at your own risk.
 
 ## 🎉 What's New in v1.4.0
 
@@ -76,8 +128,6 @@ npx mcp-shark
 ---
 
 # 🦈 MCP Shark v1.0.0 - Initial Release
-
-> ⚠️ **ALPHA VERSION** - This is an alpha release. The software is under active development and testing. Features may change, and there may be bugs. Use at your own risk.
 
 ## 🎉 What is MCP Shark?
 
