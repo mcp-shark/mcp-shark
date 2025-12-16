@@ -84,7 +84,8 @@
     "open": "^11.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "ws": "^8.16.0"
+    "ws": "^8.16.0",
+    "node-llama-cpp": "^3.14.5"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
