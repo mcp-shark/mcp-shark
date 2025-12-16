@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { colors } from './theme';
-import HelpGuideHeader from './HelpGuide/HelpGuideHeader';
 import HelpGuideContent from './HelpGuide/HelpGuideContent';
 import HelpGuideFooter from './HelpGuide/HelpGuideFooter';
+import HelpGuideHeader from './HelpGuide/HelpGuideHeader';
+import { colors } from './theme';
 
 function HelpGuide({ onClose }) {
   const [dontShowAgain, setDontShowAgain] = useState(false);
@@ -19,7 +19,9 @@ function HelpGuide({ onClose }) {
   };
 
   return (
-    <div
+    <dialog
+      open
+      aria-modal="true"
       style={{
         position: 'fixed',
         top: 0,
@@ -32,10 +34,20 @@ function HelpGuide({ onClose }) {
         alignItems: 'center',
         justifyContent: 'center',
         padding: '20px',
+        border: 'none',
+        margin: 0,
+        width: '100%',
+        height: '100%',
       }}
       onClick={handleClose}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') {
+          handleClose();
+        }
+      }}
     >
       <div
+        role="document"
         style={{
           background: colors.bgCard,
           border: `1px solid ${colors.borderLight}`,
@@ -47,6 +59,7 @@ function HelpGuide({ onClose }) {
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
         }}
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
       >
         <HelpGuideHeader onClose={handleClose} />
         <div style={{ padding: '24px' }}>
@@ -58,7 +71,7 @@ function HelpGuide({ onClose }) {
           />
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }
 

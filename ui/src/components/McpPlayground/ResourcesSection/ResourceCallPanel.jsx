@@ -35,6 +35,7 @@ export default function ResourceCallPanel({ resource, resourceResult, onReadReso
         }}
       >
         <button
+          type="button"
           onClick={onReadResource}
           disabled={loading}
           style={{
@@ -55,6 +56,7 @@ export default function ResourceCallPanel({ resource, resourceResult, onReadReso
         {resourceResult && (
           <div>
             <label
+              htmlFor="resource-result-pre"
               style={{
                 display: 'block',
                 fontSize: '12px',
@@ -66,6 +68,7 @@ export default function ResourceCallPanel({ resource, resourceResult, onReadReso
               Result
             </label>
             <pre
+              id="resource-result-pre"
               style={{
                 padding: '12px',
                 background: colors.bgSecondary,

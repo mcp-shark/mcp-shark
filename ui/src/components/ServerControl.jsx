@@ -29,6 +29,7 @@ function ServerControl({ status, loading, onStart, onStop, canStart }) {
       <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
         {status.running ? (
           <button
+            type="button"
             onClick={onStop}
             disabled={loading}
             style={{
@@ -60,6 +61,7 @@ function ServerControl({ status, loading, onStart, onStop, canStart }) {
           </button>
         ) : (
           <button
+            type="button"
             data-tour="start-button"
             onClick={onStart}
             disabled={loading || !canStart}
@@ -122,7 +124,7 @@ function ServerControl({ status, loading, onStart, onStop, canStart }) {
               fontFamily: fonts.body,
             }}
           >
-            {status.running ? `Running (PID: ${status.pid})` : 'Stopped'}
+            {status.running ? (status.pid ? `Running (PID: ${status.pid})` : 'Running') : 'Stopped'}
           </span>
         </div>
       </div>

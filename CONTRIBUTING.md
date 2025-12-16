@@ -50,7 +50,7 @@ We welcome contributions! Here's how you can help:
 
 ## Development Guidelines
 
-- **Code Style**: Follow the existing code style and use Prettier for formatting
+- **Code Style**: Follow the existing code style and use Biome for formatting
 - **Testing**: Test your changes before submitting
 - **Documentation**: Update documentation for any new features or changes
 - **Performance**: Consider performance implications of your changes
@@ -98,9 +98,8 @@ chore: update dependencies
 
 Before each commit, the following checks run automatically:
 
-1. **Fix All**: Runs `npm run fix:all` to fix linting and formatting issues in all files (continues on error)
-2. **Lint-staged**: Runs Prettier on staged files to ensure consistent formatting
-3. **Commitlint**: Validates commit message format (non-blocking)
+1. **Lint-staged**: Runs Biome on staged files to ensure consistent formatting and linting
+2. **Commitlint**: Validates commit message format (non-blocking)
 
 The hooks are configured to be non-blocking - they will attempt to fix issues automatically and won't block your commit if tools are unavailable. However, it's recommended to ensure your code is properly formatted before committing.
 
@@ -108,7 +107,6 @@ The hooks are configured to be non-blocking - they will attempt to fix issues au
 
 This project uses:
 
-- **ESLint**: Code linting with Prettier integration
-- **Prettier**: Code formatting
+- **Biome**: Unified tool for linting and formatting (replaces ESLint and Prettier)
 - **Husky**: Git hooks for pre-commit checks
 - **Commitlint**: Conventional commit message validation

@@ -10,7 +10,10 @@ const TourIcon = ({ size = 16, color = 'currentColor' }) => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
+    role="img"
+    aria-label="Tour icon"
   >
+    <title>Tour icon</title>
     <path d="M12 2L2 7l10 5 10-5-10-5z" />
     <path d="M2 17l10 5 10-5" />
     <path d="M2 12l10 5 10-5" />
@@ -20,6 +23,7 @@ const TourIcon = ({ size = 16, color = 'currentColor' }) => (
 export default function HelpButton({ onClick }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       data-tour="help-button"
       style={{

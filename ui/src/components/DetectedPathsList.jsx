@@ -1,5 +1,5 @@
+import { IconClock, IconCode, IconEye, IconRefresh } from '@tabler/icons-react';
 import { colors, fonts } from '../theme';
-import { IconRefresh, IconEye, IconCode, IconClock } from '@tabler/icons-react';
 
 function DetectedPathsList({ detectedPaths, detecting, onDetect, onSelect, onView }) {
   if (detectedPaths.length === 0) {
@@ -27,6 +27,7 @@ function DetectedPathsList({ detectedPaths, detecting, onDetect, onSelect, onVie
           Detected Configuration Files:
         </div>
         <button
+          type="button"
           onClick={onDetect}
           disabled={detecting}
           title="Refresh detection"
@@ -67,7 +68,8 @@ function DetectedPathsList({ detectedPaths, detecting, onDetect, onSelect, onVie
       >
         {detectedPaths.map((item, idx) => (
           <button
-            key={idx}
+            key={`${item.editor}-${item.path}-${idx}`}
+            type="button"
             data-tour={idx === 0 ? 'first-detected-editor' : undefined}
             onClick={() => onSelect(item.path)}
             onDoubleClick={() => {
@@ -137,6 +139,7 @@ function DetectedPathsList({ detectedPaths, detecting, onDetect, onSelect, onVie
                     Found
                   </span>
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       onView(item.path);

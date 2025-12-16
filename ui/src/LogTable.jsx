@@ -1,10 +1,16 @@
-import { colors, fonts, withOpacity } from './theme';
+import { colors, fonts } from './theme';
 
 function LogTable({ logs, selected, onSelect }) {
   const getStatusColor = (status) => {
-    if (status === 'error') return colors.error;
-    if (status === 'success') return colors.success;
-    if (status === 'pending') return colors.warning;
+    if (status === 'error') {
+      return colors.error;
+    }
+    if (status === 'success') {
+      return colors.success;
+    }
+    if (status === 'pending') {
+      return colors.warning;
+    }
     return colors.textTertiary;
   };
 
@@ -144,6 +150,14 @@ function LogTable({ logs, selected, onSelect }) {
             <tr
               key={log.id}
               onClick={() => onSelect(log)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onSelect(log);
+                }
+              }}
+              tabIndex={0}
+              aria-label={`Select log entry ${log.id}`}
               style={{
                 cursor: 'pointer',
                 background: selected?.id === log.id ? colors.bgSelected : colors.bgCard,

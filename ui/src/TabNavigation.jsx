@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { colors, fonts } from './theme';
 import { SharkLogo } from './components/SharkLogo';
+import DesktopTabs from './components/TabNavigation/DesktopTabs';
+import MobileDropdown from './components/TabNavigation/MobileDropdown';
 import {
-  NetworkIcon,
   LogsIcon,
-  SettingsIcon,
+  NetworkIcon,
   PlaygroundIcon,
+  SettingsIcon,
   ShieldIcon,
 } from './components/TabNavigationIcons';
-import MobileDropdown from './components/TabNavigation/MobileDropdown';
-import DesktopTabs from './components/TabNavigation/DesktopTabs';
+import { colors, fonts } from './theme';
 
 function TabNavigation({ activeTab, onTabChange }) {
   const tabs = [

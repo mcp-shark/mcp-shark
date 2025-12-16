@@ -1,6 +1,6 @@
 import { colors, fonts } from '../../theme';
-import ScanResultsDisplay from './ScanResultsDisplay';
 import ScanDetailView from './ScanDetailView';
+import ScanResultsDisplay from './ScanResultsDisplay';
 
 export default function ListViewContent({
   error,
@@ -50,7 +50,7 @@ export default function ListViewContent({
         <div
           style={{
             padding: '12px 16px',
-            background: colors.error + '20',
+            background: `${colors.error}20`,
             border: `1px solid ${colors.error}`,
             borderRadius: '8px',
             marginBottom: '16px',

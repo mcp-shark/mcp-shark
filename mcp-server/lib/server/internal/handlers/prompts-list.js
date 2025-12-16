@@ -1,11 +1,7 @@
 import { listAll } from '../../external/kv.js';
 
-export function createPromptsListHandler(
-  logger,
-  mcpServers,
-  requestedMcpServer
-) {
-  return async req => {
+export function createPromptsListHandler(logger, mcpServers, requestedMcpServer) {
+  return async (req) => {
     const path = req.path;
     logger.debug('Prompts list', path);
 

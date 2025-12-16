@@ -1,5 +1,5 @@
-import { CheckIcon, CacheIcon } from '../../SmartScanIcons';
 import { colors, fonts } from '../../../theme';
+import { CacheIcon, CheckIcon } from '../../SmartScanIcons';
 
 export default function BatchResultsHeader({ scanResults }) {
   const cachedCount = scanResults.filter((r) => r.cached).length;

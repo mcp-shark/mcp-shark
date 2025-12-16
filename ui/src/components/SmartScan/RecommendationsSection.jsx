@@ -2,7 +2,9 @@ import { colors, fonts } from '../../theme';
 import ExpandableSection from './ExpandableSection';
 
 export default function RecommendationsSection({ recommendations }) {
-  if (!recommendations || recommendations.length === 0) return null;
+  if (!recommendations || recommendations.length === 0) {
+    return null;
+  }
 
   return (
     <ExpandableSection
@@ -13,24 +15,24 @@ export default function RecommendationsSection({ recommendations }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {recommendations.map((recommendation, index) => (
           <div
-            key={index}
+            key={`recommendation-${recommendation.type || index}-${index}`}
             style={{
               display: 'flex',
               alignItems: 'flex-start',
               gap: '8px',
               padding: '8px',
-              background: colors.accentBlue + '10',
+              background: `${colors.accentBlue}10`,
               borderRadius: '6px',
               border: `1px solid ${colors.accentBlue}20`,
               transition: 'all 0.15s',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = colors.accentBlue + '15';
-              e.currentTarget.style.borderColor = colors.accentBlue + '40';
+              e.currentTarget.style.background = `${colors.accentBlue}15`;
+              e.currentTarget.style.borderColor = `${colors.accentBlue}40`;
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = colors.accentBlue + '10';
-              e.currentTarget.style.borderColor = colors.accentBlue + '20';
+              e.currentTarget.style.background = `${colors.accentBlue}10`;
+              e.currentTarget.style.borderColor = `${colors.accentBlue}20`;
             }}
           >
             <div
@@ -40,7 +42,7 @@ export default function RecommendationsSection({ recommendations }) {
                 width: '16px',
                 height: '16px',
                 borderRadius: '50%',
-                background: colors.accentBlue + '30',
+                background: `${colors.accentBlue}30`,
                 border: `1px solid ${colors.accentBlue}60`,
                 display: 'flex',
                 alignItems: 'center',

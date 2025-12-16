@@ -43,6 +43,7 @@ export default function ToolCallPanel({
       >
         <div>
           <label
+            htmlFor="tool-args-textarea"
             style={{
               display: 'block',
               fontSize: '12px',
@@ -54,6 +55,7 @@ export default function ToolCallPanel({
             Arguments (JSON)
           </label>
           <textarea
+            id="tool-args-textarea"
             value={toolArgs}
             onChange={(e) => onToolArgsChange(e.target.value)}
             style={{
@@ -71,6 +73,7 @@ export default function ToolCallPanel({
           />
         </div>
         <button
+          type="button"
           onClick={onCallTool}
           disabled={loading}
           style={{
@@ -91,6 +94,7 @@ export default function ToolCallPanel({
         {toolResult && (
           <div>
             <label
+              htmlFor="tool-result-pre"
               style={{
                 display: 'block',
                 fontSize: '12px',
@@ -102,6 +106,7 @@ export default function ToolCallPanel({
               Result
             </label>
             <pre
+              id="tool-result-pre"
               style={{
                 padding: '12px',
                 background: colors.bgSecondary,

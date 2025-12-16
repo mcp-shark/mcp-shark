@@ -1,6 +1,6 @@
+import { IconChevronRight, IconExternalLink, IconEye } from '@tabler/icons-react';
 import { useState } from 'react';
 import { colors, fonts } from '../../../theme';
-import { IconChevronRight, IconEye, IconExternalLink } from '@tabler/icons-react';
 import { getRiskLevelColor } from '../utils';
 
 export default function ScanListItem({ scan, onSelectScan }) {
@@ -25,6 +25,13 @@ export default function ScanListItem({ scan, onSelectScan }) {
           cursor: 'pointer',
         }}
         onClick={() => setIsExpanded(!isExpanded)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setIsExpanded(!isExpanded);
+          }
+        }}
+        aria-label={`Toggle scan ${scan.scanId || 'details'}`}
       >
         <div
           style={{
@@ -101,8 +108,15 @@ export default function ScanListItem({ scan, onSelectScan }) {
             flexShrink: 0,
           }}
           onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              e.stopPropagation();
+            }
+          }}
         >
           <button
+            type="button"
             onClick={() => {
               onSelectScan(scan.id);
             }}

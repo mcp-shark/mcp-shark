@@ -1,8 +1,10 @@
-import { LoadingSpinner } from '../SmartScanIcons';
 import { colors, fonts } from '../../theme';
+import { LoadingSpinner } from '../SmartScanIcons';
 
 export default function ScanningProgress({ scanning, selectedServers }) {
-  if (!scanning) return null;
+  if (!scanning) {
+    return null;
+  }
 
   return (
     <div

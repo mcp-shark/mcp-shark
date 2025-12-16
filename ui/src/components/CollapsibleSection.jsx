@@ -12,7 +12,10 @@ const ChevronDown = ({ size = 12, color = 'currentColor' }) => (
     strokeLinecap="round"
     strokeLinejoin="round"
     style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '4px' }}
+    role="img"
+    aria-label="Chevron icon"
   >
+    <title>Chevron icon</title>
     <polyline points="6 9 12 15 18 9" />
   </svg>
 );
@@ -27,7 +30,8 @@ function CollapsibleSection({
 
   return (
     <div style={{ marginBottom: '16px' }}>
-      <div
+      <button
+        type="button"
         style={{
           color: titleColor,
           fontWeight: '600',
@@ -41,8 +45,18 @@ function CollapsibleSection({
           gap: '6px',
           padding: '4px 0',
           transition: 'color 0.15s ease',
+          background: 'transparent',
+          border: 'none',
+          textAlign: 'left',
+          width: '100%',
         }}
         onClick={() => setIsExpanded(!isExpanded)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setIsExpanded(!isExpanded);
+          }
+        }}
         onMouseEnter={(e) => {
           e.currentTarget.style.color =
             titleColor === colors.accentBlue ? colors.accentBlueHover : titleColor;
@@ -61,7 +75,7 @@ function CollapsibleSection({
           <ChevronDown size={12} color={titleColor} />
         </span>
         {title}
-      </div>
+      </button>
       {isExpanded && (
         <div
           style={{

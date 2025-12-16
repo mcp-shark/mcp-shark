@@ -1,9 +1,9 @@
-import { useRef, useEffect } from 'react';
-import { colors } from '../../theme';
-import { slideInRight } from '../../utils/animations';
-import RequestList from '../../PacketList';
+import { useEffect, useRef } from 'react';
 import RequestDetail from '../../PacketDetail';
 import RequestFilters from '../../PacketFilters';
+import RequestList from '../../PacketList';
+import { colors } from '../../theme';
+import { slideInRight } from '../../utils/animations';
 
 export default function TrafficTab({
   requests,

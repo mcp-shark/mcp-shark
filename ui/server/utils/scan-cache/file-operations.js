@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, existsSync, unlinkSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { getScanResultFilePath, getScanResultsDirectory } from './directory.js';
 
@@ -44,17 +44,19 @@ export function storeScanResult(serverName, hash, scanData) {
     const now = Date.now();
 
     // Check if file exists to preserve original creation time
-    let createdAt = now;
-    if (existsSync(filePath)) {
+    const getCreatedAt = (filePath, defaultTime) => {
+      if (!existsSync(filePath)) {
+        return defaultTime;
+      }
       try {
         const existingContent = readFileSync(filePath, 'utf8');
         const existingData = JSON.parse(existingContent);
-        createdAt = existingData.createdAt || now;
-      } catch (e) {
-        // If we can't read existing file, use current time
-        createdAt = now;
+        return existingData.createdAt || defaultTime;
+      } catch (_e) {
+        return defaultTime;
       }
-    }
+    };
+    const createdAt = getCreatedAt(filePath, now);
 
     const dataToStore = {
       serverName,
@@ -84,17 +86,17 @@ export function clearAllScanResults() {
     }
 
     const files = readdirSync(scanResultsDir).filter((f) => f.endsWith('.json'));
-    let deletedCount = 0;
 
-    for (const file of files) {
+    const deletedCount = files.reduce((count, file) => {
       try {
         const filePath = join(scanResultsDir, file);
         unlinkSync(filePath);
-        deletedCount++;
+        return count + 1;
       } catch (error) {
         console.warn(`Error deleting scan result file ${file}:`, error);
+        return count;
       }
-    }
+    }, 0);
 
     return deletedCount;
   } catch (error) {

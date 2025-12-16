@@ -1,6 +1,6 @@
+import anime from 'animejs';
 import { useEffect, useRef } from 'react';
 import { colors, fonts } from '../../theme';
-import anime from 'animejs';
 
 export default function LoadingModal({ show }) {
   const loadingModalRef = useRef(null);
@@ -42,7 +42,9 @@ export default function LoadingModal({ show }) {
     }
   }, [show]);
 
-  if (!show) return null;
+  if (!show) {
+    return null;
+  }
 
   return (
     <div

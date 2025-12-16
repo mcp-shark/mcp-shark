@@ -1,6 +1,6 @@
 import * as fs from 'node:fs';
-import * as path from 'node:path';
 import { homedir } from 'node:os';
+import * as path from 'node:path';
 import { storeOriginalConfig } from './config.js';
 
 function findLatestBackup(filePath) {
@@ -157,7 +157,7 @@ function computeBackupPath(resolvedFilePath, content, mcpSharkLogs, broadcastLog
 
 export function updateConfigFile(
   originalConfig,
-  selectedServiceNames,
+  _selectedServiceNames,
   resolvedFilePath,
   content,
   mcpSharkLogs,
@@ -170,7 +170,7 @@ export function updateConfigFile(
     const updatedServers = {};
     // Transform all original servers to HTTP URLs pointing to MCP shark server
     // Each server gets its own endpoint to avoid tool name prefixing issues
-    Object.entries(serverObject).forEach(([name, cfg]) => {
+    Object.entries(serverObject).forEach(([name, _cfg]) => {
       updatedServers[name] = {
         type: 'http',
         url: `http://localhost:9851/mcp/${encodeURIComponent(name)}`,

@@ -1,9 +1,8 @@
 import React from 'react';
-import { colors, fonts } from '../theme';
-import RequestRow from './RequestRow';
+import { colors } from '../theme';
+import { getCategoryIconComponent } from '../utils/mcpGroupingUtils';
 import GroupHeader from './GroupHeader';
-import { getCategoryIconComponent, getMethodDescription } from '../utils/mcpGroupingUtils';
-import { getJsonRpcMethod } from '../utils/requestUtils';
+import RequestRow from './RequestRow';
 
 function GroupedByMcpView({
   groupedData,

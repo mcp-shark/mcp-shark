@@ -531,6 +531,76 @@ The diagram above illustrates how MCP Shark works:
 - All traffic is logged to SQLite Database
 - UI reads from database and can control the server
 
+### MCP Server Architecture
+
+```
+┌─────────────────┐
+│   MCP Client    │
+└────────┬────────┘
+         │ HTTP
+         ▼
+┌─────────────────────────────────┐
+│   MCP Shark Server               │
+│   (Express on port 9851)         │
+│                                   │
+│  ┌────────────────────────────┐ │
+│  │  Internal MCP Server        │ │
+│  │  - tools/list               │ │
+│  │  - tools/call               │ │
+│  │  - prompts/list             │ │
+│  │  - prompts/get              │ │
+│  │  - resources/list            │ │
+│  │  - resources/read            │ │
+│  └──────────┬──────────────────┘ │
+│             │                     │
+│  ┌──────────▼──────────────────┐ │
+│  │  Audit Logger (SQLite)      │ │
+│  └──────────────────────────────┘ │
+└──────────┬────────────────────────┘
+           │
+           ├──► HTTP MCP Server
+           ├──► stdio MCP Server
+           └──► stdio MCP Server
+```
+
+### Project Structure
+
+```
+mcp-shark/
+├── bin/
+│   └── mcp-shark.js          # CLI entry point
+├── mcp-server/
+│   ├── index.js              # Library entry point
+│   ├── mcp-shark.js          # Server entry point
+│   └── lib/
+│       ├── server/
+│       │   ├── internal/     # Internal MCP server (aggregator)
+│       │   │   ├── server.js
+│       │   │   ├── run.js
+│       │   │   ├── session.js
+│       │   │   └── handlers/
+│       │   └── external/     # External MCP server clients
+│       │       ├── all.js
+│       │       ├── config.js
+│       │       ├── kv.js
+│       │       └── single/
+│       └── auditor/
+│           └── audit.js
+├── ui/
+│   ├── server.js             # Express server with WebSocket
+│   ├── src/                  # React frontend
+│   │   ├── App.jsx
+│   │   ├── components/
+│   │   └── ...
+│   └── vite.config.js
+└── package.json              # Single package.json for entire project
+```
+
+**Configuration and database files are stored in `~/.mcp-shark/` by default:**
+
+- `~/.mcp-shark/mcps.json` - Server configuration
+- `~/.mcp-shark/db/mcp-shark.sqlite` - SQLite database
+
 ## 🔧 Supported MCP Methods
 
 MCP Shark supports all standard MCP methods:
@@ -654,6 +724,108 @@ If you need to configure manually, create a file at `~/.mcp-shark/mcps.json`:
 
 - **Node.js** 18+ and npm
 - **Git** (for installing dependencies from GitHub, if needed)
+
+## 🛠️ Development
+
+### Installation
+
+From the root directory:
+
+```bash
+# Install all dependencies
+npm install
+```
+
+### Available Scripts
+
+```bash
+# Start the application (builds UI and starts server)
+npm start
+
+# Development mode (with hot reload)
+npm run dev
+
+# Build UI for production
+npm run build
+
+# Linting and formatting
+npm run lint          # Check for linting issues
+npm run lint:fix      # Fix linting issues
+npm run format        # Format code
+npm run check         # Check linting and formatting
+npm run check:fix      # Fix linting and formatting issues
+```
+
+### Tech Stack
+
+**MCP Server:**
+- Express.js for HTTP server
+- Model Context Protocol SDK
+- SQLite for audit logging
+- Support for HTTP and stdio-based MCP servers
+
+**UI:**
+- React 18 for frontend
+- Vite for build tooling
+- Express.js for backend API
+- WebSocket (ws) for real-time updates
+- SQLite (better-sqlite3) for database
+
+### Code Quality
+
+- **Biome**: Unified tool for linting and formatting (replaces ESLint and Prettier)
+- **Husky**: Git hooks for pre-commit checks
+- **Commitlint**: Conventional commit message validation
+
+### API Endpoints
+
+**Traffic & Monitoring:**
+- `GET /api/requests` - Retrieve communication requests/responses with optional filtering
+- `GET /api/conversations` - Get request/response conversation pairs
+- `GET /api/sessions` - List all sessions
+- `GET /api/statistics` - Get traffic statistics
+
+**MCP Server Management:**
+- `GET /api/composite/status` - Get the status of the MCP Shark server
+- `GET /api/composite/logs` - Get MCP Shark server logs
+- `GET /api/composite/servers` - Get available server names
+- `POST /api/composite/setup` - Configure and start the MCP Shark server
+- `POST /api/composite/stop` - Stop the MCP Shark server
+- `POST /api/composite/logs/clear` - Clear server logs
+
+**Configuration:**
+- `GET /api/config/detect` - Detect default MCP config file paths
+- `GET /api/config/read` - Read MCP configuration file
+- `POST /api/config/services` - Extract services from config
+
+**Playground:**
+- `POST /api/playground/proxy` - Proxy MCP requests for testing
+
+**Smart Scan:**
+- `POST /api/smartscan/scans` - Create a new scan
+- `GET /api/smartscan/scans` - List all scans
+- `GET /api/smartscan/scans/:scanId` - Get scan details
+- `GET /api/smartscan/token` - Get scan token
+- `POST /api/smartscan/token` - Save scan token
+- `GET /api/smartscan/discover` - Discover servers from config
+
+### WebSocket
+
+The server broadcasts real-time updates via WebSocket on the same port as the HTTP server.
+
+**Connection:**
+- Development: `ws://localhost:9853`
+- Production: `wss://your-domain.com` (if using HTTPS)
+
+**Message Format:**
+```json
+{
+  "type": "update",
+  "data": [
+    /* array of log entries */
+  ]
+}
+```
 
 ## 🔍 Troubleshooting
 

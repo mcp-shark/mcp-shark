@@ -1,11 +1,11 @@
 import { colors, fonts } from '../../theme';
 import AnalysisResult from './AnalysisResult';
-import { normalizeScanData } from './scanDataUtils';
-import ScanDetailHeader from './ScanDetailHeader';
 import DebugInfoSection from './DebugInfoSection';
+import RawDataSection from './RawDataSection';
+import ScanDetailHeader from './ScanDetailHeader';
 import ScanOverviewSection from './ScanOverviewSection';
 import ServerInfoSection from './ServerInfoSection';
-import RawDataSection from './RawDataSection';
+import { normalizeScanData } from './scanDataUtils';
 
 export default function ScanDetailView({ scan, loading, onClose }) {
   if (loading) {
@@ -120,7 +120,7 @@ export default function ScanDetailView({ scan, loading, onClose }) {
             <div
               style={{
                 padding: '12px',
-                background: colors.bgTertiary + '80',
+                background: `${colors.bgTertiary}80`,
                 borderRadius: '6px',
                 border: `1px solid ${colors.borderLight}`,
                 fontSize: '12px',

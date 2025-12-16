@@ -16,9 +16,8 @@ export function useCacheManagement(discoveredServers, discoverMcpData, setError)
           await discoverMcpData();
         }
         return { success: true, message: data.message };
-      } else {
-        throw new Error(data.error || 'Failed to clear cache');
       }
+      throw new Error(data.error || 'Failed to clear cache');
     } catch (err) {
       setError(err.message || 'Failed to clear cache');
       return { success: false, error: err.message };

@@ -1,6 +1,6 @@
 import { colors, fonts } from '../../theme';
-import ToolsList from './ToolsSection/ToolsList';
 import ToolCallPanel from './ToolsSection/ToolCallPanel';
+import ToolsList from './ToolsSection/ToolsList';
 
 export default function ToolsSection({
   tools,
@@ -33,6 +33,7 @@ export default function ToolsSection({
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '100%' }}>
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
         <button
+          type="button"
           onClick={onRefresh}
           disabled={loading || toolsLoading}
           style={{

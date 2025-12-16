@@ -32,6 +32,7 @@ export default function HelpGuideFooter({ dontShowAgain, setDontShowAgain, onClo
         Don't show this again
       </label>
       <button
+        type="button"
         onClick={onClose}
         style={{
           background: colors.buttonPrimary,

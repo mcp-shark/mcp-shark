@@ -1,19 +1,19 @@
-export function createLogsRoutes(mcpSharkLogs, broadcastLogUpdate) {
+export function createLogsRoutes(mcpSharkLogs, _broadcastLogUpdate) {
   const router = {};
 
   router.getLogs = (req, res) => {
-    const limit = parseInt(req.query.limit) || 1000;
-    const offset = parseInt(req.query.offset) || 0;
+    const limit = Number.parseInt(req.query.limit) || 1000;
+    const offset = Number.parseInt(req.query.offset) || 0;
     const logs = [...mcpSharkLogs].reverse().slice(offset, offset + limit);
     res.json(logs);
   };
 
-  router.clearLogs = (req, res) => {
+  router.clearLogs = (_req, res) => {
     mcpSharkLogs.length = 0;
     res.json({ success: true, message: 'Logs cleared' });
   };
 
-  router.exportLogs = (req, res) => {
+  router.exportLogs = (_req, res) => {
     try {
       const logsText = mcpSharkLogs
         .map((log) => `[${log.timestamp}] [${log.type.toUpperCase()}] ${log.line}`)

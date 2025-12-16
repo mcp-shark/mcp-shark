@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
 import anime from 'animejs';
+import { useEffect, useRef } from 'react';
 
 /**
  * React hook for animating elements on mount/unmount
@@ -18,7 +18,7 @@ export const useAnimation = (animationFn, deps = []) => {
         anime.remove(elementRef.current);
       }
     };
-  }, deps);
+  }, [animationFn, ...deps]);
 
   return elementRef;
 };
@@ -28,6 +28,7 @@ export const useAnimation = (animationFn, deps = []) => {
  */
 export const useMountAnimation = (options = {}) => {
   const elementRef = useRef(null);
+  const { duration, easing } = options;
 
   useEffect(() => {
     if (elementRef.current) {
@@ -35,12 +36,12 @@ export const useMountAnimation = (options = {}) => {
         targets: elementRef.current,
         opacity: [0, 1],
         translateY: [20, 0],
-        duration: options.duration || 400,
-        easing: options.easing || 'easeOutExpo',
+        duration: duration || 400,
+        easing: easing || 'easeOutExpo',
         ...options,
       });
     }
-  }, []);
+  }, [duration, easing, options]);
 
   return elementRef;
 };
@@ -50,6 +51,7 @@ export const useMountAnimation = (options = {}) => {
  */
 export const useUnmountAnimation = (shouldUnmount, onComplete, options = {}) => {
   const elementRef = useRef(null);
+  const { duration, easing } = options;
 
   useEffect(() => {
     if (shouldUnmount && elementRef.current) {
@@ -57,13 +59,13 @@ export const useUnmountAnimation = (shouldUnmount, onComplete, options = {}) => 
         targets: elementRef.current,
         opacity: [1, 0],
         translateY: [0, -20],
-        duration: options.duration || 300,
-        easing: options.easing || 'easeInExpo',
+        duration: duration || 300,
+        easing: easing || 'easeInExpo',
         complete: onComplete,
         ...options,
       });
     }
-  }, [shouldUnmount, onComplete]);
+  }, [shouldUnmount, onComplete, duration, easing, options]);
 
   return elementRef;
 };
@@ -73,6 +75,7 @@ export const useUnmountAnimation = (shouldUnmount, onComplete, options = {}) => 
  */
 export const useStaggerAnimation = (items, options = {}) => {
   const containerRef = useRef(null);
+  const { duration, delay, easing } = options;
 
   useEffect(() => {
     if (containerRef.current && items.length > 0) {
@@ -80,13 +83,13 @@ export const useStaggerAnimation = (items, options = {}) => {
         targets: containerRef.current.children,
         opacity: [0, 1],
         translateY: [20, 0],
-        duration: options.duration || 400,
-        delay: anime.stagger(options.delay || 50),
-        easing: options.easing || 'easeOutExpo',
+        duration: duration || 400,
+        delay: anime.stagger(delay || 50),
+        easing: easing || 'easeOutExpo',
         ...options,
       });
     }
-  }, [items.length]);
+  }, [items.length, duration, delay, easing, options]);
 
   return containerRef;
 };

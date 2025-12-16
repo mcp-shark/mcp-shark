@@ -1,238 +1,90 @@
-.PHONY: help install install-all start stop start-ui stop-ui start-server stop-server dev-ui build-ui clean clean-node-modules kill-all-node
+.PHONY: help install start stop dev build clean lint lint-fix format check check-fix
 
 # Default target
 help:
 	@echo "MCP Shark - Makefile Commands"
 	@echo ""
 	@echo "Installation:"
-	@echo "  make install          - Install root dependencies"
-	@echo "  make install-all      - Install all dependencies (root, mcp-server, ui)"
+	@echo "  make install          - Install all dependencies"
 	@echo ""
-	@echo "UI Commands (Recommended):"
-	@echo "  make start            - Start the UI server (port 9853) - default"
-	@echo "  make start-ui         - Start the UI server (port 9853)"
-	@echo "                         Use the UI to configure and start the MCP server"
-	@echo "  make stop             - Stop the UI server - default"
-	@echo "  make stop-ui          - Stop the UI server"
-	@echo "  make dev-ui           - Start UI in development mode"
-	@echo "  make build-ui         - Build UI for production"
+	@echo "Development:"
+	@echo "  make start            - Build UI and start server (production)"
+	@echo "  make dev              - Start UI in development mode"
+	@echo "  make build            - Build UI for production"
+	@echo "  make stop             - Stop running servers"
 	@echo ""
-	@echo "Server Commands (Alternative):"
-	@echo "  make start-server     - Start the MCP server directly (port 9851)"
-	@echo "                         Note: Requires manual config at mcp-server/temp/mcps.json"
-	@echo "  make stop-server      - Stop the MCP server"
+	@echo "Code Quality:"
+	@echo "  make lint             - Check for linting issues"
+	@echo "  make lint-fix         - Fix linting issues"
+	@echo "  make format           - Format code"
+	@echo "  make check            - Check linting and formatting"
+	@echo "  make check-fix         - Fix linting and formatting issues"
 	@echo ""
-	@echo "Other:"
-	@echo "  make clean            - Clean build artifacts and log files"
-	@echo "  make clean-node-modules - Remove all node_modules and package-lock.json files"
-	@echo "  make kill-all-node    - Kill all running npm and node processes"
+	@echo "Cleanup:"
+	@echo "  make clean            - Clean build artifacts and logs"
 	@echo "  make help             - Show this help message"
 
 # Installation
 install:
-	@echo "Installing root dependencies..."
+	@echo "Installing dependencies..."
 	npm install
+	@echo "Dependencies installed!"
 
-install-all:
-	@echo "Installing all dependencies..."
-	npm install
-	@echo "Installing mcp-server dependencies..."
-	cd mcp-server && npm install
-	@echo "Installing ui dependencies..."
-	cd ui && npm install
-	@echo "All dependencies installed!"
+# Development commands
+start:
+	@echo "Starting MCP Shark..."
+	npm start
 
-# UI Commands
-start-ui:
-	@echo "Starting UI server..."
-	@if [ -f ui/.ui.pid ]; then \
-		PID=$$(cat ui/.ui.pid); \
-		if ps -p $$PID > /dev/null 2>&1; then \
-			echo "UI server is already running (PID: $$PID)"; \
-			exit 1; \
-		else \
-			rm ui/.ui.pid; \
-		fi; \
-	fi
-	@cd ui && npm start > .ui.log 2>&1 &
-	@sleep 2
-	@PID=$$(lsof -ti:9853 2>/dev/null || pgrep -f "node.*server.js" | head -1); \
-	if [ -n "$$PID" ]; then \
-		echo $$PID > ui/.ui.pid; \
-		echo "UI server started (PID: $$PID)"; \
-		echo "UI available at http://localhost:9853"; \
-	else \
-		echo "Warning: Could not determine UI server PID. Check ui/.ui.log for details."; \
-	fi
+dev:
+	@echo "Starting development server..."
+	npm run dev
 
-stop-ui:
-	@echo "Stopping UI server..."
+build:
+	@echo "Building UI for production..."
+	npm run build
+
+stop:
+	@echo "Stopping servers..."
 	@PIDS=$$(lsof -ti:9853 2>/dev/null); \
 	if [ -n "$$PIDS" ]; then \
 		echo $$PIDS | xargs kill -TERM 2>/dev/null || true; \
 		sleep 2; \
 		echo $$PIDS | xargs kill -9 2>/dev/null || true; \
 	fi
-	@cd ui && pkill -f "node.*server.js" 2>/dev/null || true
-	@cd ui && pkill -9 -f "node.*server.js" 2>/dev/null || true
-	@for PID in $$(pgrep -f "npm.*start" 2>/dev/null); do \
-		if [ -n "$$PID" ]; then \
-			DIR=$$(pwdx $$PID 2>/dev/null | awk '{print $$2}' | grep -q "ui" && echo "yes" || echo "no"); \
-			if [ "$$DIR" = "yes" ]; then \
-				kill -TERM $$PID 2>/dev/null || true; \
-				sleep 1; \
-				kill -9 $$PID 2>/dev/null || true; \
-			fi; \
-		fi; \
-	done
-	@rm -f ui/.ui.pid
-	@if lsof -ti:9853 > /dev/null 2>&1; then \
-		echo "Warning: Some processes may still be running on port 9853"; \
-		lsof -ti:9853 | xargs kill -9 2>/dev/null || true; \
-	fi
-	@echo "UI server stopped"
-
-dev-ui:
-	@echo "Starting UI in development mode..."
-	cd ui && npm run dev
-
-build-ui:
-	@echo "Building UI for production..."
-	cd ui && npm run build
-
-# Server Commands
-start-server:
-	@echo "Starting MCP server..."
-	@if [ -f mcp-server/.server.pid ]; then \
-		PID=$$(cat mcp-server/.server.pid); \
-		if ps -p $$PID > /dev/null 2>&1; then \
-			echo "MCP server is already running (PID: $$PID)"; \
-			exit 1; \
-		else \
-			rm mcp-server/.server.pid; \
-		fi; \
-	fi
-	@cd mcp-server && npm start > .server.log 2>&1 &
-	@sleep 2
-	@PID=$$(lsof -ti:9851 2>/dev/null || pgrep -f "node.*mcp-shark.js" | head -1); \
-	if [ -n "$$PID" ]; then \
-		echo $$PID > mcp-server/.server.pid; \
-		echo "MCP server started (PID: $$PID)"; \
-		echo "MCP server available at http://localhost:9851/mcp"; \
-	else \
-		echo "Warning: Could not determine MCP server PID. Check mcp-server/.server.log for details."; \
-	fi
-
-stop-server:
-	@echo "Stopping MCP server..."
 	@PIDS=$$(lsof -ti:9851 2>/dev/null); \
-	if [ -z "$$PIDS" ]; then \
-		if [ -f mcp-server/.server.pid ]; then \
-			PIDS=$$(cat mcp-server/.server.pid); \
-		fi; \
-	fi; \
-	if [ -z "$$PIDS" ]; then \
-		echo "MCP server is not running"; \
-		rm -f mcp-server/.server.pid; \
-		exit 1; \
-	fi; \
-	for PID in $$PIDS; do \
-		if ps -p $$PID > /dev/null 2>&1; then \
-			echo "Stopping process $$PID..."; \
-			kill -TERM $$PID 2>/dev/null; \
-			sleep 1; \
-			if ps -p $$PID > /dev/null 2>&1; then \
-				echo "Force killing process $$PID..."; \
-				kill -9 $$PID 2>/dev/null; \
-			fi; \
-			PPID=$$(ps -o ppid= -p $$PID 2>/dev/null | tr -d ' '); \
-			if [ -n "$$PPID" ] && [ "$$PPID" != "1" ] && ps -p $$PPID > /dev/null 2>&1; then \
-				CMD=$$(ps -p $$PPID -o command= 2>/dev/null); \
-				if echo "$$CMD" | grep -q "npm\|node"; then \
-					echo "Stopping parent process $$PPID..."; \
-					kill -TERM $$PPID 2>/dev/null; \
-					sleep 1; \
-					if ps -p $$PPID > /dev/null 2>&1; then \
-						kill -9 $$PPID 2>/dev/null; \
-					fi; \
-				fi; \
-			fi; \
-		fi; \
-	done; \
-	rm -f mcp-server/.server.pid; \
-	echo "MCP server stopped"
+	if [ -n "$$PIDS" ]; then \
+		echo $$PIDS | xargs kill -TERM 2>/dev/null || true; \
+		sleep 2; \
+		echo $$PIDS | xargs kill -9 2>/dev/null || true; \
+	fi
+	@echo "Servers stopped"
 
-# Default commands (map to UI)
-start: start-ui
-	@echo ""
-	@echo "=========================================="
-	@echo "UI server started!"
-	@echo "  UI: http://localhost:9853"
-	@echo ""
-	@echo "Use the UI to configure and start the MCP server"
-	@echo "=========================================="
+# Code quality
+lint:
+	@echo "Checking for linting issues..."
+	npm run lint
 
-stop: stop-ui
+lint-fix:
+	@echo "Fixing linting issues..."
+	npm run lint:fix
+
+format:
+	@echo "Formatting code..."
+	npm run format
+
+check:
+	@echo "Checking code quality..."
+	npm run check
+
+check-fix:
+	@echo "Fixing code quality issues..."
+	npm run check:fix
 
 # Cleanup
 clean:
 	@echo "Cleaning up..."
 	@make stop 2>/dev/null || true
-	@rm -f ui/.ui.pid mcp-server/.server.pid
-	@rm -f ui/.ui.log mcp-server/.server.log
+	@rm -rf ui/dist
+	@rm -f ui/.ui.pid ui/.ui.log
+	@rm -f mcp-server/.server.pid mcp-server/.server.log
 	@echo "Cleanup complete"
-
-# Remove all node_modules folders and package-lock.json files
-clean-node-modules:
-	@echo "Removing all node_modules folders and package-lock.json files..."
-	@if [ -d "node_modules" ]; then \
-		echo "  Removing root node_modules..."; \
-		rm -rf node_modules; \
-	fi
-	@if [ -f "package-lock.json" ]; then \
-		echo "  Removing root package-lock.json..."; \
-		rm -f package-lock.json; \
-	fi
-	@if [ -d "mcp-server/node_modules" ]; then \
-		echo "  Removing mcp-server/node_modules..."; \
-		rm -rf mcp-server/node_modules; \
-	fi
-	@if [ -f "mcp-server/package-lock.json" ]; then \
-		echo "  Removing mcp-server/package-lock.json..."; \
-		rm -f mcp-server/package-lock.json; \
-	fi
-	@if [ -d "ui/node_modules" ]; then \
-		echo "  Removing ui/node_modules..."; \
-		rm -rf ui/node_modules; \
-	fi
-	@if [ -f "ui/package-lock.json" ]; then \
-		echo "  Removing ui/package-lock.json..."; \
-		rm -f ui/package-lock.json; \
-	fi
-	@echo "All node_modules folders and package-lock.json files removed!"
-	@echo "Run 'make install-all' to reinstall dependencies."
-
-# Kill all running npm and node processes
-kill-all-node:
-	@echo "Killing all npm and node processes..."
-	@PIDS=$$(pgrep -f "node|npm" 2>/dev/null || true); \
-	if [ -z "$$PIDS" ]; then \
-		echo "No npm or node processes found."; \
-	else \
-		echo "Found processes: $$PIDS"; \
-		for PID in $$PIDS; do \
-			if ps -p $$PID > /dev/null 2>&1; then \
-				echo "  Killing process $$PID..."; \
-				kill -TERM $$PID 2>/dev/null || true; \
-			fi; \
-		done; \
-		sleep 2; \
-		for PID in $$PIDS; do \
-			if ps -p $$PID > /dev/null 2>&1; then \
-				echo "  Force killing process $$PID..."; \
-				kill -9 $$PID 2>/dev/null || true; \
-			fi; \
-		done; \
-		echo "All npm and node processes killed."; \
-	fi
-

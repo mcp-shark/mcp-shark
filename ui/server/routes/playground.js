@@ -79,56 +79,53 @@ export function createPlaygroundRoutes() {
 
       const { client } = await getClient(serverName, sessionId);
 
-      let result;
-      switch (method) {
-        case 'tools/list':
-          result = await client.listTools();
-          break;
-        case 'tools/call':
-          if (!params?.name) {
-            return res.status(400).json({
-              error: 'Invalid request',
-              message: 'Tool name is required',
+      const executeMethod = async () => {
+        switch (method) {
+          case 'tools/list':
+            return await client.listTools();
+          case 'tools/call':
+            if (!params?.name) {
+              return res.status(400).json({
+                error: 'Invalid request',
+                message: 'Tool name is required',
+              });
+            }
+            return await client.callTool({
+              name: params.name,
+              arguments: params.arguments || {},
             });
-          }
-          result = await client.callTool({
-            name: params.name,
-            arguments: params.arguments || {},
-          });
-          break;
-        case 'prompts/list':
-          result = await client.listPrompts();
-          break;
-        case 'prompts/get':
-          if (!params?.name) {
-            return res.status(400).json({
-              error: 'Invalid request',
-              message: 'Prompt name is required',
+          case 'prompts/list':
+            return await client.listPrompts();
+          case 'prompts/get':
+            if (!params?.name) {
+              return res.status(400).json({
+                error: 'Invalid request',
+                message: 'Prompt name is required',
+              });
+            }
+            return await client.getPrompt({
+              name: params.name,
+              arguments: params.arguments || {},
             });
-          }
-          result = await client.getPrompt({
-            name: params.name,
-            arguments: params.arguments || {},
-          });
-          break;
-        case 'resources/list':
-          result = await client.listResources();
-          break;
-        case 'resources/read':
-          if (!params?.uri) {
+          case 'resources/list':
+            return await client.listResources();
+          case 'resources/read':
+            if (!params?.uri) {
+              return res.status(400).json({
+                error: 'Invalid request',
+                message: 'Resource URI is required',
+              });
+            }
+            return await client.readResource({ uri: params.uri });
+          default:
             return res.status(400).json({
-              error: 'Invalid request',
-              message: 'Resource URI is required',
+              error: 'Unsupported method',
+              message: `Method ${method} is not supported`,
             });
-          }
-          result = await client.readResource({ uri: params.uri });
-          break;
-        default:
-          return res.status(400).json({
-            error: 'Unsupported method',
-            message: `Method ${method} is not supported`,
-          });
-      }
+        }
+      };
+
+      const result = await executeMethod();
 
       // Return session ID in response
       res.setHeader('Mcp-Session-Id', sessionId);

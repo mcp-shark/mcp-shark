@@ -1,9 +1,9 @@
 import { colors, fonts, withOpacity } from '../../theme';
 import {
-  formatRelativeTime,
   formatDateTime,
-  getSourceDest,
+  formatRelativeTime,
   getEndpoint,
+  getSourceDest,
 } from '../../utils/requestUtils.js';
 
 export default function OrphanedResponseRow({ response, selected, firstRequestTime, onSelect }) {
@@ -14,6 +14,14 @@ export default function OrphanedResponseRow({ response, selected, firstRequestTi
   return (
     <tr
       onClick={() => onSelect(response)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect(response);
+        }
+      }}
+      tabIndex={0}
+      aria-label={`Select orphaned response ${response.frame_number}`}
       style={{
         cursor: 'pointer',
         background: isSelected ? colors.bgSelected : colors.bgUnpaired,

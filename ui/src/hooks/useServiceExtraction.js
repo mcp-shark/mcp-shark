@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export function useServiceExtraction(fileContent, filePath) {
   const [services, setServices] = useState([]);

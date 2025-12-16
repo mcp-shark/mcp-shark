@@ -8,36 +8,32 @@ export function useMcpDiscovery(setError) {
   const [sessionId, setSessionId] = useState(null);
 
   const makeMcpRequest = async (method, params = {}) => {
-    try {
-      const headers = { 'Content-Type': 'application/json' };
-      if (sessionId) {
-        headers['Mcp-Session-Id'] = sessionId;
-      }
-
-      const response = await fetch('/api/playground/proxy', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ method, params }),
-      });
-
-      const data = await response.json();
-
-      const responseSessionId =
-        response.headers.get('Mcp-Session-Id') ||
-        response.headers.get('mcp-session-id') ||
-        data._sessionId;
-      if (responseSessionId && responseSessionId !== sessionId) {
-        setSessionId(responseSessionId);
-      }
-
-      if (!response.ok) {
-        throw new Error(data.error?.message || data.message || 'Request failed');
-      }
-
-      return data.result || data;
-    } catch (err) {
-      throw err;
+    const headers = { 'Content-Type': 'application/json' };
+    if (sessionId) {
+      headers['Mcp-Session-Id'] = sessionId;
     }
+
+    const response = await fetch('/api/playground/proxy', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ method, params }),
+    });
+
+    const data = await response.json();
+
+    const responseSessionId =
+      response.headers.get('Mcp-Session-Id') ||
+      response.headers.get('mcp-session-id') ||
+      data._sessionId;
+    if (responseSessionId && responseSessionId !== sessionId) {
+      setSessionId(responseSessionId);
+    }
+
+    if (!response.ok) {
+      throw new Error(data.error?.message || data.message || 'Request failed');
+    }
+
+    return data.result || data;
   };
 
   const discoverMcpData = async () => {
@@ -95,7 +91,7 @@ export function useMcpDiscovery(setError) {
         setMcpData({
           server: {
             name: firstServer.name,
-            description: `Discovered from MCP config`,
+            description: 'Discovered from MCP config',
           },
           tools: firstServer.tools || [],
           resources: firstServer.resources || [],

@@ -1,12 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
-import { colors, fonts } from './theme';
-import PacketDetailHeader from './components/PacketDetailHeader';
-import TabNavigation from './components/TabNavigation';
+import { useEffect, useRef, useState } from 'react';
 import DetailsTab from './components/DetailsTab';
 import HexTab from './components/HexTab';
+import PacketDetailHeader from './components/PacketDetailHeader';
 import RawTab from './components/RawTab';
-import { generateHexDump, createFullRequestText } from './utils/hexUtils.js';
+import TabNavigation from './components/TabNavigation';
+import { colors } from './theme';
 import { fadeIn } from './utils/animations';
+import { createFullRequestText, generateHexDump } from './utils/hexUtils.js';
 
 function RequestDetail({ request, onClose, requests = [] }) {
   const [activeTab, setActiveTab] = useState('details');
@@ -20,7 +20,9 @@ function RequestDetail({ request, onClose, requests = [] }) {
     }
   }, [activeTab]);
 
-  if (!request) return null;
+  if (!request) {
+    return null;
+  }
 
   // Helper function to extract JSON-RPC method
   const getJsonRpcMethod = (req) => {
@@ -38,7 +40,7 @@ function RequestDetail({ request, onClose, requests = [] }) {
           if (body && typeof body === 'object' && body.method) {
             return body.method;
           }
-        } catch (e) {
+        } catch (_e) {
           // Failed to parse
         }
       }
@@ -48,7 +50,7 @@ function RequestDetail({ request, onClose, requests = [] }) {
           if (body && typeof body === 'object' && body.method) {
             return body.method;
           }
-        } catch (e) {
+        } catch (_e) {
           // Failed to parse
         }
       }
@@ -61,7 +63,9 @@ function RequestDetail({ request, onClose, requests = [] }) {
   const findMatchingPair = () => {
     const matches = (req, resp) => {
       // Session ID must match
-      if (req.session_id !== resp.session_id) return false;
+      if (req.session_id !== resp.session_id) {
+        return false;
+      }
 
       // JSON-RPC Method must match
       const reqMethod = getJsonRpcMethod(req);
@@ -78,7 +82,9 @@ function RequestDetail({ request, onClose, requests = [] }) {
         return false;
       }
 
-      if (reqMethod !== respMethod) return false;
+      if (reqMethod !== respMethod) {
+        return false;
+      }
 
       // If JSON-RPC ID exists, it must match
       if (req.jsonrpc_id && resp.jsonrpc_id) {
@@ -94,13 +100,12 @@ function RequestDetail({ request, onClose, requests = [] }) {
         (r) =>
           r.direction === 'response' && matches(request, r) && r.frame_number > request.frame_number
       );
-    } else {
-      // Find the corresponding request
-      return requests.find(
-        (r) =>
-          r.direction === 'request' && matches(r, request) && r.frame_number < request.frame_number
-      );
     }
+    // Find the corresponding request
+    return requests.find(
+      (r) =>
+        r.direction === 'request' && matches(r, request) && r.frame_number < request.frame_number
+    );
   };
 
   const matchingPair = findMatchingPair();

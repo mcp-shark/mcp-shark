@@ -1,9 +1,9 @@
 import { colors, fonts } from '../theme';
-import { useMcpPlayground } from './McpPlayground/useMcpPlayground';
 import LoadingModal from './McpPlayground/LoadingModal';
-import ToolsSection from './McpPlayground/ToolsSection';
 import PromptsSection from './McpPlayground/PromptsSection';
 import ResourcesSection from './McpPlayground/ResourcesSection';
+import ToolsSection from './McpPlayground/ToolsSection';
+import { useMcpPlayground } from './McpPlayground/useMcpPlayground';
 
 function McpPlayground() {
   const {
@@ -100,6 +100,7 @@ function McpPlayground() {
               }}
             >
               <label
+                htmlFor="mcp-server-select"
                 style={{
                   fontSize: '13px',
                   fontFamily: fonts.body,
@@ -119,6 +120,7 @@ function McpPlayground() {
                 {availableServers.map((server) => (
                   <button
                     key={server}
+                    type="button"
                     onClick={() => setSelectedServer(server)}
                     style={{
                       padding: '10px 18px',
@@ -169,6 +171,7 @@ function McpPlayground() {
             {['tools', 'prompts', 'resources'].map((section) => (
               <button
                 key={section}
+                type="button"
                 onClick={() => setActiveSection(section)}
                 style={{
                   padding: '10px 18px',

@@ -1,7 +1,7 @@
 import { colors } from '../../theme';
-import ServerSelectionRow from './ServerSelectionRow';
-import ScanResultsDisplay from './ScanResultsDisplay';
 import ScanDetailView from './ScanDetailView';
+import ScanResultsDisplay from './ScanResultsDisplay';
+import ServerSelectionRow from './ServerSelectionRow';
 
 export default function ScanViewContent({
   discoveredServers,

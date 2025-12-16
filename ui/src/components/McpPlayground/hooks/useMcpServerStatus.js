@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export function useMcpServerStatus() {
   const [serverStatus, setServerStatus] = useState(null);
@@ -6,7 +6,7 @@ export function useMcpServerStatus() {
   const [availableServers, setAvailableServers] = useState([]);
   const [selectedServer, setSelectedServer] = useState(null);
 
-  const checkServerStatus = async () => {
+  const checkServerStatus = useCallback(async () => {
     try {
       const res = await fetch('/api/composite/status');
       if (!res.ok) {
@@ -23,15 +23,15 @@ export function useMcpServerStatus() {
       } else if (data.running && showLoadingModal) {
         setShowLoadingModal(false);
       }
-    } catch (err) {
+    } catch (_err) {
       setServerStatus({ running: false });
       if (!showLoadingModal) {
         setShowLoadingModal(true);
       }
     }
-  };
+  }, [serverStatus, showLoadingModal]);
 
-  const loadAvailableServers = async () => {
+  const loadAvailableServers = useCallback(async () => {
     try {
       const res = await fetch('/api/composite/servers');
       if (res.ok) {
@@ -44,14 +44,14 @@ export function useMcpServerStatus() {
     } catch (err) {
       console.error('Failed to load servers:', err);
     }
-  };
+  }, [selectedServer]);
 
   useEffect(() => {
     checkServerStatus();
     loadAvailableServers();
     const interval = setInterval(checkServerStatus, 2000);
     return () => clearInterval(interval);
-  }, []);
+  }, [checkServerStatus, loadAvailableServers]);
 
   useEffect(() => {
     if (availableServers.length > 0 && !selectedServer) {

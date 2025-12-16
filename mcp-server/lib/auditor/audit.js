@@ -4,6 +4,17 @@ import { getSessionFromRequest } from '../server/internal/handlers/common.js';
 
 /* ---------- helpers ---------- */
 
+/**
+ * Safely parse JSON string, returning null if parsing fails
+ */
+function parseJsonSafely(jsonString) {
+  try {
+    return JSON.parse(jsonString);
+  } catch {
+    return null;
+  }
+}
+
 function toBuffer(body) {
   if (body === undefined || body === null) {
     return Buffer.alloc(0);
@@ -13,11 +24,7 @@ function toBuffer(body) {
     return body;
   }
 
-  if (
-    typeof body === 'object' &&
-    body.type === 'Buffer' &&
-    Array.isArray(body.data)
-  ) {
+  if (typeof body === 'object' && body.type === 'Buffer' && Array.isArray(body.data)) {
     return Buffer.from(body.data);
   }
 
@@ -52,7 +59,7 @@ function captureResponse(res) {
   const wrapped = new Proxy(res, {
     get(target, prop, receiver) {
       if (prop === 'write') {
-        return function (chunk, ...args) {
+        return (chunk, ...args) => {
           if (chunk) {
             const buf = toBuffer(chunk);
             chunks.push(buf);
@@ -62,7 +69,7 @@ function captureResponse(res) {
       }
 
       if (prop === 'end') {
-        return function (chunk, ...args) {
+        return (chunk, ...args) => {
           if (chunk) {
             const buf = toBuffer(chunk);
             chunks.push(buf);
@@ -114,12 +121,12 @@ function rebuildReq(req, buf) {
 }
 
 function waitForResponseFinish(res) {
-  return new Promise(resolve => {
-    let done = false;
+  return new Promise((resolve) => {
+    const state = { done: false };
 
     function finishOnce() {
-      if (!done) {
-        done = true;
+      if (!state.done) {
+        state.done = true;
         resolve();
       }
     }
@@ -154,13 +161,7 @@ export async function withAuditRequestResponseHandler(
 
   // Extract request body as string
   const reqBodyStr = reqBuf.toString('utf8');
-  const reqBodyJson = (() => {
-    try {
-      return JSON.parse(reqBodyStr);
-    } catch {
-      return null;
-    }
-  })();
+  const reqBodyJson = parseJsonSafely(reqBodyStr);
 
   // Log request packet to database
   const requestResult = auditLogger.logRequestPacket({
@@ -177,15 +178,7 @@ export async function withAuditRequestResponseHandler(
 
   const replayReq = req.body ? req : rebuildReq(req, reqBuf);
 
-  const parsedForTransport = reqJsonRpc
-    ? (() => {
-        try {
-          return JSON.parse(reqBuf.toString('utf8'));
-        } catch {
-          return undefined;
-        }
-      })()
-    : undefined;
+  const parsedForTransport = reqJsonRpc ? parseJsonSafely(reqBuf.toString('utf8')) : undefined;
 
   // hand over to transport
   if (!transport || typeof transport.handleRequest !== 'function') {
@@ -206,19 +199,10 @@ export async function withAuditRequestResponseHandler(
 
   // Extract response body as string
   const resBodyStr = resBuf.toString('utf8');
-  const resBodyJson = (() => {
-    try {
-      return JSON.parse(resBodyStr);
-    } catch {
-      return null;
-    }
-  })();
+  const resBodyJson = parseJsonSafely(resBodyStr);
 
   // Extract JSON-RPC ID from request for correlation
-  const jsonrpcId =
-    reqJsonRpc?.payload?.id !== undefined
-      ? String(reqJsonRpc.payload.id)
-      : null;
+  const jsonrpcId = reqJsonRpc?.payload?.id !== undefined ? String(reqJsonRpc.payload.id) : null;
 
   // Log response packet to database
   // Use the same session ID from the request

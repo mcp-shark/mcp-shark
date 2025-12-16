@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
-import { colors } from './theme';
-import LogsToolbar from './components/LogsToolbar';
+import { useEffect, useRef, useState } from 'react';
 import LogsDisplay from './components/LogsDisplay';
+import LogsToolbar from './components/LogsToolbar';
+import { colors } from './theme';
 
 function CompositeLogs() {
   const [logs, setLogs] = useState([]);
@@ -11,27 +11,23 @@ function CompositeLogs() {
   const logEndRef = useRef(null);
   const wsRef = useRef(null);
 
-  const scrollToTop = () => {
+  useEffect(() => {
     if (autoScroll && logEndRef.current) {
       logEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  };
+  }, [autoScroll]);
 
   useEffect(() => {
-    scrollToTop();
-  }, [logs, autoScroll]);
+    const loadLogs = async () => {
+      try {
+        const response = await fetch('/api/composite/logs?limit=5000');
+        const data = await response.json();
+        setLogs(data);
+      } catch (error) {
+        console.error('Failed to load logs:', error);
+      }
+    };
 
-  const loadLogs = async () => {
-    try {
-      const response = await fetch('/api/composite/logs?limit=5000');
-      const data = await response.json();
-      setLogs(data);
-    } catch (error) {
-      console.error('Failed to load logs:', error);
-    }
-  };
-
-  useEffect(() => {
     loadLogs();
 
     const wsUrl = import.meta.env.DEV
@@ -106,8 +102,12 @@ function CompositeLogs() {
   };
 
   const filteredLogs = logs.filter((log) => {
-    if (logType !== 'all' && log.type !== logType) return false;
-    if (filter && !log.line.toLowerCase().includes(filter.toLowerCase())) return false;
+    if (logType !== 'all' && log.type !== logType) {
+      return false;
+    }
+    if (filter && !log.line.toLowerCase().includes(filter.toLowerCase())) {
+      return false;
+    }
     return true;
   });
 

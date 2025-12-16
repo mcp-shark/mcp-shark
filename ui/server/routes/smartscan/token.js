@@ -4,7 +4,7 @@ import { readSmartScanToken, writeSmartScanToken } from '../../utils/smartscan-t
  * Get stored Smart Scan token
  * GET /api/smartscan/token
  */
-export function getToken(req, res) {
+export function getToken(_req, res) {
   try {
     const token = readSmartScanToken();
     return res.json({

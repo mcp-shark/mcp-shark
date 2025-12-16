@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export function useAppState() {
   const [activeTab, setActiveTab] = useState('traffic');
@@ -81,8 +81,49 @@ export function useAppState() {
       }
     };
 
+    const initData = async () => {
+      try {
+        const queryParams = new URLSearchParams();
+        if (filters.search) queryParams.append('search', filters.search);
+        if (filters.serverName) queryParams.append('serverName', filters.serverName);
+        if (filters.sessionId) queryParams.append('sessionId', filters.sessionId);
+        if (filters.method) queryParams.append('method', filters.method);
+        if (filters.jsonrpcMethod) queryParams.append('jsonrpcMethod', filters.jsonrpcMethod);
+        if (filters.statusCode) queryParams.append('statusCode', filters.statusCode);
+        if (filters.jsonrpcId) queryParams.append('jsonrpcId', filters.jsonrpcId);
+        queryParams.append('limit', '5000');
+
+        const response = await fetch(`/api/requests?${queryParams}`);
+        const data = await response.json();
+        setRequests(data);
+
+        if (data.length > 0) {
+          const oldest = data[data.length - 1]?.timestamp_iso;
+          if (oldest) {
+            setFirstRequestTime(oldest);
+          }
+        }
+
+        // Also load statistics
+        const statsQueryParams = new URLSearchParams();
+        if (filters.search) statsQueryParams.append('search', filters.search);
+        if (filters.serverName) statsQueryParams.append('serverName', filters.serverName);
+        if (filters.sessionId) statsQueryParams.append('sessionId', filters.sessionId);
+        if (filters.method) statsQueryParams.append('method', filters.method);
+        if (filters.jsonrpcMethod) statsQueryParams.append('jsonrpcMethod', filters.jsonrpcMethod);
+        if (filters.statusCode) statsQueryParams.append('statusCode', filters.statusCode);
+        if (filters.jsonrpcId) statsQueryParams.append('jsonrpcId', filters.jsonrpcId);
+
+        const statsResponse = await fetch(`/api/statistics?${statsQueryParams}`);
+        const statsData = await statsResponse.json();
+        setStats(statsData);
+      } catch (error) {
+        console.error('Failed to load requests:', error);
+      }
+    };
+
     checkTourState();
-    loadRequests();
+    initData();
 
     const wsUrl = import.meta.env.DEV
       ? 'ws://localhost:9853'
@@ -92,7 +133,7 @@ export function useAppState() {
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
-      ws.onmessage = (e) => {
+      ws.onmessage = async (e) => {
         const msg = JSON.parse(e.data);
         if (msg.type === 'update') {
           setRequests(msg.data);
@@ -103,7 +144,22 @@ export function useAppState() {
             }
           }
           // Update statistics when new data arrives via WebSocket
-          loadStatistics();
+          try {
+            const queryParams = new URLSearchParams();
+            if (filters.search) queryParams.append('search', filters.search);
+            if (filters.serverName) queryParams.append('serverName', filters.serverName);
+            if (filters.sessionId) queryParams.append('sessionId', filters.sessionId);
+            if (filters.method) queryParams.append('method', filters.method);
+            if (filters.jsonrpcMethod) queryParams.append('jsonrpcMethod', filters.jsonrpcMethod);
+            if (filters.statusCode) queryParams.append('statusCode', filters.statusCode);
+            if (filters.jsonrpcId) queryParams.append('jsonrpcId', filters.jsonrpcId);
+
+            const statsResponse = await fetch(`/api/statistics?${queryParams}`);
+            const statsData = await statsResponse.json();
+            setStats(statsData);
+          } catch (error) {
+            console.error('Failed to load statistics:', error);
+          }
         }
       };
 
@@ -114,7 +170,7 @@ export function useAppState() {
       ws.onclose = () => {
         // Connection closed - will attempt to reconnect on next mount if needed
       };
-    } catch (err) {
+    } catch (_err) {
       // Silently handle WebSocket creation errors
     }
 
@@ -123,10 +179,51 @@ export function useAppState() {
         wsRef.current.close();
       }
     };
-  }, []);
+  }, [filters]);
 
   useEffect(() => {
-    loadRequests();
+    const fetchData = async () => {
+      try {
+        const queryParams = new URLSearchParams();
+        if (filters.search) queryParams.append('search', filters.search);
+        if (filters.serverName) queryParams.append('serverName', filters.serverName);
+        if (filters.sessionId) queryParams.append('sessionId', filters.sessionId);
+        if (filters.method) queryParams.append('method', filters.method);
+        if (filters.jsonrpcMethod) queryParams.append('jsonrpcMethod', filters.jsonrpcMethod);
+        if (filters.statusCode) queryParams.append('statusCode', filters.statusCode);
+        if (filters.jsonrpcId) queryParams.append('jsonrpcId', filters.jsonrpcId);
+        queryParams.append('limit', '5000');
+
+        const response = await fetch(`/api/requests?${queryParams}`);
+        const data = await response.json();
+        setRequests(data);
+
+        if (data.length > 0) {
+          const oldest = data[data.length - 1]?.timestamp_iso;
+          if (oldest) {
+            setFirstRequestTime(oldest);
+          }
+        }
+
+        // Also load statistics
+        const statsQueryParams = new URLSearchParams();
+        if (filters.search) statsQueryParams.append('search', filters.search);
+        if (filters.serverName) statsQueryParams.append('serverName', filters.serverName);
+        if (filters.sessionId) statsQueryParams.append('sessionId', filters.sessionId);
+        if (filters.method) statsQueryParams.append('method', filters.method);
+        if (filters.jsonrpcMethod) statsQueryParams.append('jsonrpcMethod', filters.jsonrpcMethod);
+        if (filters.statusCode) statsQueryParams.append('statusCode', filters.statusCode);
+        if (filters.jsonrpcId) statsQueryParams.append('jsonrpcId', filters.jsonrpcId);
+
+        const statsResponse = await fetch(`/api/statistics?${statsQueryParams}`);
+        const statsData = await statsResponse.json();
+        setStats(statsData);
+      } catch (error) {
+        console.error('Failed to load requests:', error);
+      }
+    };
+
+    fetchData();
   }, [filters]);
 
   // Periodically update statistics when on traffic tab
@@ -136,8 +233,23 @@ export function useAppState() {
     }
 
     // Update statistics every 2 seconds
-    const interval = setInterval(() => {
-      loadStatistics();
+    const interval = setInterval(async () => {
+      try {
+        const queryParams = new URLSearchParams();
+        if (filters.search) queryParams.append('search', filters.search);
+        if (filters.serverName) queryParams.append('serverName', filters.serverName);
+        if (filters.sessionId) queryParams.append('sessionId', filters.sessionId);
+        if (filters.method) queryParams.append('method', filters.method);
+        if (filters.jsonrpcMethod) queryParams.append('jsonrpcMethod', filters.jsonrpcMethod);
+        if (filters.statusCode) queryParams.append('statusCode', filters.statusCode);
+        if (filters.jsonrpcId) queryParams.append('jsonrpcId', filters.jsonrpcId);
+
+        const statsResponse = await fetch(`/api/statistics?${queryParams}`);
+        const statsData = await statsResponse.json();
+        setStats(statsData);
+      } catch (error) {
+        console.error('Failed to load statistics:', error);
+      }
     }, 2000);
 
     return () => clearInterval(interval);

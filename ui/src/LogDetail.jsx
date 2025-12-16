@@ -16,6 +16,7 @@ function LogDetail({ log, onClose }) {
       >
         <h3 style={{ fontSize: '14px', fontWeight: 'normal' }}>Details</h3>
         <button
+          type="button"
           onClick={onClose}
           style={{
             background: 'none',

@@ -1,7 +1,7 @@
 import React from 'react';
 import { colors, fonts } from '../theme';
-import RequestRow from './RequestRow';
 import GroupHeader from './GroupHeader';
+import RequestRow from './RequestRow';
 
 export default function GroupedByServerView({
   groupedData,

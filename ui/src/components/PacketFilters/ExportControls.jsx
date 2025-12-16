@@ -1,6 +1,6 @@
-import { colors, fonts } from '../../theme';
 import { IconDownload } from '@tabler/icons-react';
 import anime from 'animejs';
+import { colors, fonts } from '../../theme';
 
 export default function ExportControls({ stats, onExport }) {
   return (
@@ -50,6 +50,7 @@ export default function ExportControls({ stats, onExport }) {
         }}
       >
         <button
+          type="button"
           onClick={() => onExport('json')}
           style={{
             padding: '8px 14px',

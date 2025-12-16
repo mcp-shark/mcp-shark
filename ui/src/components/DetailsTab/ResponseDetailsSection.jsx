@@ -1,14 +1,16 @@
 import { colors, fonts } from '../../theme';
+import CollapsibleSection from '../CollapsibleSection';
+import BodySection from './BodySection';
 import CollapsibleRequestResponse from './CollapsibleRequestResponse';
+import HeadersSection from './HeadersSection';
+import InfoSection from './InfoSection';
 import NetworkInfoSection from './NetworkInfoSection';
 import ProtocolInfoSection from './ProtocolInfoSection';
-import HeadersSection from './HeadersSection';
-import BodySection from './BodySection';
-import InfoSection from './InfoSection';
-import CollapsibleSection from '../CollapsibleSection';
 
 export default function ResponseDetailsSection({ response, responseHeaders, responseBody }) {
-  if (!response) return null;
+  if (!response) {
+    return null;
+  }
 
   return (
     <CollapsibleRequestResponse

@@ -1,10 +1,14 @@
-import { colors, fonts } from '../theme';
 import { IconX } from '@tabler/icons-react';
+import { colors, fonts } from '../theme';
 
 function PacketDetailHeader({ request, onClose, matchingPair }) {
   const formatBytes = (bytes) => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+    if (bytes < 1024) {
+      return `${bytes} B`;
+    }
+    if (bytes < 1024 * 1024) {
+      return `${(bytes / 1024).toFixed(2)} KB`;
+    }
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   };
 
@@ -59,6 +63,7 @@ function PacketDetailHeader({ request, onClose, matchingPair }) {
         </span>
       </div>
       <button
+        type="button"
         onClick={onClose}
         style={{
           background: 'none',

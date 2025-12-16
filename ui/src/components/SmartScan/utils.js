@@ -1,7 +1,9 @@
 import { colors } from '../../theme';
 
 export function getRiskLevelColor(riskLevel) {
-  if (!riskLevel) return colors.textTertiary;
+  if (!riskLevel) {
+    return colors.textTertiary;
+  }
   switch (riskLevel.toLowerCase()) {
     case 'none':
       return colors.accentGreen;

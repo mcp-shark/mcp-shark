@@ -3,9 +3,9 @@
  * Proxies requests to the Smart Scan API to avoid CORS issues
  */
 
-import * as tokenRoutes from './smartscan/token.js';
 import * as discoverRoutes from './smartscan/discover.js';
 import * as scanRoutes from './smartscan/scans.js';
+import * as tokenRoutes from './smartscan/token.js';
 
 export function createSmartScanRoutes() {
   const router = {};

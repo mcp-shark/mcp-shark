@@ -1,5 +1,5 @@
-import { colors, fonts } from '../../theme';
 import anime from 'animejs';
+import { colors, fonts } from '../../theme';
 
 export default function FilterInput({
   type = 'text',

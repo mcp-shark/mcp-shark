@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export function useTokenManagement() {
   const [apiToken, setApiToken] = useState('');
@@ -22,7 +22,7 @@ export function useTokenManagement() {
           setApiToken(data.token);
         }
       }
-    } catch (err) {
+    } catch (_err) {
       console.debug('No stored token found');
     }
   };

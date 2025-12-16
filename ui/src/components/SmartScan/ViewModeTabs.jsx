@@ -13,6 +13,7 @@ export default function ViewModeTabs({ viewMode, setViewMode, onSwitchToScan, on
       }}
     >
       <button
+        type="button"
         onClick={() => {
           setViewMode('scan');
           onSwitchToScan?.();
@@ -33,6 +34,7 @@ export default function ViewModeTabs({ viewMode, setViewMode, onSwitchToScan, on
         Scan Servers
       </button>
       <button
+        type="button"
         onClick={() => {
           setViewMode('list');
           onSwitchToList?.();

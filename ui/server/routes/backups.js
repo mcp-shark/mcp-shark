@@ -1,11 +1,19 @@
-import * as path from 'node:path';
 import * as fs from 'node:fs';
 import { homedir } from 'node:os';
+import * as path from 'node:path';
+
+function tryParseJson(content) {
+  try {
+    return JSON.parse(content);
+  } catch (_e) {
+    return null;
+  }
+}
 
 export function createBackupRoutes() {
   const router = {};
 
-  router.listBackups = (req, res) => {
+  router.listBackups = (_req, res) => {
     try {
       const backups = [];
       const homeDir = homedir();
@@ -97,25 +105,31 @@ export function createBackupRoutes() {
       }
 
       // Determine original path
-      let targetPath;
-      if (originalPath) {
-        targetPath = originalPath.startsWith('~')
-          ? path.join(homedir(), originalPath.slice(1))
-          : originalPath;
-      } else {
-        // Try to extract from backup filename
-        if (resolvedBackupPath.endsWith('.backup')) {
-          targetPath = resolvedBackupPath.replace('.backup', '');
-        } else {
-          // New format: .mcp.json-mcpshark.<datetime>.json
-          const match = path.basename(resolvedBackupPath).match(/^\.(.+)-mcpshark\./);
-          if (match) {
-            const originalBasename = match[1];
-            targetPath = path.join(path.dirname(resolvedBackupPath), originalBasename);
-          } else {
-            return res.status(400).json({ error: 'Could not determine original file path' });
-          }
+      const determineTargetPath = (originalPath, backupPath) => {
+        if (originalPath) {
+          return originalPath.startsWith('~')
+            ? path.join(homedir(), originalPath.slice(1))
+            : originalPath;
         }
+
+        // Try to extract from backup filename
+        if (backupPath.endsWith('.backup')) {
+          return backupPath.replace('.backup', '');
+        }
+
+        // New format: .mcp.json-mcpshark.<datetime>.json
+        const match = path.basename(backupPath).match(/^\.(.+)-mcpshark\./);
+        if (match) {
+          const originalBasename = match[1];
+          return path.join(path.dirname(backupPath), originalBasename);
+        }
+
+        return null;
+      };
+
+      const targetPath = determineTargetPath(originalPath, resolvedBackupPath);
+      if (!targetPath) {
+        return res.status(400).json({ error: 'Could not determine original file path' });
       }
 
       const backupContent = fs.readFileSync(resolvedBackupPath, 'utf8');
@@ -171,13 +185,7 @@ export function createBackupRoutes() {
       }
 
       const content = fs.readFileSync(resolvedBackupPath, 'utf-8');
-      const parsed = (() => {
-        try {
-          return JSON.parse(content);
-        } catch (e) {
-          return null;
-        }
-      })();
+      const parsed = tryParseJson(content);
 
       const stats = fs.statSync(resolvedBackupPath);
 

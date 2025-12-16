@@ -2,7 +2,9 @@ import { colors, fonts } from '../../theme';
 import CollapsibleSection from '../CollapsibleSection';
 
 export default function BodySection({ body, title, titleColor }) {
-  if (!body) return null;
+  if (!body) {
+    return null;
+  }
 
   return (
     <CollapsibleSection title={title || 'Body'} titleColor={titleColor}>

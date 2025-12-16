@@ -1,6 +1,6 @@
-import { CheckIcon, CacheIcon, ExternalLinkIcon } from '../../SmartScanIcons';
 import { IconEye } from '@tabler/icons-react';
 import { colors, fonts } from '../../../theme';
+import { CacheIcon, CheckIcon, ExternalLinkIcon } from '../../SmartScanIcons';
 import { getRiskLevelColor } from '../utils';
 
 export default function BatchResultItem({ result, onViewScan }) {
@@ -64,6 +64,7 @@ export default function BatchResultItem({ result, onViewScan }) {
             )}
             {onViewScan && result.data && (
               <button
+                type="button"
                 onClick={() => onViewScan(result.data)}
                 style={{
                   display: 'inline-flex',

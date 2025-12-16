@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { colors, fonts } from '../theme';
-import TourTooltipHeader from './TourTooltip/TourTooltipHeader';
 import TourTooltipButtons from './TourTooltip/TourTooltipButtons';
+import TourTooltipHeader from './TourTooltip/TourTooltipHeader';
 import { useTooltipPosition } from './TourTooltip/useTooltipPosition';
 
 function TourTooltip({ elementRect, step, currentStep, totalSteps, onNext, onPrevious, onSkip }) {
@@ -17,9 +17,17 @@ function TourTooltip({ elementRect, step, currentStep, totalSteps, onNext, onPre
   }
 
   return (
-    <div
+    <button
+      type="button"
       ref={tooltipRef}
       onMouseDown={(e) => handleMouseDown(e, tooltipRef)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleMouseDown(e, tooltipRef);
+        }
+      }}
+      aria-label="Draggable tooltip"
       style={{
         position: 'fixed',
         left: `${position.left}px`,
@@ -76,7 +84,7 @@ function TourTooltip({ elementRect, step, currentStep, totalSteps, onNext, onPre
         onPrevious={onPrevious}
         onSkip={onSkip}
       />
-    </div>
+    </button>
   );
 }
 

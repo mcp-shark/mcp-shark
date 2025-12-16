@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const tourSteps = [
   {
     target: '[data-tour="tabs"]',

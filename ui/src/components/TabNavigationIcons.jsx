@@ -1,13 +1,13 @@
 // Tabler Icons for Tab Navigation
 // Using @tabler/icons-react - install with: npm install @tabler/icons-react
 import {
-  IconNetwork,
-  IconFileText,
-  IconSettings,
   IconBrandStackoverflow,
-  IconShield,
-  IconMenu2,
   IconChevronDown,
+  IconFileText,
+  IconMenu2,
+  IconNetwork,
+  IconSettings,
+  IconShield,
 } from '@tabler/icons-react';
 
 // Wrapper components to match existing API

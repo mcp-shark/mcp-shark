@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
-import { colors, fonts } from '../../theme';
 import anime from 'animejs';
+import { useEffect } from 'react';
+import { colors, fonts } from '../../theme';
 
 export default function DesktopTabs({ tabs, activeTab, onTabChange, tabRefs, indicatorRef }) {
   useEffect(() => {
@@ -21,8 +21,13 @@ export default function DesktopTabs({ tabs, activeTab, onTabChange, tabRefs, ind
     <div style={{ position: 'relative', display: 'flex', flex: 1 }}>
       {tabs.map((tab) => (
         <button
+          type="button"
           key={tab.id}
-          ref={(el) => (tabRefs.current[tab.id] = el)}
+          ref={(el) => {
+            if (el) {
+              tabRefs.current[tab.id] = el;
+            }
+          }}
           data-tour={
             tab.id === 'traffic'
               ? 'traffic-tab'

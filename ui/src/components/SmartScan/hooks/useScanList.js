@@ -23,7 +23,7 @@ export function useScanList(apiToken, setError) {
       if (cacheResponse.ok) {
         const scans = cacheData.scans || [];
         console.log(`[useScanList] Loaded ${scans.length} cached scans from API`);
-        console.log(`[useScanList] Full cacheData:`, cacheData);
+        console.log('[useScanList] Full cacheData:', cacheData);
 
         // Debug: Log first scan structure to see what we're receiving
         if (scans.length > 0) {
@@ -54,9 +54,9 @@ export function useScanList(apiToken, setError) {
           // Extract server name from multiple possible locations
           // Handle empty strings, null, undefined
           const serverName =
-            (scan.serverName && scan.serverName.trim()) ||
-            (scan.server_name && scan.server_name.trim()) ||
-            (scan.server?.name && scan.server.name.trim()) ||
+            scan.serverName?.trim() ||
+            scan.server_name?.trim() ||
+            scan.server?.name?.trim() ||
             'Unknown Server';
 
           console.log(`[useScanList] Extracted serverName for scan ${index}: "${serverName}"`);
@@ -79,12 +79,13 @@ export function useScanList(apiToken, setError) {
           // Get the actual scan data - it might be nested
           // scan.data could be the scan result from API which has { success, data, scan_id, ... }
           // or it could be the direct scan data
-          let scanData = scan.data || scan.result || scan;
+          const baseScanData = scan.data || scan.result || scan;
 
           // If scanData has a nested 'data' property (from API response), use that
-          if (scanData && scanData.data && typeof scanData.data === 'object') {
-            scanData = scanData.data;
-          }
+          const scanData =
+            baseScanData?.data && typeof baseScanData.data === 'object'
+              ? baseScanData.data
+              : baseScanData;
 
           const transformed = {
             serverName: serverName,
@@ -144,7 +145,7 @@ export function useScanList(apiToken, setError) {
         r.data?.data?.id === scanId ||
         r.data?.data?.scan_id === scanId
     );
-    if (cachedResult && cachedResult.cached && cachedResult.data?.data) {
+    if (cachedResult?.cached && cachedResult.data?.data) {
       // Use the cached scan data directly
       const scanData = cachedResult.data.data;
       setSelectedScan({

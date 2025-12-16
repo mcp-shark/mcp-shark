@@ -1,9 +1,11 @@
 import { colors, fonts } from '../../theme';
-import CollapsibleSection from '../CollapsibleSection';
 import { getInfo } from '../../utils/requestUtils';
+import CollapsibleSection from '../CollapsibleSection';
 
 export default function InfoSection({ data, titleColor }) {
-  if (!data) return null;
+  if (!data) {
+    return null;
+  }
 
   const info = getInfo(data);
 

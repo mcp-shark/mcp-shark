@@ -1,13 +1,13 @@
+import { IconSearch, IconTrash } from '@tabler/icons-react';
+import anime from 'animejs';
 import { useEffect, useRef, useState } from 'react';
+import ConfirmationModal from './components/ConfirmationModal';
+import ExportControls from './components/PacketFilters/ExportControls';
+import FilterInput from './components/PacketFilters/FilterInput';
 import { colors, fonts } from './theme';
 import { fadeIn } from './utils/animations';
-import FilterInput from './components/PacketFilters/FilterInput';
-import ExportControls from './components/PacketFilters/ExportControls';
-import ConfirmationModal from './components/ConfirmationModal';
-import { IconTrash, IconSearch } from '@tabler/icons-react';
-import anime from 'animejs';
 
-function RequestFilters({ filters, onFilterChange, stats, onExport, onClear }) {
+function RequestFilters({ filters, onFilterChange, stats, onClear }) {
   const filtersRef = useRef(null);
   const [showClearModal, setShowClearModal] = useState(false);
 
@@ -127,7 +127,7 @@ function RequestFilters({ filters, onFilterChange, stats, onExport, onClear }) {
         onChange={(e) =>
           onFilterChange({
             ...filters,
-            statusCode: e.target.value ? parseInt(e.target.value) : null,
+            statusCode: e.target.value ? Number.parseInt(e.target.value) : null,
           })
         }
         style={{ width: '120px' }}
@@ -144,6 +144,7 @@ function RequestFilters({ filters, onFilterChange, stats, onExport, onClear }) {
       <ExportControls stats={stats} onExport={handleExport} />
 
       <button
+        type="button"
         onClick={() => setShowClearModal(true)}
         style={{
           padding: '8px 14px',

@@ -1,9 +1,9 @@
 import { colors, fonts } from '../../theme';
 import ExpandableSection from './ExpandableSection';
 import FindingsTable from './FindingsTable';
+import NotablePatternsSection from './NotablePatternsSection';
 import OverallSummarySection from './OverallSummarySection';
 import RecommendationsSection from './RecommendationsSection';
-import NotablePatternsSection from './NotablePatternsSection';
 
 export default function AnalysisResult({ analysis }) {
   if (!analysis) {
@@ -11,7 +11,7 @@ export default function AnalysisResult({ analysis }) {
       <div
         style={{
           padding: '12px',
-          background: colors.bgTertiary + '80',
+          background: `${colors.bgTertiary}80`,
           borderRadius: '6px',
           border: `1px solid ${colors.borderLight}`,
           fontSize: '12px',

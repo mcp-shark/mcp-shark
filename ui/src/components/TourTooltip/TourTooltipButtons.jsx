@@ -19,6 +19,7 @@ export default function TourTooltipButtons({
       }}
     >
       <button
+        type="button"
         onClick={(e) => {
           e.stopPropagation();
           onSkip();
@@ -52,6 +53,7 @@ export default function TourTooltipButtons({
       <div style={{ display: 'flex', gap: '8px', pointerEvents: 'auto' }}>
         {currentStep > 0 && (
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               onPrevious();
@@ -82,6 +84,7 @@ export default function TourTooltipButtons({
           </button>
         )}
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             onNext();

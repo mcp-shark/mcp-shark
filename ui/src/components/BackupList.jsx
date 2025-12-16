@@ -1,5 +1,5 @@
+import { IconEye, IconRefresh, IconRestore, IconTrash } from '@tabler/icons-react';
 import { colors, fonts, withOpacity } from '../theme';
-import { IconRefresh, IconEye, IconTrash, IconRestore } from '@tabler/icons-react';
 
 function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onDelete }) {
   if (backups.length === 0) {
@@ -36,6 +36,7 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onD
           Backup Files
         </h3>
         <button
+          type="button"
           onClick={onRefresh}
           disabled={loadingBackups}
           style={{
@@ -68,7 +69,7 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onD
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {backups.map((backup, idx) => (
           <div
-            key={idx}
+            key={backup.backupPath || `backup-${idx}`}
             style={{
               padding: '12px',
               background: colors.bgPrimary,
@@ -97,6 +98,7 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onD
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <button
+                type="button"
                 onClick={() => onView(backup.backupPath)}
                 style={{
                   padding: '6px 12px',
@@ -122,6 +124,7 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onD
                 View
               </button>
               <button
+                type="button"
                 onClick={() => {
                   if (confirm('Are you sure you want to delete this backup?')) {
                     onDelete(backup.backupPath);
@@ -155,6 +158,7 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onD
                 Delete
               </button>
               <button
+                type="button"
                 onClick={() => onRestore(backup.backupPath, backup.originalPath)}
                 style={{
                   padding: '6px 12px',

@@ -1,5 +1,5 @@
-import { CheckIcon, ShieldIcon, LoadingSpinner } from '../SmartScanIcons';
 import { colors, fonts } from '../../theme';
+import { LoadingSpinner, ShieldIcon } from '../SmartScanIcons';
 
 export default function ServerSelectionRow({
   discoveredServers,
@@ -57,7 +57,7 @@ export default function ServerSelectionRow({
             const isSelected = selectedServers.has(server.name);
             return (
               <label
-                key={idx}
+                key={server.name || `server-${idx}`}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -119,6 +119,7 @@ export default function ServerSelectionRow({
           })}
         </div>
         <button
+          type="button"
           onClick={toggleSelectAll}
           style={{
             padding: '6px 12px',
@@ -143,6 +144,7 @@ export default function ServerSelectionRow({
           {selectedServers.size === discoveredServers.length ? 'Deselect All' : 'Select All'}
         </button>
         <button
+          type="button"
           onClick={runScan}
           disabled={!apiToken || selectedServers.size === 0 || scanning}
           style={{

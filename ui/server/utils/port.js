@@ -1,4 +1,4 @@
-import { createConnection } from 'net';
+import { createConnection } from 'node:net';
 
 export function checkPortReady(port, host = 'localhost', timeout = 10000) {
   return new Promise((resolve, reject) => {
@@ -12,7 +12,7 @@ export function checkPortReady(port, host = 'localhost', timeout = 10000) {
         resolve(true);
       });
 
-      socket.on('error', (err) => {
+      socket.on('error', (_err) => {
         socket.destroy();
         const elapsed = Date.now() - startTime;
         if (elapsed >= timeout) {

@@ -1,4 +1,4 @@
-function TourOverlay({ elementRect, onClick }) {
+function TourOverlay({ elementRect, _onClick }) {
   if (!elementRect) {
     return (
       <div

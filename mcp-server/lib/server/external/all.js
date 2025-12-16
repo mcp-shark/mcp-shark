@@ -1,7 +1,7 @@
-import { normalizeConfig } from './config.js';
-import { runExternalServer } from './single/run.js';
 import { CompositeError, getErrors } from '../../common/error.js';
+import { normalizeConfig } from './config.js';
 import { buildKv } from './kv.js';
+import { runExternalServer } from './single/run.js';
 
 export class RunAllExternalServersError extends CompositeError {
   constructor(message, error, errors = []) {
@@ -13,9 +13,7 @@ export class RunAllExternalServersError extends CompositeError {
 export async function runAllExternalServers(logger, parsedConfig) {
   const configs = normalizeConfig(parsedConfig);
   const results = await Promise.all(
-    Object.entries(configs).map(([name, config]) =>
-      runExternalServer({ logger, name, config })
-    )
+    Object.entries(configs).map(([name, config]) => runExternalServer({ logger, name, config }))
   );
 
   const flattenedResults = results.flat();
@@ -28,5 +26,6 @@ export async function runAllExternalServers(logger, parsedConfig) {
     );
   }
 
-  return buildKv(flattenedResults);
+  const kv = buildKv(flattenedResults);
+  return { kv, servers: flattenedResults };
 }

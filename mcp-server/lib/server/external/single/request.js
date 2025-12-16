@@ -1,7 +1,7 @@
 import {
-  ListToolsResultSchema,
-  ListResourcesResultSchema,
   ListPromptsResultSchema,
+  ListResourcesResultSchema,
+  ListToolsResultSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 
 import { CompositeError } from '../../../common/error.js';
@@ -22,10 +22,7 @@ async function getListOf(client, typeOfList, schema) {
     [typeOfList]: [],
   };
   try {
-    const result = await client.request(
-      { method: `${typeOfList}/list` },
-      schema
-    );
+    const result = await client.request({ method: `${typeOfList}/list` }, schema);
     fetchedList[typeOfList] = result[typeOfList];
     return fetchedList;
   } catch (error) {

@@ -3,7 +3,7 @@ import { readHelpState, writeHelpState } from 'mcp-shark-common/configs/index.js
 export function createHelpRoutes() {
   const router = {};
 
-  router.getState = (req, res) => {
+  router.getState = (_req, res) => {
     const state = readHelpState();
     res.json({
       dismissed: state.dismissed || false,
@@ -25,7 +25,7 @@ export function createHelpRoutes() {
     }
   };
 
-  router.reset = (req, res) => {
+  router.reset = (_req, res) => {
     const state = {
       dismissed: false,
       tourCompleted: false,

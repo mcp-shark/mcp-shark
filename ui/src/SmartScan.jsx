@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { colors } from './theme';
-import SmartScanHeader from './components/SmartScan/SmartScanHeader';
-import SmartScanControls from './components/SmartScan/SmartScanControls';
-import ViewModeTabs from './components/SmartScan/ViewModeTabs';
-import ScanViewContent from './components/SmartScan/ScanViewContent';
 import ListViewContent from './components/SmartScan/ListViewContent';
+import ScanViewContent from './components/SmartScan/ScanViewContent';
+import SmartScanControls from './components/SmartScan/SmartScanControls';
+import SmartScanHeader from './components/SmartScan/SmartScanHeader';
+import ViewModeTabs from './components/SmartScan/ViewModeTabs';
 import { useSmartScan } from './components/SmartScan/useSmartScan';
+import { colors } from './theme';
 
 function SmartScan() {
   const [viewMode, setViewMode] = useState('scan'); // 'scan' or 'list'
@@ -151,7 +151,7 @@ function SmartScan() {
               const serverName =
                 matchingScan?.serverName || scanData.serverName || 'Unknown Server';
 
-              if (scanData && scanData.data && typeof scanData.data === 'object') {
+              if (scanData?.data && typeof scanData.data === 'object') {
                 const actualScan = scanData.data;
                 setSelectedScan({
                   ...actualScan,

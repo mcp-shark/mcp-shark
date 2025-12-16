@@ -1,4 +1,4 @@
-import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { getScanResultsDirectory } from './directory.js';
 
@@ -9,13 +9,13 @@ import { getScanResultsDirectory } from './directory.js';
  * @returns {string} Server name
  */
 function extractServerName(data, scanData) {
-  let serverName = data.serverName; // From cache file metadata (most reliable)
+  const cachedServerName = data.serverName; // From cache file metadata (most reliable)
 
   // If not found at top level, try to extract from scan data (API response)
-  if (!serverName || serverName === 'Unknown Server') {
+  if (!cachedServerName || cachedServerName === 'Unknown Server') {
     const actualScanData = scanData.data || scanData;
 
-    serverName =
+    const serverName =
       actualScanData.serverName ||
       actualScanData.server_name ||
       actualScanData.server?.name ||
@@ -25,9 +25,11 @@ function extractServerName(data, scanData) {
       scanData.server?.name ||
       scanData.mcp_server_data?.server?.name ||
       'Unknown Server';
+
+    return serverName;
   }
 
-  return serverName;
+  return cachedServerName;
 }
 
 /**
@@ -146,20 +148,25 @@ export function getAllCachedScanResults() {
       return [];
     }
 
-    const results = [];
-    let successCount = 0;
-    let errorCount = 0;
-
     // Read each file
-    for (const file of jsonFiles) {
-      const result = processScanFile(file, scanResultsDir);
-      if (result) {
-        results.push(result);
-        successCount++;
-      } else {
-        errorCount++;
-      }
-    }
+    const { results, successCount, errorCount } = jsonFiles.reduce(
+      (acc, file) => {
+        const result = processScanFile(file, scanResultsDir);
+        if (result) {
+          return {
+            results: [...acc.results, result],
+            successCount: acc.successCount + 1,
+            errorCount: acc.errorCount,
+          };
+        }
+        return {
+          results: acc.results,
+          successCount: acc.successCount,
+          errorCount: acc.errorCount + 1,
+        };
+      },
+      { results: [], successCount: 0, errorCount: 0 }
+    );
 
     // Sort by updatedAt descending (most recent first)
     results.sort((a, b) => {

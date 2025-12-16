@@ -126,8 +126,7 @@ mcp-shark/
 
 This project uses:
 
-- **ESLint**: Code linting with Prettier integration
-- **Prettier**: Code formatting
+- **Biome**: Unified tool for linting and formatting (replaces ESLint and Prettier)
 - **Husky**: Git hooks for pre-commit checks
 - **Commitlint**: Conventional commit message validation
 

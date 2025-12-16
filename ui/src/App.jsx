@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
-import CompositeSetup from './CompositeSetup';
 import CompositeLogs from './CompositeLogs';
-import McpPlayground from './components/McpPlayground';
+import CompositeSetup from './CompositeSetup';
+import IntroTour from './IntroTour';
 import SmartScan from './SmartScan';
 import TabNavigation from './TabNavigation';
-import IntroTour from './IntroTour';
 import HelpButton from './components/App/HelpButton';
 import TrafficTab from './components/App/TrafficTab';
-import { colors } from './theme';
-import { tourSteps } from './config/tourSteps.jsx';
-import { fadeIn } from './utils/animations';
 import { useAppState } from './components/App/useAppState';
+import McpPlayground from './components/McpPlayground';
+import { tourSteps } from './config/tourSteps.jsx';
+import { colors } from './theme';
+import { fadeIn } from './utils/animations';
 
 function App() {
   const {

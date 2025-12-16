@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useMcpDataLoader } from './hooks/useMcpDataLoader';
 import { useMcpRequest } from './hooks/useMcpRequest';
 import { useMcpServerStatus } from './hooks/useMcpServerStatus';
-import { useMcpDataLoader } from './hooks/useMcpDataLoader';
 
 export function useMcpPlayground() {
   const [activeSection, setActiveSection] = useState('tools');
@@ -64,8 +64,17 @@ export function useMcpPlayground() {
     }, 100);
 
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedServer, serverStatus?.running, activeSection]);
+  }, [
+    selectedServer,
+    serverStatus?.running,
+    activeSection,
+    resetData,
+    loadTools,
+    loadPrompts,
+    loadResources,
+    resetSession,
+    setError,
+  ]);
 
   useEffect(() => {
     if (
@@ -79,11 +88,12 @@ export function useMcpPlayground() {
       }, 2000);
       return () => clearTimeout(timer);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serverStatus?.running, selectedServer, activeSection, tools.length]);
+  }, [serverStatus?.running, selectedServer, activeSection, tools.length, loadTools]);
 
   useEffect(() => {
-    if (!serverStatus?.running || !selectedServer) return;
+    if (!serverStatus?.running || !selectedServer) {
+      return;
+    }
 
     const timer = setTimeout(() => {
       if (activeSection === 'tools' && !toolsLoaded && !toolsLoading) {
@@ -96,27 +106,37 @@ export function useMcpPlayground() {
     }, 100);
 
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     activeSection,
     serverStatus?.running,
     selectedServer,
     toolsLoaded,
-    promptsLoaded,
-    resourcesLoaded,
     toolsLoading,
+    promptsLoaded,
     promptsLoading,
+    resourcesLoaded,
     resourcesLoading,
+    loadTools,
+    loadPrompts,
+    loadResources,
   ]);
 
   const handleCallTool = async () => {
-    if (!selectedTool) return;
+    if (!selectedTool) {
+      return;
+    }
 
     try {
-      let args = {};
-      try {
-        args = JSON.parse(toolArgs);
-      } catch (e) {
+      const parseArgs = (argsString) => {
+        try {
+          return JSON.parse(argsString);
+        } catch (_e) {
+          return null;
+        }
+      };
+
+      const args = parseArgs(toolArgs);
+      if (args === null) {
         setError('Invalid JSON in arguments');
         return;
       }
@@ -133,13 +153,21 @@ export function useMcpPlayground() {
   };
 
   const handleGetPrompt = async () => {
-    if (!selectedPrompt) return;
+    if (!selectedPrompt) {
+      return;
+    }
 
     try {
-      let args = {};
-      try {
-        args = JSON.parse(promptArgs);
-      } catch (e) {
+      const parseArgs = (argsString) => {
+        try {
+          return JSON.parse(argsString);
+        } catch (_e) {
+          return null;
+        }
+      };
+
+      const args = parseArgs(promptArgs);
+      if (args === null) {
         setError('Invalid JSON in arguments');
         return;
       }
@@ -156,7 +184,9 @@ export function useMcpPlayground() {
   };
 
   const handleReadResource = async () => {
-    if (!selectedResource) return;
+    if (!selectedResource) {
+      return;
+    }
 
     try {
       const result = await makeMcpRequest('resources/read', {

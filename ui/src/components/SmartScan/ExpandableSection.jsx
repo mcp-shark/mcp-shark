@@ -14,6 +14,7 @@ export default function ExpandableSection({ title, count, children, defaultExpan
       }}
     >
       <button
+        type="button"
         onClick={() => setIsExpanded(!isExpanded)}
         style={{
           width: '100%',
@@ -73,7 +74,10 @@ export default function ExpandableSection({ title, count, children, defaultExpan
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
+          role="img"
+          aria-label="Chevron icon"
         >
+          <title>Chevron icon</title>
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>

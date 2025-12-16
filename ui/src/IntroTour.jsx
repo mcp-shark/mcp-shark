@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import TourOverlay from './components/TourOverlay';
 import TourTooltip from './components/TourTooltip';
 
@@ -9,7 +9,9 @@ function IntroTour({ steps, onComplete, onSkip, onStepChange }) {
   const overlayRef = useRef(null);
 
   useEffect(() => {
-    if (!highlightedElement) return;
+    if (!highlightedElement) {
+      return;
+    }
 
     const updatePosition = () => {
       if (highlightedElement) {
@@ -31,10 +33,14 @@ function IntroTour({ steps, onComplete, onSkip, onStepChange }) {
   }, [highlightedElement]);
 
   useEffect(() => {
-    if (steps.length === 0) return;
+    if (steps.length === 0) {
+      return;
+    }
 
     const step = steps[currentStep];
-    if (!step) return;
+    if (!step) {
+      return;
+    }
 
     if (onStepChange) {
       onStepChange(currentStep);
@@ -108,6 +114,7 @@ function IntroTour({ steps, onComplete, onSkip, onStepChange }) {
     <>
       <div
         ref={overlayRef}
+        role="presentation"
         style={{
           position: 'fixed',
           top: 0,
@@ -118,6 +125,11 @@ function IntroTour({ steps, onComplete, onSkip, onStepChange }) {
           pointerEvents: 'auto',
         }}
         onClick={handleSkip}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            handleSkip();
+          }
+        }}
       >
         <TourOverlay elementRect={elementRect} />
       </div>

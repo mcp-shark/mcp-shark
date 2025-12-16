@@ -16,9 +16,7 @@ function parseConfig(configPath) {
     }
     return new ConfigError(
       'Invalid config file',
-      new Error(
-        `Invalid config file: ${configPath} - ${JSON.stringify(conf, null, 2)}`
-      )
+      new Error(`Invalid config file: ${configPath} - ${JSON.stringify(conf, null, 2)}`)
     );
   } catch (error) {
     return new ConfigError(

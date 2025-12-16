@@ -1,5 +1,5 @@
-import { colors, fonts } from '../../../theme';
 import { IconRefresh } from '@tabler/icons-react';
+import { colors, fonts } from '../../../theme';
 
 export default function ScanListHeader({ scanCount, loading, onRefresh }) {
   return (
@@ -23,6 +23,7 @@ export default function ScanListHeader({ scanCount, loading, onRefresh }) {
         All Scans ({scanCount})
       </h2>
       <button
+        type="button"
         onClick={onRefresh}
         disabled={loading}
         style={{

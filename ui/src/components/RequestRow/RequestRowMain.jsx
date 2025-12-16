@@ -1,11 +1,11 @@
+import { IconChevronDown } from '@tabler/icons-react';
 import { colors, fonts, withOpacity } from '../../theme';
 import {
-  formatRelativeTime,
   formatDateTime,
-  getSourceDest,
+  formatRelativeTime,
   getEndpoint,
+  getSourceDest,
 } from '../../utils/requestUtils.js';
-import { IconChevronDown } from '@tabler/icons-react';
 
 const ChevronDown = ({ size = 12, rotated = false }) => (
   <IconChevronDown
@@ -39,6 +39,14 @@ export default function RequestRowMain({
     <>
       <tr
         onClick={() => onSelect(request)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onSelect(request);
+          }
+        }}
+        tabIndex={0}
+        aria-label={`Select request ${request.frame_number}`}
         style={{
           cursor: 'pointer',
           background: isSelected
@@ -84,6 +92,7 @@ export default function RequestRowMain({
           >
             {hasResponse && (
               <button
+                type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   onToggleExpand();

@@ -1,5 +1,5 @@
+import { IconDownload, IconSearch, IconTrash } from '@tabler/icons-react';
 import { colors, fonts } from '../theme';
-import { IconTrash, IconDownload, IconSearch } from '@tabler/icons-react';
 
 export default function LogsToolbar({
   filter,
@@ -117,6 +117,7 @@ export default function LogsToolbar({
       </label>
 
       <button
+        type="button"
         onClick={onClearLogs}
         style={{
           padding: '8px 14px',
@@ -148,6 +149,7 @@ export default function LogsToolbar({
       </button>
 
       <button
+        type="button"
         onClick={onExportLogs}
         style={{
           padding: '8px 14px',

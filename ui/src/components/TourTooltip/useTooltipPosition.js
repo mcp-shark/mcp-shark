@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
-export function useTooltipPosition(elementRect, step, currentStep) {
+export function useTooltipPosition(elementRect, step, _currentStep) {
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     setTooltipPosition({ x: 0, y: 0 });
-  }, [currentStep]);
+  }, []);
 
   const handleMouseDown = (e, tooltipRef) => {
     e.preventDefault();
@@ -23,7 +23,9 @@ export function useTooltipPosition(elementRect, step, currentStep) {
   };
 
   useEffect(() => {
-    if (!isDragging) return;
+    if (!isDragging) {
+      return;
+    }
 
     const handleMouseMove = (e) => {
       setTooltipPosition({
@@ -46,7 +48,9 @@ export function useTooltipPosition(elementRect, step, currentStep) {
   }, [isDragging, dragOffset]);
 
   const calculatePosition = () => {
-    if (!elementRect) return { left: 0, top: 0, transform: 'none' };
+    if (!elementRect) {
+      return { left: 0, top: 0, transform: 'none' };
+    }
 
     const tooltipWidth = 350;
     const tooltipHeight = 200;
@@ -62,42 +66,65 @@ export function useTooltipPosition(elementRect, step, currentStep) {
     }
 
     const position = step.position || 'bottom';
-    let left, top, transform;
 
-    if (position === 'left') {
-      left = elementRect.left - tooltipWidth - spacing;
-      top = elementRect.top + elementRect.height / 2;
-      transform = 'translateY(-50%)';
-      if (left < 10) {
-        left = elementRect.right + spacing;
+    const calculatePosition = (position, elementRect, tooltipWidth, tooltipHeight, spacing) => {
+      if (position === 'left') {
+        const baseLeft = elementRect.left - tooltipWidth - spacing;
+        const left = baseLeft < 10 ? elementRect.right + spacing : baseLeft;
+        return {
+          left,
+          top: elementRect.top + elementRect.height / 2,
+          transform: 'translateY(-50%)',
+        };
       }
-    } else if (position === 'right') {
-      left = elementRect.right + spacing;
-      top = elementRect.top + elementRect.height / 2;
-      transform = 'translateY(-50%)';
-      if (left + tooltipWidth > window.innerWidth - 10) {
-        left = elementRect.left - tooltipWidth - spacing;
-      }
-    } else if (position === 'top') {
-      left = elementRect.left + elementRect.width / 2;
-      top = elementRect.top - tooltipHeight - spacing;
-      transform = 'translate(-50%, 0)';
-      if (top < 10) {
-        top = elementRect.bottom + spacing;
-      }
-    } else {
-      left = elementRect.left + elementRect.width / 2;
-      top = elementRect.bottom + spacing;
-      transform = 'translate(-50%, 0)';
-      if (top + tooltipHeight > window.innerHeight - 10) {
-        top = elementRect.top - tooltipHeight - spacing;
-      }
-    }
 
-    left = Math.max(10, Math.min(left, window.innerWidth - tooltipWidth - 10));
-    top = Math.max(10, Math.min(top, window.innerHeight - tooltipHeight - 10));
+      if (position === 'right') {
+        const baseLeft = elementRect.right + spacing;
+        const left =
+          baseLeft + tooltipWidth > window.innerWidth - 10
+            ? elementRect.left - tooltipWidth - spacing
+            : baseLeft;
+        return {
+          left,
+          top: elementRect.top + elementRect.height / 2,
+          transform: 'translateY(-50%)',
+        };
+      }
 
-    return { left, top, transform };
+      if (position === 'top') {
+        const baseTop = elementRect.top - tooltipHeight - spacing;
+        const top = baseTop < 10 ? elementRect.bottom + spacing : baseTop;
+        return {
+          left: elementRect.left + elementRect.width / 2,
+          top,
+          transform: 'translate(-50%, 0)',
+        };
+      }
+
+      // bottom (default)
+      const baseTop = elementRect.bottom + spacing;
+      const top =
+        baseTop + tooltipHeight > window.innerHeight - 10
+          ? elementRect.top - tooltipHeight - spacing
+          : baseTop;
+      return {
+        left: elementRect.left + elementRect.width / 2,
+        top,
+        transform: 'translate(-50%, 0)',
+      };
+    };
+
+    const rawPosition = calculatePosition(
+      position,
+      elementRect,
+      tooltipWidth,
+      tooltipHeight,
+      spacing
+    );
+    const left = Math.max(10, Math.min(rawPosition.left, window.innerWidth - tooltipWidth - 10));
+    const top = Math.max(10, Math.min(rawPosition.top, window.innerHeight - tooltipHeight - 10));
+
+    return { left, top, transform: rawPosition.transform };
   };
 
   return {

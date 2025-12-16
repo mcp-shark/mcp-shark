@@ -4,7 +4,7 @@ import { getAllCachedScanResults } from '../../../utils/scan-cache.js';
  * List all scans from local cache only
  * GET /api/smartscan/scans?cache=true
  */
-export async function listScans(req, res) {
+export async function listScans(_req, res) {
   try {
     console.log('[listScans] Loading cached scans from local storage...');
     const cachedScans = getAllCachedScanResults();

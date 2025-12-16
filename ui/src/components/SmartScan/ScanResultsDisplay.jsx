@@ -1,8 +1,8 @@
 import { colors } from '../../theme';
+import BatchResultsDisplay from './BatchResultsDisplay';
 import EmptyState from './EmptyState';
 import ErrorDisplay from './ErrorDisplay';
 import ScanningProgress from './ScanningProgress';
-import BatchResultsDisplay from './BatchResultsDisplay';
 import SingleResultDisplay from './SingleResultDisplay';
 
 export default function ScanResultsDisplay({

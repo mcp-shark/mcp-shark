@@ -110,7 +110,7 @@ export default function FindingsTable({ findings, type }) {
         <tbody>
           {findings.map((finding, index) => (
             <tr
-              key={index}
+              key={`finding-${finding.id || finding.name || index}-${index}`}
               style={{
                 borderBottom: `1px solid ${colors.borderLight}`,
                 transition: 'background 0.15s',
@@ -164,7 +164,7 @@ export default function FindingsTable({ findings, type }) {
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px' }}>
                   {finding.risk_tags?.map((tag, tagIndex) => (
                     <span
-                      key={tagIndex}
+                      key={`tag-${String(tag)}-${tagIndex}`}
                       style={{
                         padding: '2px 6px',
                         background: colors.bgCard,
@@ -192,7 +192,10 @@ export default function FindingsTable({ findings, type }) {
                   style={{ listStyle: 'disc', listStylePosition: 'inside', margin: 0, padding: 0 }}
                 >
                   {finding.reasons?.map((reason, reasonIndex) => (
-                    <li key={reasonIndex} style={{ fontSize: '10px', marginBottom: '2px' }}>
+                    <li
+                      key={`reason-${reasonIndex}-${reason.substring(0, 20)}`}
+                      style={{ fontSize: '10px', marginBottom: '2px' }}
+                    >
                       {reason}
                     </li>
                   ))}
@@ -209,45 +212,46 @@ export default function FindingsTable({ findings, type }) {
               >
                 {finding.safe_use_notes}
               </td>
-              {type === 'tool' && finding.hasOwnProperty('is_potentially_poisoned') && (
-                <td style={{ padding: '8px' }}>
-                  {finding.is_potentially_poisoned ? (
-                    <span
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        padding: '2px 6px',
-                        fontSize: '10px',
-                        fontWeight: '500',
-                        borderRadius: '4px',
-                        background: colors.error + '20',
-                        color: colors.error,
-                        border: `1px solid ${colors.error}40`,
-                        fontFamily: fonts.body,
-                      }}
-                    >
-                      Yes
-                    </span>
-                  ) : (
-                    <span
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        padding: '2px 6px',
-                        fontSize: '10px',
-                        fontWeight: '500',
-                        borderRadius: '4px',
-                        background: colors.accentGreen + '20',
-                        color: colors.accentGreen,
-                        border: `1px solid ${colors.accentGreen}40`,
-                        fontFamily: fonts.body,
-                      }}
-                    >
-                      No
-                    </span>
-                  )}
-                </td>
-              )}
+              {type === 'tool' &&
+                Object.prototype.hasOwnProperty.call(finding, 'is_potentially_poisoned') && (
+                  <td style={{ padding: '8px' }}>
+                    {finding.is_potentially_poisoned ? (
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          padding: '2px 6px',
+                          fontSize: '10px',
+                          fontWeight: '500',
+                          borderRadius: '4px',
+                          background: `${colors.error}20`,
+                          color: colors.error,
+                          border: `1px solid ${colors.error}40`,
+                          fontFamily: fonts.body,
+                        }}
+                      >
+                        Yes
+                      </span>
+                    ) : (
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          padding: '2px 6px',
+                          fontSize: '10px',
+                          fontWeight: '500',
+                          borderRadius: '4px',
+                          background: `${colors.accentGreen}20`,
+                          color: colors.accentGreen,
+                          border: `1px solid ${colors.accentGreen}40`,
+                          fontFamily: fonts.body,
+                        }}
+                      >
+                        No
+                      </span>
+                    )}
+                  </td>
+                )}
             </tr>
           ))}
         </tbody>

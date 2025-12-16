@@ -1,7 +1,9 @@
 import { colors, fonts } from '../../theme';
 
 export default function ServerInfoSection({ serverData }) {
-  if (!serverData) return null;
+  if (!serverData) {
+    return null;
+  }
 
   return (
     <div style={{ marginBottom: '24px' }}>

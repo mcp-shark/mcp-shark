@@ -1,19 +1,45 @@
-import * as path from 'node:path';
 import * as fs from 'node:fs';
 import { homedir } from 'node:os';
-import { checkPortReady } from '../utils/port.js';
-import { findMcpServerPath } from '../utils/paths.js';
-import { convertMcpServersToServers, clearOriginalConfig } from '../utils/config.js';
+import * as path from 'node:path';
+import { startMcpSharkServer } from '@mcp-shark/mcp-shark/mcp-server';
 import { getMcpConfigPath } from 'mcp-shark-common/configs/index.js';
-import {
-  createLogEntry,
-  spawnMcpSharkServer,
-  setupProcessHandlers,
-  getMcpSharkJsPath,
-} from '../utils/process.js';
-import { updateConfigFile, getSelectedServiceNames } from '../utils/config-update.js';
+import { getSelectedServiceNames, updateConfigFile } from '../utils/config-update.js';
+import { clearOriginalConfig, convertMcpServersToServers } from '../utils/config.js';
+import { createLogEntry } from '../utils/process.js';
 
 const MAX_LOG_LINES = 10000;
+
+function resolveFileData(filePath, fileContent) {
+  if (fileContent) {
+    const resolvedFilePath = filePath
+      ? filePath.startsWith('~')
+        ? path.join(homedir(), filePath.slice(1))
+        : filePath
+      : null;
+    return { content: fileContent, resolvedFilePath };
+  }
+
+  const resolvedFilePath = filePath.startsWith('~')
+    ? path.join(homedir(), filePath.slice(1))
+    : filePath;
+
+  if (!fs.existsSync(resolvedFilePath)) {
+    return null;
+  }
+
+  return {
+    content: fs.readFileSync(resolvedFilePath, 'utf-8'),
+    resolvedFilePath,
+  };
+}
+
+function parseJsonConfig(content) {
+  try {
+    return { config: JSON.parse(content), error: null };
+  } catch (e) {
+    return { config: null, error: e };
+  }
+}
 
 export function createCompositeRoutes(
   getMcpSharkProcess,
@@ -34,29 +60,7 @@ export function createCompositeRoutes(
         return res.status(400).json({ error: 'Either filePath or fileContent is required' });
       }
 
-      const fileData = (() => {
-        if (fileContent) {
-          const resolvedFilePath = filePath
-            ? filePath.startsWith('~')
-              ? path.join(homedir(), filePath.slice(1))
-              : filePath
-            : null;
-          return { content: fileContent, resolvedFilePath };
-        }
-
-        const resolvedFilePath = filePath.startsWith('~')
-          ? path.join(homedir(), filePath.slice(1))
-          : filePath;
-
-        if (!fs.existsSync(resolvedFilePath)) {
-          return null;
-        }
-
-        return {
-          content: fs.readFileSync(resolvedFilePath, 'utf-8'),
-          resolvedFilePath,
-        };
-      })();
+      const fileData = resolveFileData(filePath, fileContent);
 
       if (!fileData) {
         const resolvedFilePath = filePath.startsWith('~')
@@ -65,13 +69,7 @@ export function createCompositeRoutes(
         return res.status(404).json({ error: 'File not found', path: resolvedFilePath });
       }
 
-      const parseResult = (() => {
-        try {
-          return { config: JSON.parse(fileData.content), error: null };
-        } catch (e) {
-          return { config: null, error: e };
-        }
-      })();
+      const parseResult = parseJsonConfig(fileData.content);
 
       if (!parseResult.config) {
         return res.status(400).json({
@@ -81,108 +79,101 @@ export function createCompositeRoutes(
       }
 
       const originalConfig = parseResult.config;
-      let convertedConfig = convertMcpServersToServers(originalConfig);
+      const baseConvertedConfig = convertMcpServersToServers(originalConfig);
 
-      if (selectedServices && Array.isArray(selectedServices) && selectedServices.length > 0) {
+      const filterServers = (config, services) => {
         const filteredServers = {};
-        selectedServices.forEach((serviceName) => {
-          if (convertedConfig.servers[serviceName]) {
-            filteredServers[serviceName] = convertedConfig.servers[serviceName];
+        services.forEach((serviceName) => {
+          if (config.servers[serviceName]) {
+            filteredServers[serviceName] = config.servers[serviceName];
           }
         });
-        convertedConfig = { servers: filteredServers };
-      }
+        return { servers: filteredServers };
+      };
+
+      const convertedConfig =
+        selectedServices && Array.isArray(selectedServices) && selectedServices.length > 0
+          ? filterServers(baseConvertedConfig, selectedServices)
+          : baseConvertedConfig;
 
       if (Object.keys(convertedConfig.servers).length === 0) {
         return res.status(400).json({ error: 'No servers found in config' });
       }
 
-      const mcpServerPath = findMcpServerPath();
       const mcpsJsonPath = getMcpConfigPath();
       fs.writeFileSync(mcpsJsonPath, JSON.stringify(convertedConfig, null, 2));
       console.log(`Wrote converted config to: ${mcpsJsonPath}`);
 
-      const currentProcess = getMcpSharkProcess();
-      if (currentProcess) {
-        currentProcess.kill();
+      const currentServer = getMcpSharkProcess();
+      if (currentServer?.stop) {
+        await currentServer.stop();
         setMcpSharkProcess(null);
       }
 
-      const mcpSharkJsPath = getMcpSharkJsPath();
-      if (!fs.existsSync(mcpSharkJsPath)) {
-        return res.status(500).json({
-          error: 'MCP Shark server not found',
-          details: `Could not find mcp-shark.js at ${mcpSharkJsPath}`,
-        });
-      }
+      logEntry('info', '[UI Server] Starting MCP-Shark server as library...');
+      logEntry('info', `[UI Server] Config: ${mcpsJsonPath}`);
 
-      const processHandle = spawnMcpSharkServer(mcpSharkJsPath, mcpsJsonPath, logEntry);
-      setMcpSharkProcess(processHandle);
-
-      setupProcessHandlers(
-        processHandle,
-        logEntry,
-        (err) => {
-          setMcpSharkProcess(null);
-          return res.status(500).json({
-            error: 'Failed to start mcp-shark server',
-            details: err.message,
-          });
+      const serverInstance = await startMcpSharkServer({
+        configPath: mcpsJsonPath,
+        port: 9851,
+        logger: {
+          info: (msg, ...args) => {
+            const message = args.length > 0 ? `${msg} ${args.join(' ')}` : msg;
+            logEntry('info', message);
+            console.log(`[MCP-Shark] ${message}`);
+          },
+          error: (msg, ...args) => {
+            const message = args.length > 0 ? `${msg} ${args.join(' ')}` : msg;
+            logEntry('error', message);
+            console.error(`[MCP-Shark] ${message}`);
+          },
+          warn: (msg, ...args) => {
+            const message = args.length > 0 ? `${msg} ${args.join(' ')}` : msg;
+            logEntry('stderr', message);
+            console.warn(`[MCP-Shark] ${message}`);
+          },
+          debug: (msg, ...args) => {
+            const message = args.length > 0 ? `${msg} ${args.join(' ')}` : msg;
+            logEntry('stdout', message);
+          },
+          level: 'info',
         },
-        () => {
+        onError: (err) => {
+          logEntry('error', `Failed to start mcp-shark server: ${err.message}`);
           setMcpSharkProcess(null);
-        }
+          throw err;
+        },
+        onReady: () => {
+          logEntry('info', 'MCP Shark server is ready!');
+          console.log('MCP Shark server is ready!');
+        },
+      });
+
+      setMcpSharkProcess(serverInstance);
+      console.log('MCP Shark server started successfully');
+
+      const selectedServiceNames = getSelectedServiceNames(originalConfig, selectedServices);
+      const { updatedConfig, backupPath: createdBackupPath } = updateConfigFile(
+        originalConfig,
+        selectedServiceNames,
+        fileData.resolvedFilePath,
+        fileData.content,
+        mcpSharkLogs,
+        broadcastLogUpdate
       );
 
-      try {
-        console.log('Waiting for mcp-shark server to start on port 9851...');
-        await checkPortReady(9851, 'localhost', 15000);
-        console.log('MCP Shark server is ready!');
-
-        const selectedServiceNames = getSelectedServiceNames(originalConfig, selectedServices);
-        const { updatedConfig, backupPath: createdBackupPath } = updateConfigFile(
-          originalConfig,
-          selectedServiceNames,
-          fileData.resolvedFilePath,
-          fileData.content,
-          mcpSharkLogs,
-          broadcastLogUpdate
-        );
-
-        if (!fileData.resolvedFilePath) {
-          clearOriginalConfig();
-        }
-
-        res.json({
-          success: true,
-          message: 'MCP Shark server started successfully and config file updated',
-          convertedConfig,
-          updatedConfig,
-          filePath: fileData.resolvedFilePath || null,
-          backupPath: createdBackupPath || null,
-        });
-      } catch (waitError) {
-        console.error('MCP Shark server did not start in time:', waitError);
-        if (processHandle) {
-          processHandle.kill();
-          setMcpSharkProcess(null);
-        }
-        const timestamp = new Date().toISOString();
-        const errorLog = {
-          timestamp,
-          type: 'error',
-          line: `[ERROR] MCP Shark server failed to start: ${waitError.message}`,
-        };
-        mcpSharkLogs.push(errorLog);
-        if (mcpSharkLogs.length > MAX_LOG_LINES) {
-          mcpSharkLogs.shift();
-        }
-        broadcastLogUpdate(errorLog);
-        return res.status(500).json({
-          error: 'MCP Shark server failed to start',
-          details: waitError.message,
-        });
+      if (!fileData.resolvedFilePath) {
+        clearOriginalConfig();
       }
+
+      res.json({
+        success: true,
+        message: 'MCP Shark server started successfully and config file updated',
+        convertedConfig,
+        updatedConfig,
+        filePath: fileData.resolvedFilePath || null,
+        backupPath: createdBackupPath || null,
+      });
     } catch (error) {
       console.error('Error setting up mcp-shark server:', error);
       const timestamp = new Date().toISOString();
@@ -200,11 +191,11 @@ export function createCompositeRoutes(
     }
   };
 
-  router.stop = (req, res, restoreOriginalConfig) => {
+  router.stop = async (_req, res, restoreOriginalConfig) => {
     try {
-      const currentProcess = getMcpSharkProcess();
-      if (currentProcess) {
-        currentProcess.kill();
+      const currentServer = getMcpSharkProcess();
+      if (currentServer?.stop) {
+        await currentServer.stop();
         setMcpSharkProcess(null);
 
         const restored = restoreOriginalConfig();
@@ -214,7 +205,7 @@ export function createCompositeRoutes(
           const restoreLog = {
             timestamp,
             type: 'stdout',
-            line: `[RESTORE] Restored original config`,
+            line: '[RESTORE] Restored original config',
           };
           mcpSharkLogs.push(restoreLog);
           if (mcpSharkLogs.length > MAX_LOG_LINES) {
@@ -232,15 +223,15 @@ export function createCompositeRoutes(
     }
   };
 
-  router.getStatus = (req, res) => {
-    const currentProcess = getMcpSharkProcess();
+  router.getStatus = (_req, res) => {
+    const currentServer = getMcpSharkProcess();
     res.json({
-      running: currentProcess !== null,
-      pid: currentProcess?.pid || null,
+      running: currentServer !== null,
+      pid: null, // No process PID when using library
     });
   };
 
-  router.getServers = (req, res) => {
+  router.getServers = (_req, res) => {
     try {
       const mcpsJsonPath = getMcpConfigPath();
       if (!fs.existsSync(mcpsJsonPath)) {

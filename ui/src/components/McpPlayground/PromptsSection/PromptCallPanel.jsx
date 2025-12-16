@@ -43,6 +43,7 @@ export default function PromptCallPanel({
       >
         <div>
           <label
+            htmlFor="prompt-args-textarea"
             style={{
               display: 'block',
               fontSize: '12px',
@@ -54,6 +55,7 @@ export default function PromptCallPanel({
             Arguments (JSON)
           </label>
           <textarea
+            id="prompt-args-textarea"
             value={promptArgs}
             onChange={(e) => onPromptArgsChange(e.target.value)}
             style={{
@@ -71,6 +73,7 @@ export default function PromptCallPanel({
           />
         </div>
         <button
+          type="button"
           onClick={onGetPrompt}
           disabled={loading}
           style={{
@@ -91,6 +94,7 @@ export default function PromptCallPanel({
         {promptResult && (
           <div>
             <label
+              htmlFor="prompt-result-pre"
               style={{
                 display: 'block',
                 fontSize: '12px',
@@ -102,6 +106,7 @@ export default function PromptCallPanel({
               Result
             </label>
             <pre
+              id="prompt-result-pre"
               style={{
                 padding: '12px',
                 background: colors.bgSecondary,

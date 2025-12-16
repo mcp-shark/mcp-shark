@@ -1,4 +1,4 @@
-import { readFileSync, existsSync, readdirSync, unlinkSync } from 'node:fs';
+import { readFileSync, readdirSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { ensureScanResultsDirectory } from './directory.js';
 
@@ -54,9 +54,8 @@ export function clearOldScanResults(maxAgeMs = 30 * 24 * 60 * 60 * 1000) {
     const scanResultsDir = ensureScanResultsDirectory();
     const files = readdirSync(scanResultsDir).filter((f) => f.endsWith('.json'));
     const cutoffTime = Date.now() - maxAgeMs;
-    let deletedCount = 0;
 
-    for (const file of files) {
+    const deletedCount = files.reduce((count, file) => {
       try {
         const filePath = join(scanResultsDir, file);
         const fileContent = readFileSync(filePath, 'utf8');
@@ -64,13 +63,15 @@ export function clearOldScanResults(maxAgeMs = 30 * 24 * 60 * 60 * 1000) {
 
         if (data.updatedAt && data.updatedAt < cutoffTime) {
           unlinkSync(filePath);
-          deletedCount++;
+          return count + 1;
         }
+        return count;
       } catch (error) {
         // Skip files that can't be parsed
         console.warn(`Error processing scan result file ${file} for cleanup:`, error);
+        return count;
       }
-    }
+    }, 0);
 
     return deletedCount;
   } catch (error) {

@@ -1,6 +1,6 @@
 import { colors, fonts } from '../../theme';
-import ResourcesList from './ResourcesSection/ResourcesList';
 import ResourceCallPanel from './ResourcesSection/ResourceCallPanel';
+import ResourcesList from './ResourcesSection/ResourcesList';
 
 export default function ResourcesSection({
   resources,
@@ -19,6 +19,7 @@ export default function ResourcesSection({
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '100%' }}>
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
         <button
+          type="button"
           onClick={onRefresh}
           disabled={loading || resourcesLoading}
           style={{

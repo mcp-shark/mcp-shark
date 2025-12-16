@@ -11,5 +11,5 @@ export function isError(error) {
 }
 
 export function getErrors(results) {
-  return results.filter(result => isError(result));
+  return results.filter((result) => isError(result));
 }

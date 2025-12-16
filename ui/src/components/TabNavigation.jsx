@@ -1,6 +1,6 @@
+import anime from 'animejs';
 import { useEffect, useRef } from 'react';
 import { colors, fonts } from '../theme';
-import anime from 'animejs';
 
 function TabNavigation({ tabs, activeTab, onTabChange }) {
   const tabRefs = useRef({});
@@ -18,7 +18,7 @@ function TabNavigation({ tabs, activeTab, onTabChange }) {
         easing: 'easeOutExpo',
       });
     }
-  }, [activeTab, tabs]);
+  }, [activeTab]);
 
   return (
     <div
@@ -35,7 +35,12 @@ function TabNavigation({ tabs, activeTab, onTabChange }) {
       {tabs.map((tab) => (
         <button
           key={tab}
-          ref={(el) => (tabRefs.current[tab] = el)}
+          type="button"
+          ref={(el) => {
+            if (el) {
+              tabRefs.current[tab] = el;
+            }
+          }}
           onClick={() => onTabChange(tab)}
           style={{
             padding: '10px 18px',

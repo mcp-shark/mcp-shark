@@ -1,8 +1,10 @@
-import { AlertIcon } from '../SmartScanIcons';
 import { colors, fonts } from '../../theme';
+import { AlertIcon } from '../SmartScanIcons';
 
 export default function ErrorDisplay({ error }) {
-  if (!error) return null;
+  if (!error) {
+    return null;
+  }
 
   return (
     <div

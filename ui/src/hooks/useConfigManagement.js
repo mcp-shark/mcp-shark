@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export function useConfigManagement() {
   const [detectedPaths, setDetectedPaths] = useState([]);
@@ -12,7 +12,7 @@ export function useConfigManagement() {
   const [backupContent, setBackupContent] = useState(null);
   const [loadingBackup, setLoadingBackup] = useState(false);
 
-  const detectConfigPaths = async () => {
+  const detectConfigPaths = useCallback(async () => {
     setDetecting(true);
     try {
       const res = await fetch('/api/config/detect');
@@ -23,9 +23,9 @@ export function useConfigManagement() {
     } finally {
       setDetecting(false);
     }
-  };
+  }, []);
 
-  const loadBackups = async () => {
+  const loadBackups = useCallback(async () => {
     setLoadingBackups(true);
     try {
       const res = await fetch('/api/config/backups');
@@ -36,7 +36,7 @@ export function useConfigManagement() {
     } finally {
       setLoadingBackups(false);
     }
-  };
+  }, []);
 
   const handleViewConfig = async (filePath) => {
     setLoadingConfig(true);
@@ -49,7 +49,7 @@ export function useConfigManagement() {
       } else {
         setConfigContent(null);
       }
-    } catch (err) {
+    } catch (_err) {
       setConfigContent(null);
     } finally {
       setLoadingConfig(false);
@@ -69,7 +69,7 @@ export function useConfigManagement() {
       } else {
         setBackupContent(null);
       }
-    } catch (err) {
+    } catch (_err) {
       setBackupContent(null);
     } finally {
       setLoadingBackup(false);
@@ -98,7 +98,7 @@ export function useConfigManagement() {
   useEffect(() => {
     detectConfigPaths();
     loadBackups();
-  }, []);
+  }, [detectConfigPaths, loadBackups]);
 
   return {
     detectedPaths,

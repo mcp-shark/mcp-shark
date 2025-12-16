@@ -2,15 +2,7 @@ const kv = new Map();
 
 export function buildKv(downstreamServers) {
   for (const downstreamServer of downstreamServers) {
-    const {
-      name,
-      tools,
-      resources,
-      prompts,
-      callTool,
-      getPrompt,
-      readResource,
-    } = downstreamServer;
+    const { name, tools, resources, prompts, callTool, getPrompt, readResource } = downstreamServer;
 
     if (!kv.has(name)) {
       const toolsMap = new Map();
@@ -33,16 +25,16 @@ export function buildKv(downstreamServers) {
         toolsMap,
         resourcesMap,
         promptsMap,
-        tools: tools.map(tool => {
+        tools: tools.map((tool) => {
           return { ...tool, name: tool.name };
         }),
-        resources: resources.map(resource => {
+        resources: resources.map((resource) => {
           return {
             ...resource,
             name: resource.name,
           };
         }),
-        prompts: prompts.map(prompt => {
+        prompts: prompts.map((prompt) => {
           return { ...prompt, name: prompt.name };
         }),
       });

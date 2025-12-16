@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 import { spawn } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
-import { dirname, join, resolve } from 'node:path';
 import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 import open from 'open';
 
@@ -86,7 +86,7 @@ async function installDependencies() {
 async function buildUI() {
   console.log('Building UI for production...');
   try {
-    await runCommand('npm', ['run', 'build'], { cwd: uiDir });
+    await runCommand('vite', ['build'], { cwd: uiDir });
   } catch (error) {
     console.error('Failed to build UI:', error.message);
     process.exit(1);
@@ -134,7 +134,9 @@ async function startServer(shouldOpenBrowser = false) {
 
   // Handle process termination
   const shutdown = async (signal) => {
-    if (isShuttingDown) return;
+    if (isShuttingDown) {
+      return;
+    }
     isShuttingDown = true;
 
     console.log('Shutting down...');

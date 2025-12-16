@@ -1,12 +1,12 @@
 import { colors, fonts } from '../../theme';
 import {
-  formatRelativeTime,
   formatDateTime,
-  getSourceDest,
+  formatRelativeTime,
   getEndpoint,
+  getSourceDest,
 } from '../../utils/requestUtils.js';
 
-export default function ResponseRow({ response, selected, firstRequestTime, onSelect, request }) {
+export default function ResponseRow({ response, selected, firstRequestTime, onSelect }) {
   const isSelected = selected?.frame_number === response.frame_number;
   const { source, dest } = getSourceDest(response);
   const relativeTime = formatRelativeTime(response.timestamp_iso, firstRequestTime);
@@ -14,6 +14,14 @@ export default function ResponseRow({ response, selected, firstRequestTime, onSe
   return (
     <tr
       onClick={() => onSelect(response)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect(response);
+        }
+      }}
+      tabIndex={0}
+      aria-label={`Select response ${response.frame_number}`}
       style={{
         cursor: 'pointer',
         background:

@@ -1,5 +1,5 @@
-import { ShieldIcon, ExternalLinkIcon } from '../SmartScanIcons';
 import { colors, fonts } from '../../theme';
+import { ExternalLinkIcon, ShieldIcon } from '../SmartScanIcons';
 
 export default function SmartScanHeader() {
   return (

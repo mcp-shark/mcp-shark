@@ -17,7 +17,10 @@ const ChevronDown = ({ size = 14, color = 'currentColor', rotated = false }) => 
       transform: rotated ? 'rotate(-90deg)' : 'rotate(0deg)',
       transition: 'transform 0.2s ease',
     }}
+    role="img"
+    aria-label="Chevron down icon"
   >
+    <title>Chevron down icon</title>
     <polyline points="6 9 12 15 18 9" />
   </svg>
 );
@@ -35,8 +38,15 @@ function CollapsibleRequestResponse({ title, titleColor, children, defaultExpand
         marginBottom: '20px',
       }}
     >
-      <div
+      <button
+        type="button"
         onClick={() => setIsExpanded(!isExpanded)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setIsExpanded(!isExpanded);
+          }
+        }}
         style={{
           padding: '16px 20px',
           background: isExpanded ? colors.bgCard : colors.bgSecondary,
@@ -47,6 +57,9 @@ function CollapsibleRequestResponse({ title, titleColor, children, defaultExpand
           alignItems: 'center',
           justifyContent: 'space-between',
           transition: 'background-color 0.15s ease',
+          width: '100%',
+          border: 'none',
+          textAlign: 'left',
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.background = colors.bgHover;
@@ -71,7 +84,7 @@ function CollapsibleRequestResponse({ title, titleColor, children, defaultExpand
           <ChevronDown size={14} color={titleColor} rotated={!isExpanded} />
           {title}
         </div>
-      </div>
+      </button>
       {isExpanded && <div style={{ padding: '20px' }}>{children}</div>}
     </div>
   );
@@ -100,7 +113,7 @@ function HexTab({ requestHexLines, responseHexLines, hasRequest, hasResponse }) 
               {requestHexLines.length > 0 ? (
                 requestHexLines.map((line, i) => (
                   <div
-                    key={i}
+                    key={`request-${line.offset}-${i}`}
                     style={{
                       display: 'flex',
                       gap: '16px',
@@ -150,7 +163,7 @@ function HexTab({ requestHexLines, responseHexLines, hasRequest, hasResponse }) 
               {responseHexLines.length > 0 ? (
                 responseHexLines.map((line, i) => (
                   <div
-                    key={i}
+                    key={`response-${line.offset}-${i}`}
                     style={{
                       display: 'flex',
                       gap: '16px',

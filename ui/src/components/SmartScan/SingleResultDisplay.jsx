@@ -1,9 +1,11 @@
-import { ExternalLinkIcon } from '../SmartScanIcons';
 import { colors, fonts } from '../../theme';
+import { ExternalLinkIcon } from '../SmartScanIcons';
 import { getRiskLevelColor } from './utils';
 
 export default function SingleResultDisplay({ scanResult }) {
-  if (!scanResult) return null;
+  if (!scanResult) {
+    return null;
+  }
 
   return (
     <div
@@ -218,7 +220,7 @@ export default function SingleResultDisplay({ scanResult }) {
             }}
           >
             {scanResult.data.recommendations.map((rec, idx) => (
-              <li key={idx}>{rec}</li>
+              <li key={`recommendation-${idx}-${rec.substring(0, 30)}`}>{rec}</li>
             ))}
           </ul>
         </div>

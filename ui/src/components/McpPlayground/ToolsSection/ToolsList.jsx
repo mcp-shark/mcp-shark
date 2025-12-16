@@ -1,7 +1,7 @@
 import { colors } from '../../../theme';
-import LoadingState from '../common/LoadingState';
-import ErrorState from '../common/ErrorState';
 import EmptyState from '../common/EmptyState';
+import ErrorState from '../common/ErrorState';
+import LoadingState from '../common/LoadingState';
 import ToolItem from './ToolItem';
 
 export default function ToolsList({
@@ -26,7 +26,7 @@ export default function ToolsList({
         <LoadingState message="Waiting for MCP server to start..." />
       ) : toolsLoading || !toolsLoaded ? (
         <LoadingState message="Loading tools..." />
-      ) : error && error.includes('tools:') ? (
+      ) : error?.includes('tools:') ? (
         <ErrorState message={`Error loading tools: ${error.replace('tools: ', '')}`} />
       ) : tools.length === 0 ? (
         <EmptyState message="No tools available." />
@@ -34,7 +34,7 @@ export default function ToolsList({
         <div style={{ padding: '8px 0' }}>
           {tools.map((tool, idx) => (
             <ToolItem
-              key={idx}
+              key={tool.name || `tool-${idx}`}
               tool={tool}
               isSelected={selectedTool?.name === tool.name}
               onClick={() => onSelectTool(tool)}

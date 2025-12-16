@@ -1,20 +1,20 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 
 import {
-  ListToolsRequestSchema,
   CallToolRequestSchema,
-  ListPromptsRequestSchema,
   GetPromptRequestSchema,
+  ListPromptsRequestSchema,
   ListResourcesRequestSchema,
+  ListToolsRequestSchema,
   ReadResourceRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 
-import { createToolsListHandler } from './handlers/tools-list.js';
-import { createToolsCallHandler } from './handlers/tools-call.js';
-import { createPromptsListHandler } from './handlers/prompts-list.js';
 import { createPromptsGetHandler } from './handlers/prompts-get.js';
+import { createPromptsListHandler } from './handlers/prompts-list.js';
 import { createResourcesListHandler } from './handlers/resources-list.js';
 import { createResourcesReadHandler } from './handlers/resources-read.js';
+import { createToolsCallHandler } from './handlers/tools-call.js';
+import { createToolsListHandler } from './handlers/tools-list.js';
 
 export function createInternalServer(logger, mcpServers, requestedMcpServer) {
   // create MCP server
@@ -58,6 +58,5 @@ export function createInternalServer(logger, mcpServers, requestedMcpServer) {
 }
 
 export function createInternalServerFactory(logger, mcpServers) {
-  return requestedMcpServer =>
-    createInternalServer(logger, mcpServers, requestedMcpServer);
+  return (requestedMcpServer) => createInternalServer(logger, mcpServers, requestedMcpServer);
 }

@@ -3,7 +3,9 @@ import { getRiskLevelColor } from './utils';
 
 export default function ScanOverviewSection({ status, overallRiskLevel, createdAt, updatedAt }) {
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) {
+      return 'N/A';
+    }
     return new Date(dateString).toLocaleString();
   };
 

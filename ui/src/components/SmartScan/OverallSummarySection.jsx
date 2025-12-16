@@ -1,9 +1,42 @@
 import { colors, fonts } from '../../theme';
-import { getRiskLevelColor } from './utils';
 import ExpandableSection from './ExpandableSection';
+import { getRiskLevelColor } from './utils';
+
+function renderReasonContent(overallReason) {
+  const separator = overallReason.includes('\n')
+    ? '\n'
+    : overallReason.includes(' | ')
+      ? ' | '
+      : null;
+
+  if (separator) {
+    return (
+      <ul
+        style={{
+          listStyle: 'disc',
+          listStylePosition: 'inside',
+          margin: 0,
+          paddingLeft: '8px',
+        }}
+      >
+        {overallReason.split(separator).map((item, index) => (
+          <li
+            key={`reason-${index}-${item.trim().substring(0, 20)}`}
+            style={{ fontSize: '12px', marginBottom: '2px' }}
+          >
+            {item.trim()}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+  return <p style={{ fontSize: '12px' }}>{overallReason}</p>;
+}
 
 export default function OverallSummarySection({ overallRiskLevel, overallReason }) {
-  if (!overallRiskLevel) return null;
+  if (!overallRiskLevel) {
+    return null;
+  }
 
   return (
     <ExpandableSection title="Overall Summary" count={overallReason ? 1 : 0} defaultExpanded={true}>
@@ -37,33 +70,7 @@ export default function OverallSummarySection({ overallRiskLevel, overallReason 
         </div>
         {overallReason && (
           <div style={{ fontSize: '12px', color: colors.textSecondary, fontFamily: fonts.body }}>
-            {(() => {
-              const separator = overallReason.includes('\n')
-                ? '\n'
-                : overallReason.includes(' | ')
-                  ? ' | '
-                  : null;
-
-              if (separator) {
-                return (
-                  <ul
-                    style={{
-                      listStyle: 'disc',
-                      listStylePosition: 'inside',
-                      margin: 0,
-                      paddingLeft: '8px',
-                    }}
-                  >
-                    {overallReason.split(separator).map((item, index) => (
-                      <li key={index} style={{ fontSize: '12px', marginBottom: '2px' }}>
-                        {item.trim()}
-                      </li>
-                    ))}
-                  </ul>
-                );
-              }
-              return <p style={{ fontSize: '12px' }}>{overallReason}</p>;
-            })()}
+            {renderReasonContent(overallReason)}
           </div>
         )}
       </div>

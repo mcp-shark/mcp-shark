@@ -1,5 +1,5 @@
-import { colors, fonts } from '../theme';
 import { IconList, IconNetwork } from '@tabler/icons-react';
+import { colors, fonts } from '../theme';
 
 function ViewModeTabs({ viewMode, onViewModeChange }) {
   return (
@@ -15,6 +15,7 @@ function ViewModeTabs({ viewMode, onViewModeChange }) {
       }}
     >
       <button
+        type="button"
         onClick={() => onViewModeChange('general')}
         style={{
           padding: '10px 18px',
@@ -49,6 +50,7 @@ function ViewModeTabs({ viewMode, onViewModeChange }) {
         General List
       </button>
       <button
+        type="button"
         onClick={() => onViewModeChange('groupedByMcp')}
         style={{
           padding: '10px 18px',

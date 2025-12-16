@@ -4,7 +4,7 @@ import { clearAllScanResults } from '../../../utils/scan-cache.js';
  * Clear all cached scan results
  * POST /api/smartscan/cache/clear
  */
-export function clearCache(req, res) {
+export function clearCache(_req, res) {
   try {
     const deletedCount = clearAllScanResults();
     return res.json({

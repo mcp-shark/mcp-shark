@@ -1,6 +1,6 @@
 import { colors, fonts } from '../../theme';
-import PromptsList from './PromptsSection/PromptsList';
 import PromptCallPanel from './PromptsSection/PromptCallPanel';
+import PromptsList from './PromptsSection/PromptsList';
 
 export default function PromptsSection({
   prompts,
@@ -32,6 +32,7 @@ export default function PromptsSection({
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '100%' }}>
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
         <button
+          type="button"
           onClick={onRefresh}
           disabled={loading || promptsLoading}
           style={{

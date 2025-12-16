@@ -10,10 +10,14 @@ function ConfirmationModal({
   cancelText = 'Cancel',
   danger = false,
 }) {
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   return (
-    <div
+    <dialog
+      open
+      aria-modal="true"
       style={{
         position: 'fixed',
         top: 0,
@@ -25,10 +29,20 @@ function ConfirmationModal({
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 1000,
+        border: 'none',
+        margin: 0,
+        width: '100%',
+        height: '100%',
       }}
       onClick={onClose}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') {
+          onClose();
+        }
+      }}
     >
       <div
+        role="document"
         style={{
           background: colors.bgCard,
           borderRadius: '12px',
@@ -39,6 +53,7 @@ function ConfirmationModal({
           fontFamily: fonts.body,
         }}
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
       >
         <h3
           style={{
@@ -68,6 +83,7 @@ function ConfirmationModal({
           }}
         >
           <button
+            type="button"
             onClick={onClose}
             style={{
               padding: '10px 20px',
@@ -91,6 +107,7 @@ function ConfirmationModal({
             {cancelText}
           </button>
           <button
+            type="button"
             onClick={() => {
               onConfirm();
               onClose();
@@ -122,7 +139,7 @@ function ConfirmationModal({
           </button>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }
 

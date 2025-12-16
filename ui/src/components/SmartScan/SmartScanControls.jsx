@@ -1,9 +1,7 @@
-import { useState, useRef } from 'react';
+import { useRef, useState } from 'react';
 import { colors, fonts } from '../../theme';
-import { CheckIcon, LoadingSpinner, CacheIcon } from '../SmartScanIcons';
-import { ExternalLinkIcon } from '../SmartScanIcons';
-import { IconTrash } from '@tabler/icons-react';
 import ConfirmationModal from '../ConfirmationModal';
+import { CheckIcon, ExternalLinkIcon, LoadingSpinner } from '../SmartScanIcons';
 
 export default function SmartScanControls({
   apiToken,
@@ -12,13 +10,14 @@ export default function SmartScanControls({
   loadingData,
   discoverMcpData,
   discoveredServers,
-  selectedServers,
-  setSelectedServers,
-  runScan,
+  _selectedServers,
+  _setSelectedServers,
   scanning,
   clearCache,
   clearingCache,
+  ...rest
 }) {
+  const { runScan: _runScan } = rest;
   const saveTokenTimeoutRef = useRef(null);
   const [showClearCacheModal, setShowClearCacheModal] = useState(false);
 
@@ -56,6 +55,7 @@ export default function SmartScanControls({
         }}
       >
         <label
+          htmlFor="api-token-input"
           style={{
             fontSize: '12px',
             fontWeight: '600',
@@ -68,6 +68,7 @@ export default function SmartScanControls({
         </label>
         <div style={{ position: 'relative', width: '200px' }}>
           <input
+            id="api-token-input"
             type="password"
             value={apiToken}
             onChange={(e) => handleTokenChange(e.target.value)}
@@ -145,6 +146,7 @@ export default function SmartScanControls({
         }}
       >
         <label
+          htmlFor="servers-label"
           style={{
             fontSize: '12px',
             fontWeight: '600',
@@ -156,6 +158,7 @@ export default function SmartScanControls({
           Servers:
         </label>
         <button
+          type="button"
           onClick={discoverMcpData}
           disabled={loadingData}
           style={{
@@ -224,6 +227,7 @@ export default function SmartScanControls({
 
       {/* Clear Cache Button */}
       <button
+        type="button"
         onClick={() => setShowClearCacheModal(true)}
         disabled={clearingCache}
         style={{

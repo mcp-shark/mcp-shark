@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
-import { colors } from './theme';
-import SetupHeader from './components/SetupHeader';
-import ConfigFileSection from './components/ConfigFileSection';
-import WhatThisDoesSection from './components/WhatThisDoesSection';
-import ServerControl from './components/ServerControl';
-import MessageDisplay from './components/MessageDisplay';
+import { useEffect, useState } from 'react';
 import BackupList from './components/BackupList';
+import ConfigFileSection from './components/ConfigFileSection';
 import ConfigViewerModal from './components/ConfigViewerModal';
-import { useServiceExtraction } from './hooks/useServiceExtraction';
+import MessageDisplay from './components/MessageDisplay';
+import ServerControl from './components/ServerControl';
+import SetupHeader from './components/SetupHeader';
+import WhatThisDoesSection from './components/WhatThisDoesSection';
 import { useConfigManagement } from './hooks/useConfigManagement';
+import { useServiceExtraction } from './hooks/useServiceExtraction';
+import { colors } from './theme';
 
 function CompositeSetup() {
   const [fileContent, setFileContent] = useState('');
@@ -181,7 +181,7 @@ function CompositeSetup() {
       if (res.ok) {
         const msg = data.message || 'MCP Shark server stopped';
         setMessage(
-          data.message && data.message.includes('restored')
+          data.message?.includes('restored')
             ? 'MCP Shark server stopped and original config file restored'
             : msg
         );

@@ -1,5 +1,5 @@
+import { IconExternalLink, IconX } from '@tabler/icons-react';
 import { colors, fonts } from '../../theme';
-import { IconX, IconExternalLink } from '@tabler/icons-react';
 
 export default function ScanDetailHeader({ scanId, serverName, onClose }) {
   return (
@@ -63,6 +63,7 @@ export default function ScanDetailHeader({ scanId, serverName, onClose }) {
           </a>
         )}
         <button
+          type="button"
           onClick={onClose}
           style={{
             padding: '6px',

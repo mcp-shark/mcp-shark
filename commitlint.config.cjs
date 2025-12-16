@@ -39,4 +39,3 @@ module.exports = {
     'footer-leading-blank': [2, 'always'],
   },
 };
-

@@ -40,6 +40,7 @@ function ServiceSelector({ services, selectedServices, onSelectionChange }) {
         }}
       >
         <button
+          type="button"
           onClick={() => {
             onSelectionChange(new Set(services.map((s) => s.name)));
           }}
@@ -56,6 +57,7 @@ function ServiceSelector({ services, selectedServices, onSelectionChange }) {
           Select All
         </button>
         <button
+          type="button"
           onClick={() => {
             onSelectionChange(new Set());
           }}

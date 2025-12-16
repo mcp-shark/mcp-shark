@@ -1,5 +1,5 @@
-import { colors, fonts } from '../theme';
 import { IconHelp, IconX } from '@tabler/icons-react';
+import { colors, fonts } from '../theme';
 
 export default function HelpGuideHeader({ onClose }) {
   return (
@@ -29,6 +29,7 @@ export default function HelpGuideHeader({ onClose }) {
         </h2>
       </div>
       <button
+        type="button"
         onClick={onClose}
         style={{
           background: 'transparent',

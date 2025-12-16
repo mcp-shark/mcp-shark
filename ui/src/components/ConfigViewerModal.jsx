@@ -1,4 +1,4 @@
-import { colors, fonts } from '../theme';
+import { colors } from '../theme';
 
 function ConfigViewerModal({
   viewingConfig,
@@ -21,7 +21,9 @@ function ConfigViewerModal({
   const title = isViewingBackup ? 'Backup File' : 'MCP Configuration File';
 
   return (
-    <div
+    <dialog
+      open
+      aria-modal="true"
       style={{
         position: 'fixed',
         top: 0,
@@ -34,10 +36,20 @@ function ConfigViewerModal({
         justifyContent: 'center',
         zIndex: 1000,
         padding: '20px',
+        border: 'none',
+        margin: 0,
+        width: '100%',
+        height: '100%',
       }}
       onClick={onClose}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') {
+          onClose();
+        }
+      }}
     >
       <div
+        role="document"
         style={{
           background: colors.bgPrimary,
           border: `1px solid ${colors.borderLight}`,
@@ -50,6 +62,7 @@ function ConfigViewerModal({
           overflow: 'hidden',
         }}
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
       >
         <div
           style={{
@@ -83,6 +96,7 @@ function ConfigViewerModal({
             )}
           </div>
           <button
+            type="button"
             onClick={onClose}
             style={{
               background: 'transparent',
@@ -134,7 +148,7 @@ function ConfigViewerModal({
           )}
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }
 

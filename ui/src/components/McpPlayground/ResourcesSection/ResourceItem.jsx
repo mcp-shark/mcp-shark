@@ -2,8 +2,10 @@ import { colors } from '../../../theme';
 
 export default function ResourceItem({ resource, isSelected, onClick }) {
   return (
-    <div
+    <button
+      type="button"
       onClick={onClick}
+      aria-label={`Select resource ${resource.uri}`}
       style={{
         padding: '16px 20px',
         margin: '4px 8px',
@@ -14,6 +16,8 @@ export default function ResourceItem({ resource, isSelected, onClick }) {
         boxShadow: isSelected ? `0 2px 4px ${colors.shadowSm}` : 'none',
         transition: 'all 0.2s ease',
         position: 'relative',
+        width: '100%',
+        textAlign: 'left',
       }}
       onMouseEnter={(e) => {
         if (!isSelected) {
@@ -82,6 +86,6 @@ export default function ResourceItem({ resource, isSelected, onClick }) {
           )}
         </div>
       </div>
-    </div>
+    </button>
   );
 }

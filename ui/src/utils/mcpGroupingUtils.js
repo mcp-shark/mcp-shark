@@ -1,13 +1,13 @@
-import { pairRequestsWithResponses } from './requestUtils.js';
 import {
-  IconRefresh,
-  IconTool,
+  IconBell,
   IconDatabase,
   IconMessage,
-  IconBell,
-  IconUser,
   IconPackage,
+  IconRefresh,
+  IconTool,
+  IconUser,
 } from '@tabler/icons-react';
+import { pairRequestsWithResponses } from './requestUtils.js';
 
 /**
  * MCP Method Categories based on the protocol specification
@@ -27,7 +27,9 @@ export const MCP_METHOD_CATEGORIES = {
  * Categorize an MCP method into its protocol category
  */
 export function categorizeMcpMethod(method) {
-  if (!method) return MCP_METHOD_CATEGORIES.OTHER;
+  if (!method) {
+    return MCP_METHOD_CATEGORIES.OTHER;
+  }
 
   // Lifecycle methods
   if (method === 'initialize' || method === 'notifications/initialized') {
@@ -112,7 +114,9 @@ export function groupByMcpSessionAndCategory(requests) {
 
   pairs.forEach((pair) => {
     const request = pair.request || pair.response;
-    if (!request) return;
+    if (!request) {
+      return;
+    }
 
     const sessionId = request.session_id || '__NO_SESSION__';
     const method = getJsonRpcMethod(request);
@@ -140,7 +144,7 @@ export function groupByMcpSessionAndCategory(requests) {
   });
 
   return Array.from(sessionGroups.entries())
-    .map(([sessionId, session]) => ({
+    .map(([_sessionId, session]) => ({
       sessionId: session.sessionId,
       firstTimestamp: session.firstTimestamp,
       categories: Array.from(session.categories.entries())
@@ -182,7 +186,9 @@ export function groupByMcpCategory(requests) {
 
   pairs.forEach((pair) => {
     const request = pair.request || pair.response;
-    if (!request) return;
+    if (!request) {
+      return;
+    }
 
     const method = getJsonRpcMethod(request);
     const category = categorizeMcpMethod(method || '');
@@ -226,7 +232,9 @@ export function groupByMcpCategory(requests) {
  * Based on the protocol specification
  */
 export function getMethodDescription(method) {
-  if (!method) return 'Unknown operation';
+  if (!method) {
+    return 'Unknown operation';
+  }
 
   const descriptions = {
     // Lifecycle

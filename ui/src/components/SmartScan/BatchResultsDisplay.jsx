@@ -1,9 +1,11 @@
 import { colors } from '../../theme';
-import BatchResultsHeader from './BatchResultsDisplay/BatchResultsHeader';
 import BatchResultItem from './BatchResultsDisplay/BatchResultItem';
+import BatchResultsHeader from './BatchResultsDisplay/BatchResultsHeader';
 
 export default function BatchResultsDisplay({ scanResults, onViewScan }) {
-  if (scanResults.length === 0) return null;
+  if (scanResults.length === 0) {
+    return null;
+  }
 
   return (
     <div
@@ -18,7 +20,11 @@ export default function BatchResultsDisplay({ scanResults, onViewScan }) {
       <BatchResultsHeader scanResults={scanResults} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {scanResults.map((result, idx) => (
-          <BatchResultItem key={idx} result={result} onViewScan={onViewScan} />
+          <BatchResultItem
+            key={result.scanId || `batch-result-${idx}`}
+            result={result}
+            onViewScan={onViewScan}
+          />
         ))}
       </div>
     </div>

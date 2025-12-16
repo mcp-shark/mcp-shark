@@ -1,5 +1,5 @@
 import { colors, fonts } from '../../theme';
-import { MenuIcon, ChevronDownIcon } from '../TabNavigationIcons';
+import { ChevronDownIcon, MenuIcon } from '../TabNavigationIcons';
 
 export default function MobileDropdown({
   tabs,
@@ -15,6 +15,7 @@ export default function MobileDropdown({
       ref={dropdownRef}
     >
       <button
+        type="button"
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         style={{
           display: 'flex',
@@ -74,6 +75,7 @@ export default function MobileDropdown({
             const Icon = tab.icon;
             return (
               <button
+                type="button"
                 key={tab.id}
                 onClick={() => {
                   onTabChange(tab.id);

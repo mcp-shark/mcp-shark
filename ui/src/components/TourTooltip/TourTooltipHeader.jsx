@@ -36,6 +36,7 @@ export default function TourTooltipHeader({ step, currentStep, totalSteps, isDra
         </p>
       </div>
       <button
+        type="button"
         onClick={(e) => {
           e.stopPropagation();
           onSkip();

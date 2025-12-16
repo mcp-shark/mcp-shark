@@ -1,6 +1,6 @@
+import { IconChevronDown } from '@tabler/icons-react';
 import { useState } from 'react';
 import { colors, fonts } from '../../theme';
-import { IconChevronDown } from '@tabler/icons-react';
 
 export default function CollapsibleRequestResponse({
   title,
@@ -20,8 +20,16 @@ export default function CollapsibleRequestResponse({
         marginBottom: '20px',
       }}
     >
-      <div
+      <button
+        type="button"
         onClick={() => setIsExpanded(!isExpanded)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setIsExpanded(!isExpanded);
+          }
+        }}
+        aria-label={`Toggle ${title} section`}
         style={{
           padding: '16px 20px',
           background: isExpanded ? colors.bgCard : colors.bgSecondary,
@@ -32,6 +40,9 @@ export default function CollapsibleRequestResponse({
           alignItems: 'center',
           justifyContent: 'space-between',
           transition: 'background-color 0.15s ease',
+          width: '100%',
+          border: 'none',
+          textAlign: 'left',
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.background = colors.bgHover;
@@ -63,7 +74,7 @@ export default function CollapsibleRequestResponse({
           />
           {title}
         </div>
-      </div>
+      </button>
       {isExpanded && <div style={{ padding: '20px' }}>{children}</div>}
     </div>
   );

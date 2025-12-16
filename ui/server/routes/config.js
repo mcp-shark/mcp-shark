@@ -1,8 +1,35 @@
-import * as path from 'node:path';
 import * as fs from 'node:fs';
 import { homedir } from 'node:os';
-import { extractServices, convertMcpServersToServers } from '../utils/config.js';
+import * as path from 'node:path';
+import { extractServices } from '../utils/config.js';
 import { createBackupRoutes } from './backups.js';
+
+function readFileContent(filePath) {
+  const resolvedFilePath = filePath.startsWith('~')
+    ? path.join(homedir(), filePath.slice(1))
+    : filePath;
+
+  if (!fs.existsSync(resolvedFilePath)) {
+    return null;
+  }
+  return fs.readFileSync(resolvedFilePath, 'utf-8');
+}
+
+function parseJsonSafely(content) {
+  try {
+    return { config: JSON.parse(content), error: null };
+  } catch (e) {
+    return { config: null, error: e };
+  }
+}
+
+function tryParseJson(content) {
+  try {
+    return JSON.parse(content);
+  } catch (_e) {
+    return null;
+  }
+}
 
 export function createConfigRoutes() {
   const router = {};
@@ -15,18 +42,7 @@ export function createConfigRoutes() {
         return res.status(400).json({ error: 'Either filePath or fileContent is required' });
       }
 
-      const content = fileContent
-        ? fileContent
-        : (() => {
-            const resolvedFilePath = filePath.startsWith('~')
-              ? path.join(homedir(), filePath.slice(1))
-              : filePath;
-
-            if (!fs.existsSync(resolvedFilePath)) {
-              return null;
-            }
-            return fs.readFileSync(resolvedFilePath, 'utf-8');
-          })();
+      const content = fileContent ? fileContent : readFileContent(filePath);
 
       if (!content) {
         const resolvedFilePath = filePath.startsWith('~')
@@ -35,13 +51,7 @@ export function createConfigRoutes() {
         return res.status(404).json({ error: 'File not found', path: resolvedFilePath });
       }
 
-      const parseResult = (() => {
-        try {
-          return { config: JSON.parse(content), error: null };
-        } catch (e) {
-          return { config: null, error: e };
-        }
-      })();
+      const parseResult = parseJsonSafely(content);
 
       if (!parseResult.config) {
         return res.status(400).json({
@@ -76,13 +86,7 @@ export function createConfigRoutes() {
       }
 
       const content = fs.readFileSync(resolvedPath, 'utf-8');
-      const parsed = (() => {
-        try {
-          return JSON.parse(content);
-        } catch (e) {
-          return null;
-        }
-      })();
+      const parsed = tryParseJson(content);
 
       res.json({
         success: true,
@@ -97,7 +101,7 @@ export function createConfigRoutes() {
     }
   };
 
-  router.detectConfig = (req, res) => {
+  router.detectConfig = (_req, res) => {
     const detected = [];
     const platform = process.platform;
     const homeDir = homedir();

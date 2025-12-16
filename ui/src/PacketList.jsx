@@ -1,13 +1,12 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { colors, fonts } from './theme';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import GroupedByMcpView from './components/GroupedByMcpView';
 import RequestRow from './components/RequestRow';
 import TableHeader from './components/TableHeader';
 import ViewModeTabs from './components/ViewModeTabs';
-import GroupedByMcpView from './components/GroupedByMcpView';
+import { colors, fonts } from './theme';
+import { staggerIn } from './utils/animations';
 import { groupByMcpSessionAndCategory } from './utils/mcpGroupingUtils.js';
 import { pairRequestsWithResponses } from './utils/requestUtils.js';
-import { staggerIn } from './utils/animations';
-import anime from 'animejs';
 
 function RequestList({ requests, selected, onSelect, firstRequestTime }) {
   const [viewMode, setViewMode] = useState('general');

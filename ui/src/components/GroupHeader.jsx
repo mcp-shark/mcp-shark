@@ -11,7 +11,10 @@ const ChevronDown = ({ size = 12, color = 'currentColor' }) => (
     strokeLinecap="round"
     strokeLinejoin="round"
     style={{ display: 'inline-block', verticalAlign: 'middle' }}
+    role="img"
+    aria-label="Chevron down icon"
   >
+    <title>Chevron down icon</title>
     <polyline points="6 9 12 15 18 9" />
   </svg>
 );
@@ -27,7 +30,10 @@ const ChevronRight = ({ size = 12, color = 'currentColor' }) => (
     strokeLinecap="round"
     strokeLinejoin="round"
     style={{ display: 'inline-block', verticalAlign: 'middle' }}
+    role="img"
+    aria-label="Chevron right icon"
   >
+    <title>Chevron right icon</title>
     <polyline points="9 18 15 12 9 6" />
   </svg>
 );
@@ -36,6 +42,14 @@ export default function GroupHeader({ children, onClick, isExpanded, indent = 0 
   return (
     <tr
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      tabIndex={0}
+      aria-label={`Toggle group ${children}`}
       style={{
         cursor: 'pointer',
         background: colors.bgSecondary,

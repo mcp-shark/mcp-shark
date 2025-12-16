@@ -1,5 +1,4 @@
 import * as fs from 'node:fs';
-import { homedir } from 'node:os';
 
 const state = { originalConfigData: null };
 
@@ -8,7 +7,7 @@ export function storeOriginalConfig(filePath, originalContent, backupPath) {
 }
 
 export function restoreOriginalConfig(mcpSharkLogs, broadcastLogUpdate) {
-  if (state.originalConfigData && state.originalConfigData.filePath) {
+  if (state.originalConfigData?.filePath) {
     try {
       if (fs.existsSync(state.originalConfigData.filePath)) {
         fs.writeFileSync(

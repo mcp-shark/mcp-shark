@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export function useServerStatus() {
   const [serverStatus, setServerStatus] = useState(null);
@@ -17,7 +17,7 @@ export function useServerStatus() {
       }
       const data = await res.json();
       setServerStatus(data);
-    } catch (err) {
+    } catch (_err) {
       setServerStatus({ running: false });
     }
   };

@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { useTokenManagement } from './hooks/useTokenManagement';
-import { useServerStatus } from './hooks/useServerStatus';
-import { useMcpDiscovery } from './hooks/useMcpDiscovery';
-import { useScanOperations } from './hooks/useScanOperations';
-import { useScanList } from './hooks/useScanList';
 import { useCacheManagement } from './hooks/useCacheManagement';
+import { useMcpDiscovery } from './hooks/useMcpDiscovery';
+import { useScanList } from './hooks/useScanList';
+import { useScanOperations } from './hooks/useScanOperations';
+import { useServerStatus } from './hooks/useServerStatus';
+import { useTokenManagement } from './hooks/useTokenManagement';
 
 export function useSmartScan() {
   const [error, setError] = useState(null);

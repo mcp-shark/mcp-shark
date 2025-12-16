@@ -4,6 +4,10 @@
   "description": "Aggregate multiple Model Context Protocol (MCP) servers into a single unified interface with a powerful monitoring UI. Prov deep visibility into every request and response.",
   "type": "module",
   "main": "./bin/mcp-shark.js",
+  "exports": {
+    ".": "./bin/mcp-shark.js",
+    "./mcp-server": "./mcp-server/index.js"
+  },
   "bin": {
     "mcp-shark": "./bin/mcp-shark.js",
     "@mcp-shark/mcp-shark": "./bin/mcp-shark.js"
@@ -16,40 +20,24 @@
   "bugs": {
     "url": "https://github.com/mcp-shark/mcp-shark/issues"
   },
-  "files": [
-    "bin",
-    "ui",
-    "mcp-server",
-    "README.md",
-    "LICENSE"
-  ],
+  "files": ["bin", "ui", "mcp-server", "README.md", "LICENSE", "package.json"],
   "scripts": {
-    "install:all": "npm install",
-    "start:ui": "cd ui && npm start",
-    "start": "npm run start:ui",
-    "dev:ui": "cd ui && npm run dev",
-    "build:ui": "cd ui && npm run build",
-    "lint:server": "cd mcp-server && npm run lint",
-    "lint:fix:server": "cd mcp-server && npm run lint:fix",
-    "format:server": "cd mcp-server && npm run format",
-    "lint:ui": "cd ui && (eslint . --ext .js,.jsx,.ts,.tsx || echo 'eslint not available in ui')",
-    "lint:fix:ui": "cd ui && (eslint . --ext .js,.jsx,.ts,.tsx --fix || echo 'eslint not available in ui')",
-    "format:ui": "prettier --write \"ui/**/*.{js,jsx,ts,tsx,json,css,md}\"",
-    "lint:fix:all": "(npm run lint:fix:server || true) && (npm run lint:fix:ui || true)",
-    "format:all": "(npm run format:server || true) && (npm run format:ui || true)",
-    "fix:all": "(npm run lint:fix:all || true) && (npm run format:all || true)",
+    "start": "npm run build:ui && cd ui && node server.js",
+    "dev": "cd ui && vite",
+    "build": "cd ui && vite build",
+    "build:ui": "cd ui && vite build",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format --write .",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
     "prepare": "husky install || true",
-    "prepublishOnly": "npm run lint:fix:all && npm run format:all",
+    "prepublishOnly": "npm run check:fix",
     "publish:public": "npm publish --access public",
     "publish:dry-run": "npm publish --dry-run"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "prettier --write"
-    ],
-    "*.{json,css,md,yml,yaml}": [
-      "prettier --write"
-    ]
+    "*": ["biome check --write"]
   },
   "keywords": [
     "mcp",
@@ -78,28 +66,24 @@
     "@modelcontextprotocol/sdk": "^1.20.2",
     "@tabler/icons-react": "^3.0.0",
     "animejs": "^3.2.2",
+    "commander": "^14.0.2",
     "consola": "^3.4.2",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "jsonrpc-lite": "^2.2.0",
     "mcp-shark-common": "github:mcp-shark/mcp-shark-common",
+    "open": "^11.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "ws": "^8.16.0",
-    "open": "^11.0.0",
-    "commander": "^14.0.2"
+    "ws": "^8.16.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
-    "@eslint/js": "^9.15.0",
     "@vitejs/plugin-react": "^4.2.1",
-    "eslint": "^9.15.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.2.1",
     "husky": "^9.1.6",
     "lint-staged": "^15.2.10",
-    "prettier": "^3.3.3",
-    "vite": "^5.1.0"
+    "vite": "^7.3.0"
   }
 }

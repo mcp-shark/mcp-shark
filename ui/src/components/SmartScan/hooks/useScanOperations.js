@@ -43,21 +43,30 @@ export function useScanOperations(apiToken, discoveredServers, selectedServers, 
       const data = await response.json();
 
       if (!response.ok) {
-        let errorMessage = data.error || data.message || `API error: ${response.status}`;
-
-        if (response.status === 400 && data.details) {
-          if (Array.isArray(data.details)) {
-            errorMessage = `Validation failed: ${data.details
-              .map((d) => {
-                if (typeof d === 'string') return d;
-                if (d.field && d.message) return `${d.field}: ${d.message}`;
-                return JSON.stringify(d);
-              })
-              .join('; ')}`;
-          } else if (typeof data.details === 'string') {
-            errorMessage = data.details;
+        const formatValidationErrors = (details) => {
+          if (!Array.isArray(details)) {
+            return null;
           }
-        }
+          return `Validation failed: ${details
+            .map((d) => {
+              if (typeof d === 'string') {
+                return d;
+              }
+              if (d.field && d.message) {
+                return `${d.field}: ${d.message}`;
+              }
+              return JSON.stringify(d);
+            })
+            .join('; ')}`;
+        };
+
+        const errorMessage =
+          response.status === 400 && data.details
+            ? formatValidationErrors(data.details) ||
+              data.error ||
+              data.message ||
+              `API error: ${response.status}`
+            : data.error || data.message || `API error: ${response.status}`;
 
         setError(errorMessage);
         return;

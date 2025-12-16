@@ -1,5 +1,7 @@
 export function generateHexDump(text) {
-  if (!text) return [];
+  if (!text) {
+    return [];
+  }
   const bytes = new TextEncoder().encode(text);
   const lines = [];
   for (let i = 0; i < bytes.length; i += 16) {
@@ -20,5 +22,5 @@ export function createFullRequestText(headers, bodyRaw) {
   const headersText = Object.entries(headers)
     .map(([key, value]) => `${key}: ${value}`)
     .join('\r\n');
-  return headersText + (bodyRaw ? '\r\n\r\n' + bodyRaw : '');
+  return headersText + (bodyRaw ? `\r\n\r\n${bodyRaw}` : '');
 }

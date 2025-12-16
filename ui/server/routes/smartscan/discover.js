@@ -1,6 +1,6 @@
-import { getMcpConfigPath } from 'mcp-shark-common/configs/index.js';
-import { readFileSync, existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { getMcpConfigPath } from 'mcp-shark-common/configs/index.js';
 import { convertMcpServersToServers } from '../../utils/config.js';
 import { createTransport } from './transport.js';
 
@@ -51,7 +51,7 @@ async function discoverServer(serverName, serverConfig) {
       if (transport.close) {
         await transport.close();
       }
-    } catch (closeError) {
+    } catch (_closeError) {
       // Ignore close errors
     }
     throw error;
@@ -62,7 +62,7 @@ async function discoverServer(serverName, serverConfig) {
  * Discover all MCP servers from config
  * GET /api/smartscan/discover
  */
-export async function discoverServers(req, res) {
+export async function discoverServers(_req, res) {
   try {
     const configPath = getMcpConfigPath();
 

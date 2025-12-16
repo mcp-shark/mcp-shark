@@ -1,5 +1,5 @@
-import { colors, fonts } from '../theme';
 import { IconFileUpload } from '@tabler/icons-react';
+import { colors, fonts } from '../theme';
 
 function FileInput({
   filePath,
@@ -70,6 +70,7 @@ function FileInput({
       {fileContent && !filePath && (
         <div>
           <label
+            htmlFor="update-path-input"
             style={{
               display: 'block',
               fontSize: '12px',
@@ -80,6 +81,7 @@ function FileInput({
             Optional: File Path to Update
           </label>
           <input
+            id="update-path-input"
             type="text"
             placeholder="Enter file path to update (e.g., ~/.cursor/mcp.json)"
             value={updatePath}

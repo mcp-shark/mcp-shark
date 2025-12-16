@@ -1,34 +1,31 @@
-import express from 'express';
-import { createServer } from 'http';
-import { WebSocketServer } from 'ws';
+import { createServer } from 'node:http';
 import * as path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import express from 'express';
+import { WebSocketServer } from 'ws';
 
+import { getDatabaseFile, prepareAppDataSpaces } from 'mcp-shark-common/configs/index.js';
 import { openDb } from 'mcp-shark-common/db/init.js';
-import {
-  getDatabaseFile,
-  prepareAppDataSpaces,
-  getMcpConfigPath,
-} from 'mcp-shark-common/configs/index.js';
 import { queryRequests } from 'mcp-shark-common/db/query.js';
 import { restoreOriginalConfig } from './server/utils/config.js';
 
-import { createRequestsRoutes } from './server/routes/requests.js';
-import { createConversationsRoutes } from './server/routes/conversations.js';
-import { createSessionsRoutes } from './server/routes/sessions.js';
-import { createStatisticsRoutes } from './server/routes/statistics.js';
-import { createLogsRoutes } from './server/routes/logs.js';
-import { createConfigRoutes } from './server/routes/config.js';
 import { createBackupRoutes } from './server/routes/backups.js';
 import { createCompositeRoutes } from './server/routes/composite.js';
+import { createConfigRoutes } from './server/routes/config.js';
+import { createConversationsRoutes } from './server/routes/conversations.js';
 import { createHelpRoutes } from './server/routes/help.js';
+import { createLogsRoutes } from './server/routes/logs.js';
 import { createPlaygroundRoutes } from './server/routes/playground.js';
+import { createRequestsRoutes } from './server/routes/requests.js';
+import { createSessionsRoutes } from './server/routes/sessions.js';
 import { createSmartScanRoutes } from './server/routes/smartscan.js';
+import { createStatisticsRoutes } from './server/routes/statistics.js';
+import { serializeBigInt } from './server/utils/serialization.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const MAX_LOG_LINES = 10000;
+const _MAX_LOG_LINES = 10000;
 
 export function createUIServer() {
   prepareAppDataSpaces();
@@ -42,10 +39,10 @@ export function createUIServer() {
 
   const clients = new Set();
   const mcpSharkLogs = [];
-  const processState = { mcpSharkProcess: null };
+  const processState = { mcpSharkServer: null };
 
-  const setMcpSharkProcess = (process) => {
-    processState.mcpSharkProcess = process;
+  const setMcpSharkProcess = (server) => {
+    processState.mcpSharkServer = server;
   };
 
   wss.on('connection', (ws) => {
@@ -73,7 +70,7 @@ export function createUIServer() {
   const logsRoutes = createLogsRoutes(mcpSharkLogs, broadcastLogUpdate);
   const configRoutes = createConfigRoutes();
   const backupRoutes = createBackupRoutes();
-  const getMcpSharkProcess = () => processState.mcpSharkProcess;
+  const getMcpSharkProcess = () => processState.mcpSharkServer;
   const compositeRoutes = createCompositeRoutes(
     getMcpSharkProcess,
     setMcpSharkProcess,
@@ -138,30 +135,15 @@ export function createUIServer() {
   app.post('/api/smartscan/cached-results', smartScanRoutes.getCachedResults);
   app.post('/api/smartscan/cache/clear', smartScanRoutes.clearCache);
 
-  const cleanup = () => {
-    if (processState.mcpSharkProcess) {
-      processState.mcpSharkProcess.kill();
-      processState.mcpSharkProcess = null;
-    }
-    restoreConfig();
-  };
-
-  process.on('SIGTERM', cleanup);
-  process.on('SIGINT', cleanup);
-  process.on('exit', () => {
-    restoreConfig();
-  });
-
   const staticPath = path.join(__dirname, 'dist');
   app.use(express.static(staticPath));
 
-  app.get('*', (req, res) => {
+  app.get('*', (_req, res) => {
     res.sendFile(path.join(staticPath, 'index.html'));
   });
 
   const notifyClients = async () => {
     const requests = queryRequests(db, { limit: 100 });
-    const { serializeBigInt } = await import('./server/utils/serialization.js');
     const message = JSON.stringify({ type: 'update', data: serializeBigInt(requests) });
     clients.forEach((client) => {
       if (client.readyState === 1) {
@@ -171,7 +153,7 @@ export function createUIServer() {
   };
 
   const timestampState = { lastTs: 0 };
-  setInterval(() => {
+  const intervalId = setInterval(() => {
     const lastCheck = db.prepare('SELECT MAX(timestamp_ns) as max_ts FROM packets').get();
     if (lastCheck && lastCheck.max_ts > timestampState.lastTs) {
       timestampState.lastTs = lastCheck.max_ts;
@@ -179,19 +161,78 @@ export function createUIServer() {
     }
   }, 500);
 
+  const cleanup = async () => {
+    console.log('Shutting down UI server...');
+
+    // Clear interval
+    clearInterval(intervalId);
+
+    // Stop MCP Shark server if running
+    if (processState.mcpSharkServer) {
+      try {
+        if (processState.mcpSharkServer.stop) {
+          await processState.mcpSharkServer.stop();
+        }
+        processState.mcpSharkServer = null;
+      } catch (err) {
+        console.error('Error stopping MCP Shark server:', err);
+      }
+    }
+
+    // Close WebSocket connections
+    clients.forEach((client) => {
+      if (client.readyState === 1) {
+        client.close();
+      }
+    });
+    clients.clear();
+
+    // Close WebSocket server
+    wss.close();
+
+    // Restore config
+    restoreConfig();
+
+    // Close HTTP server
+    return new Promise((resolve) => {
+      server.close(() => {
+        console.log('UI server stopped');
+        resolve();
+      });
+    });
+  };
+
   return { server, cleanup };
 }
 
 export async function runUIServer() {
-  const port = parseInt(process.env.UI_PORT) || 9853;
+  const port = Number.parseInt(process.env.UI_PORT) || 9853;
   const { server, cleanup } = createUIServer();
+
+  const shutdown = async () => {
+    try {
+      await cleanup();
+    } catch (err) {
+      console.error('Error during shutdown:', err);
+    } finally {
+      process.exit(0);
+    }
+  };
+
+  // Register signal handlers
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
+  process.on('exit', async () => {
+    // Final cleanup on exit
+    try {
+      await cleanup();
+    } catch (_err) {
+      // Ignore errors during exit
+    }
+  });
 
   server.listen(port, '0.0.0.0', () => {
     console.log(`UI server listening on http://localhost:${port}`);
-  });
-
-  server.on('close', () => {
-    cleanup();
   });
 }
 

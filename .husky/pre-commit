@@ -1,9 +1,5 @@
-# Fix linting and formatting issues in all files
-# Continue even if this fails (some tools may not be available)
-npm run fix:all 2>/dev/null || true
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
 
-# Run lint-staged on staged files (only prettier, eslint handled per-project)
-npx lint-staged 2>/dev/null || true
-
-# Always exit successfully to not block commits
-exit 0
+# Run lint-staged (Biome for linting and formatting)
+npx lint-staged

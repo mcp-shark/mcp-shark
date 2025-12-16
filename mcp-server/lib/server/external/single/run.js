@@ -1,7 +1,7 @@
-import { makeTransport } from './transport.js';
+import { CompositeError, getErrors, isError } from '../../../common/error.js';
 import { createClient } from './client.js';
 import * as requests from './request.js';
-import { isError, CompositeError, getErrors } from '../../../common/error.js';
+import { makeTransport } from './transport.js';
 
 export class RunError extends CompositeError {
   constructor(message, error, errors = []) {
@@ -11,27 +11,18 @@ export class RunError extends CompositeError {
 }
 
 export async function runExternalServer({ logger, name, config }) {
-  logger.debug(
-    `Starting external server run for server ${name} with config:`,
-    config
-  );
+  logger.debug(`Starting external server run for server ${name} with config:`, config);
 
   // Create transport
   const transport = makeTransport(config);
   if (isError(transport)) {
-    return new RunError(
-      `Error creating transport for external server ${name}`,
-      transport.error
-    );
+    return new RunError(`Error creating transport for external server ${name}`, transport.error);
   }
 
   // Create client
   const client = await createClient({ transport });
   if (isError(client)) {
-    return new RunError(
-      `Error creating client for external server ${name}`,
-      client.error
-    );
+    return new RunError(`Error creating client for external server ${name}`, client.error);
   }
 
   // Run requests
@@ -52,17 +43,15 @@ export async function runExternalServer({ logger, name, config }) {
     );
   }
 
-  const [{ tools }, { resources }, { prompts }] = results.map(
-    result => result.value
-  );
+  const [{ tools }, { resources }, { prompts }] = results.map((result) => result.value);
   return {
     name,
     client,
     tools,
     resources,
     prompts,
-    callTool: args => client.callTool.bind(client)(args),
-    readResource: resourceUri => {
+    callTool: (args) => client.callTool.bind(client)(args),
+    readResource: (resourceUri) => {
       return client.readResource.bind(client)(resourceUri);
     },
     getPrompt: (promptName, args) => {

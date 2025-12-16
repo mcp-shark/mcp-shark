@@ -1,7 +1,7 @@
 import { colors } from '../../../theme';
-import LoadingState from '../common/LoadingState';
-import ErrorState from '../common/ErrorState';
 import EmptyState from '../common/EmptyState';
+import ErrorState from '../common/ErrorState';
+import LoadingState from '../common/LoadingState';
 import PromptItem from './PromptItem';
 
 export default function PromptsList({
@@ -26,7 +26,7 @@ export default function PromptsList({
         <LoadingState message="Waiting for MCP server to start..." />
       ) : promptsLoading || !promptsLoaded ? (
         <LoadingState message="Loading prompts..." />
-      ) : error && error.includes('prompts:') ? (
+      ) : error?.includes('prompts:') ? (
         <ErrorState message={`Error loading prompts: ${error.replace('prompts: ', '')}`} />
       ) : prompts.length === 0 ? (
         <EmptyState message="No prompts available." />
@@ -34,7 +34,7 @@ export default function PromptsList({
         <div style={{ padding: '8px 0' }}>
           {prompts.map((prompt, idx) => (
             <PromptItem
-              key={idx}
+              key={prompt.name || `prompt-${idx}`}
               prompt={prompt}
               isSelected={selectedPrompt?.name === prompt.name}
               onClick={() => onSelectPrompt(prompt)}

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 export function useMcpRequest(selectedServer) {
   const [loading, setLoading] = useState(false);

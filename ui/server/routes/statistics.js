@@ -1,5 +1,13 @@
-import { serializeBigInt } from '../utils/serialization.js';
 import { queryRequests } from 'mcp-shark-common/db/query.js';
+import { serializeBigInt } from '../utils/serialization.js';
+
+const sanitizeSearch = (value) => {
+  if (value !== undefined && value !== null) {
+    const trimmed = String(value).trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }
+  return null;
+};
 
 export function createStatisticsRoutes(db) {
   const router = {};
@@ -7,13 +15,7 @@ export function createStatisticsRoutes(db) {
   router.getStatistics = (req, res) => {
     try {
       // Sanitize search parameter - convert empty strings to null
-      let search = req.query.search;
-      if (search !== undefined && search !== null) {
-        search = String(search).trim();
-        search = search.length > 0 ? search : null;
-      } else {
-        search = null;
-      }
+      const search = sanitizeSearch(req.query.search);
 
       // Build filters object matching the requests route
       const filters = {
@@ -21,7 +23,7 @@ export function createStatisticsRoutes(db) {
         direction: (req.query.direction && String(req.query.direction).trim()) || null,
         method: (req.query.method && String(req.query.method).trim()) || null,
         jsonrpcMethod: (req.query.jsonrpcMethod && String(req.query.jsonrpcMethod).trim()) || null,
-        statusCode: req.query.statusCode ? parseInt(req.query.statusCode) : null,
+        statusCode: req.query.statusCode ? Number.parseInt(req.query.statusCode) : null,
         jsonrpcId: (req.query.jsonrpcId && String(req.query.jsonrpcId).trim()) || null,
         search: search,
         serverName: (req.query.serverName && String(req.query.serverName).trim()) || null,

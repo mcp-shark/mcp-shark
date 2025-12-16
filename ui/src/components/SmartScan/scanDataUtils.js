@@ -4,15 +4,12 @@
 
 export function getScanValue(scan, path) {
   const paths = path.split('.');
-  let value = scan;
-  for (const p of paths) {
+  return paths.reduce((value, p) => {
     if (value && typeof value === 'object' && p in value) {
-      value = value[p];
-    } else {
-      return null;
+      return value[p];
     }
-  }
-  return value;
+    return null;
+  }, scan);
 }
 
 export function normalizeScanData(scan) {
@@ -24,8 +21,8 @@ export function normalizeScanData(scan) {
     getScanValue(scan, 'scan_id') ||
     getScanValue(scan, 'data.id') ||
     getScanValue(scan, 'data.scan_id') ||
-    (actualScan && actualScan.id) ||
-    (actualScan && actualScan.scan_id);
+    actualScan?.id ||
+    actualScan?.scan_id;
 
   const serverName =
     scan.serverName || // Check top-level first (for cached scans)
@@ -35,7 +32,7 @@ export function normalizeScanData(scan) {
     getScanValue(scan, 'server.name') ||
     getScanValue(scan, 'data.server.name') ||
     getScanValue(scan, 'data.data.server.name') ||
-    (scan.server && scan.server.name) || // Check nested server object
+    scan.server?.name || // Check nested server object
     'Unknown Server';
 
   const status =
@@ -61,21 +58,29 @@ export function normalizeScanData(scan) {
     getScanValue(scan, 'data.updated_at') ||
     getScanValue(scan, 'data.data.updated_at');
 
-  let analysisResult =
+  const baseAnalysisResult =
     getScanValue(scan, 'result.analysis_result') ||
     getScanValue(scan, 'analysis_result') ||
     getScanValue(scan, 'data.analysis_result') ||
     getScanValue(scan, 'data.data.analysis_result') ||
     getScanValue(scan, 'data.data.data.analysis_result');
 
-  if (!analysisResult && actualScan && typeof actualScan === 'object') {
-    if (actualScan.tool_findings || actualScan.prompt_findings || actualScan.resource_findings) {
-      analysisResult = actualScan;
+  const extractAnalysisResult = (base, actual) => {
+    if (base) {
+      return base;
     }
-    if (!analysisResult && actualScan.analysis_result) {
-      analysisResult = actualScan.analysis_result;
+    if (actual && typeof actual === 'object') {
+      if (actual.tool_findings || actual.prompt_findings || actual.resource_findings) {
+        return actual;
+      }
+      if (actual.analysis_result) {
+        return actual.analysis_result;
+      }
     }
-  }
+    return null;
+  };
+
+  const analysisResult = extractAnalysisResult(baseAnalysisResult, actualScan);
 
   const serverData =
     getScanValue(scan, 'result.mcp_server_data.server') ||
