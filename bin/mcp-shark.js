@@ -6,7 +6,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 import open from 'open';
-import logger from '../shared/logger.js';
+import logger from '#common/logger';
 
 const SERVER_URL = 'http://localhost:9853';
 const BROWSER_OPEN_DELAY = 1000;

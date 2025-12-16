@@ -123,8 +123,10 @@ mcp-shark/
 │   │   ├── components/
 │   │   └── ...
 │   └── vite.config.js
-├── shared/
-│   └── logger.js             # Shared logger implementation
+├── lib/common/
+│   ├── logger.js             # Unified logger implementation
+│   ├── configs/              # Configuration management
+│   └── db/                   # Database utilities
 └── package.json              # Single package.json for entire project
 ```
 

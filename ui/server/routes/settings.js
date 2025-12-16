@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
-import { getDatabaseFile, getWorkingDirectory } from 'mcp-shark-common/configs/index.js';
+import { getDatabaseFile, getWorkingDirectory } from '#common/configs';
 import logger from '../utils/logger.js';
 import { getScanResultsDirectory } from '../utils/scan-cache/directory.js';
 

@@ -1,4 +1,4 @@
-import { queryRequests } from 'mcp-shark-common/db/query.js';
+import { queryRequests } from '#common/db/query';
 import logger from '../utils/logger.js';
 import { serializeBigInt } from '../utils/serialization.js';
 

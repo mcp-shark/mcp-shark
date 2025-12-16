@@ -1,3 +1,4 @@
+import { IconTrash } from '@tabler/icons-react';
 import { useRef, useState } from 'react';
 import { colors, fonts } from '../../theme';
 import ConfirmationModal from '../ConfirmationModal';

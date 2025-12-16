@@ -1,4 +1,4 @@
-import { readHelpState, writeHelpState } from 'mcp-shark-common/configs/index.js';
+import { readHelpState, writeHelpState } from '#common/configs';
 
 export function createHelpRoutes() {
   const router = {};

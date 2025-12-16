@@ -4,9 +4,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import express from 'express';
 import { WebSocketServer } from 'ws';
 
-import { getDatabaseFile, prepareAppDataSpaces } from 'mcp-shark-common/configs/index.js';
-import { openDb } from 'mcp-shark-common/db/init.js';
-import { queryRequests } from 'mcp-shark-common/db/query.js';
+import { getDatabaseFile, prepareAppDataSpaces } from '#common/configs';
+import { openDb } from '#common/db/init';
+import { queryRequests } from '#common/db/query';
 import { restoreOriginalConfig } from './server/utils/config.js';
 
 import { createBackupRoutes } from './server/routes/backups/index.js';

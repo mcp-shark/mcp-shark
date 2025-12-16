@@ -1,4 +1,4 @@
-import { getSessionRequests, getSessions } from 'mcp-shark-common/db/query.js';
+import { getSessionRequests, getSessions } from '#common/db/query';
 import { serializeBigInt } from '../utils/serialization.js';
 
 export function createSessionsRoutes(db) {

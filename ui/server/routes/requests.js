@@ -1,4 +1,4 @@
-import { queryRequests } from 'mcp-shark-common/db/query.js';
+import { queryRequests } from '#common/db/query';
 import logger from '../utils/logger.js';
 import { serializeBigInt } from '../utils/serialization.js';
 
@@ -78,7 +78,7 @@ export function createRequestsRoutes(db) {
 
       const existingTables = tablesResult.map((row) => row.name);
 
-      // Based on mcp-shark-common schema, these are the traffic-related tables:
+      // Based on lib/common/db schema, these are the traffic-related tables:
       // - packets: Individual HTTP request/response packets
       // - conversations: Correlated request/response pairs
       // - sessions: Session tracking

@@ -56,8 +56,10 @@ mcp-shark/
 │   ├── server.js          # Express server
 │   ├── src/               # React frontend
 │   └── vite.config.js     # Vite configuration
-├── shared/                 # Shared utilities
-│   └── logger.js          # Logger implementation
+├── lib/common/            # Common utilities
+│   ├── logger.js          # Unified logger implementation
+│   ├── configs/           # Configuration management
+│   └── db/                # Database utilities
 ├── scripts/                # Build scripts
 │   └── start-ui.js
 ├── docs/                   # Documentation
@@ -200,7 +202,7 @@ Husky runs pre-commit hooks that:
 
 ## Database Schema
 
-The database schema is managed by `mcp-shark-common`. See the common package for schema details.
+The database schema is managed in `lib/common/db/init.js`. See the schema definition for details.
 
 ## Debugging
 

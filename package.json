@@ -1,12 +1,20 @@
 {
   "name": "@mcp-shark/mcp-shark",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "Aggregate multiple Model Context Protocol (MCP) servers into a single unified interface with a powerful monitoring UI. Prov deep visibility into every request and response.",
   "type": "module",
   "main": "./bin/mcp-shark.js",
   "exports": {
     ".": "./bin/mcp-shark.js",
     "./mcp-server": "./mcp-server/index.js"
+  },
+  "imports": {
+    "#common/configs": "./lib/common/configs/index.js",
+    "#common/db/query": "./lib/common/db/query.js",
+    "#common/db/init": "./lib/common/db/init.js",
+    "#common/db/logger": "./lib/common/db/logger.js",
+    "#common/logger": "./lib/common/logger.js",
+    "#common/*": "./lib/common/*"
   },
   "bin": {
     "mcp-shark": "./bin/mcp-shark.js",
@@ -20,7 +28,7 @@
   "bugs": {
     "url": "https://github.com/mcp-shark/mcp-shark/issues"
   },
-  "files": ["bin", "ui", "mcp-server", "shared", "README.md", "LICENSE", "package.json"],
+  "files": ["bin", "ui", "mcp-server", "lib", "README.md", "LICENSE", "package.json"],
   "scripts": {
     "start": "node scripts/start-ui.js",
     "predev": "npm run build:ui",
@@ -61,7 +69,7 @@
   "author": "",
   "license": "SEE LICENSE IN LICENSE",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.20.2",
@@ -72,7 +80,7 @@
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "jsonrpc-lite": "^2.2.0",
-    "mcp-shark-common": "github:mcp-shark/mcp-shark-common",
+    "better-sqlite3": "^12.4.1",
     "open": "^11.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

@@ -2,7 +2,7 @@ import * as fs from 'node:fs';
 import { homedir } from 'node:os';
 import * as path from 'node:path';
 import { startMcpSharkServer } from '@mcp-shark/mcp-shark/mcp-server';
-import { getMcpConfigPath } from 'mcp-shark-common/configs/index.js';
+import { getMcpConfigPath } from '#common/configs';
 import { getSelectedServiceNames, updateConfigFile } from '../../utils/config-update.js';
 import { clearOriginalConfig, convertMcpServersToServers } from '../../utils/config.js';
 import logger from '../../utils/logger.js';

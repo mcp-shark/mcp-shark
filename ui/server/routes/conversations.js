@@ -1,4 +1,4 @@
-import { queryConversations } from 'mcp-shark-common/db/query.js';
+import { queryConversations } from '#common/db/query';
 import { serializeBigInt } from '../utils/serialization.js';
 
 export function createConversationsRoutes(db) {

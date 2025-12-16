@@ -1,2 +1,2 @@
-// Re-export shared logger
-export { default } from '../../../shared/logger.js';
+// Re-export common logger
+export { default } from '#common/logger';

@@ -1,16 +1,12 @@
 import { createServer } from 'node:http';
 
-import serverLogger from '../shared/logger.js';
+import serverLogger from '#common/logger';
 import { isError } from './lib/common/error.js';
 import { runAllExternalServers } from './lib/server/external/all.js';
 
-import {
-  getDatabaseFile,
-  getMcpConfigPath,
-  prepareAppDataSpaces,
-} from 'mcp-shark-common/configs/index.js';
-import { initDb } from 'mcp-shark-common/db/init.js';
-import { getLogger } from 'mcp-shark-common/db/logger.js';
+import { getDatabaseFile, getMcpConfigPath, prepareAppDataSpaces } from '#common/configs';
+import { initDb } from '#common/db/init';
+import { getLogger } from '#common/db/logger';
 import { withAuditRequestResponseHandler } from './lib/auditor/audit.js';
 import { getInternalServer } from './lib/server/internal/run.js';
 import { createInternalServerFactory } from './lib/server/internal/server.js';

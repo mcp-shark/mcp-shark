@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { getWorkingDirectory } from 'mcp-shark-common/configs/index.js';
+import { getWorkingDirectory } from '#common/configs';
 
 const SCAN_RESULTS_DIR_NAME = 'scan-results';
 

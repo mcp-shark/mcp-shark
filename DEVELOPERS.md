@@ -119,8 +119,10 @@ mcp-shark/
   - `server.js`: Express server for API and WebSocket
   - `dist/`: Built frontend (generated)
 
-- **`mcp-shark-common/`**: Shared utilities (if present)
+- **`lib/common/`**: Shared utilities
   - Common functions used by both server and UI
+  - Database initialization and query utilities
+  - Configuration path management
 
 ## Code Quality
 

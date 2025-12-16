@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { getMcpConfigPath } from 'mcp-shark-common/configs/index.js';
+import { getMcpConfigPath } from '#common/configs';
 import { convertMcpServersToServers } from '../../utils/config.js';
 import logger from '../../utils/logger.js';
 import { createTransport } from './transport.js';

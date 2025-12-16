@@ -1,5 +1,5 @@
 import * as fs from 'node:fs';
-import { getMcpConfigPath } from 'mcp-shark-common/configs/index.js';
+import { getMcpConfigPath } from '#common/configs';
 
 export function getServers(_req, res) {
   try {

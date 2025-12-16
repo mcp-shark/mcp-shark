@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { getWorkingDirectory, prepareAppDataSpaces } from 'mcp-shark-common/configs/index.js';
+import { getWorkingDirectory, prepareAppDataSpaces } from '#common/configs';
 import logger from './logger.js';
 
 const SMART_SCAN_TOKEN_NAME = 'smart-scan-token.json';

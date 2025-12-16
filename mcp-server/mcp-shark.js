@@ -1,4 +1,4 @@
-import logger from '../shared/logger.js';
+import logger from '#common/logger';
 // CLI entry point - uses the library
 import { startMcpSharkServer } from './index.js';
 
