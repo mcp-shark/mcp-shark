@@ -20,7 +20,7 @@
   "bugs": {
     "url": "https://github.com/mcp-shark/mcp-shark/issues"
   },
-  "files": ["bin", "ui", "mcp-server", "README.md", "LICENSE", "package.json"],
+  "files": ["bin", "ui", "mcp-server", "shared", "README.md", "LICENSE", "package.json"],
   "scripts": {
     "start": "node scripts/start-ui.js",
     "predev": "npm run build:ui",
