@@ -108,12 +108,8 @@ export function createUIServer() {
   app.get('/api/config/detect', configRoutes.detectConfig);
   app.get('/api/config/backups', backupRoutes.listBackups);
   app.get('/api/config/backup/view', backupRoutes.viewBackup);
-  app.post('/api/config/restore', (req, res) => {
-    backupRoutes.restoreBackup(req, res, mcpSharkLogs, broadcastLogUpdate);
-  });
-  app.post('/api/config/backup/delete', (req, res) => {
-    backupRoutes.deleteBackup(req, res, mcpSharkLogs, broadcastLogUpdate);
-  });
+  app.post('/api/config/restore', backupRoutes.restoreBackup);
+  app.post('/api/config/backup/delete', backupRoutes.deleteBackup);
 
   app.post('/api/composite/setup', compositeRoutes.setup);
   app.post('/api/composite/stop', (req, res) => {
