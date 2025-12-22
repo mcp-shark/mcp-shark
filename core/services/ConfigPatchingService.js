@@ -36,26 +36,24 @@ export class ConfigPatchingService {
       'Config file is already patched, restoring original before repatching'
     );
 
-    let restored = false;
-    let warning = 'Config was already patched. Restored original and repatched.';
-
     // Try to restore from in-memory backup first
-    restored = this.configService.restoreOriginalConfig();
+    const inMemoryRestored = this.configService.restoreOriginalConfig();
 
     // If that didn't work, use BackupService to find and restore from backup file
-    if (!restored) {
-      const restoreResult = this._restoreFromBackupFile(resolvedPath);
-      if (restoreResult.success) {
-        restored = true;
-      }
-    }
+    const restoreResult = inMemoryRestored
+      ? { success: true }
+      : this._restoreFromBackupFile(resolvedPath);
+
+    const restored = restoreResult.success;
+    const warning = restored
+      ? 'Config was already patched. Restored original and repatched.'
+      : 'Config was patched but could not restore original. Proceeding anyway.';
 
     if (!restored) {
       this.logger?.warn(
         { filePath: resolvedPath },
         'Could not restore original config - may cause issues'
       );
-      warning = 'Config was patched but could not restore original. Proceeding anyway.';
     }
 
     // Now write the patched config
