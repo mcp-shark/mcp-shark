@@ -122,38 +122,78 @@ async function performCleanup(intervalId, processState, clients, wss, server, co
   // Clear interval
   clearInterval(intervalId);
 
-  // Stop MCP Shark server if running
-  if (processState.mcpSharkServer) {
-    try {
-      if (processState.mcpSharkServer.stop) {
-        await processState.mcpSharkServer.stop();
+  // Stop MCP Shark server if running and restore config
+  // Use ServerManagementService to ensure proper cleanup and config restoration
+  try {
+    const serverManagementService = container.getService('serverManagement');
+    const serverStatus = serverManagementService.getServerStatus();
+
+    if (serverStatus.running) {
+      logger?.info('Stopping MCP Shark server...');
+      try {
+        await serverManagementService.stopServer();
+        logger?.info('MCP Shark server stopped');
+      } catch (stopErr) {
+        logger?.warn(
+          { error: stopErr.message },
+          'Error stopping MCP Shark server, continuing with cleanup'
+        );
       }
-      processState.mcpSharkServer = null;
-    } catch (err) {
-      logger?.error({ error: err }, 'Error stopping MCP Shark server');
     }
+  } catch (err) {
+    logger?.warn(
+      { error: err.message },
+      'Error accessing server management service during shutdown'
+    );
+    // Continue with cleanup even if server stop fails
   }
+
+  // Restore config (always attempt, even if server stop failed)
+  // This ensures patched configs are restored on exit
+  try {
+    const configService = container.getService('config');
+    const restored = configService.restoreOriginalConfig();
+    if (restored) {
+      logger?.info('Config restored successfully');
+    }
+  } catch (configErr) {
+    logger?.warn({ error: configErr.message }, 'Failed to restore config during shutdown');
+    // Continue anyway - config restoration failure shouldn't prevent exit
+  }
+
+  // Clear process state
+  processState.mcpSharkServer = null;
 
   // Close WebSocket connections
-  for (const client of clients) {
-    if (client.readyState === 1) {
-      client.close();
+  try {
+    for (const client of clients) {
+      if (client.readyState === 1) {
+        client.close();
+      }
     }
+    clients.clear();
+  } catch (err) {
+    logger?.warn({ error: err.message }, 'Error closing WebSocket connections');
   }
-  clients.clear();
 
   // Close WebSocket server
-  wss.close();
-
-  // Restore config
-  restoreConfig(container);
+  try {
+    wss.close();
+  } catch (err) {
+    logger?.warn({ error: err.message }, 'Error closing WebSocket server');
+  }
 
   // Close HTTP server
   return new Promise((resolve) => {
-    server.close(() => {
-      logger?.info('UI server stopped');
-      resolve();
-    });
+    try {
+      server.close(() => {
+        logger?.info('UI server stopped');
+        resolve();
+      });
+    } catch (err) {
+      logger?.warn({ error: err.message }, 'Error closing HTTP server');
+      resolve(); // Resolve anyway to allow exit
+    }
   });
 }
 
@@ -281,10 +321,18 @@ export function createUIServer() {
 
 async function shutdown(cleanup, logger) {
   try {
+    // Set a timeout to force exit if cleanup takes too long
+    const timeout = setTimeout(() => {
+      logger?.warn('Shutdown timeout reached, forcing exit');
+      process.exit(0);
+    }, 5000); // 5 second timeout
+
     await cleanup();
+    clearTimeout(timeout);
   } catch (err) {
-    logger?.error({ error: err }, 'Error during shutdown');
+    logger?.warn({ error: err.message }, 'Error during shutdown, exiting anyway');
   } finally {
+    // Always exit, even if cleanup failed
     process.exit(0);
   }
 }
