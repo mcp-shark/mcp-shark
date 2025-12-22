@@ -15,7 +15,7 @@ export class McpDiscoveryService {
    * Discover a single MCP server
    */
   async discoverServer(serverName, serverConfig) {
-    const transport = this._createTransport(serverConfig, serverName);
+    const transport = createTransport(serverConfig, serverName);
     const client = new Client(
       { name: 'mcp-shark-smart-scan', version: '1.0.0' },
       {
@@ -103,9 +103,5 @@ export class McpDiscoveryService {
       success: true,
       servers: discoveredServers,
     };
-  }
-
-  _createTransport(serverConfig, serverName) {
-    return createTransport(serverConfig, serverName);
   }
 }
