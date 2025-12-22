@@ -9,7 +9,7 @@ export async function shutdown(cleanup, logger) {
     const timeout = setTimeout(() => {
       logger?.warn('Shutdown timeout reached, forcing exit');
       process.exit(0);
-    }, 5000); // 5 second timeout
+    }, 2000); // 2 second timeout
 
     await cleanup();
     clearTimeout(timeout);
