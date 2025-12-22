@@ -9,8 +9,11 @@ import { Server as ServerConstants } from '#core/constants/Server.js';
 export function handleWebSocketConnection(clients, ws, logger) {
   clients.add(ws);
 
+  // Use object to hold timeout ID (allows reassignment while keeping const)
+  const timeoutState = { id: null };
+
   // Set up timeout to close stale connections
-  let timeoutId = setTimeout(() => {
+  timeoutState.id = setTimeout(() => {
     if (ws.readyState === 1) {
       logger?.warn('WebSocket connection timeout, closing');
       ws.close();
@@ -28,8 +31,8 @@ export function handleWebSocketConnection(clients, ws, logger) {
 
   ws.on('pong', () => {
     // Reset timeout on pong
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
+    clearTimeout(timeoutState.id);
+    timeoutState.id = setTimeout(() => {
       if (ws.readyState === 1) {
         logger?.warn('WebSocket connection timeout, closing');
         ws.close();
@@ -38,14 +41,14 @@ export function handleWebSocketConnection(clients, ws, logger) {
   });
 
   ws.on('close', () => {
-    clearTimeout(timeoutId);
+    clearTimeout(timeoutState.id);
     clearInterval(heartbeatInterval);
     clients.delete(ws);
   });
 
   ws.on('error', (error) => {
     logger?.error({ error: error.message }, 'WebSocket error');
-    clearTimeout(timeoutId);
+    clearTimeout(timeoutState.id);
     clearInterval(heartbeatInterval);
     clients.delete(ws);
   });

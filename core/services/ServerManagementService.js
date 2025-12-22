@@ -36,13 +36,10 @@ export class ServerManagementService {
 
     // If filePath is provided, restore original config if already patched
     // This ensures processSetup reads the original config, not the patched one
-    let restoreWarning = null;
-    if (filePath && !fileContent) {
-      const restoreResult = this.configPatchingService.restoreIfPatched(filePath);
-      if (restoreResult.warning) {
-        restoreWarning = restoreResult.warning;
-      }
-    }
+    const restoreWarning =
+      filePath && !fileContent
+        ? this.configPatchingService.restoreIfPatched(filePath).warning || null
+        : null;
 
     // Process setup
     const setupResult = this.configService.processSetup(filePath, fileContent, selectedServices);
@@ -80,16 +77,11 @@ export class ServerManagementService {
     });
 
     // Patch the original config file if it exists
-    let patchWarning = null;
-    if (fileData.resolvedFilePath && this.configService.fileExists(fileData.resolvedFilePath)) {
-      const patchResult = this.configPatchingService.patchConfigFile(
-        fileData.resolvedFilePath,
-        updatedConfig
-      );
-      if (patchResult.warning) {
-        patchWarning = patchResult.warning;
-      }
-    }
+    const patchWarning =
+      fileData.resolvedFilePath && this.configService.fileExists(fileData.resolvedFilePath)
+        ? this.configPatchingService.patchConfigFile(fileData.resolvedFilePath, updatedConfig)
+            .warning || null
+        : null;
 
     return {
       success: true,

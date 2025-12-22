@@ -77,11 +77,7 @@ export class ServerManagementController {
   stop = async (_req, res) => {
     try {
       const stopped = await this.serverManagementService.stopServer();
-      let restored = false;
-
-      if (this.configService) {
-        restored = this.configService.restoreOriginalConfig();
-      }
+      const restored = this.configService ? this.configService.restoreOriginalConfig() : false;
 
       if (stopped) {
         if (restored) {
