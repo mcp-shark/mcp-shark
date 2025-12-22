@@ -1,5 +1,4 @@
 import { ConfigController } from '#ui/server/controllers/index.js';
-import { createBackupRoutes } from './backups/index.js';
 
 /**
  * Create config routes
@@ -16,13 +15,6 @@ export function createConfigRoutes(container) {
   router.extractServices = configController.extractServices;
   router.readConfig = configController.readConfig;
   router.detectConfig = configController.detectConfig;
-
-  // Delegate backup routes to separate module
-  const backupRoutes = createBackupRoutes();
-  router.listBackups = backupRoutes.listBackups;
-  router.restoreBackup = backupRoutes.restoreBackup;
-  router.viewBackup = backupRoutes.viewBackup;
-  router.deleteBackup = backupRoutes.deleteBackup;
 
   return router;
 }
