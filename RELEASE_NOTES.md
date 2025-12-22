@@ -1,3 +1,27 @@
+# 🦈 MCP Shark v1.5.7 - Bug Fixes & Code Quality
+
+## 🎉 What's New in v1.5.7
+
+### 🐛 Bug Fixes
+
+- **Stop Server Endpoint** — Fixed `Cannot read properties of undefined` error when stopping the MCP server
+  - Injected `configService` into `ServerManagementController` to properly restore original config
+  - Server stop endpoint now correctly restores configuration files
+
+### 🧹 Code Quality Improvements
+
+- **Coding Rules Compliance** — Replaced all `let` declarations with `const` to comply with coding standards
+  - Refactored `ServerManagementService` to use `const` with ternary expressions
+  - Refactored `ServerManagementController` to use `const` for restored flag
+  - Refactored WebSocket handler to use object state pattern for timeout management
+  - All files now fully comply with "always use const" rule
+
+### 📚 Documentation Updates
+
+- **Release Notes** — Updated with v1.5.7 changes
+
+---
+
 # 🦈 MCP Shark v1.5.6 - MCP Server Status Endpoint
 
 ## 🎉 What's New in v1.5.6
