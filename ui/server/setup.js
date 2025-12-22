@@ -114,6 +114,7 @@ export function createUIServer() {
     compositeRoutes.stop(req, res, () => restoreConfig(container));
   });
   app.get('/api/composite/status', compositeRoutes.getStatus);
+  app.get('/api/mcp-server/status', compositeRoutes.getMcpServerStatus);
   app.post('/api/composite/shutdown', compositeRoutes.shutdown);
   app.get('/api/composite/servers', compositeRoutes.getServers);
 

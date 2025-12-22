@@ -112,6 +112,42 @@ export const serverManagementPaths = {
       },
     },
   },
+  '/api/mcp-server/status': {
+    get: {
+      tags: ['Server Management'],
+      summary: 'Check MCP server (gateway) status',
+      description:
+        'Check if the MCP server (gateway) is running. This endpoint specifically indicates whether the MCP gateway server is active, so users can know if they should focus on the traffic page.',
+      responses: {
+        200: {
+          description: 'MCP server status',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  running: {
+                    type: 'boolean',
+                    description: 'Whether the MCP server (gateway) is running',
+                    example: true,
+                  },
+                  message: {
+                    type: 'string',
+                    description: 'Human-readable status message',
+                    example: 'MCP server (gateway) is running and ready to receive traffic',
+                  },
+                },
+                required: ['running', 'message'],
+              },
+            },
+          },
+        },
+        500: {
+          description: 'Internal server error',
+        },
+      },
+    },
+  },
   '/api/composite/shutdown': {
     post: {
       tags: ['Server Management'],

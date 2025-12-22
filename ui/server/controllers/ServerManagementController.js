@@ -109,6 +109,26 @@ export class ServerManagementController {
     }
   };
 
+  /**
+   * GET /api/mcp-server/status
+   * Check if the MCP server (gateway) is running
+   * This endpoint specifically indicates whether the MCP gateway server is active
+   * so users can know if they should focus on the traffic page
+   */
+  getMcpServerStatus = (_req, res) => {
+    try {
+      const status = this.serverManagementService.getServerStatus();
+      res.json({
+        running: status.running,
+        message: status.running
+          ? 'MCP server (gateway) is running and ready to receive traffic'
+          : 'MCP server (gateway) is not running. Start the server to begin capturing traffic.',
+      });
+    } catch (error) {
+      handleError(error, res, this.logger, 'Error getting MCP server status');
+    }
+  };
+
   shutdown = async (_req, res) => {
     try {
       if (!this.cleanup) {

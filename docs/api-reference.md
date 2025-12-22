@@ -226,6 +226,28 @@ Get the status of the MCP Shark server.
 
 **Note:** When using the library mode (not a separate process), `pid` will be `null`.
 
+### GET /api/mcp-server/status
+
+Check if the MCP server (gateway) is running. This endpoint specifically indicates whether the MCP gateway server is active, so users can know if they should focus on the traffic page.
+
+**Response:**
+```json
+{
+  "running": true,
+  "message": "MCP server (gateway) is running and ready to receive traffic"
+}
+```
+
+**When `running` is `false`:**
+```json
+{
+  "running": false,
+  "message": "MCP server (gateway) is not running. Start the server to begin capturing traffic."
+}
+```
+
+**Use Case:** This endpoint is useful for checking if the MCP gateway server is active before focusing on the traffic monitoring page. It provides a clear indication of whether traffic will be captured.
+
 ### GET /api/composite/logs
 
 Get MCP Shark server logs.
