@@ -10,27 +10,31 @@ async function* createLoggedStream(result, logger) {
   }
 }
 
+async function handleToolsCall(req, logger, mcpServers, requestedMcpServer) {
+  const path = req.path;
+  const { name, arguments: args } = req.params;
+  logger.debug('Tool call', path, name, args);
+
+  const callTool = getBy(mcpServers, requestedMcpServer, name, 'callTool', args || {});
+  if (!callTool) {
+    throw new InternalServerError(`Tool not found: ${name}`);
+  }
+
+  const result = await callTool({
+    ...req.params,
+    name,
+  });
+  logger.debug('Tool call result', result);
+
+  if (isAsyncIterable(result)) {
+    return createLoggedStream(result, logger);
+  }
+
+  return result;
+}
+
 export function createToolsCallHandler(logger, mcpServers, requestedMcpServer) {
   return async (req) => {
-    const path = req.path;
-    const { name, arguments: args } = req.params;
-    logger.debug('Tool call', path, name, args);
-
-    const callTool = getBy(mcpServers, requestedMcpServer, name, 'callTool', args || {});
-    if (!callTool) {
-      throw new InternalServerError(`Tool not found: ${name}`);
-    }
-
-    const result = await callTool({
-      ...req.params,
-      name,
-    });
-    logger.debug('Tool call result', result);
-
-    if (isAsyncIterable(result)) {
-      return createLoggedStream(result, logger);
-    }
-
-    return result;
+    return handleToolsCall(req, logger, mcpServers, requestedMcpServer);
   };
 }

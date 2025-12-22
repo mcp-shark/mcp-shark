@@ -53,40 +53,54 @@ async function readBody(req) {
   return Buffer.concat(chunks);
 }
 
+function createWriteHandler(chunks, target) {
+  return (chunk, ...args) => {
+    if (chunk) {
+      const buf = toBuffer(chunk);
+      chunks.push(buf);
+    }
+    return target.write(chunk, ...args);
+  };
+}
+
+function createEndHandler(chunks, target) {
+  return (chunk, ...args) => {
+    if (chunk) {
+      const buf = toBuffer(chunk);
+      chunks.push(buf);
+    }
+    return target.end(chunk, ...args);
+  };
+}
+
+function createProxyGetHandler(chunks) {
+  return (target, prop, receiver) => {
+    if (prop === 'write') {
+      return createWriteHandler(chunks, target);
+    }
+
+    if (prop === 'end') {
+      return createEndHandler(chunks, target);
+    }
+
+    return Reflect.get(target, prop, receiver);
+  };
+}
+
+function getResponseBody(chunks) {
+  return Buffer.concat(chunks);
+}
+
 function captureResponse(res) {
   const chunks = [];
 
   const wrapped = new Proxy(res, {
-    get(target, prop, receiver) {
-      if (prop === 'write') {
-        return (chunk, ...args) => {
-          if (chunk) {
-            const buf = toBuffer(chunk);
-            chunks.push(buf);
-          }
-          return target.write(chunk, ...args);
-        };
-      }
-
-      if (prop === 'end') {
-        return (chunk, ...args) => {
-          if (chunk) {
-            const buf = toBuffer(chunk);
-            chunks.push(buf);
-          }
-          return target.end(chunk, ...args);
-        };
-      }
-
-      return Reflect.get(target, prop, receiver);
-    },
+    get: createProxyGetHandler(chunks),
   });
 
   return {
     res: wrapped,
-    getBody: () => {
-      return Buffer.concat(chunks);
-    },
+    getBody: () => getResponseBody(chunks),
   };
 }
 
@@ -127,12 +141,20 @@ function finishOnce(state, resolve) {
   }
 }
 
+function handleResponseFinish(state, resolve) {
+  finishOnce(state, resolve);
+}
+
+function handleResponseClose(state, resolve) {
+  finishOnce(state, resolve);
+}
+
 function waitForResponseFinish(res) {
   return new Promise((resolve) => {
     const state = { done: false };
 
-    res.on('finish', () => finishOnce(state, resolve));
-    res.on('close', () => finishOnce(state, resolve));
+    res.on('finish', () => handleResponseFinish(state, resolve));
+    res.on('close', () => handleResponseClose(state, resolve));
   });
 }
 

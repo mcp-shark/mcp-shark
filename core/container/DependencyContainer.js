@@ -1,9 +1,4 @@
 import { LoggerLibrary, SerializationLibrary } from '#core/libraries/index.js';
-/**
- * Dependency Injection Container
- * Manages all dependencies and provides instances of services, repositories, and libraries
- * Follows SOLID principles with dependency inversion
- */
 import {
   AuditRepository,
   ConversationRepository,
@@ -29,6 +24,11 @@ import {
   TokenService,
 } from '#core/services/index.js';
 
+/**
+ * Dependency Injection Container
+ * Manages all dependencies and provides instances of services, repositories, and libraries
+ * Follows SOLID principles with dependency inversion
+ */
 export class DependencyContainer {
   constructor(db) {
     this.db = db;

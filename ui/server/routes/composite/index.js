@@ -1,16 +1,24 @@
 import { ServerManagementController } from '#ui/server/controllers';
 import { getServers } from './servers.js';
 
+function getServerInstanceWrapper(getMcpSharkProcess, originalGetInstance) {
+  return getMcpSharkProcess() || originalGetInstance();
+}
+
 function createGetServerInstance(getMcpSharkProcess, originalGetInstance) {
   return () => {
-    return getMcpSharkProcess() || originalGetInstance();
+    return getServerInstanceWrapper(getMcpSharkProcess, originalGetInstance);
   };
+}
+
+function setServerInstanceWrapper(setMcpSharkProcess, serverManagementService, instance) {
+  setMcpSharkProcess(instance);
+  serverManagementService.serverInstance = instance;
 }
 
 function createSetServerInstance(setMcpSharkProcess, serverManagementService) {
   return (instance) => {
-    setMcpSharkProcess(instance);
-    serverManagementService.serverInstance = instance;
+    setServerInstanceWrapper(setMcpSharkProcess, serverManagementService, instance);
   };
 }
 
@@ -41,7 +49,10 @@ export function createCompositeRoutes(
     getMcpSharkProcess,
     originalGetInstance
   );
-  serverManagementService.setServerInstance = createSetServerInstance(setMcpSharkProcess, serverManagementService);
+  serverManagementService.setServerInstance = createSetServerInstance(
+    setMcpSharkProcess,
+    serverManagementService
+  );
 
   const serverManagementController = new ServerManagementController(
     serverManagementService,

@@ -39,24 +39,25 @@ export function getCachedScanResult(hash) {
  * @param {Object} scanData - Scan result data to store
  * @returns {boolean} Success status
  */
+function getCreatedAt(filePath, defaultTime) {
+  if (!existsSync(filePath)) {
+    return defaultTime;
+  }
+  try {
+    const existingContent = readFileSync(filePath, 'utf8');
+    const existingData = JSON.parse(existingContent);
+    return existingData.createdAt || defaultTime;
+  } catch (_e) {
+    return defaultTime;
+  }
+}
+
 export function storeScanResult(serverName, hash, scanData) {
   try {
     const filePath = getScanResultFilePath(hash);
     const now = Date.now();
 
     // Check if file exists to preserve original creation time
-    const getCreatedAt = (filePath, defaultTime) => {
-      if (!existsSync(filePath)) {
-        return defaultTime;
-      }
-      try {
-        const existingContent = readFileSync(filePath, 'utf8');
-        const existingData = JSON.parse(existingContent);
-        return existingData.createdAt || defaultTime;
-      } catch (_e) {
-        return defaultTime;
-      }
-    };
     const createdAt = getCreatedAt(filePath, now);
 
     const dataToStore = {

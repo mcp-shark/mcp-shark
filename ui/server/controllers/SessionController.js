@@ -1,9 +1,10 @@
 import { Defaults } from '#core/constants/Defaults.js';
 import { StatusCodes } from '#core/constants/StatusCodes.js';
+import { SessionFilters } from '#core/models/SessionFilters.js';
+
 /**
  * Controller for session-related HTTP endpoints
  */
-import { SessionFilters } from '#core/models/SessionFilters.js';
 
 export class SessionController {
   constructor(sessionService, serializationLib, logger) {

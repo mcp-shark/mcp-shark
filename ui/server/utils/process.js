@@ -12,6 +12,10 @@ function logEntry(mcpSharkLogs, broadcastLogUpdate, type, data) {
   broadcastLogUpdate({ timestamp, type, line });
 }
 
+function createLogEntryWrapper(mcpSharkLogs, broadcastLogUpdate, type, data) {
+  return logEntry(mcpSharkLogs, broadcastLogUpdate, type, data);
+}
+
 export function createLogEntry(mcpSharkLogs, broadcastLogUpdate) {
-  return (type, data) => logEntry(mcpSharkLogs, broadcastLogUpdate, type, data);
+  return (type, data) => createLogEntryWrapper(mcpSharkLogs, broadcastLogUpdate, type, data);
 }

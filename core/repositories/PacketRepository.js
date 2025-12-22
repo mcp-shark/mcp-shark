@@ -9,9 +9,6 @@ export class PacketRepository {
     this.db = db;
   }
 
-  /**
-   * Query packets with forensic filters
-   */
   queryPackets(filters = {}) {
     const {
       sessionId = null,
@@ -77,9 +74,6 @@ export class PacketRepository {
     return stmt.all(...params);
   }
 
-  /**
-   * Enhanced query function for requests/responses with search and server name filtering
-   */
   queryRequests(filters = {}) {
     const {
       sessionId = null,
@@ -179,17 +173,11 @@ export class PacketRepository {
     return stmt.all(...params);
   }
 
-  /**
-   * Get packet by frame number
-   */
   getByFrameNumber(frameNumber) {
     const stmt = this.db.prepare('SELECT * FROM packets WHERE frame_number = ?');
     return stmt.get(frameNumber);
   }
 
-  /**
-   * Get all packets for a specific session
-   */
   getSessionPackets(sessionId, limit = Defaults.DEFAULT_SESSION_LIMIT) {
     const stmt = this.db.prepare(`
       SELECT * FROM packets
@@ -200,9 +188,6 @@ export class PacketRepository {
     return stmt.all(sessionId, limit);
   }
 
-  /**
-   * Get all requests for a specific session (ordered by most recent first)
-   */
   getSessionRequests(sessionId, limit = Defaults.DEFAULT_SESSION_LIMIT) {
     const stmt = this.db.prepare(`
       SELECT * FROM packets
@@ -213,9 +198,6 @@ export class PacketRepository {
     return stmt.all(sessionId, limit);
   }
 
-  /**
-   * Clear all packets (and related tables)
-   */
   clearAll() {
     this.db.exec('PRAGMA foreign_keys = OFF');
 
@@ -248,9 +230,6 @@ export class PacketRepository {
     return { clearedTables };
   }
 
-  /**
-   * Get the maximum timestamp from packets
-   */
   getMaxTimestamp() {
     const stmt = this.db.prepare('SELECT MAX(timestamp_ns) as max_ts FROM packets');
     return stmt.get();

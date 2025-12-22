@@ -38,6 +38,28 @@ export function findMcpServerPath() {
   return path.join(process.cwd(), '../mcp-server');
 }
 
+function getPathOutput(shell, shellName) {
+  const execOptions = {
+    encoding: 'utf8',
+    timeout: 2000,
+    stdio: ['ignore', 'pipe', 'ignore'],
+    maxBuffer: 1024 * 1024,
+    env: {
+      ...Object.fromEntries(Object.entries(process.env).filter(([key]) => key !== 'PATH')),
+    },
+  };
+
+  if (shellName === 'zsh') {
+    try {
+      return execSync(`${shell} -i -c 'echo $PATH'`, execOptions);
+    } catch (_e) {
+      return execSync(`${shell} -l -c 'echo $PATH'`, execOptions);
+    }
+  }
+
+  return execSync(`${shell} -l -c 'echo $PATH'`, execOptions);
+}
+
 /**
  * Get system PATH from the host machine's shell environment
  * This works in Electron by executing a shell command to get the actual PATH
@@ -60,31 +82,6 @@ function getSystemPath() {
       if (fs.existsSync(shell)) {
         try {
           const shellName = path.basename(shell);
-
-          const getPathOutput = (shell, shellName) => {
-            const execOptions = {
-              encoding: 'utf8',
-              timeout: 2000,
-              stdio: ['ignore', 'pipe', 'ignore'],
-              maxBuffer: 1024 * 1024,
-              env: {
-                ...Object.fromEntries(
-                  Object.entries(process.env).filter(([key]) => key !== 'PATH')
-                ),
-              },
-            };
-
-            if (shellName === 'zsh') {
-              try {
-                return execSync(`${shell} -i -c 'echo $PATH'`, execOptions);
-              } catch (_e) {
-                return execSync(`${shell} -l -c 'echo $PATH'`, execOptions);
-              }
-            }
-
-            return execSync(`${shell} -l -c 'echo $PATH'`, execOptions);
-          };
-
           const pathOutput = getPathOutput(shell, shellName);
           const systemPath = pathOutput.trim();
           if (systemPath) {

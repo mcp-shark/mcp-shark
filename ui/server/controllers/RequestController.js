@@ -1,10 +1,11 @@
 import { StatusCodes } from '#core/constants/StatusCodes.js';
 import { ExportFormat } from '#core/models/ExportFormat.js';
+import { RequestFilters } from '#core/models/RequestFilters.js';
+
 /**
  * Controller for request-related HTTP endpoints
  * Handles HTTP concerns: extraction, sanitization, serialization, formatting
  */
-import { RequestFilters } from '#core/models/RequestFilters.js';
 
 export class RequestController {
   constructor(requestService, serializationLib, logger) {

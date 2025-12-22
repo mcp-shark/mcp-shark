@@ -151,7 +151,12 @@ export class SettingsService {
             display: this._toDisplayPath(homeDir, windsurfBackupDir),
           },
         ],
-        count: this._getBackupCount(cursorBackupDir, windsurfBackupDir, cursorConfigPath, windsurfConfigPath),
+        count: this._getBackupCount(
+          cursorBackupDir,
+          windsurfBackupDir,
+          cursorConfigPath,
+          windsurfConfigPath
+        ),
       },
     };
   }

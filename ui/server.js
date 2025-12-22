@@ -26,6 +26,97 @@ const __dirname = path.dirname(__filename);
 
 const _MAX_LOG_LINES = 10000;
 
+function setMcpSharkProcess(processState, server) {
+  processState.mcpSharkServer = server;
+}
+
+function handleWebSocketConnection(clients, ws) {
+  clients.add(ws);
+  ws.on('close', () => clients.delete(ws));
+}
+
+function broadcastLogUpdate(clients, logEntry) {
+  const message = JSON.stringify({ type: 'log', data: logEntry });
+  clients.forEach((client) => {
+    if (client.readyState === 1) {
+      client.send(message);
+    }
+  });
+}
+
+function restoreConfig(container) {
+  const configService = container.getService('config');
+  const logService = container.getService('log');
+  const restored = configService.restoreOriginalConfig();
+  if (restored) {
+    const timestamp = new Date().toISOString();
+    const restoreLog = {
+      timestamp,
+      type: 'stdout',
+      line: '[RESTORE] Restored original config',
+    };
+    logService.addLog(restoreLog);
+  }
+  return restored;
+}
+
+function getMcpSharkProcess(processState) {
+  return processState.mcpSharkServer;
+}
+
+function notifyClients(clients, requestService, serializationLib) {
+  const filters = new RequestFilters({ limit: 100 });
+  const requests = requestService.getRequests(filters);
+  const serialized = serializationLib.serializeBigInt(requests);
+  const message = JSON.stringify({ type: 'update', data: serialized });
+  clients.forEach((client) => {
+    if (client.readyState === 1) {
+      client.send(message);
+    }
+  });
+}
+
+async function performCleanup(intervalId, processState, clients, wss, server, container) {
+  console.log('Shutting down UI server...');
+
+  // Clear interval
+  clearInterval(intervalId);
+
+  // Stop MCP Shark server if running
+  if (processState.mcpSharkServer) {
+    try {
+      if (processState.mcpSharkServer.stop) {
+        await processState.mcpSharkServer.stop();
+      }
+      processState.mcpSharkServer = null;
+    } catch (err) {
+      console.error('Error stopping MCP Shark server:', err);
+    }
+  }
+
+  // Close WebSocket connections
+  clients.forEach((client) => {
+    if (client.readyState === 1) {
+      client.close();
+    }
+  });
+  clients.clear();
+
+  // Close WebSocket server
+  wss.close();
+
+  // Restore config
+  restoreConfig(container);
+
+  // Close HTTP server
+  return new Promise((resolve) => {
+    server.close(() => {
+      console.log('UI server stopped');
+      resolve();
+    });
+  });
+}
+
 export function createUIServer() {
   prepareAppDataSpaces();
 
@@ -41,39 +132,7 @@ export function createUIServer() {
   const mcpSharkLogs = [];
   const processState = { mcpSharkServer: null };
 
-  const setMcpSharkProcess = (server) => {
-    processState.mcpSharkServer = server;
-  };
-
-  wss.on('connection', (ws) => {
-    clients.add(ws);
-    ws.on('close', () => clients.delete(ws));
-  });
-
-  const broadcastLogUpdate = (logEntry) => {
-    const message = JSON.stringify({ type: 'log', data: logEntry });
-    clients.forEach((client) => {
-      if (client.readyState === 1) {
-        client.send(message);
-      }
-    });
-  };
-
-  const restoreConfig = () => {
-    const configService = container.getService('config');
-    const logService = container.getService('log');
-    const restored = configService.restoreOriginalConfig();
-    if (restored) {
-      const timestamp = new Date().toISOString();
-      const restoreLog = {
-        timestamp,
-        type: 'stdout',
-        line: '[RESTORE] Restored original config',
-      };
-      logService.addLog(restoreLog);
-    }
-    return restored;
-  };
+  wss.on('connection', (ws) => handleWebSocketConnection(clients, ws));
 
   const requestsRoutes = createRequestsRoutes(container);
   const conversationsRoutes = createConversationsRoutes(container);
@@ -82,13 +141,12 @@ export function createUIServer() {
   const logsRoutes = createLogsRoutes(container, mcpSharkLogs);
   const configRoutes = createConfigRoutes(container);
   const backupRoutes = createBackupRoutes(container);
-  const getMcpSharkProcess = () => processState.mcpSharkServer;
   const compositeRoutes = createCompositeRoutes(
     container,
-    getMcpSharkProcess,
-    setMcpSharkProcess,
+    () => getMcpSharkProcess(processState),
+    (server) => setMcpSharkProcess(processState, server),
     mcpSharkLogs,
-    broadcastLogUpdate
+    (logEntry) => broadcastLogUpdate(clients, logEntry)
   );
   const helpRoutes = createHelpRoutes();
   const playgroundRoutes = createPlaygroundRoutes(container);
@@ -124,7 +182,7 @@ export function createUIServer() {
 
   app.post('/api/composite/setup', compositeRoutes.setup);
   app.post('/api/composite/stop', (req, res) => {
-    compositeRoutes.stop(req, res, restoreConfig);
+    compositeRoutes.stop(req, res, () => restoreConfig(container));
   });
   app.get('/api/composite/status', compositeRoutes.getStatus);
   app.get('/api/composite/servers', compositeRoutes.getServers);
@@ -157,98 +215,53 @@ export function createUIServer() {
   const requestService = container.getService('request');
   const serializationLib = container.getLibrary('serialization');
 
-  const notifyClients = async () => {
-    const filters = new RequestFilters({ limit: 100 });
-    const requests = requestService.getRequests(filters);
-    const serialized = serializationLib.serializeBigInt(requests);
-    const message = JSON.stringify({ type: 'update', data: serialized });
-    clients.forEach((client) => {
-      if (client.readyState === 1) {
-        client.send(message);
-      }
-    });
-  };
-
   const packetRepository = container.getRepository('packet');
 
   const timestampState = { lastTs: 0 };
-  const intervalId = setInterval(() => {
+
+  function checkTimestampAndNotify() {
     const lastCheck = packetRepository.getMaxTimestamp();
     if (lastCheck && lastCheck.max_ts > timestampState.lastTs) {
       timestampState.lastTs = lastCheck.max_ts;
-      notifyClients();
+      notifyClients(clients, requestService, serializationLib);
     }
-  }, 500);
+  }
+
+  const intervalId = setInterval(checkTimestampAndNotify, 500);
 
   const cleanup = async () => {
-    console.log('Shutting down UI server...');
-
-    // Clear interval
-    clearInterval(intervalId);
-
-    // Stop MCP Shark server if running
-    if (processState.mcpSharkServer) {
-      try {
-        if (processState.mcpSharkServer.stop) {
-          await processState.mcpSharkServer.stop();
-        }
-        processState.mcpSharkServer = null;
-      } catch (err) {
-        console.error('Error stopping MCP Shark server:', err);
-      }
-    }
-
-    // Close WebSocket connections
-    clients.forEach((client) => {
-      if (client.readyState === 1) {
-        client.close();
-      }
-    });
-    clients.clear();
-
-    // Close WebSocket server
-    wss.close();
-
-    // Restore config
-    restoreConfig();
-
-    // Close HTTP server
-    return new Promise((resolve) => {
-      server.close(() => {
-        console.log('UI server stopped');
-        resolve();
-      });
-    });
+    return performCleanup(intervalId, processState, clients, wss, server, container);
   };
 
   return { server, cleanup };
+}
+
+async function shutdown(cleanup) {
+  try {
+    await cleanup();
+  } catch (err) {
+    console.error('Error during shutdown:', err);
+  } finally {
+    process.exit(0);
+  }
+}
+
+async function handleExit(cleanup) {
+  try {
+    await cleanup();
+  } catch (_err) {
+    // Ignore errors during exit
+  }
 }
 
 export async function runUIServer() {
   const port = Number.parseInt(process.env.UI_PORT) || 9853;
   const { server, cleanup } = createUIServer();
 
-  const shutdown = async () => {
-    try {
-      await cleanup();
-    } catch (err) {
-      console.error('Error during shutdown:', err);
-    } finally {
-      process.exit(0);
-    }
-  };
-
   // Register signal handlers
-  process.on('SIGTERM', shutdown);
-  process.on('SIGINT', shutdown);
-  process.on('exit', async () => {
-    // Final cleanup on exit
-    try {
-      await cleanup();
-    } catch (_err) {
-      // Ignore errors during exit
-    }
-  });
+  process.on('SIGTERM', () => shutdown(cleanup));
+  process.on('SIGINT', () => shutdown(cleanup));
+  process.on('exit', () => handleExit(cleanup));
 
   server.listen(port, '0.0.0.0', () => {
     console.log(`UI server listening on http://localhost:${port}`);

@@ -7,30 +7,18 @@ export class AuditRepository {
     this.db = db;
   }
 
-  /**
-   * Get timestamp in nanoseconds
-   */
   _getTimestampNs() {
     return Number(process.hrtime.bigint());
   }
 
-  /**
-   * Get timestamp in ISO format
-   */
   _getTimestampISO() {
     return new Date().toISOString();
   }
 
-  /**
-   * Calculate duration in milliseconds
-   */
   _calculateDurationMs(startNs, endNs) {
     return (endNs - startNs) / 1_000_000;
   }
 
-  /**
-   * Normalize session ID from various header formats
-   */
   _normalizeSessionId(headers) {
     if (!headers || typeof headers !== 'object') {
       return null;
@@ -53,9 +41,6 @@ export class AuditRepository {
     return null;
   }
 
-  /**
-   * Extract JSON-RPC metadata from body
-   */
   _extractJsonRpcMetadata(bodyJson) {
     if (!bodyJson) {
       return { id: null, method: null, result: null, error: null };
@@ -74,9 +59,6 @@ export class AuditRepository {
     }
   }
 
-  /**
-   * Generate info summary for quick packet identification
-   */
   _generateInfo(direction, method, url, statusCode, jsonrpcMethod) {
     if (direction === 'request') {
       const rpcInfo = jsonrpcMethod ? ` ${jsonrpcMethod}` : '';
@@ -87,9 +69,6 @@ export class AuditRepository {
     return `${statusCode}${rpcInfo}`;
   }
 
-  /**
-   * Normalize body to raw string and JSON
-   */
   _normalizeBody(body) {
     if (!body) {
       return { bodyRaw: '', bodyJson: null };
@@ -104,9 +83,6 @@ export class AuditRepository {
     return { bodyRaw: '', bodyJson: null };
   }
 
-  /**
-   * Log an HTTP request packet
-   */
   logRequestPacket(options) {
     const {
       method,
@@ -178,9 +154,6 @@ export class AuditRepository {
     return { frameNumber, timestampNs, jsonrpcId, sessionId };
   }
 
-  /**
-   * Log an HTTP response packet
-   */
   logResponsePacket(options) {
     const {
       statusCode,

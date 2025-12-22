@@ -58,6 +58,16 @@ function findLatestBackup(filePath) {
   }
 }
 
+function normalizeContent(str) {
+  try {
+    // Try to parse as JSON and re-stringify to normalize
+    return JSON.stringify(JSON.parse(str), null, 2);
+  } catch {
+    // If not valid JSON, just trim
+    return str.trim();
+  }
+}
+
 function shouldCreateBackup(
   latestBackupPath,
   resolvedFilePath,
@@ -72,17 +82,6 @@ function shouldCreateBackup(
   try {
     const latestBackupContent = fs.readFileSync(latestBackupPath, 'utf-8');
     const currentContent = content || fs.readFileSync(resolvedFilePath, 'utf-8');
-
-    // Normalize both contents for comparison (remove whitespace differences)
-    const normalizeContent = (str) => {
-      try {
-        // Try to parse as JSON and re-stringify to normalize
-        return JSON.stringify(JSON.parse(str), null, 2);
-      } catch {
-        // If not valid JSON, just trim
-        return str.trim();
-      }
-    };
 
     const normalizedBackup = normalizeContent(latestBackupContent);
     const normalizedCurrent = normalizeContent(currentContent);

@@ -8,6 +8,8 @@ export { ConversationService } from './ConversationService.js';
 export { StatisticsService } from './StatisticsService.js';
 export { AuditService } from './AuditService.js';
 export { ConfigService } from './ConfigService.js';
+export { ConfigFileService } from './ConfigFileService.js';
+export { ConfigTransformService } from './ConfigTransformService.js';
 export { ServerManagementService } from './ServerManagementService.js';
 export { BackupService } from './BackupService.js';
 export { LogService } from './LogService.js';

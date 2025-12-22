@@ -1,8 +1,9 @@
 import { StatusCodes } from '#core/constants/StatusCodes.js';
+import { ConversationFilters } from '#core/models/ConversationFilters.js';
+
 /**
  * Controller for conversation-related HTTP endpoints
  */
-import { ConversationFilters } from '#core/models/ConversationFilters.js';
 
 export class ConversationController {
   constructor(conversationService, serializationLib, logger) {

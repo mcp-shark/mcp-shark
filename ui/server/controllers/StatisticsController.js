@@ -1,8 +1,9 @@
 import { StatusCodes } from '#core/constants/StatusCodes.js';
+import { RequestFilters } from '#core/models/RequestFilters.js';
+
 /**
  * Controller for statistics-related HTTP endpoints
  */
-import { RequestFilters } from '#core/models/RequestFilters.js';
 
 export class StatisticsController {
   constructor(statisticsService, serializationLib, logger) {
