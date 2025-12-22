@@ -8,8 +8,16 @@ MCP Shark automatically detects and converts configuration files from:
 
 - **Cursor** — `~/.cursor/mcp.json`
 - **Windsurf** — `~/.codeium/windsurf/mcp_config.json`
+- **Codex** — `~/.codex/config.toml` (or `$CODEX_HOME/config.toml`)
 
 The UI will show detected configuration files and allow you to select which one to use.
+
+## Supported Formats
+
+MCP Shark supports multiple configuration formats:
+
+- **JSON**: Standard MCP configuration format (used by Cursor, Windsurf)
+- **TOML**: Codex configuration format (`config.toml`)
 
 ## Manual Configuration
 
@@ -44,6 +52,22 @@ If you need to configure manually, create a file at `~/.mcp-shark/mcps.json`:
   }
 }
 ```
+
+## Codex Integration
+
+Full support for Codex's `config.toml` format:
+
+```toml
+[mcp_servers]
+server_name = { command = "node", args = ["server.js"], env = { KEY = "value" } }
+http_server = { url = "https://api.example.com", headers = { Authorization = "Bearer token" } }
+```
+
+MCP Shark automatically:
+- Detects Codex `config.toml` files
+- Parses the `[mcp_servers]` section
+- Converts to internal format (supports both stdio and HTTP servers)
+- Handles environment variables and headers
 
 ## Configuration File Format
 

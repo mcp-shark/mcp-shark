@@ -85,6 +85,7 @@ Navigate to the **"MCP Server Setup"** tab to configure your MCP servers.
 MCP Shark automatically detects configuration files from:
 - **Cursor**: `~/.cursor/mcp.json`
 - **Windsurf**: `~/.codeium/windsurf/mcp_config.json`
+- **Codex**: `~/.codex/config.toml` (or `$CODEX_HOME/config.toml`)
 
 **Manual Configuration:**
 
@@ -133,7 +134,7 @@ If you encounter issues:
 
 ## System Requirements
 
-- **Node.js**: 18.0.0 or higher
+- **Node.js**: 20.0.0 or higher
 - **npm**: Comes with Node.js
 - **Operating System**: macOS, Windows, or Linux
 
@@ -141,6 +142,17 @@ If you encounter issues:
 
 - **Package Name**: `@mcp-shark/mcp-shark`
 - **npm Registry**: [https://www.npmjs.com/package/@mcp-shark/mcp-shark](https://www.npmjs.com/package/@mcp-shark/mcp-shark)
-- **Version**: 1.4.2
+- **Version**: 1.5.4
 - **License**: Source-Available Non-Commercial (see [LICENSE](../LICENSE) for details)
+
+## Usage Options
+
+**Options:**
+- `--open` or `-o`: Automatically open the browser after starting
+
+The executable will:
+- Install dependencies if needed
+- Build the frontend if needed
+- Start the server on `http://localhost:9853`
+- Optionally open your browser automatically
 

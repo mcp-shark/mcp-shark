@@ -50,6 +50,18 @@ export function prepareAppDataSpaces() {
   createDatabaseSpaces();
 }
 
+/**
+ * Ensure directory exists for a given file path
+ * Creates parent directory if it doesn't exist
+ * @param {string} filePath - Full path to a file
+ */
+export function ensureDirectoryExists(filePath) {
+  const dir = dirname(filePath);
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true });
+  }
+}
+
 export function getHelpStatePath() {
   return join(getWorkingDirectory(), HELP_STATE_NAME);
 }

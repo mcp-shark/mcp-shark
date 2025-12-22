@@ -6,7 +6,7 @@ Developer guide for contributing to MCP Shark.
 
 ### Prerequisites
 
-- **Node.js**: 18.0.0 or higher
+- **Node.js**: 20.0.0 or higher
 - **npm**: Comes with Node.js
 - **Git**: For version control
 
@@ -46,24 +46,21 @@ npm run check:fix     # Fix linting and formatting issues
 
 ```
 mcp-shark/
-├── bin/                    # CLI executable
-│   └── mcp-shark.js
-├── core/mcp-server/      # MCP server library (core component)
-│   ├── index.js           # Library entry point
-│   ├── mcp-shark.js       # Server entry point
-│   └── lib/               # Server implementation
-├── ui/                     # Web UI
-│   ├── server.js          # Express server
-│   ├── src/               # React frontend
-│   └── vite.config.js     # Vite configuration
-├── lib/common/            # Common utilities
-│   ├── logger.js          # Unified logger implementation
-│   ├── configs/           # Configuration management
-│   └── db/                # Database utilities
-├── scripts/                # Build scripts
-│   └── start-ui.js
-├── docs/                   # Documentation
-└── package.json
+├── bin/                    # Executable scripts
+├── core/                   # Core architecture
+│   ├── constants/         # Well-defined constants
+│   ├── container/         # Dependency injection
+│   ├── libraries/         # Pure utility libraries
+│   ├── models/           # Typed data models
+│   ├── mcp-server/       # MCP server implementation
+│   ├── repositories/     # Data access layer
+│   └── services/         # Business logic layer
+├── ui/                    # Web UI
+│   ├── server/           # Express server and routes
+│   └── src/              # React frontend
+├── docs/                  # Documentation
+├── rules/                 # Architecture and coding rules
+└── scripts/               # Build and utility scripts
 ```
 
 ## Technology Stack
@@ -87,6 +84,15 @@ mcp-shark/
 
 ## Code Quality Standards
 
+MCP Shark maintains strict code quality standards:
+
+- **Linting**: Biome for code linting and formatting
+- **Architecture Compliance**: Regular compliance checks ensure adherence to architecture principles
+- **File Size Limits**: Backend files must not exceed 250 lines
+- **No Nested Functions**: All functions must be at module or class level
+- **Imports at Top**: All imports must be at the top of files
+- **No Magic Numbers**: All constants must be well-defined
+
 ### Linting Rules
 
 The project uses Biome for linting and formatting. See [LINTING_RULES.md](../rules/LINTING_RULES.md) for details.
@@ -107,6 +113,8 @@ See [CODING_RULES.md](../rules/CODING_RULES.md) for complete coding standards.
 - Multiline conditionals with braces
 - No IIFEs
 - Proper error handling with try-catch
+- No nested functions
+- All imports at top of files
 
 ### Running Checks
 

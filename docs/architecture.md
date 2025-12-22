@@ -4,11 +4,59 @@ Overview of MCP Shark's system architecture and design.
 
 ## System Overview
 
-MCP Shark consists of three main components:
+MCP Shark follows a clean architecture pattern with strict separation of concerns:
+
+```
+┌─────────────┐
+│ Controllers │  (HTTP handling: extraction, sanitization, serialization)
+└──────┬──────┘
+       │ uses models
+       ▼
+┌─────────────┐
+│   Models    │  (Typed data structures)
+└──────┬──────┘
+       │ used by
+       ▼
+┌─────────────┐
+│  Services   │  (Business Logic - HTTP-agnostic)
+└──────┬──────┘
+       │ uses
+       ▼
+┌─────────────┐
+│Repositories │  (Data Access)
+└──────┬──────┘
+       │ uses
+       ▼
+┌─────────────┐
+│  Database   │  (SQLite)
+└─────────────┘
+```
+
+### Main Components
 
 1. **MCP Shark Server** (Port 9851): Aggregation layer that connects to multiple MCP servers
 2. **MCP Shark UI** (Port 9853): Web interface for monitoring and management
 3. **SQLite Database**: Stores all traffic for audit logging and analysis
+
+## Architecture Principles
+
+- **Service-Oriented Architecture (SOA)**: All business logic is in service classes
+- **HTTP-Agnostic Services**: Services accept and return typed models, with no knowledge of HTTP
+- **Dependency Injection**: All dependencies are managed through `DependencyContainer`
+- **SOLID Principles**: Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion
+- **Clean Code**: No nested functions, all imports at top, file size limits (250 lines max for backend files)
+
+## Core Components
+
+- **Controllers** (`ui/server/controllers/`): Handle HTTP concerns (request parsing, response formatting, error handling)
+- **Services** (`core/services/`): Contain all business logic, HTTP-agnostic
+- **Repositories** (`core/repositories/`): Encapsulate database access
+- **Models** (`core/models/`): Typed data structures for data transfer
+- **Libraries** (`core/libraries/`): Pure utility functions with no dependencies
+- **Constants** (`core/constants/`): Well-defined constants (no magic numbers)
+- **MCP Server** (`core/mcp-server/`): Core MCP server implementation with audit logging
+
+For detailed core architecture documentation, see [Core README](../core/README.md).
 
 ## Architecture Diagram
 
@@ -97,37 +145,21 @@ Stores all MCP communications with:
 
 ```
 mcp-shark/
-├── bin/
-│   └── mcp-shark.js          # CLI entry point
-├── core/mcp-server/      # MCP server library (core component)
-│   ├── index.js              # Library entry point
-│   ├── mcp-shark.js          # Server entry point
-│   └── lib/
-│       ├── server/
-│       │   ├── internal/     # Internal MCP server (aggregator)
-│       │   │   ├── server.js
-│       │   │   ├── run.js
-│       │   │   ├── session.js
-│       │   │   └── handlers/
-│       │   └── external/     # External MCP server clients
-│       │       ├── all.js
-│       │       ├── config.js
-│       │       ├── kv.js
-│       │       └── single/
-│       └── auditor/
-│           └── audit.js
-├── ui/
-│   ├── server.js             # Express server with WebSocket
-│   ├── src/                  # React frontend
-│   │   ├── App.jsx
-│   │   ├── components/
-│   │   └── ...
-│   └── vite.config.js
-├── lib/common/
-│   ├── logger.js             # Unified logger implementation
-│   ├── configs/              # Configuration management
-│   └── db/                   # Database utilities
-└── package.json              # Single package.json for entire project
+├── bin/                    # Executable scripts
+├── core/                   # Core architecture
+│   ├── constants/         # Well-defined constants
+│   ├── container/         # Dependency injection
+│   ├── libraries/         # Pure utility libraries
+│   ├── models/           # Typed data models
+│   ├── mcp-server/       # MCP server implementation
+│   ├── repositories/     # Data access layer
+│   └── services/         # Business logic layer
+├── ui/                    # Web UI
+│   ├── server/           # Express server and routes
+│   └── src/              # React frontend
+├── docs/                  # Documentation
+├── rules/                 # Architecture and coding rules
+└── scripts/               # Build and utility scripts
 ```
 
 ## Configuration Files

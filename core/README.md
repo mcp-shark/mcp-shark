@@ -154,11 +154,18 @@ const auditLogger = container.getAuditLogger();
 // auditLogger.logResponsePacket(options)
 ```
 
-## Migration Notes
+## Database Architecture
 
-- Old query functions in `lib/common/db/query.js` and `lib/common/db/logger.js` are kept for backward compatibility but should not be used in new code
+### Database Initialization (`core/db/`)
+- `init.js` - Database initialization only (creates tables, no queries)
+- All SQL queries are in repositories (`core/repositories/`)
+- Database is injected into repositories via `DependencyContainer`
+
+### Migration Notes
+
 - All routes now receive a `DependencyContainer` instead of a database instance
 - Services handle all business logic and data transformation
-- Repositories handle all database queries
+- Repositories handle all database queries (all SQL queries must be in repositories)
 - Libraries are injected into services, not accessed directly
+- **No SQL queries outside repositories** - All database access goes through repositories with dependency injection
 
