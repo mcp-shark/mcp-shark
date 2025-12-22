@@ -1,4 +1,3 @@
-import { homedir } from 'node:os';
 import { HttpStatus } from '#core/constants';
 
 /**
@@ -24,27 +23,15 @@ export class ConfigController {
         });
       }
 
-      const fileData = this.configService.resolveFileData(filePath, fileContent);
+      const result = this.configService.extractServicesFromFile(filePath, fileContent);
 
-      if (!fileData) {
-        const resolvedFilePath = filePath ? this.configService.resolveFilePath(filePath) : null;
-        return res.status(HttpStatus.NOT_FOUND).json({
-          error: 'File not found',
-          path: resolvedFilePath,
-        });
+      if (!result.success) {
+        const statusCode =
+          result.error === 'File not found' ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
+        return res.status(statusCode).json(result);
       }
 
-      const parseResult = this.configService.parseJsonConfig(fileData.content);
-
-      if (!parseResult.config) {
-        return res.status(HttpStatus.BAD_REQUEST).json({
-          error: 'Invalid JSON file',
-          details: parseResult.error ? parseResult.error.message : 'Failed to parse JSON',
-        });
-      }
-
-      const services = this.configService.extractServices(parseResult.config);
-      res.json({ success: true, services });
+      res.json(result);
     } catch (error) {
       this.logger?.error({ error: error.message }, 'Error extracting services');
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
@@ -65,26 +52,13 @@ export class ConfigController {
         return res.status(HttpStatus.BAD_REQUEST).json({ error: 'filePath is required' });
       }
 
-      const resolvedPath = this.configService.resolveFilePath(filePath);
+      const result = this.configService.readConfigFileWithMetadata(filePath);
 
-      if (!this.configService.fileExists(resolvedPath)) {
-        return res
-          .status(HttpStatus.NOT_FOUND)
-          .json({ error: 'File not found', path: resolvedPath });
+      if (!result.success) {
+        return res.status(HttpStatus.NOT_FOUND).json(result);
       }
 
-      const content = this.configService.readConfigFile(resolvedPath);
-      const parsed = this.configService.tryParseJson(content);
-      const homeDir = homedir();
-
-      res.json({
-        success: true,
-        filePath: resolvedPath,
-        displayPath: resolvedPath.replace(homeDir, '~'),
-        content: content,
-        parsed: parsed,
-        exists: true,
-      });
+      res.json(result);
     } catch (error) {
       this.logger?.error({ error: error.message }, 'Error reading config');
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
@@ -100,12 +74,11 @@ export class ConfigController {
   detectConfig = (_req, res) => {
     try {
       const detected = this.configService.detectConfigFiles();
-      const platform = process.platform;
-      const homeDir = homedir();
+      const homeDir = this.configService.getHomeDir();
 
       res.json({
-        detected: detected,
-        platform,
+        detected,
+        platform: process.platform,
         homeDir,
       });
     } catch (error) {

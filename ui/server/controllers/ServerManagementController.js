@@ -31,39 +31,17 @@ export class ServerManagementController {
         });
       }
 
-      const fileData = this.configService.resolveFileData(filePath, fileContent);
+      const setupResult = this.configService.processSetup(filePath, fileContent, selectedServices);
 
-      if (!fileData) {
-        const resolvedFilePath = filePath ? this.configService.resolveFilePath(filePath) : null;
-        return res.status(HttpStatus.NOT_FOUND).json({
-          error: 'File not found',
-          path: resolvedFilePath,
-        });
+      if (!setupResult.success) {
+        const statusCode =
+          setupResult.error === 'File not found' ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
+        return res.status(statusCode).json(setupResult);
       }
 
-      const parseResult = this.configService.parseJsonConfig(fileData.content);
-
-      if (!parseResult.config) {
-        return res.status(HttpStatus.BAD_REQUEST).json({
-          error: 'Invalid JSON file',
-          details: parseResult.error ? parseResult.error.message : 'Failed to parse JSON',
-        });
-      }
-
-      const originalConfig = parseResult.config;
-      const baseConvertedConfig = this.configService.convertMcpServersToServers(originalConfig);
-
-      const convertedConfig =
-        selectedServices && Array.isArray(selectedServices) && selectedServices.length > 0
-          ? this.configService.filterServers(baseConvertedConfig, selectedServices)
-          : baseConvertedConfig;
-
-      if (Object.keys(convertedConfig.servers).length === 0) {
-        return res.status(HttpStatus.BAD_REQUEST).json({ error: 'No servers found in config' });
-      }
-
+      const { fileData, convertedConfig, updatedConfig } = setupResult;
       const mcpsJsonPath = this.configService.getMcpConfigPath();
-      this.configService.writeConfigFile(mcpsJsonPath, JSON.stringify(convertedConfig, null, 2));
+      this.configService.writeConfigAsJson(mcpsJsonPath, convertedConfig);
 
       const currentServer = this.serverManagementService.getServerInstance();
       if (currentServer?.stop) {
@@ -85,15 +63,10 @@ export class ServerManagementController {
         },
       });
 
-      this.configService.getSelectedServiceNames(originalConfig, selectedServices);
-      const updatedConfig = this.configService.updateConfigForMcpShark(originalConfig);
       const backupPath = null; // TODO: Implement backup creation in BackupService
 
       if (fileData.resolvedFilePath && this.configService.fileExists(fileData.resolvedFilePath)) {
-        this.configService.writeConfigFile(
-          fileData.resolvedFilePath,
-          JSON.stringify(updatedConfig, null, 2)
-        );
+        this.configService.writeConfigAsJson(fileData.resolvedFilePath, updatedConfig);
       }
 
       res.json({

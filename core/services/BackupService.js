@@ -105,6 +105,29 @@ export class BackupService {
   }
 
   /**
+   * Determine target path for restore
+   */
+  _determineTargetPath(originalPath, backupPath) {
+    if (originalPath) {
+      return this.configService.resolveFilePath(originalPath);
+    }
+
+    // Try to extract from backup filename
+    if (backupPath.endsWith('.backup')) {
+      return backupPath.replace('.backup', '');
+    }
+
+    // New format: .mcp.json-mcpshark.<datetime>.json
+    const match = path.basename(backupPath).match(/^\.(.+)-mcpshark\./);
+    if (match) {
+      const originalBasename = match[1];
+      return path.join(path.dirname(backupPath), originalBasename);
+    }
+
+    return null;
+  }
+
+  /**
    * Restore backup
    */
   restoreBackup(backupPath, originalPath) {
@@ -114,27 +137,7 @@ export class BackupService {
       return { success: false, error: 'Backup file not found' };
     }
 
-    const determineTargetPath = (originalPath, backupPath) => {
-      if (originalPath) {
-        return this.configService.resolveFilePath(originalPath);
-      }
-
-      // Try to extract from backup filename
-      if (backupPath.endsWith('.backup')) {
-        return backupPath.replace('.backup', '');
-      }
-
-      // New format: .mcp.json-mcpshark.<datetime>.json
-      const match = path.basename(backupPath).match(/^\.(.+)-mcpshark\./);
-      if (match) {
-        const originalBasename = match[1];
-        return path.join(path.dirname(backupPath), originalBasename);
-      }
-
-      return null;
-    };
-
-    const targetPath = determineTargetPath(originalPath, resolvedBackupPath);
+    const targetPath = this._determineTargetPath(originalPath, resolvedBackupPath);
     if (!targetPath) {
       return { success: false, error: 'Could not determine original file path' };
     }

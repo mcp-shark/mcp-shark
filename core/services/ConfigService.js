@@ -87,4 +87,138 @@ export class ConfigService {
   clearOriginalConfig() {
     return this.fileService.clearOriginalConfig();
   }
+
+  getFileType(filePath) {
+    return this.fileService.getFileType(filePath);
+  }
+
+  getDisplayPath(filePath) {
+    return this.fileService.getDisplayPath(filePath);
+  }
+
+  getHomeDir() {
+    return this.fileService.getHomeDir();
+  }
+
+  /**
+   * Extract services from file (handles full flow)
+   */
+  extractServicesFromFile(filePath, fileContent) {
+    const fileData = this.fileService.resolveFileData(filePath, fileContent);
+    if (!fileData) {
+      const resolvedFilePath = filePath ? this.fileService.resolveFilePath(filePath) : null;
+      return {
+        success: false,
+        error: 'File not found',
+        path: resolvedFilePath,
+      };
+    }
+
+    const parseResult = this.fileService.parseJsonConfig(
+      fileData.content,
+      fileData.resolvedFilePath
+    );
+    if (!parseResult.config) {
+      const fileType = this.fileService.getFileType(fileData.resolvedFilePath);
+      return {
+        success: false,
+        error: `Invalid ${fileType} file`,
+        details: parseResult.error ? parseResult.error.message : `Failed to parse ${fileType}`,
+      };
+    }
+
+    const services = this.transformService.extractServices(parseResult.config);
+    return {
+      success: true,
+      services,
+    };
+  }
+
+  /**
+   * Read config file with metadata
+   */
+  readConfigFileWithMetadata(filePath) {
+    const resolvedPath = this.fileService.resolveFilePath(filePath);
+
+    if (!this.fileService.fileExists(resolvedPath)) {
+      return {
+        success: false,
+        error: 'File not found',
+        path: resolvedPath,
+      };
+    }
+
+    const content = this.fileService.readConfigFile(resolvedPath);
+    const parsed = this.fileService.tryParseJson(content, resolvedPath);
+
+    return {
+      success: true,
+      filePath: resolvedPath,
+      displayPath: this.fileService.getDisplayPath(resolvedPath),
+      content,
+      parsed,
+      exists: true,
+    };
+  }
+
+  /**
+   * Process setup: parse, convert, filter, and prepare config
+   */
+  processSetup(filePath, fileContent, selectedServices) {
+    const fileData = this.fileService.resolveFileData(filePath, fileContent);
+    if (!fileData) {
+      const resolvedFilePath = filePath ? this.fileService.resolveFilePath(filePath) : null;
+      return {
+        success: false,
+        error: 'File not found',
+        path: resolvedFilePath,
+      };
+    }
+
+    const parseResult = this.fileService.parseJsonConfig(
+      fileData.content,
+      fileData.resolvedFilePath
+    );
+    if (!parseResult.config) {
+      const fileType = this.fileService.getFileType(fileData.resolvedFilePath);
+      return {
+        success: false,
+        error: `Invalid ${fileType} file`,
+        details: parseResult.error ? parseResult.error.message : `Failed to parse ${fileType}`,
+      };
+    }
+
+    const originalConfig = parseResult.config;
+    const baseConvertedConfig = this.transformService.convertMcpServersToServers(originalConfig);
+
+    const convertedConfig =
+      selectedServices && Array.isArray(selectedServices) && selectedServices.length > 0
+        ? this.transformService.filterServers(baseConvertedConfig, selectedServices)
+        : baseConvertedConfig;
+
+    if (Object.keys(convertedConfig.servers || {}).length === 0) {
+      return {
+        success: false,
+        error: 'No servers found in config',
+      };
+    }
+
+    const updatedConfig = this.transformService.updateConfigForMcpShark(originalConfig);
+
+    return {
+      success: true,
+      fileData,
+      originalConfig,
+      convertedConfig,
+      updatedConfig,
+    };
+  }
+
+  /**
+   * Write config as JSON string
+   */
+  writeConfigAsJson(filePath, config) {
+    const jsonContent = JSON.stringify(config, null, 2);
+    this.fileService.writeConfigFile(filePath, jsonContent);
+  }
 }

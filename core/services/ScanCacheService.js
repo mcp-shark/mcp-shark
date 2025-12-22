@@ -84,26 +84,29 @@ export class ScanCacheService {
   }
 
   /**
+   * Get created timestamp from existing file or use default
+   */
+  _getCreatedAt(filePath, defaultTime) {
+    if (!existsSync(filePath)) {
+      return defaultTime;
+    }
+    try {
+      const existingContent = readFileSync(filePath, 'utf8');
+      const existingData = JSON.parse(existingContent);
+      return existingData.createdAt || defaultTime;
+    } catch (_e) {
+      return defaultTime;
+    }
+  }
+
+  /**
    * Store scan result in cache
    */
   storeScanResult(serverName, hash, scanData) {
     try {
       const filePath = getScanResultFilePath(hash);
       const now = Date.now();
-
-      const getCreatedAt = (filePath, defaultTime) => {
-        if (!existsSync(filePath)) {
-          return defaultTime;
-        }
-        try {
-          const existingContent = readFileSync(filePath, 'utf8');
-          const existingData = JSON.parse(existingContent);
-          return existingData.createdAt || defaultTime;
-        } catch (_e) {
-          return defaultTime;
-        }
-      };
-      const createdAt = getCreatedAt(filePath, now);
+      const createdAt = this._getCreatedAt(filePath, now);
 
       const dataToStore = {
         serverName,

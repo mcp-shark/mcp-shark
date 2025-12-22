@@ -1,4 +1,5 @@
 const LLM_SERVER = 'LLM Server';
+
 export function extractServerName(request) {
   if (request.body_json) {
     try {

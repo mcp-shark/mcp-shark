@@ -1,7 +1,9 @@
 import * as fs from 'node:fs';
 import { homedir } from 'node:os';
 import * as path from 'node:path';
+import { parse as parseToml } from '@iarna/toml';
 import { getMcpConfigPath } from '#common/configs';
+import { ConfigDetectionService } from './ConfigDetectionService.js';
 
 /**
  * Service for configuration file operations
@@ -11,6 +13,7 @@ export class ConfigFileService {
   constructor(logger) {
     this.logger = logger;
     this.originalConfigData = null;
+    this.detectionService = new ConfigDetectionService();
   }
 
   /**
@@ -49,10 +52,13 @@ export class ConfigFileService {
   }
 
   /**
-   * Parse JSON content safely
+   * Parse JSON or TOML content safely
    */
-  parseJsonConfig(content) {
+  parseJsonConfig(content, filePath = null) {
     try {
+      if (filePath && path.extname(filePath).toLowerCase() === '.toml') {
+        return { config: parseToml(content), error: null };
+      }
       return { config: JSON.parse(content), error: null };
     } catch (error) {
       return { config: null, error };
@@ -60,10 +66,13 @@ export class ConfigFileService {
   }
 
   /**
-   * Try to parse JSON, return null on error
+   * Try to parse JSON or TOML, return null on error
    */
-  tryParseJson(content) {
+  tryParseJson(content, filePath = null) {
     try {
+      if (filePath && path.extname(filePath).toLowerCase() === '.toml') {
+        return parseToml(content);
+      }
       return JSON.parse(content);
     } catch (_e) {
       return null;
@@ -101,67 +110,39 @@ export class ConfigFileService {
   }
 
   /**
+   * Get file type from path
+   */
+  getFileType(filePath) {
+    if (!filePath) {
+      return 'JSON';
+    }
+    const ext = path.extname(filePath).toLowerCase();
+    return ext === '.toml' ? 'TOML' : 'JSON';
+  }
+
+  /**
+   * Get display path (replace home directory with ~)
+   */
+  getDisplayPath(filePath) {
+    if (!filePath) {
+      return filePath;
+    }
+    const homeDir = homedir();
+    return filePath.replace(homeDir, '~');
+  }
+
+  /**
+   * Get home directory
+   */
+  getHomeDir() {
+    return homedir();
+  }
+
+  /**
    * Detect config files on the system
    */
   detectConfigFiles() {
-    const detected = [];
-    const platform = process.platform;
-    const homeDir = homedir();
-
-    const cursorPaths = [
-      path.join(homeDir, '.cursor', 'mcp.json'),
-      ...(platform === 'win32'
-        ? [path.join(process.env.USERPROFILE || '', '.cursor', 'mcp.json')]
-        : []),
-    ];
-
-    const windsurfPaths = [
-      path.join(homeDir, '.codeium', 'windsurf', 'mcp_config.json'),
-      ...(platform === 'win32'
-        ? [path.join(process.env.USERPROFILE || '', '.codeium', 'windsurf', 'mcp_config.json')]
-        : []),
-    ];
-
-    for (const cursorPath of cursorPaths) {
-      if (fs.existsSync(cursorPath)) {
-        detected.push({
-          editor: 'Cursor',
-          path: cursorPath,
-          displayPath: cursorPath.replace(homeDir, '~'),
-          exists: true,
-        });
-        break;
-      }
-    }
-
-    for (const windsurfPath of windsurfPaths) {
-      if (fs.existsSync(windsurfPath)) {
-        detected.push({
-          editor: 'Windsurf',
-          path: windsurfPath,
-          displayPath: windsurfPath.replace(homeDir, '~'),
-          exists: true,
-        });
-        break;
-      }
-    }
-
-    const defaultPaths = [
-      {
-        editor: 'Cursor',
-        path: path.join(homeDir, '.cursor', 'mcp.json'),
-        displayPath: '~/.cursor/mcp.json',
-        exists: fs.existsSync(path.join(homeDir, '.cursor', 'mcp.json')),
-      },
-      {
-        editor: 'Windsurf',
-        path: path.join(homeDir, '.codeium', 'windsurf', 'mcp_config.json'),
-        displayPath: '~/.codeium/windsurf/mcp_config.json',
-        exists: fs.existsSync(path.join(homeDir, '.codeium', 'windsurf', 'mcp_config.json')),
-      },
-    ];
-
-    return detected.length > 0 ? detected : defaultPaths;
+    return this.detectionService.detectConfigFiles();
   }
 
   /**
@@ -172,7 +153,7 @@ export class ConfigFileService {
   }
 
   /**
-   * Read MCP config file
+   * Read MCP config file (supports both JSON and TOML)
    */
   readMcpConfig() {
     const configPath = this.getMcpConfigPath();
@@ -181,6 +162,12 @@ export class ConfigFileService {
     }
 
     const content = fs.readFileSync(configPath, 'utf-8');
+    const ext = path.extname(configPath).toLowerCase();
+
+    if (ext === '.toml') {
+      return parseToml(content);
+    }
+
     return JSON.parse(content);
   }
 
