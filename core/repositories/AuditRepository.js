@@ -123,19 +123,7 @@ export class AuditRepository {
     const sessionId = providedSessionId || this._normalizeSessionId(headers);
     const host = headers.host || headers.Host || null;
 
-    const { bodyRaw, bodyJson } = (() => {
-      if (!body) {
-        return { bodyRaw: '', bodyJson: null };
-      }
-      if (typeof body === 'string') {
-        return { bodyRaw: body, bodyJson: body };
-      }
-      if (typeof body === 'object') {
-        const raw = JSON.stringify(body);
-        return { bodyRaw: raw, bodyJson: raw };
-      }
-      return { bodyRaw: '', bodyJson: null };
-    })();
+    const { bodyRaw, bodyJson } = this._normalizeBody(body);
     const headersJson = JSON.stringify(headers);
 
     const jsonrpc = this._extractJsonRpcMetadata(bodyJson || bodyRaw);
@@ -211,19 +199,7 @@ export class AuditRepository {
     const sessionId = providedSessionId || this._normalizeSessionId(headers);
     const host = headers.host || headers.Host || null;
 
-    const { bodyRaw, bodyJson } = (() => {
-      if (!body) {
-        return { bodyRaw: '', bodyJson: null };
-      }
-      if (typeof body === 'string') {
-        return { bodyRaw: body, bodyJson: body };
-      }
-      if (typeof body === 'object') {
-        const raw = JSON.stringify(body);
-        return { bodyRaw: raw, bodyJson: raw };
-      }
-      return { bodyRaw: '', bodyJson: null };
-    })();
+    const { bodyRaw, bodyJson } = this._normalizeBody(body);
     const headersJson = JSON.stringify(headers);
 
     const jsonrpc = this._extractJsonRpcMetadata(bodyJson || bodyRaw);
