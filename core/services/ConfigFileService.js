@@ -1,19 +1,18 @@
 import * as fs from 'node:fs';
 import { homedir } from 'node:os';
 import * as path from 'node:path';
-import { parse as parseToml } from '@iarna/toml';
 import { getMcpConfigPath } from '#core/configs';
-import { ConfigDetectionService } from './ConfigDetectionService.js';
 
 /**
  * Service for configuration file operations
  * Handles file I/O, path resolution, and backup/restore
  */
 export class ConfigFileService {
-  constructor(logger) {
+  constructor(logger, configDetectionService, configParserFactory) {
     this.logger = logger;
     this.originalConfigData = null;
-    this.detectionService = new ConfigDetectionService();
+    this.detectionService = configDetectionService;
+    this.parserFactory = configParserFactory;
   }
 
   /**
@@ -52,14 +51,12 @@ export class ConfigFileService {
   }
 
   /**
-   * Parse JSON or TOML content safely
+   * Parse JSON or TOML content safely using appropriate parser
    */
   parseJsonConfig(content, filePath = null) {
     try {
-      if (filePath && path.extname(filePath).toLowerCase() === '.toml') {
-        return { config: parseToml(content), error: null };
-      }
-      return { config: JSON.parse(content), error: null };
+      const config = this.parserFactory.parse(content, filePath);
+      return { config, error: null };
     } catch (error) {
       return { config: null, error };
     }
@@ -69,14 +66,7 @@ export class ConfigFileService {
    * Try to parse JSON or TOML, return null on error
    */
   tryParseJson(content, filePath = null) {
-    try {
-      if (filePath && path.extname(filePath).toLowerCase() === '.toml') {
-        return parseToml(content);
-      }
-      return JSON.parse(content);
-    } catch (_e) {
-      return null;
-    }
+    return this.parserFactory.parse(content, filePath);
   }
 
   /**
@@ -154,6 +144,7 @@ export class ConfigFileService {
 
   /**
    * Read MCP config file (supports both JSON and TOML)
+   * Uses appropriate parser based on file extension
    */
   readMcpConfig() {
     const configPath = this.getMcpConfigPath();
@@ -162,13 +153,7 @@ export class ConfigFileService {
     }
 
     const content = fs.readFileSync(configPath, 'utf-8');
-    const ext = path.extname(configPath).toLowerCase();
-
-    if (ext === '.toml') {
-      return parseToml(content);
-    }
-
-    return JSON.parse(content);
+    return this.parserFactory.parse(content, configPath);
   }
 
   /**

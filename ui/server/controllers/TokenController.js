@@ -1,4 +1,4 @@
-import { HttpStatus } from '#core/constants';
+import { StatusCodes } from '#core/constants';
 
 /**
  * Controller for Smart Scan token HTTP endpoints
@@ -18,7 +18,7 @@ export class TokenController {
       });
     } catch (error) {
       this.logger?.error({ error: error.message }, 'Error reading Smart Scan token');
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         error: 'Failed to read token',
         message: error.message,
       });
@@ -30,7 +30,7 @@ export class TokenController {
       const { token } = req.body;
 
       if (token === undefined) {
-        return res.status(HttpStatus.BAD_REQUEST).json({
+        return res.status(StatusCodes.BAD_REQUEST).json({
           error: 'Token is required',
         });
       }
@@ -38,7 +38,7 @@ export class TokenController {
       const success = this.tokenService.writeToken(token);
 
       if (!success) {
-        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
           error: 'Failed to save token',
         });
       }
@@ -49,7 +49,7 @@ export class TokenController {
       });
     } catch (error) {
       this.logger?.error({ error: error.message }, 'Error saving Smart Scan token');
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         error: 'Failed to save token',
         message: error.message,
       });

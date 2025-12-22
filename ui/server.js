@@ -5,8 +5,10 @@ import express from 'express';
 import { WebSocketServer } from 'ws';
 
 import { DependencyContainer, RequestFilters } from '#core';
-import { getDatabaseFile, prepareAppDataSpaces } from '#core/configs';
+import { Environment, getDatabaseFile, prepareAppDataSpaces } from '#core/configs';
+import { Server as ServerConstants } from '#core/constants/Server.js';
 import { openDb } from '#core/db/init';
+import { bootstrapLogger } from '#core/libraries';
 
 import { createBackupRoutes } from './server/routes/backups/index.js';
 import { createCompositeRoutes } from './server/routes/composite/index.js';
@@ -24,24 +26,62 @@ import { createStatisticsRoutes } from './server/routes/statistics.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const _MAX_LOG_LINES = 10000;
-
 function setMcpSharkProcess(processState, server) {
   processState.mcpSharkServer = server;
 }
 
-function handleWebSocketConnection(clients, ws) {
+function handleWebSocketConnection(clients, ws, logger) {
   clients.add(ws);
-  ws.on('close', () => clients.delete(ws));
+
+  // Set up timeout to close stale connections
+  let timeoutId = setTimeout(() => {
+    if (ws.readyState === 1) {
+      logger?.warn('WebSocket connection timeout, closing');
+      ws.close();
+    }
+  }, ServerConstants.WEBSOCKET_TIMEOUT_MS);
+
+  // Set up heartbeat to keep connection alive
+  const heartbeatInterval = setInterval(() => {
+    if (ws.readyState === 1) {
+      ws.ping();
+    } else {
+      clearInterval(heartbeatInterval);
+    }
+  }, ServerConstants.WEBSOCKET_HEARTBEAT_INTERVAL_MS);
+
+  ws.on('pong', () => {
+    // Reset timeout on pong
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      if (ws.readyState === 1) {
+        logger?.warn('WebSocket connection timeout, closing');
+        ws.close();
+      }
+    }, ServerConstants.WEBSOCKET_TIMEOUT_MS);
+  });
+
+  ws.on('close', () => {
+    clearTimeout(timeoutId);
+    clearInterval(heartbeatInterval);
+    clients.delete(ws);
+  });
+
+  ws.on('error', (error) => {
+    logger?.error({ error: error.message }, 'WebSocket error');
+    clearTimeout(timeoutId);
+    clearInterval(heartbeatInterval);
+    clients.delete(ws);
+  });
 }
 
 function broadcastLogUpdate(clients, logEntry) {
   const message = JSON.stringify({ type: 'log', data: logEntry });
-  clients.forEach((client) => {
+  for (const client of clients) {
     if (client.readyState === 1) {
       client.send(message);
     }
-  });
+  }
 }
 
 function restoreConfig(container) {
@@ -69,15 +109,15 @@ function notifyClients(clients, requestService, serializationLib) {
   const requests = requestService.getRequests(filters);
   const serialized = serializationLib.serializeBigInt(requests);
   const message = JSON.stringify({ type: 'update', data: serialized });
-  clients.forEach((client) => {
+  for (const client of clients) {
     if (client.readyState === 1) {
       client.send(message);
     }
-  });
+  }
 }
 
-async function performCleanup(intervalId, processState, clients, wss, server, container) {
-  console.log('Shutting down UI server...');
+async function performCleanup(intervalId, processState, clients, wss, server, container, logger) {
+  logger?.info('Shutting down UI server...');
 
   // Clear interval
   clearInterval(intervalId);
@@ -90,16 +130,16 @@ async function performCleanup(intervalId, processState, clients, wss, server, co
       }
       processState.mcpSharkServer = null;
     } catch (err) {
-      console.error('Error stopping MCP Shark server:', err);
+      logger?.error({ error: err }, 'Error stopping MCP Shark server');
     }
   }
 
   // Close WebSocket connections
-  clients.forEach((client) => {
+  for (const client of clients) {
     if (client.readyState === 1) {
       client.close();
     }
-  });
+  }
   clients.clear();
 
   // Close WebSocket server
@@ -111,7 +151,7 @@ async function performCleanup(intervalId, processState, clients, wss, server, co
   // Close HTTP server
   return new Promise((resolve) => {
     server.close(() => {
-      console.log('UI server stopped');
+      logger?.info('UI server stopped');
       resolve();
     });
   });
@@ -132,7 +172,7 @@ export function createUIServer() {
   const mcpSharkLogs = [];
   const processState = { mcpSharkServer: null };
 
-  wss.on('connection', (ws) => handleWebSocketConnection(clients, ws));
+  wss.on('connection', (ws) => handleWebSocketConnection(clients, ws, logger));
 
   const requestsRoutes = createRequestsRoutes(container);
   const conversationsRoutes = createConversationsRoutes(container);
@@ -141,8 +181,9 @@ export function createUIServer() {
   const logsRoutes = createLogsRoutes(container, mcpSharkLogs);
   const configRoutes = createConfigRoutes(container);
   const backupRoutes = createBackupRoutes(container);
+  const logger = container.getLibrary('logger');
   const cleanup = async () => {
-    return performCleanup(intervalId, processState, clients, wss, server, container);
+    return performCleanup(intervalId, processState, clients, wss, server, container, logger);
   };
 
   const compositeRoutes = createCompositeRoutes(
@@ -233,16 +274,16 @@ export function createUIServer() {
     }
   }
 
-  const intervalId = setInterval(checkTimestampAndNotify, 500);
+  const intervalId = setInterval(checkTimestampAndNotify, ServerConstants.PACKET_CHECK_INTERVAL_MS);
 
-  return { server, cleanup };
+  return { server, cleanup, logger };
 }
 
-async function shutdown(cleanup) {
+async function shutdown(cleanup, logger) {
   try {
     await cleanup();
   } catch (err) {
-    console.error('Error during shutdown:', err);
+    logger?.error({ error: err }, 'Error during shutdown');
   } finally {
     process.exit(0);
   }
@@ -257,19 +298,25 @@ async function handleExit(cleanup) {
 }
 
 export async function runUIServer() {
-  const port = Number.parseInt(process.env.UI_PORT) || 9853;
-  const { server, cleanup } = createUIServer();
+  const port = Environment.getUiPort();
+  const { server, cleanup, logger } = createUIServer();
 
   // Register signal handlers
-  process.on('SIGTERM', () => shutdown(cleanup));
-  process.on('SIGINT', () => shutdown(cleanup));
+  process.on('SIGTERM', () => shutdown(cleanup, logger));
+  process.on('SIGINT', () => shutdown(cleanup, logger));
   process.on('exit', () => handleExit(cleanup));
 
   server.listen(port, '0.0.0.0', () => {
-    console.log(`UI server listening on http://localhost:${port}`);
+    logger?.info({ port }, 'UI server listening');
   });
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  runUIServer().catch(console.error);
+  runUIServer().catch((error) => {
+    bootstrapLogger.error(
+      { error: error.message, stack: error.stack },
+      'Failed to start UI server'
+    );
+    process.exit(1);
+  });
 }

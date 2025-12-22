@@ -45,11 +45,11 @@ export class StatisticsService {
 
     // Get unique sessions
     const uniqueSessions = new Set();
-    allRequests.forEach((r) => {
+    for (const r of allRequests) {
       if (r.session_id) {
         uniqueSessions.add(r.session_id);
       }
-    });
+    }
 
     const stats = {
       total_packets: totalPackets,

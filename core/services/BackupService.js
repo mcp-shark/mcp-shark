@@ -27,36 +27,35 @@ export class BackupService {
     const backupDirs = [path.join(homeDir, '.cursor'), path.join(homeDir, '.codeium', 'windsurf')];
 
     // Find backups with new format: .mcp.json-mcpshark.<datetime>.json
-    backupDirs.forEach((dir) => {
+    for (const dir of backupDirs) {
       if (fs.existsSync(dir)) {
         const files = fs.readdirSync(dir);
-        files
-          .filter((file) => {
-            return /^\.(.+)-mcpshark\.\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.json$/.test(file);
-          })
-          .forEach((file) => {
-            const match = file.match(/^\.(.+)-mcpshark\./);
-            if (match) {
-              const originalBasename = match[1];
-              const originalPath = path.join(dir, originalBasename);
-              const backupPath = path.join(dir, file);
-              const stats = fs.statSync(backupPath);
-              backups.push({
-                originalPath: originalPath,
-                backupPath: backupPath,
-                createdAt: stats.birthtime.toISOString(),
-                modifiedAt: stats.mtime.toISOString(),
-                size: stats.size,
-                displayPath: originalPath.replace(homeDir, '~'),
-                backupFileName: file,
-              });
-            }
-          });
+        const matchingFiles = files.filter((file) => {
+          return /^\.(.+)-mcpshark\.\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.json$/.test(file);
+        });
+        for (const file of matchingFiles) {
+          const match = file.match(/^\.(.+)-mcpshark\./);
+          if (match) {
+            const originalBasename = match[1];
+            const originalPath = path.join(dir, originalBasename);
+            const backupPath = path.join(dir, file);
+            const stats = fs.statSync(backupPath);
+            backups.push({
+              originalPath: originalPath,
+              backupPath: backupPath,
+              createdAt: stats.birthtime.toISOString(),
+              modifiedAt: stats.mtime.toISOString(),
+              size: stats.size,
+              displayPath: originalPath.replace(homeDir, '~'),
+              backupFileName: file,
+            });
+          }
+        }
       }
-    });
+    }
 
     // Also check for old .backup format for backward compatibility
-    commonPaths.forEach((configPath) => {
+    for (const configPath of commonPaths) {
       const backupPath = `${configPath}.backup`;
       if (fs.existsSync(backupPath)) {
         const stats = fs.statSync(backupPath);
@@ -70,7 +69,7 @@ export class BackupService {
           backupFileName: path.basename(backupPath),
         });
       }
-    });
+    }
 
     // Sort by modifiedAt (latest first)
     return backups.sort(

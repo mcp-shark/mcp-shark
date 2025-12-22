@@ -1,4 +1,4 @@
-import { HttpStatus } from '#core/constants';
+import { StatusCodes } from '#core/constants';
 
 /**
  * Get servers from config
@@ -14,7 +14,7 @@ export function getServers(container) {
       res.json({ servers });
     } catch (error) {
       logger.error({ error: error.message }, 'Error getting servers');
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         error: 'Failed to get servers',
         details: error.message,
       });

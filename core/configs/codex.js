@@ -1,14 +1,17 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { homedir } from 'node:os';
 import { join } from 'node:path';
-import { parse as parseToml } from '@iarna/toml';
+import { ConfigParserFactory } from '#core/services/parsers/ConfigParserFactory.js';
+import { Environment } from './environment.js';
+
+const parserFactory = new ConfigParserFactory();
 
 /**
  * Get Codex config.toml path
  * Codex uses $CODEX_HOME/config.toml, defaulting to ~/.codex/config.toml
+ * @returns {string} Path to Codex config file
  */
 export function getCodexConfigPath() {
-  const codexHome = process.env.CODEX_HOME || join(homedir(), '.codex');
+  const codexHome = Environment.getCodexHome();
   return join(codexHome, 'config.toml');
 }
 
@@ -21,6 +24,7 @@ export function codexConfigExists() {
 
 /**
  * Read and parse Codex config.toml
+ * Uses TomlConfigParser for parsing
  */
 export function readCodexConfig() {
   const configPath = getCodexConfigPath();
@@ -30,7 +34,7 @@ export function readCodexConfig() {
 
   try {
     const content = readFileSync(configPath, 'utf-8');
-    return parseToml(content);
+    return parserFactory.parse(content, configPath);
   } catch (_error) {
     return null;
   }
@@ -38,82 +42,27 @@ export function readCodexConfig() {
 
 /**
  * Convert Codex mcp_servers TOML format to MCP Shark JSON format
- * Codex format:
- *   [mcp_servers."server-name"]
- *   command = "/path/to/command"
- *   args = ["arg1", "arg2"]
- *   env.KEY = "value"
- *
- * MCP Shark format:
- *   {
- *     "mcpServers": {
- *       "server-name": {
- *         "type": "stdio",
- *         "command": "/path/to/command",
- *         "args": ["arg1", "arg2"],
- *         "env": {
- *           "KEY": "value"
- *         }
- *       }
- *     }
- *   }
+ * Uses TomlConfigParser for conversion
+ * @deprecated Use ConfigParserFactory.normalizeToInternalFormat() instead
  */
 export function convertCodexConfigToMcpShark(codexConfig) {
-  if (!codexConfig || !codexConfig.mcp_servers) {
-    return null;
-  }
-
-  const mcpServers = {};
-
-  for (const [serverName, serverConfig] of Object.entries(codexConfig.mcp_servers)) {
-    if (!serverConfig || typeof serverConfig !== 'object') {
-      continue;
-    }
-
-    const converted = {
-      type: 'stdio',
-    };
-
-    if (serverConfig.command) {
-      converted.command = serverConfig.command;
-    }
-
-    if (Array.isArray(serverConfig.args)) {
-      converted.args = serverConfig.args;
-    }
-
-    if (serverConfig.env && typeof serverConfig.env === 'object') {
-      converted.env = serverConfig.env;
-    }
-
-    if (serverConfig.url) {
-      converted.type = 'http';
-      converted.url = serverConfig.url;
-      if (serverConfig.headers && typeof serverConfig.headers === 'object') {
-        converted.headers = serverConfig.headers;
-      }
-    }
-
-    mcpServers[serverName] = converted;
-  }
-
-  if (Object.keys(mcpServers).length === 0) {
-    return null;
-  }
-
-  return {
-    mcpServers,
-  };
+  return parserFactory.normalizeToInternalFormat(codexConfig);
 }
 
 /**
  * Read Codex config and convert to MCP Shark format
+ * Uses ConfigParserFactory for unified parsing and conversion
  */
 export function readCodexConfigAsMcpShark() {
-  const codexConfig = readCodexConfig();
-  if (!codexConfig) {
+  const configPath = getCodexConfigPath();
+  if (!existsSync(configPath)) {
     return null;
   }
 
-  return convertCodexConfigToMcpShark(codexConfig);
+  try {
+    const content = readFileSync(configPath, 'utf-8');
+    return parserFactory.parseAndNormalize(content, configPath);
+  } catch (_error) {
+    return null;
+  }
 }

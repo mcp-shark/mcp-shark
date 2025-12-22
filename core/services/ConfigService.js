@@ -1,14 +1,19 @@
-import { ConfigFileService } from './ConfigFileService.js';
-import { ConfigTransformService } from './ConfigTransformService.js';
-
 /**
  * Service for configuration file operations
  * Composes ConfigFileService and ConfigTransformService
+ * Uses dependency injection for all dependencies
  */
 export class ConfigService {
-  constructor(logger) {
-    this.fileService = new ConfigFileService(logger);
-    this.transformService = new ConfigTransformService();
+  /**
+   * @param {Object} logger - Logger instance
+   * @param {ConfigFileService} configFileService - File service instance
+   * @param {ConfigTransformService} configTransformService - Transform service instance
+   * @param {ConfigDetectionService} configDetectionService - Detection service instance
+   */
+  constructor(logger, configFileService, configTransformService, configDetectionService) {
+    this.fileService = configFileService;
+    this.transformService = configTransformService;
+    this.detectionService = configDetectionService;
     this.logger = logger;
   }
 

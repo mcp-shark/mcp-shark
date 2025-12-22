@@ -1,4 +1,6 @@
-import { HttpStatus } from '#core/constants';
+import { StatusCodes } from '#core/constants';
+import { NotFoundError } from '#core/libraries';
+import { handleError, handleValidationError } from '../utils/errorHandler.js';
 
 /**
  * Controller for backup-related HTTP endpoints
@@ -14,11 +16,7 @@ export class BackupController {
       const backups = this.backupService.listBackups();
       res.json({ backups });
     } catch (error) {
-      this.logger?.error({ error: error.message }, 'Error listing backups');
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        error: 'Failed to list backups',
-        details: error.message,
-      });
+      handleError(error, res, this.logger, 'Error listing backups');
     }
   };
 
@@ -27,16 +25,18 @@ export class BackupController {
       const { backupPath } = req.query;
 
       if (!backupPath) {
-        return res.status(HttpStatus.BAD_REQUEST).json({ error: 'backupPath is required' });
+        return handleValidationError('backupPath is required', res, this.logger);
       }
 
       const result = this.backupService.viewBackup(backupPath);
 
       if (!result) {
-        return res.status(HttpStatus.NOT_FOUND).json({
-          error: 'Backup file not found',
-          path: backupPath,
-        });
+        return handleError(
+          new NotFoundError('Backup file not found', null),
+          res,
+          this.logger,
+          'Error viewing backup'
+        );
       }
 
       res.json({
@@ -44,11 +44,7 @@ export class BackupController {
         ...result,
       });
     } catch (error) {
-      this.logger?.error({ error: error.message }, 'Error viewing backup');
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        error: 'Failed to read backup file',
-        details: error.message,
-      });
+      handleError(error, res, this.logger, 'Error viewing backup');
     }
   };
 
@@ -57,14 +53,15 @@ export class BackupController {
       const { backupPath, originalPath } = req.body;
 
       if (!backupPath) {
-        return res.status(HttpStatus.BAD_REQUEST).json({ error: 'backupPath is required' });
+        return handleValidationError('backupPath is required', res, this.logger);
       }
 
       const result = this.backupService.restoreBackup(backupPath, originalPath);
 
       if (!result.success) {
-        return res.status(HttpStatus.BAD_REQUEST).json({
-          error: result.error || 'Failed to restore backup',
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          error: 'ValidationError',
+          message: result.error || 'Failed to restore backup',
         });
       }
 
@@ -74,11 +71,7 @@ export class BackupController {
         originalPath: result.originalPath,
       });
     } catch (error) {
-      this.logger?.error({ error: error.message }, 'Error restoring backup');
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        error: 'Failed to restore backup',
-        details: error.message,
-      });
+      handleError(error, res, this.logger, 'Error restoring backup');
     }
   };
 
@@ -87,15 +80,18 @@ export class BackupController {
       const { backupPath } = req.body;
 
       if (!backupPath) {
-        return res.status(HttpStatus.BAD_REQUEST).json({ error: 'backupPath is required' });
+        return handleValidationError('backupPath is required', res, this.logger);
       }
 
       const result = this.backupService.deleteBackup(backupPath);
 
       if (!result.success) {
-        return res.status(HttpStatus.NOT_FOUND).json({
-          error: result.error || 'Backup file not found',
-        });
+        return handleError(
+          new NotFoundError(result.error || 'Backup file not found', null),
+          res,
+          this.logger,
+          'Error deleting backup'
+        );
       }
 
       res.json({
@@ -104,11 +100,7 @@ export class BackupController {
         backupPath: result.backupPath,
       });
     } catch (error) {
-      this.logger?.error({ error: error.message }, 'Error deleting backup');
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        error: 'Failed to delete backup',
-        details: error.message,
-      });
+      handleError(error, res, this.logger, 'Error deleting backup');
     }
   };
 }

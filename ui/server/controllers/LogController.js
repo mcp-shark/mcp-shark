@@ -1,4 +1,5 @@
-import { Defaults, HttpStatus } from '#core/constants';
+import { Defaults } from '#core/constants';
+import { handleError } from '../utils/errorHandler.js';
 
 /**
  * Controller for log-related HTTP endpoints
@@ -16,11 +17,7 @@ export class LogController {
       const logs = this.logService.getLogs({ limit, offset });
       res.json(logs);
     } catch (error) {
-      this.logger?.error({ error: error.message }, 'Error getting logs');
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        error: 'Failed to get logs',
-        details: error.message,
-      });
+      handleError(error, res, this.logger, 'Error getting logs');
     }
   };
 
@@ -29,11 +26,7 @@ export class LogController {
       const result = this.logService.clearLogs();
       res.json(result);
     } catch (error) {
-      this.logger?.error({ error: error.message }, 'Error clearing logs');
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        error: 'Failed to clear logs',
-        details: error.message,
-      });
+      handleError(error, res, this.logger, 'Error clearing logs');
     }
   };
 
@@ -45,11 +38,7 @@ export class LogController {
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       res.send(logsText);
     } catch (error) {
-      this.logger?.error({ error: error.message }, 'Error exporting logs');
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        error: 'Failed to export logs',
-        details: error.message,
-      });
+      handleError(error, res, this.logger, 'Error exporting logs');
     }
   };
 }

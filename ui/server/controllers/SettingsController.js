@@ -1,4 +1,4 @@
-import { HttpStatus } from '#core/constants';
+import { StatusCodes } from '#core/constants';
 
 /**
  * Controller for settings HTTP endpoints
@@ -15,7 +15,7 @@ export class SettingsController {
       res.json(settings);
     } catch (error) {
       this.logger?.error({ error: error.message }, 'Error getting settings');
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         error: 'Failed to get settings',
         details: error.message,
       });

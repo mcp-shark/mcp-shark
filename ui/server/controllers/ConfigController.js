@@ -1,4 +1,4 @@
-import { HttpStatus } from '#core/constants';
+import { StatusCodes } from '#core/constants';
 
 /**
  * Controller for configuration-related HTTP endpoints
@@ -18,7 +18,7 @@ export class ConfigController {
       const { filePath, fileContent } = req.body;
 
       if (!filePath && !fileContent) {
-        return res.status(HttpStatus.BAD_REQUEST).json({
+        return res.status(StatusCodes.BAD_REQUEST).json({
           error: 'Either filePath or fileContent is required',
         });
       }
@@ -27,14 +27,14 @@ export class ConfigController {
 
       if (!result.success) {
         const statusCode =
-          result.error === 'File not found' ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
+          result.error === 'File not found' ? StatusCodes.NOT_FOUND : StatusCodes.BAD_REQUEST;
         return res.status(statusCode).json(result);
       }
 
       res.json(result);
     } catch (error) {
       this.logger?.error({ error: error.message }, 'Error extracting services');
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         error: 'Failed to extract services',
         details: error.message,
       });
@@ -49,19 +49,19 @@ export class ConfigController {
       const { filePath } = req.query;
 
       if (!filePath) {
-        return res.status(HttpStatus.BAD_REQUEST).json({ error: 'filePath is required' });
+        return res.status(StatusCodes.BAD_REQUEST).json({ error: 'filePath is required' });
       }
 
       const result = this.configService.readConfigFileWithMetadata(filePath);
 
       if (!result.success) {
-        return res.status(HttpStatus.NOT_FOUND).json(result);
+        return res.status(StatusCodes.NOT_FOUND).json(result);
       }
 
       res.json(result);
     } catch (error) {
       this.logger?.error({ error: error.message }, 'Error reading config');
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         error: 'Failed to read file',
         details: error.message,
       });
@@ -83,7 +83,7 @@ export class ConfigController {
       });
     } catch (error) {
       this.logger?.error({ error: error.message }, 'Error detecting config');
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         error: 'Failed to detect config files',
         details: error.message,
       });

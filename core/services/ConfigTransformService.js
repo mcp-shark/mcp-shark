@@ -3,22 +3,34 @@
  * Handles converting, filtering, and updating config structures
  */
 export class ConfigTransformService {
+  constructor(configParserFactory) {
+    this.parserFactory = configParserFactory;
+  }
+
   /**
    * Convert MCP servers format to servers format
+   * Normalizes config first, then converts mcpServers to servers
    */
   convertMcpServersToServers(config) {
-    const { mcpServers, servers } = config;
-    const converted = { servers: {} };
-
-    if (servers) {
-      converted.servers = servers;
+    // Normalize config to ensure consistent format
+    const normalized = this.parserFactory.normalizeToInternalFormat(config);
+    if (!normalized) {
+      return { servers: {} };
     }
 
-    if (mcpServers) {
-      Object.entries(mcpServers).forEach(([name, cfg]) => {
+    const converted = { servers: {} };
+
+    // Handle normalized servers (legacy format)
+    if (normalized.servers) {
+      converted.servers = { ...normalized.servers };
+    }
+
+    // Convert mcpServers to servers format
+    if (normalized.mcpServers) {
+      for (const [name, cfg] of Object.entries(normalized.mcpServers)) {
         const type = cfg.type || (cfg.url ? 'http' : cfg.command ? 'stdio' : 'stdio');
         converted.servers[name] = { type, ...cfg };
-      });
+      }
     }
 
     return converted;
@@ -32,7 +44,7 @@ export class ConfigTransformService {
     const servicesMap = new Map();
 
     if (servers) {
-      Object.entries(servers).forEach(([name, cfg]) => {
+      for (const [name, cfg] of Object.entries(servers)) {
         const type = cfg.type || (cfg.url ? 'http' : cfg.command ? 'stdio' : 'stdio');
         servicesMap.set(name, {
           name,
@@ -41,11 +53,11 @@ export class ConfigTransformService {
           command: cfg.command || null,
           args: cfg.args || null,
         });
-      });
+      }
     }
 
     if (mcpServers) {
-      Object.entries(mcpServers).forEach(([name, cfg]) => {
+      for (const [name, cfg] of Object.entries(mcpServers)) {
         if (!servicesMap.has(name)) {
           const type = cfg.type || (cfg.url ? 'http' : cfg.command ? 'stdio' : 'stdio');
           servicesMap.set(name, {
@@ -56,7 +68,7 @@ export class ConfigTransformService {
             args: cfg.args || null,
           });
         }
-      });
+      }
     }
 
     return Array.from(servicesMap.values());
@@ -71,11 +83,11 @@ export class ConfigTransformService {
     }
 
     const filtered = { servers: {} };
-    selectedServices.forEach((serviceName) => {
+    for (const serviceName of selectedServices) {
       if (config.servers?.[serviceName]) {
         filtered.servers[serviceName] = config.servers[serviceName];
       }
-    });
+    }
 
     return filtered;
   }
@@ -89,12 +101,12 @@ export class ConfigTransformService {
 
     if (serverObject) {
       const updatedServers = {};
-      Object.entries(serverObject).forEach(([name, _cfg]) => {
+      for (const [name, _cfg] of Object.entries(serverObject)) {
         updatedServers[name] = {
           type: 'http',
           url: `http://localhost:9851/mcp/${encodeURIComponent(name)}`,
         };
-      });
+      }
       updatedConfig[serverType] = updatedServers;
     }
 
@@ -115,9 +127,13 @@ export class ConfigTransformService {
     const hasServers = originalConfig.servers && typeof originalConfig.servers === 'object';
 
     if (hasMcpServers) {
-      Object.keys(originalConfig.mcpServers).forEach((name) => selectedServiceNames.add(name));
+      for (const name of Object.keys(originalConfig.mcpServers)) {
+        selectedServiceNames.add(name);
+      }
     } else if (hasServers) {
-      Object.keys(originalConfig.servers).forEach((name) => selectedServiceNames.add(name));
+      for (const name of Object.keys(originalConfig.servers)) {
+        selectedServiceNames.add(name);
+      }
     }
 
     return selectedServiceNames;

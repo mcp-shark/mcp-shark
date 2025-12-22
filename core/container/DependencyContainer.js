@@ -9,7 +9,10 @@ import {
 import {
   AuditService,
   BackupService,
+  ConfigDetectionService,
+  ConfigFileService,
   ConfigService,
+  ConfigTransformService,
   ConversationService,
   LogService,
   McpClientService,
@@ -23,6 +26,7 @@ import {
   StatisticsService,
   TokenService,
 } from '#core/services/index.js';
+import { ConfigParserFactory } from '#core/services/parsers/ConfigParserFactory.js';
 
 /**
  * Dependency Injection Container
@@ -91,7 +95,23 @@ export class DependencyContainer {
         repos.conversation
       );
       this._services.audit = new AuditService(repos.audit, repos.session, repos.conversation);
-      this._services.config = new ConfigService(libs.logger);
+
+      // Config services (with proper DI)
+      const configParserFactory = new ConfigParserFactory();
+      const configDetectionService = new ConfigDetectionService();
+      const configFileService = new ConfigFileService(
+        libs.logger,
+        configDetectionService,
+        configParserFactory
+      );
+      const configTransformService = new ConfigTransformService(configParserFactory);
+      this._services.config = new ConfigService(
+        libs.logger,
+        configFileService,
+        configTransformService,
+        configDetectionService
+      );
+
       this._services.serverManagement = new ServerManagementService(
         this._services.config,
         libs.logger

@@ -5,7 +5,12 @@ import { isError } from '#core/libraries/ErrorLibrary.js';
 import { runAllExternalServers } from './server/external/all.js';
 
 import { DependencyContainer } from '#core';
-import { getDatabaseFile, getMcpConfigPath, prepareAppDataSpaces } from '#core/configs';
+import {
+  Environment,
+  getDatabaseFile,
+  getMcpConfigPath,
+  prepareAppDataSpaces,
+} from '#core/configs';
 import { initDb } from '#core/db/init';
 import { withAuditRequestResponseHandler } from './auditor/audit.js';
 import { getInternalServer } from './server/internal/run.js';
@@ -127,7 +132,7 @@ export async function startMcpSharkServer(options = {}) {
   serverLogger.info(`[MCP-Shark] Config path: ${configPath}`);
   serverLogger.info(`[MCP-Shark] Database path: ${getDatabaseFile()}`);
   serverLogger.info(`[MCP-Shark] Working directory: ${process.cwd()}`);
-  serverLogger.info(`[MCP-Shark] PATH: ${process.env.PATH}`);
+  serverLogger.info({ path: Environment.getPath() }, '[MCP-Shark] PATH');
 
   try {
     if (!providedAuditLogger) {

@@ -1,4 +1,5 @@
-import { HttpStatus } from '#core/constants';
+import { StatusCodes } from '#core/constants';
+import { handleError } from '../utils/errorHandler.js';
 
 /**
  * Controller for server management HTTP endpoints
@@ -23,11 +24,11 @@ export class ServerManagementController {
 
   setup = async (req, res) => {
     try {
-      console.log('setup', req.body);
+      this.logger?.debug({ body: req.body }, 'Setup request received');
       const { filePath, fileContent, selectedServices } = req.body;
 
       if (!filePath && !fileContent) {
-        return res.status(HttpStatus.BAD_REQUEST).json({
+        return res.status(StatusCodes.BAD_REQUEST).json({
           error: 'Either filePath or fileContent is required',
         });
       }
@@ -36,7 +37,7 @@ export class ServerManagementController {
 
       if (!setupResult.success) {
         const statusCode =
-          setupResult.error === 'File not found' ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
+          setupResult.error === 'File not found' ? StatusCodes.NOT_FOUND : StatusCodes.BAD_REQUEST;
         return res.status(statusCode).json(setupResult);
       }
 
@@ -79,7 +80,6 @@ export class ServerManagementController {
         backupPath: backupPath || null,
       });
     } catch (error) {
-      this.logger?.error({ error: error.message }, 'Error setting up mcp-shark server');
       const timestamp = new Date().toISOString();
       const errorLog = {
         timestamp,
@@ -87,10 +87,7 @@ export class ServerManagementController {
         line: `[ERROR] Failed to setup mcp-shark server: ${error.message}`,
       };
       this.logService.addLog(errorLog);
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        error: 'Failed to setup mcp-shark server',
-        details: error.message,
-      });
+      handleError(error, res, this.logger, 'Error setting up mcp-shark server');
     }
   };
 
@@ -117,11 +114,7 @@ export class ServerManagementController {
         res.json({ success: true, message: 'MCP Shark server was not running' });
       }
     } catch (error) {
-      this.logger?.error({ error: error.message }, 'Error stopping server');
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        error: 'Failed to stop mcp-shark server',
-        details: error.message,
-      });
+      handleError(error, res, this.logger, 'Error stopping server');
     }
   };
 
@@ -130,19 +123,16 @@ export class ServerManagementController {
       const status = this.serverManagementService.getServerStatus();
       res.json(status);
     } catch (error) {
-      this.logger?.error({ error: error.message }, 'Error getting server status');
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        error: 'Failed to get server status',
-        details: error.message,
-      });
+      handleError(error, res, this.logger, 'Error getting server status');
     }
   };
 
   shutdown = async (_req, res) => {
     try {
       if (!this.cleanup) {
-        return res.status(HttpStatus.SERVICE_UNAVAILABLE).json({
-          error: 'Shutdown not available',
+        return res.status(StatusCodes.SERVICE_UNAVAILABLE).json({
+          error: 'ServiceUnavailableError',
+          message: 'Shutdown not available',
           details: 'Cleanup function not configured',
         });
       }
@@ -156,11 +146,7 @@ export class ServerManagementController {
         process.exit(0);
       }, 100);
     } catch (error) {
-      this.logger?.error({ error: error.message }, 'Error shutting down application');
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        error: 'Failed to shutdown application',
-        details: error.message,
-      });
+      handleError(error, res, this.logger, 'Error shutting down application');
     }
   };
 }

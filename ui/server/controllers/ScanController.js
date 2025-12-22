@@ -1,4 +1,5 @@
-import { HttpStatus } from '#core/constants';
+import { StatusCodes } from '#core/constants';
+import { handleError, handleValidationError } from '../utils/errorHandler.js';
 
 /**
  * Controller for Smart Scan HTTP endpoints
@@ -15,25 +16,17 @@ export class ScanController {
       const { apiToken, scanData } = req.body;
 
       if (!apiToken) {
-        return res.status(HttpStatus.BAD_REQUEST).json({
-          error: 'API token is required',
-        });
+        return handleValidationError('API token is required', res, this.logger);
       }
 
       if (!scanData) {
-        return res.status(HttpStatus.BAD_REQUEST).json({
-          error: 'Scan data is required',
-        });
+        return handleValidationError('Scan data is required', res, this.logger);
       }
 
       const result = await this.scanService.createScan(scanData, apiToken);
       return res.status(result.status).json(result.data || { error: result.error });
     } catch (error) {
-      this.logger?.error({ error: error.message }, 'Smart Scan API error');
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        error: 'Failed to create scan',
-        message: error.message,
-      });
+      handleError(error, res, this.logger, 'Smart Scan API error');
     }
   };
 
@@ -42,15 +35,11 @@ export class ScanController {
       const { apiToken, servers } = req.body;
 
       if (!apiToken) {
-        return res.status(HttpStatus.BAD_REQUEST).json({
-          error: 'API token is required',
-        });
+        return handleValidationError('API token is required', res, this.logger);
       }
 
       if (!servers || !Array.isArray(servers) || servers.length === 0) {
-        return res.status(HttpStatus.BAD_REQUEST).json({
-          error: 'Servers array is required',
-        });
+        return handleValidationError('Servers array is required', res, this.logger);
       }
 
       const results = await this.scanService.createBatchScans(servers, apiToken);
@@ -59,11 +48,7 @@ export class ScanController {
         results,
       });
     } catch (error) {
-      this.logger?.error({ error: error.message }, 'Smart Scan batch API error');
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        error: 'Failed to create batch scans',
-        message: error.message,
-      });
+      handleError(error, res, this.logger, 'Smart Scan batch API error');
     }
   };
 
@@ -73,13 +58,13 @@ export class ScanController {
       const apiToken = req.headers.authorization?.replace('Bearer ', '');
 
       if (!apiToken) {
-        return res.status(HttpStatus.UNAUTHORIZED).json({
+        return res.status(StatusCodes.UNAUTHORIZED).json({
           error: 'API token is required',
         });
       }
 
       if (!scanId) {
-        return res.status(HttpStatus.BAD_REQUEST).json({
+        return res.status(StatusCodes.BAD_REQUEST).json({
           error: 'Scan ID is required',
         });
       }
@@ -87,11 +72,7 @@ export class ScanController {
       const result = await this.scanService.getScan(scanId, apiToken);
       return res.status(result.status).json(result.data || { error: result.error });
     } catch (error) {
-      this.logger?.error({ error: error.message }, 'Smart Scan API error');
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        error: 'Failed to get scan',
-        message: error.message,
-      });
+      handleError(error, res, this.logger, 'Smart Scan API error');
     }
   };
 
@@ -104,11 +85,7 @@ export class ScanController {
         count: cachedScans.length,
       });
     } catch (error) {
-      this.logger?.error({ error: error.message }, 'Error loading cached scans');
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        error: 'Failed to load cached scans',
-        message: error.message,
-      });
+      handleError(error, res, this.logger, 'Error loading cached scans');
     }
   };
 
@@ -117,9 +94,7 @@ export class ScanController {
       const { servers } = req.body;
 
       if (!servers || !Array.isArray(servers) || servers.length === 0) {
-        return res.status(HttpStatus.BAD_REQUEST).json({
-          error: 'Servers array is required',
-        });
+        return handleValidationError('Servers array is required', res, this.logger);
       }
 
       const results = this.scanService.getCachedResults(servers);
@@ -128,11 +103,7 @@ export class ScanController {
         results,
       });
     } catch (error) {
-      this.logger?.error({ error: error.message }, 'Error getting cached results');
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        error: 'Failed to get cached results',
-        message: error.message,
-      });
+      handleError(error, res, this.logger, 'Error getting cached results');
     }
   };
 
@@ -145,11 +116,7 @@ export class ScanController {
         deletedCount,
       });
     } catch (error) {
-      this.logger?.error({ error: error.message }, 'Error clearing cache');
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        error: 'Failed to clear cache',
-        message: error.message,
-      });
+      handleError(error, res, this.logger, 'Error clearing cache');
     }
   };
 }

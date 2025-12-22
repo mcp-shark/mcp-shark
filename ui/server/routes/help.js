@@ -1,5 +1,5 @@
 import { readHelpState, writeHelpState } from '#core/configs';
-import { HttpStatus } from '#core/constants';
+import { StatusCodes } from '#core/constants';
 
 export function createHelpRoutes() {
   const router = {};
@@ -22,7 +22,7 @@ export function createHelpRoutes() {
     if (success) {
       res.json({ success: true });
     } else {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: 'Failed to save help state' });
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Failed to save help state' });
     }
   };
 
@@ -36,7 +36,7 @@ export function createHelpRoutes() {
     if (success) {
       res.json({ success: true });
     } else {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: 'Failed to reset help state' });
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Failed to reset help state' });
     }
   };
 

@@ -1,5 +1,7 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import { Server as ServerConstants } from '#core/constants/Server.js';
+import { ValidationError } from '#core/libraries';
 
 /**
  * Service for MCP client management (Playground)
@@ -10,6 +12,8 @@ export class McpClientService {
     this.logger = logger;
     this.clientSessions = new Map();
     this.mcpServerBaseUrl = 'http://localhost:9851/mcp';
+    this.cleanupIntervalId = null;
+    this.startCleanupJob();
   }
 
   /**
@@ -29,7 +33,7 @@ export class McpClientService {
     }
 
     if (!serverName) {
-      throw new Error('Server name is required');
+      throw new ValidationError('Server name is required');
     }
 
     const mcpServerUrl = `${this.mcpServerBaseUrl}/${encodeURIComponent(serverName)}`;
@@ -51,6 +55,8 @@ export class McpClientService {
     const clientWrapper = {
       client,
       transport,
+      createdAt: Date.now(),
+      lastAccessed: Date.now(),
       close: async () => {
         await client.close();
         transport.close?.();
@@ -62,6 +68,17 @@ export class McpClientService {
   }
 
   /**
+   * Update last accessed time for a session
+   */
+  updateLastAccessed(serverName, sessionId) {
+    const sessionKey = this.getSessionKey(serverName, sessionId);
+    const clientWrapper = this.clientSessions.get(sessionKey);
+    if (clientWrapper) {
+      clientWrapper.lastAccessed = Date.now();
+    }
+  }
+
+  /**
    * Execute MCP method
    */
   async executeMethod(client, method, params) {
@@ -70,7 +87,7 @@ export class McpClientService {
         return await client.listTools();
       case 'tools/call':
         if (!params?.name) {
-          throw new Error('Tool name is required');
+          throw new ValidationError('Tool name is required');
         }
         return await client.callTool({
           name: params.name,
@@ -80,7 +97,7 @@ export class McpClientService {
         return await client.listPrompts();
       case 'prompts/get':
         if (!params?.name) {
-          throw new Error('Prompt name is required');
+          throw new ValidationError('Prompt name is required');
         }
         return await client.getPrompt({
           name: params.name,
@@ -90,11 +107,11 @@ export class McpClientService {
         return await client.listResources();
       case 'resources/read':
         if (!params?.uri) {
-          throw new Error('Resource URI is required');
+          throw new ValidationError('Resource URI is required');
         }
         return await client.readResource({ uri: params.uri });
       default:
-        throw new Error(`Unsupported method: ${method}`);
+        throw new ValidationError(`Unsupported method: ${method}`);
     }
   }
 
@@ -123,7 +140,96 @@ export class McpClientService {
         keysToDelete.push(key);
       }
     }
-    keysToDelete.forEach((key) => this.clientSessions.delete(key));
+    for (const key of keysToDelete) {
+      this.clientSessions.delete(key);
+    }
+    return keysToDelete.length;
+  }
+
+  /**
+   * Cleanup stale client sessions based on timeout
+   */
+  async cleanupStaleSessions() {
+    const now = Date.now();
+    const staleThreshold = now - ServerConstants.MCP_CLIENT_SESSION_TIMEOUT_MS;
+    const keysToDelete = [];
+
+    for (const [key, clientWrapper] of this.clientSessions.entries()) {
+      if (clientWrapper.lastAccessed < staleThreshold) {
+        try {
+          await clientWrapper.close();
+          keysToDelete.push(key);
+        } catch (error) {
+          this.logger?.error(
+            { error: error.message, sessionKey: key },
+            'Error closing stale MCP client session'
+          );
+        }
+      }
+    }
+
+    for (const key of keysToDelete) {
+      this.clientSessions.delete(key);
+    }
+
+    if (keysToDelete.length > 0) {
+      this.logger?.info({ count: keysToDelete.length }, 'Cleaned up stale MCP client sessions');
+    }
+
+    return keysToDelete.length;
+  }
+
+  /**
+   * Start periodic cleanup job for stale sessions
+   */
+  startCleanupJob() {
+    if (this.cleanupIntervalId) {
+      return;
+    }
+
+    // Run cleanup every 5 minutes
+    this.cleanupIntervalId = setInterval(
+      () => {
+        this.cleanupStaleSessions().catch((error) => {
+          this.logger?.error({ error: error.message }, 'Error in MCP client session cleanup job');
+        });
+      },
+      5 * 60 * 1000
+    );
+  }
+
+  /**
+   * Stop cleanup job
+   */
+  stopCleanupJob() {
+    if (this.cleanupIntervalId) {
+      clearInterval(this.cleanupIntervalId);
+      this.cleanupIntervalId = null;
+    }
+  }
+
+  /**
+   * Cleanup all client sessions (for shutdown)
+   */
+  async cleanupAll() {
+    this.stopCleanupJob();
+    const keysToDelete = Array.from(this.clientSessions.keys());
+
+    for (const key of keysToDelete) {
+      try {
+        const clientWrapper = this.clientSessions.get(key);
+        if (clientWrapper) {
+          await clientWrapper.close();
+        }
+      } catch (error) {
+        this.logger?.error(
+          { error: error.message, sessionKey: key },
+          'Error closing MCP client session during cleanup'
+        );
+      }
+      this.clientSessions.delete(key);
+    }
+
     return keysToDelete.length;
   }
 }

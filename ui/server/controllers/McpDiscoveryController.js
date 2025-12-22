@@ -1,4 +1,5 @@
-import { HttpStatus } from '#core/constants';
+import { NotFoundError, ValidationError } from '#core/libraries';
+import { handleError } from '../utils/errorHandler.js';
 
 /**
  * Controller for MCP discovery HTTP endpoints
@@ -15,16 +16,20 @@ export class McpDiscoveryController {
 
       if (!result.success) {
         if (result.error === 'MCP config file not found') {
-          return res.status(HttpStatus.NOT_FOUND).json({
-            error: 'MCP config file not found',
-            message: 'Config file not found',
-          });
+          return handleError(
+            new NotFoundError('Config file not found', null),
+            res,
+            this.logger,
+            'Error discovering servers'
+          );
         }
         if (result.error === 'No servers found in config') {
-          return res.status(HttpStatus.BAD_REQUEST).json({
-            error: 'No servers found in config',
-            message: 'The config file does not contain any MCP servers',
-          });
+          return handleError(
+            new ValidationError('The config file does not contain any MCP servers', null),
+            res,
+            this.logger,
+            'Error discovering servers'
+          );
         }
       }
 
@@ -33,11 +38,7 @@ export class McpDiscoveryController {
         servers: result.servers,
       });
     } catch (error) {
-      this.logger?.error({ error: error.message }, 'Error discovering servers');
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        error: 'Failed to discover servers',
-        message: error.message,
-      });
+      handleError(error, res, this.logger, 'Error discovering servers');
     }
   };
 }
