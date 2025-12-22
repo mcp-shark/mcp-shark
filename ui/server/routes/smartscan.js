@@ -1,24 +1,31 @@
+import { McpDiscoveryController, ScanController, TokenController } from '#ui/server/controllers';
+
 /**
- * Smart Scan API proxy routes
- * Proxies requests to the Smart Scan API to avoid CORS issues
+ * Create Smart Scan routes
+ * Routes delegate to controllers which call services
  */
+export function createSmartScanRoutes(container) {
+  const scanService = container.getService('scan');
+  const scanCacheService = container.getService('scanCache');
+  const mcpDiscoveryService = container.getService('mcpDiscovery');
+  const tokenService = container.getService('token');
+  const logger = container.getLibrary('logger');
 
-import * as discoverRoutes from './smartscan/discover.js';
-import * as scanRoutes from './smartscan/scans.js';
-import * as tokenRoutes from './smartscan/token.js';
+  const scanController = new ScanController(scanService, scanCacheService, logger);
+  const mcpDiscoveryController = new McpDiscoveryController(mcpDiscoveryService, logger);
+  const tokenController = new TokenController(tokenService, logger);
 
-export function createSmartScanRoutes() {
   const router = {};
 
-  router.getToken = tokenRoutes.getToken;
-  router.saveToken = tokenRoutes.saveToken;
-  router.discoverServers = discoverRoutes.discoverServers;
-  router.getCachedResults = scanRoutes.getCachedResults;
-  router.createScan = scanRoutes.createScan;
-  router.getScan = scanRoutes.getScan;
-  router.listScans = scanRoutes.listScans;
-  router.createBatchScans = scanRoutes.createBatchScans;
-  router.clearCache = scanRoutes.clearCache;
+  router.getToken = tokenController.getToken;
+  router.saveToken = tokenController.saveToken;
+  router.discoverServers = mcpDiscoveryController.discoverServers;
+  router.getCachedResults = scanController.getCachedResults;
+  router.createScan = scanController.createScan;
+  router.getScan = scanController.getScan;
+  router.listScans = scanController.listScans;
+  router.createBatchScans = scanController.createBatchScans;
+  router.clearCache = scanController.clearCache;
 
   return router;
 }

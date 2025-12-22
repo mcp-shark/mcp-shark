@@ -1,6 +1,7 @@
 import * as fs from 'node:fs';
 import { homedir } from 'node:os';
 import * as path from 'node:path';
+import { HttpStatus } from '#core/constants';
 
 function tryParseJson(content) {
   try {
@@ -15,7 +16,7 @@ export function viewBackup(req, res) {
     const { backupPath } = req.query;
 
     if (!backupPath) {
-      return res.status(400).json({ error: 'backupPath is required' });
+      return res.status(HttpStatus.BAD_REQUEST).json({ error: 'backupPath is required' });
     }
 
     const resolvedBackupPath = backupPath.startsWith('~')
@@ -23,7 +24,9 @@ export function viewBackup(req, res) {
       : backupPath;
 
     if (!fs.existsSync(resolvedBackupPath)) {
-      return res.status(404).json({ error: 'Backup file not found', path: resolvedBackupPath });
+      return res
+        .status(HttpStatus.NOT_FOUND)
+        .json({ error: 'Backup file not found', path: resolvedBackupPath });
     }
 
     const content = fs.readFileSync(resolvedBackupPath, 'utf-8');
@@ -42,6 +45,8 @@ export function viewBackup(req, res) {
       size: stats.size,
     });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to read backup file', details: error.message });
+    res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .json({ error: 'Failed to read backup file', details: error.message });
   }
 }

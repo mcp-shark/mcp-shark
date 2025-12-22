@@ -1,6 +1,7 @@
 import * as fs from 'node:fs';
 import { homedir } from 'node:os';
 import * as path from 'node:path';
+import { Defaults } from '#core/constants/Defaults';
 import { storeOriginalConfig } from './config.js';
 import logger from './logger.js';
 
@@ -94,7 +95,7 @@ function shouldCreateBackup(
         line: `[BACKUP] Skipped backup (no changes detected): ${resolvedFilePath.replace(homedir(), '~')}`,
       };
       mcpSharkLogs.push(skipLog);
-      if (mcpSharkLogs.length > 10000) {
+      if (mcpSharkLogs.length > Defaults.MAX_LOG_LINES) {
         mcpSharkLogs.shift();
       }
       broadcastLogUpdate(skipLog);
@@ -124,7 +125,7 @@ function createBackup(resolvedFilePath, content, mcpSharkLogs, broadcastLogUpdat
     line: `[BACKUP] Created backup: ${backupPath.replace(homedir(), '~')}`,
   };
   mcpSharkLogs.push(backupLog);
-  if (mcpSharkLogs.length > 10000) {
+  if (mcpSharkLogs.length > Defaults.MAX_LOG_LINES) {
     mcpSharkLogs.shift();
   }
   broadcastLogUpdate(backupLog);

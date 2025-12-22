@@ -1,6 +1,7 @@
 import { createConnection } from 'node:net';
+import { Defaults } from '#core/constants/Defaults';
 
-export function checkPortReady(port, host = 'localhost', timeout = 10000) {
+export function checkPortReady(port, host = 'localhost', timeout = Defaults.PORT_CHECK_TIMEOUT) {
   return new Promise((resolve, reject) => {
     const startTime = Date.now();
 

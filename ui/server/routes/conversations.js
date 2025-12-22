@@ -1,18 +1,15 @@
+import { ConversationController } from '../controllers/ConversationController.js';
+
 export function createConversationsRoutes(container) {
   const conversationService = container.getService('conversation');
+  const serializationLib = container.getLibrary('serialization');
   const logger = container.getLibrary('logger');
+
+  const controller = new ConversationController(conversationService, serializationLib, logger);
 
   const router = {};
 
-  router.getConversations = (req, res) => {
-    try {
-      const conversations = conversationService.getConversations(req.query);
-      res.json(conversations);
-    } catch (error) {
-      logger.error({ error: error.message }, 'Error in getConversations');
-      res.status(500).json({ error: 'Failed to query conversations', details: error.message });
-    }
-  };
+  router.getConversations = (req, res) => controller.getConversations(req, res);
 
   return router;
 }

@@ -1,3 +1,5 @@
+import { Defaults, HttpStatus } from '#core/constants';
+
 export async function stop(
   _req,
   res,
@@ -23,7 +25,7 @@ export async function stop(
           line: '[RESTORE] Restored original config',
         };
         mcpSharkLogs.push(restoreLog);
-        if (mcpSharkLogs.length > 10000) {
+        if (mcpSharkLogs.length > Defaults.MAX_LOG_LINES) {
           mcpSharkLogs.shift();
         }
         broadcastLogUpdate(restoreLog);
@@ -34,6 +36,8 @@ export async function stop(
       res.json({ success: true, message: 'MCP Shark server was not running' });
     }
   } catch (error) {
-    res.status(500).json({ error: 'Failed to stop mcp-shark server', details: error.message });
+    res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .json({ error: 'Failed to stop mcp-shark server', details: error.message });
   }
 }

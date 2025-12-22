@@ -1,6 +1,11 @@
 const API_BASE_URL = 'https://smart.mcpshark.sh';
-import logger from '../../../utils/logger.js';
-import { computeMcpHash, getCachedScanResult, storeScanResult } from '../../../utils/scan-cache.js';
+import { HttpStatus } from '#core/constants';
+import logger from '#ui/server/utils/logger.js';
+import {
+  computeMcpHash,
+  getCachedScanResult,
+  storeScanResult,
+} from '#ui/server/utils/scan-cache.js';
 
 /**
  * Create scan for multiple servers (one request per server)
@@ -11,13 +16,13 @@ export async function createBatchScans(req, res) {
     const { apiToken, servers } = req.body;
 
     if (!apiToken) {
-      return res.status(400).json({
+      return res.status(HttpStatus.BAD_REQUEST).json({
         error: 'API token is required',
       });
     }
 
     if (!servers || !Array.isArray(servers) || servers.length === 0) {
-      return res.status(400).json({
+      return res.status(HttpStatus.BAD_REQUEST).json({
         error: 'Servers array is required',
       });
     }
@@ -116,7 +121,7 @@ export async function createBatchScans(req, res) {
     });
   } catch (error) {
     logger.error({ error: error.message }, 'Smart Scan batch API error');
-    return res.status(500).json({
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       error: 'Failed to create batch scans',
       message: error.message,
     });

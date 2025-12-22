@@ -1,51 +1,32 @@
+import { Defaults } from '../constants/Defaults.js';
+import { StatusCodeRanges } from '../constants/StatusCodes.js';
 /**
  * Service for statistics-related business logic
+ * HTTP-agnostic: accepts models, returns models
  */
+import { RequestFilters } from '../models/RequestFilters.js';
+
 export class StatisticsService {
-  constructor(statisticsRepository, packetRepository, conversationRepository, serializationLib) {
+  constructor(statisticsRepository, packetRepository, conversationRepository) {
     this.statisticsRepository = statisticsRepository;
     this.packetRepository = packetRepository;
     this.conversationRepository = conversationRepository;
-    this.serializationLib = serializationLib;
   }
 
   /**
    * Get statistics with filters
+   * @param {RequestFilters} filters - Typed filter model
+   * @returns {Object} Statistics object
    */
-  getStatistics(filters = {}) {
-    const sanitizeSearch = (value) => {
-      if (value !== undefined && value !== null) {
-        const trimmed = String(value).trim();
-        return trimmed.length > 0 ? trimmed : null;
-      }
-      return null;
-    };
-
-    const sanitizedFilters = {
-      sessionId: (filters.sessionId && String(filters.sessionId).trim()) || null,
-      direction: (filters.direction && String(filters.direction).trim()) || null,
-      method: (filters.method && String(filters.method).trim()) || null,
-      jsonrpcMethod: (filters.jsonrpcMethod && String(filters.jsonrpcMethod).trim()) || null,
-      statusCode: filters.statusCode ? Number.parseInt(filters.statusCode) : null,
-      jsonrpcId: (filters.jsonrpcId && String(filters.jsonrpcId).trim()) || null,
-      search: sanitizeSearch(filters.search),
-      serverName: (filters.serverName && String(filters.serverName).trim()) || null,
-      startTime: filters.startTime ? BigInt(filters.startTime) : null,
-      endTime: filters.endTime ? BigInt(filters.endTime) : null,
-    };
-
-    Object.keys(sanitizedFilters).forEach((key) => {
-      if (sanitizedFilters[key] === undefined) {
-        sanitizedFilters[key] = null;
-      }
-    });
-
+  getStatistics(filters) {
     // Get all filtered requests for accurate statistics
-    const allRequests = this.packetRepository.queryRequests({
-      ...sanitizedFilters,
-      limit: 1000000,
-      offset: 0,
+    const statsFilters = new RequestFilters({
+      ...filters,
+      limit: Defaults.STATISTICS_LIMIT,
+      offset: Defaults.DEFAULT_OFFSET,
     });
+    const repoFilters = statsFilters.toRepositoryFilters();
+    const allRequests = this.packetRepository.queryRequests(repoFilters);
 
     // Calculate statistics from filtered requests
     const totalPackets = allRequests.length;
@@ -55,7 +36,8 @@ export class StatisticsService {
       if (r.direction === 'response') {
         const statusCode = r.status_code || r.status;
         return (
-          statusCode >= 400 || (r.body_json && typeof r.body_json === 'object' && r.body_json.error)
+          statusCode >= StatusCodeRanges.CLIENT_ERROR_MIN ||
+          (r.body_json && typeof r.body_json === 'object' && r.body_json.error)
         );
       }
       return false;
@@ -77,6 +59,6 @@ export class StatisticsService {
       unique_sessions: uniqueSessions.size,
     };
 
-    return this.serializationLib.serializeBigInt(stats);
+    return stats;
   }
 }

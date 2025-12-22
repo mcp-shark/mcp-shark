@@ -1,3 +1,5 @@
+import { Defaults } from '#core/constants/Defaults';
+
 /**
  * Repository for session-related database operations
  */
@@ -10,7 +12,12 @@ export class SessionRepository {
    * Get session metadata
    */
   getSessions(filters = {}) {
-    const { startTime = null, endTime = null, limit = 1000, offset = 0 } = filters;
+    const {
+      startTime = null,
+      endTime = null,
+      limit = Defaults.DEFAULT_LIMIT,
+      offset = Defaults.DEFAULT_OFFSET,
+    } = filters;
 
     const queryParts = ['SELECT * FROM sessions WHERE 1=1'];
     const params = [];

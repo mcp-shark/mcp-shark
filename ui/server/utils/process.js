@@ -1,4 +1,6 @@
-const MAX_LOG_LINES = 10000;
+import { Defaults } from '#core/constants/Defaults';
+
+const MAX_LOG_LINES = Defaults.MAX_LOG_LINES;
 
 export function createLogEntry(mcpSharkLogs, broadcastLogUpdate) {
   return function logEntry(type, data) {

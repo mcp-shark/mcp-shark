@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
-import logger from '../logger.js';
+import { Defaults } from '#core/constants/Defaults';
+import logger from '#ui/server/utils/logger.js';
 import { ensureScanResultsDirectory } from './directory.js';
 
 /**
@@ -50,7 +51,7 @@ export function getCachedScanResultsForServer(serverName) {
  * @param {number} maxAgeMs - Maximum age in milliseconds (default: 30 days)
  * @returns {number} Number of files deleted
  */
-export function clearOldScanResults(maxAgeMs = 30 * 24 * 60 * 60 * 1000) {
+export function clearOldScanResults(maxAgeMs = Defaults.SCAN_RESULTS_MAX_AGE_MS) {
   try {
     const scanResultsDir = ensureScanResultsDirectory();
     const files = readdirSync(scanResultsDir).filter((f) => f.endsWith('.json'));

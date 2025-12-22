@@ -1,6 +1,7 @@
 import * as fs from 'node:fs';
 import { homedir } from 'node:os';
 import * as path from 'node:path';
+import { HttpStatus } from '#core/constants';
 
 export function listBackups(_req, res) {
   try {
@@ -70,6 +71,8 @@ export function listBackups(_req, res) {
       ),
     });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to list backups', details: error.message });
+    res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .json({ error: 'Failed to list backups', details: error.message });
   }
 }

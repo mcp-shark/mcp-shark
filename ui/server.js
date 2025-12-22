@@ -6,8 +6,8 @@ import { WebSocketServer } from 'ws';
 
 import { getDatabaseFile, prepareAppDataSpaces } from '#common/configs';
 import { openDb } from '#common/db/init';
-import { DependencyContainer } from '#core';
-import { restoreOriginalConfig } from './server/utils/config.js';
+import { DependencyContainer, RequestFilters } from '#core';
+import { restoreOriginalConfig } from '#ui/server/utils/config.js';
 
 import { createBackupRoutes } from './server/routes/backups/index.js';
 import { createCompositeRoutes } from './server/routes/composite/index.js';
@@ -68,20 +68,21 @@ export function createUIServer() {
   const conversationsRoutes = createConversationsRoutes(container);
   const sessionsRoutes = createSessionsRoutes(container);
   const statisticsRoutes = createStatisticsRoutes(container);
-  const logsRoutes = createLogsRoutes(mcpSharkLogs, broadcastLogUpdate);
-  const configRoutes = createConfigRoutes();
-  const backupRoutes = createBackupRoutes();
+  const logsRoutes = createLogsRoutes(container, mcpSharkLogs);
+  const configRoutes = createConfigRoutes(container);
+  const backupRoutes = createBackupRoutes(container);
   const getMcpSharkProcess = () => processState.mcpSharkServer;
   const compositeRoutes = createCompositeRoutes(
+    container,
     getMcpSharkProcess,
     setMcpSharkProcess,
     mcpSharkLogs,
     broadcastLogUpdate
   );
   const helpRoutes = createHelpRoutes();
-  const playgroundRoutes = createPlaygroundRoutes();
-  const smartScanRoutes = createSmartScanRoutes();
-  const settingsRoutes = createSettingsRoutes();
+  const playgroundRoutes = createPlaygroundRoutes(container);
+  const smartScanRoutes = createSmartScanRoutes(container);
+  const settingsRoutes = createSettingsRoutes(container);
 
   app.get('/api/requests', requestsRoutes.getRequests);
   app.get('/api/packets', requestsRoutes.getRequests);
@@ -147,10 +148,13 @@ export function createUIServer() {
   });
 
   const requestService = container.getService('request');
+  const serializationLib = container.getLibrary('serialization');
 
   const notifyClients = async () => {
-    const requests = requestService.getRequests({ limit: 100 });
-    const message = JSON.stringify({ type: 'update', data: requests });
+    const filters = new RequestFilters({ limit: 100 });
+    const requests = requestService.getRequests(filters);
+    const serialized = serializationLib.serializeBigInt(requests);
+    const message = JSON.stringify({ type: 'update', data: serialized });
     clients.forEach((client) => {
       if (client.readyState === 1) {
         client.send(message);

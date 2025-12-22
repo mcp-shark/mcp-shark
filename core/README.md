@@ -6,12 +6,17 @@ This directory contains the core architecture following SOLID principles with de
 
 ```
 ┌─────────────┐
-│   Routes    │  (UI Server Routes)
+│ Controllers │  (HTTP handling: extraction, sanitization, serialization)
 └──────┬──────┘
-       │ uses
+       │ uses models
        ▼
 ┌─────────────┐
-│  Services   │  (Business Logic)
+│   Models    │  (Typed data structures)
+└──────┬──────┘
+       │ used by
+       ▼
+┌─────────────┐
+│  Services   │  (Business Logic - HTTP-agnostic)
 └──────┬──────┘
        │ uses
        ▼
@@ -32,6 +37,10 @@ This directory contains the core architecture following SOLID principles with de
        │
 ┌─────────────┐
 │  Services   │
+└─────────────┘
+
+┌─────────────┐
+│ Constants   │  (Well-defined constants, no magic numbers)
 └─────────────┘
 ```
 
@@ -62,6 +71,17 @@ This directory contains the core architecture following SOLID principles with de
 ### Libraries (`core/libraries/`)
 - `SerializationLibrary` - BigInt serialization utilities
 - `LoggerLibrary` - Logging utilities wrapper
+
+### Models (`core/models/`)
+- `RequestFilters` - Typed model for request filtering
+- `SessionFilters` - Typed model for session filtering
+- `ConversationFilters` - Typed model for conversation filtering
+- `ExportFormat` - Export format constants
+
+### Constants (`core/constants/`)
+- `Defaults` - Default values (limits, offsets, etc.)
+- `StatusCodes` - HTTP status code constants
+- `StatusCodeRanges` - Status code ranges for validation
 
 ### Container (`core/container/`)
 - `DependencyContainer` - Dependency injection container that manages all dependencies

@@ -16,7 +16,8 @@
     "#common/logger": "./lib/common/logger.js",
     "#common/*": "./lib/common/*",
     "#core": "./core/index.js",
-    "#core/*": "./core/*"
+    "#core/*": "./core/*",
+    "#ui/server/*": "./ui/server/*"
   },
   "bin": {
     "mcp-shark": "./bin/mcp-shark.js",

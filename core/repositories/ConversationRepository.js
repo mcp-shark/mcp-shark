@@ -1,3 +1,5 @@
+import { Defaults } from '#core/constants/Defaults';
+
 /**
  * Repository for conversation-related database operations
  */
@@ -17,8 +19,8 @@ export class ConversationRepository {
       startTime = null,
       endTime = null,
       jsonrpcId = null,
-      limit = 1000,
-      offset = 0,
+      limit = Defaults.DEFAULT_LIMIT,
+      offset = Defaults.DEFAULT_OFFSET,
     } = filters;
 
     const queryParts = [

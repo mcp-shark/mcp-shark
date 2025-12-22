@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import logger from '../logger.js';
+import logger from '#ui/server/utils/logger.js';
 import { getScanResultsDirectory } from './directory.js';
 
 /**

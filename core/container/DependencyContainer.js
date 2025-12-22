@@ -13,10 +13,20 @@ import {
 } from '#core/repositories/index.js';
 import {
   AuditService,
+  BackupService,
+  ConfigService,
   ConversationService,
+  LogService,
+  McpClientService,
+  McpDiscoveryService,
   RequestService,
+  ScanCacheService,
+  ScanService,
+  ServerManagementService,
   SessionService,
+  SettingsService,
   StatisticsService,
+  TokenService,
 } from '#core/services/index.js';
 
 export class DependencyContainer {
@@ -72,16 +82,32 @@ export class DependencyContainer {
       const repos = this._getRepositories();
       const libs = this._getLibraries();
 
-      this._services.request = new RequestService(repos.packet, libs.serialization);
-      this._services.session = new SessionService(repos.session, repos.packet, libs.serialization);
-      this._services.conversation = new ConversationService(repos.conversation, libs.serialization);
+      this._services.request = new RequestService(repos.packet);
+      this._services.session = new SessionService(repos.session, repos.packet);
+      this._services.conversation = new ConversationService(repos.conversation);
       this._services.statistics = new StatisticsService(
         repos.statistics,
         repos.packet,
-        repos.conversation,
-        libs.serialization
+        repos.conversation
       );
       this._services.audit = new AuditService(repos.audit, repos.session, repos.conversation);
+      this._services.config = new ConfigService(libs.logger);
+      this._services.serverManagement = new ServerManagementService(
+        this._services.config,
+        libs.logger
+      );
+      this._services.backup = new BackupService(this._services.config, libs.logger);
+      this._services.log = new LogService(libs.logger);
+      this._services.scanCache = new ScanCacheService(libs.logger);
+      this._services.scan = new ScanService(this._services.scanCache, libs.logger);
+      this._services.mcpDiscovery = new McpDiscoveryService(this._services.config, libs.logger);
+      this._services.mcpClient = new McpClientService(libs.logger);
+      this._services.token = new TokenService(libs.logger);
+      this._services.settings = new SettingsService(
+        this._services.token,
+        this._services.backup,
+        libs.logger
+      );
     }
 
     return this._services;

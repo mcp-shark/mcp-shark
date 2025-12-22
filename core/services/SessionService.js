@@ -1,34 +1,34 @@
 /**
  * Service for session-related business logic
+ * HTTP-agnostic: accepts models, returns models
  */
+import { Defaults } from '../constants/Defaults.js';
+
 export class SessionService {
-  constructor(sessionRepository, packetRepository, serializationLib) {
+  constructor(sessionRepository, packetRepository) {
     this.sessionRepository = sessionRepository;
     this.packetRepository = packetRepository;
-    this.serializationLib = serializationLib;
   }
 
   /**
    * Get sessions with filters
+   * @param {SessionFilters} filters - Typed filter model
+   * @returns {Array} Array of session objects (raw from repository)
    */
-  getSessions(filters = {}) {
-    const sanitizedFilters = {
-      startTime: filters.startTime ? BigInt(filters.startTime) : null,
-      endTime: filters.endTime ? BigInt(filters.endTime) : null,
-      limit: Number.parseInt(filters.limit) || 1000,
-      offset: Number.parseInt(filters.offset) || 0,
-    };
-
-    const sessions = this.sessionRepository.getSessions(sanitizedFilters);
-    return this.serializationLib.serializeBigInt(sessions);
+  getSessions(filters) {
+    const repoFilters = filters.toRepositoryFilters();
+    return this.sessionRepository.getSessions(repoFilters);
   }
 
   /**
    * Get requests for a specific session
+   * @param {string} sessionId - Session ID
+   * @param {number} limit - Maximum number of requests to return
+   * @returns {Array} Array of packet objects (raw from repository)
    */
-  getSessionRequests(sessionId, limit = 10000) {
-    const parsedLimit = Number.parseInt(limit) || 10000;
-    const requests = this.packetRepository.getSessionRequests(sessionId, parsedLimit);
-    return this.serializationLib.serializeBigInt(requests);
+  getSessionRequests(sessionId, limit) {
+    const parsedLimit =
+      limit !== undefined ? Number.parseInt(limit) : Defaults.DEFAULT_SESSION_LIMIT;
+    return this.packetRepository.getSessionRequests(sessionId, parsedLimit);
   }
 }

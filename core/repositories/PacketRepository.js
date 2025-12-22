@@ -1,3 +1,5 @@
+import { Defaults } from '#core/constants/Defaults';
+
 /**
  * Repository for packet-related database operations
  * Encapsulates all database queries for packets
@@ -20,8 +22,8 @@ export class PacketRepository {
       startTime = null,
       endTime = null,
       jsonrpcId = null,
-      limit = 1000,
-      offset = 0,
+      limit = Defaults.DEFAULT_LIMIT,
+      offset = Defaults.DEFAULT_OFFSET,
     } = filters;
 
     const queryParts = ['SELECT * FROM packets WHERE 1=1'];
@@ -90,8 +92,8 @@ export class PacketRepository {
       jsonrpcId = null,
       search = null,
       serverName = null,
-      limit = 1000,
-      offset = 0,
+      limit = Defaults.DEFAULT_LIMIT,
+      offset = Defaults.DEFAULT_OFFSET,
     } = filters;
 
     const queryParts = ['SELECT * FROM packets WHERE 1=1'];
@@ -115,9 +117,8 @@ export class PacketRepository {
         body_json LIKE ? ESCAPE '\\' OR
         body_raw LIKE ? ESCAPE '\\'
       )`);
-      for (let i = 0; i < 11; i++) {
-        params.push(searchPattern);
-      }
+      const searchParams = Array.from({ length: 11 }, () => searchPattern);
+      params.push(...searchParams);
       params.push(serverNamePattern);
       params.push(serverNamePattern);
     }
@@ -189,7 +190,7 @@ export class PacketRepository {
   /**
    * Get all packets for a specific session
    */
-  getSessionPackets(sessionId, limit = 10000) {
+  getSessionPackets(sessionId, limit = Defaults.DEFAULT_SESSION_LIMIT) {
     const stmt = this.db.prepare(`
       SELECT * FROM packets
       WHERE session_id = ?
@@ -202,7 +203,7 @@ export class PacketRepository {
   /**
    * Get all requests for a specific session (ordered by most recent first)
    */
-  getSessionRequests(sessionId, limit = 10000) {
+  getSessionRequests(sessionId, limit = Defaults.DEFAULT_SESSION_LIMIT) {
     const stmt = this.db.prepare(`
       SELECT * FROM packets
       WHERE session_id = ?

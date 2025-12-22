@@ -1,5 +1,6 @@
 const API_BASE_URL = 'https://smart.mcpshark.sh';
-import logger from '../../../utils/logger.js';
+import { HttpStatus } from '#core/constants';
+import logger from '#ui/server/utils/logger.js';
 
 /**
  * Proxy POST request to create a scan
@@ -10,13 +11,13 @@ export async function createScan(req, res) {
     const { apiToken, scanData } = req.body;
 
     if (!apiToken) {
-      return res.status(400).json({
+      return res.status(HttpStatus.BAD_REQUEST).json({
         error: 'API token is required',
       });
     }
 
     if (!scanData) {
-      return res.status(400).json({
+      return res.status(HttpStatus.BAD_REQUEST).json({
         error: 'Scan data is required',
       });
     }
@@ -35,7 +36,7 @@ export async function createScan(req, res) {
     return res.status(response.status).json(data);
   } catch (error) {
     logger.error({ error: error.message }, 'Smart Scan API error');
-    return res.status(500).json({
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       error: 'Failed to create scan',
       message: error.message,
     });

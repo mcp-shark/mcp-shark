@@ -1,5 +1,6 @@
-import logger from '../../../utils/logger.js';
-import { clearAllScanResults } from '../../../utils/scan-cache.js';
+import { HttpStatus } from '#core/constants';
+import logger from '#ui/server/utils/logger.js';
+import { clearAllScanResults } from '#ui/server/utils/scan-cache.js';
 
 /**
  * Clear all cached scan results
@@ -15,7 +16,7 @@ export function clearCache(_req, res) {
     });
   } catch (error) {
     logger.error({ error: error.message }, 'Error clearing cache');
-    return res.status(500).json({
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       error: 'Failed to clear cache',
       message: error.message,
     });

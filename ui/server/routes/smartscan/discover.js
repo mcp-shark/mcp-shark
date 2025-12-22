@@ -1,8 +1,9 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { getMcpConfigPath } from '#common/configs';
-import { convertMcpServersToServers } from '../../utils/config.js';
-import logger from '../../utils/logger.js';
+import { HttpStatus } from '#core/constants';
+import { convertMcpServersToServers } from '#ui/server/utils/config.js';
+import logger from '#ui/server/utils/logger.js';
 import { createTransport } from './transport.js';
 
 /**
@@ -68,7 +69,7 @@ export async function discoverServers(_req, res) {
     const configPath = getMcpConfigPath();
 
     if (!existsSync(configPath)) {
-      return res.status(404).json({
+      return res.status(HttpStatus.NOT_FOUND).json({
         error: 'MCP config file not found',
         message: `Config file not found at: ${configPath}`,
       });
@@ -81,7 +82,7 @@ export async function discoverServers(_req, res) {
     const servers = convertedConfig.servers || {};
 
     if (Object.keys(servers).length === 0) {
-      return res.status(400).json({
+      return res.status(HttpStatus.BAD_REQUEST).json({
         error: 'No servers found in config',
         message: 'The config file does not contain any MCP servers',
       });
@@ -110,7 +111,7 @@ export async function discoverServers(_req, res) {
     });
   } catch (error) {
     logger.error({ error: error.message }, 'Error discovering servers');
-    return res.status(500).json({
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       error: 'Failed to discover servers',
       message: error.message,
     });

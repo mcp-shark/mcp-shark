@@ -1,7 +1,10 @@
 /**
  * Service for audit logging business logic
  * Coordinates between audit repository and session repository
+ * HTTP-agnostic: accepts models, returns models
  */
+import { StatusCodeRanges } from '../constants/StatusCodes.js';
+
 export class AuditService {
   constructor(auditRepository, sessionRepository, conversationRepository) {
     this.auditRepository = auditRepository;
@@ -106,8 +109,11 @@ export class AuditService {
         ? this._calculateDurationMs(options.requestTimestampNs, result.timestampNs)
         : null;
 
-      const statusCode = options.statusCode || 200;
-      const status = statusCode >= 200 && statusCode < 300 ? 'completed' : 'error';
+      const statusCode = options.statusCode || StatusCodeRanges.SUCCESS_MIN;
+      const status =
+        statusCode >= StatusCodeRanges.SUCCESS_MIN && statusCode <= StatusCodeRanges.SUCCESS_MAX
+          ? 'completed'
+          : 'error';
 
       if (options.requestFrameNumber) {
         // Update existing conversation

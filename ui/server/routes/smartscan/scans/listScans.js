@@ -1,5 +1,6 @@
-import logger from '../../../utils/logger.js';
-import { getAllCachedScanResults } from '../../../utils/scan-cache.js';
+import { HttpStatus } from '#core/constants';
+import logger from '#ui/server/utils/logger.js';
+import { getAllCachedScanResults } from '#ui/server/utils/scan-cache.js';
 
 /**
  * List all scans from local cache only
@@ -17,7 +18,7 @@ export async function listScans(_req, res) {
     });
   } catch (error) {
     logger.error({ error: error.message }, 'Error loading cached scans');
-    return res.status(500).json({
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       error: 'Failed to load cached scans',
       message: error.message,
     });

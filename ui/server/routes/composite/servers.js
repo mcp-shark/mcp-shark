@@ -1,18 +1,23 @@
-import * as fs from 'node:fs';
-import { getMcpConfigPath } from '#common/configs';
+import { HttpStatus } from '#core/constants';
 
-export function getServers(_req, res) {
-  try {
-    const mcpsJsonPath = getMcpConfigPath();
-    if (!fs.existsSync(mcpsJsonPath)) {
-      return res.json({ servers: [] });
+/**
+ * Get servers from config
+ * Uses ConfigService via ConfigController
+ */
+export function getServers(container) {
+  const configService = container.getService('config');
+  const logger = container.getLibrary('logger');
+
+  return (_req, res) => {
+    try {
+      const servers = configService.getServersFromConfig();
+      res.json({ servers });
+    } catch (error) {
+      logger.error({ error: error.message }, 'Error getting servers');
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to get servers',
+        details: error.message,
+      });
     }
-
-    const configContent = fs.readFileSync(mcpsJsonPath, 'utf-8');
-    const config = JSON.parse(configContent);
-    const servers = config.servers ? Object.keys(config.servers) : [];
-    res.json({ servers });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to get servers', details: error.message });
-  }
+  };
 }

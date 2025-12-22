@@ -3,13 +3,12 @@ import { homedir } from 'node:os';
 import * as path from 'node:path';
 import { startMcpSharkServer } from '@mcp-shark/mcp-shark/mcp-server';
 import { getMcpConfigPath } from '#common/configs';
-import { getSelectedServiceNames, updateConfigFile } from '../../utils/config-update.js';
-import { clearOriginalConfig, convertMcpServersToServers } from '../../utils/config.js';
-import logger from '../../utils/logger.js';
-import { createLogEntry } from '../../utils/process.js';
+import { Defaults, HttpStatus } from '#core/constants';
+import { getSelectedServiceNames, updateConfigFile } from '#ui/server/utils/config-update.js';
+import { clearOriginalConfig, convertMcpServersToServers } from '#ui/server/utils/config.js';
+import logger from '#ui/server/utils/logger.js';
+import { createLogEntry } from '#ui/server/utils/process.js';
 import { filterServers, parseJsonConfig, resolveFileData } from './utils.js';
-
-const MAX_LOG_LINES = 10000;
 
 export async function setup(
   req,
@@ -26,7 +25,9 @@ export async function setup(
     const { filePath, fileContent, selectedServices } = req.body;
 
     if (!filePath && !fileContent) {
-      return res.status(400).json({ error: 'Either filePath or fileContent is required' });
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ error: 'Either filePath or fileContent is required' });
     }
 
     const fileData = resolveFileData(filePath, fileContent);
@@ -35,13 +36,15 @@ export async function setup(
       const resolvedFilePath = filePath.startsWith('~')
         ? path.join(homedir(), filePath.slice(1))
         : filePath;
-      return res.status(404).json({ error: 'File not found', path: resolvedFilePath });
+      return res
+        .status(HttpStatus.NOT_FOUND)
+        .json({ error: 'File not found', path: resolvedFilePath });
     }
 
     const parseResult = parseJsonConfig(fileData.content);
 
     if (!parseResult.config) {
-      return res.status(400).json({
+      return res.status(HttpStatus.BAD_REQUEST).json({
         error: 'Invalid JSON file',
         details: parseResult.error ? parseResult.error.message : 'Failed to parse JSON',
       });
@@ -56,7 +59,7 @@ export async function setup(
         : baseConvertedConfig;
 
     if (Object.keys(convertedConfig.servers).length === 0) {
-      return res.status(400).json({ error: 'No servers found in config' });
+      return res.status(HttpStatus.BAD_REQUEST).json({ error: 'No servers found in config' });
     }
 
     const mcpsJsonPath = getMcpConfigPath();
@@ -120,10 +123,12 @@ export async function setup(
       line: `[ERROR] Failed to setup mcp-shark server: ${error.message}`,
     };
     mcpSharkLogs.push(errorLog);
-    if (mcpSharkLogs.length > MAX_LOG_LINES) {
+    if (mcpSharkLogs.length > Defaults.MAX_LOG_LINES) {
       mcpSharkLogs.shift();
     }
     broadcastLogUpdate(errorLog);
-    res.status(500).json({ error: 'Failed to setup mcp-shark server', details: error.message });
+    res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .json({ error: 'Failed to setup mcp-shark server', details: error.message });
   }
 }

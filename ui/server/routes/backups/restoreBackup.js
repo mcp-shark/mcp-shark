@@ -1,13 +1,14 @@
 import * as fs from 'node:fs';
 import { homedir } from 'node:os';
 import * as path from 'node:path';
+import { Defaults, HttpStatus } from '#core/constants';
 
 export function restoreBackup(req, res, mcpSharkLogs, broadcastLogUpdate) {
   try {
     const { backupPath, originalPath } = req.body;
 
     if (!backupPath) {
-      return res.status(400).json({ error: 'backupPath is required' });
+      return res.status(HttpStatus.BAD_REQUEST).json({ error: 'backupPath is required' });
     }
 
     const resolvedBackupPath = backupPath.startsWith('~')
@@ -15,7 +16,9 @@ export function restoreBackup(req, res, mcpSharkLogs, broadcastLogUpdate) {
       : backupPath;
 
     if (!fs.existsSync(resolvedBackupPath)) {
-      return res.status(404).json({ error: 'Backup file not found', path: resolvedBackupPath });
+      return res
+        .status(HttpStatus.NOT_FOUND)
+        .json({ error: 'Backup file not found', path: resolvedBackupPath });
     }
 
     // Determine original path
@@ -43,7 +46,9 @@ export function restoreBackup(req, res, mcpSharkLogs, broadcastLogUpdate) {
 
     const targetPath = determineTargetPath(originalPath, resolvedBackupPath);
     if (!targetPath) {
-      return res.status(400).json({ error: 'Could not determine original file path' });
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ error: 'Could not determine original file path' });
     }
 
     const backupContent = fs.readFileSync(resolvedBackupPath, 'utf8');
@@ -56,7 +61,7 @@ export function restoreBackup(req, res, mcpSharkLogs, broadcastLogUpdate) {
       line: `[RESTORE] Restored config from backup: ${targetPath.replace(homedir(), '~')}`,
     };
     mcpSharkLogs.push(restoreLog);
-    if (mcpSharkLogs.length > 10000) {
+    if (mcpSharkLogs.length > Defaults.MAX_LOG_LINES) {
       mcpSharkLogs.shift();
     }
     broadcastLogUpdate(restoreLog);
@@ -74,10 +79,12 @@ export function restoreBackup(req, res, mcpSharkLogs, broadcastLogUpdate) {
       line: `[RESTORE ERROR] Failed to restore: ${error.message}`,
     };
     mcpSharkLogs.push(errorLog);
-    if (mcpSharkLogs.length > 10000) {
+    if (mcpSharkLogs.length > Defaults.MAX_LOG_LINES) {
       mcpSharkLogs.shift();
     }
     broadcastLogUpdate(errorLog);
-    res.status(500).json({ error: 'Failed to restore backup', details: error.message });
+    res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .json({ error: 'Failed to restore backup', details: error.message });
   }
 }

@@ -1,32 +1,20 @@
-export function createLogsRoutes(mcpSharkLogs, _broadcastLogUpdate) {
+import { LogController } from '#ui/server/controllers';
+
+/**
+ * Create logs routes
+ * Routes delegate to LogController which calls LogService
+ */
+export function createLogsRoutes(container, mcpSharkLogs) {
+  const logService = container.getService('log');
+  const logger = container.getLibrary('logger');
+  logService.initialize(mcpSharkLogs);
+  const logController = new LogController(logService, logger);
+
   const router = {};
 
-  router.getLogs = (req, res) => {
-    const limit = Number.parseInt(req.query.limit) || 1000;
-    const offset = Number.parseInt(req.query.offset) || 0;
-    const logs = [...mcpSharkLogs].reverse().slice(offset, offset + limit);
-    res.json(logs);
-  };
-
-  router.clearLogs = (_req, res) => {
-    mcpSharkLogs.length = 0;
-    res.json({ success: true, message: 'Logs cleared' });
-  };
-
-  router.exportLogs = (_req, res) => {
-    try {
-      const logsText = mcpSharkLogs
-        .map((log) => `[${log.timestamp}] [${log.type.toUpperCase()}] ${log.line}`)
-        .join('\n');
-
-      const filename = `mcp-shark-logs-${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
-      res.setHeader('Content-Type', 'text/plain');
-      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-      res.send(logsText);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to export logs', details: error.message });
-    }
-  };
+  router.getLogs = logController.getLogs;
+  router.clearLogs = logController.clearLogs;
+  router.exportLogs = logController.exportLogs;
 
   return router;
 }

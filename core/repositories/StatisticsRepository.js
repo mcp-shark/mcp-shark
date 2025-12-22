@@ -1,3 +1,5 @@
+import { StatusCodeRanges } from '#core/constants/StatusCodes';
+
 /**
  * Repository for statistics-related database operations
  */
@@ -36,7 +38,7 @@ export class StatisticsRepository {
         COUNT(*) as total_packets,
         COUNT(CASE WHEN direction = 'request' THEN 1 END) as total_requests,
         COUNT(CASE WHEN direction = 'response' THEN 1 END) as total_responses,
-        COUNT(CASE WHEN status_code >= 400 THEN 1 END) as total_errors,
+        COUNT(CASE WHEN status_code >= ${StatusCodeRanges.CLIENT_ERROR_START} THEN 1 END) as total_errors,
         COUNT(DISTINCT session_id) as unique_sessions,
         AVG(length) as avg_packet_size,
         SUM(length) as total_bytes,

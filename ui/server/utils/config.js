@@ -1,4 +1,5 @@
 import * as fs from 'node:fs';
+import { Defaults } from '#core/constants/Defaults';
 import logger from './logger.js';
 
 const state = { originalConfigData: null };
@@ -30,7 +31,7 @@ export function restoreOriginalConfig(mcpSharkLogs, broadcastLogUpdate) {
         line: `[RESTORE ERROR] Failed to restore: ${error.message}`,
       };
       mcpSharkLogs.push(errorLog);
-      if (mcpSharkLogs.length > 10000) {
+      if (mcpSharkLogs.length > Defaults.MAX_LOG_LINES) {
         mcpSharkLogs.shift();
       }
       broadcastLogUpdate(errorLog);

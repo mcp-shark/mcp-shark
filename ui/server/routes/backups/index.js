@@ -1,15 +1,20 @@
-import { deleteBackup } from './deleteBackup.js';
-import { listBackups } from './listBackups.js';
-import { restoreBackup } from './restoreBackup.js';
-import { viewBackup } from './viewBackup.js';
+import { BackupController } from '#ui/server/controllers';
 
-export function createBackupRoutes() {
+/**
+ * Create backup routes
+ * Routes delegate to BackupController which calls BackupService
+ */
+export function createBackupRoutes(container) {
+  const backupService = container.getService('backup');
+  const logger = container.getLibrary('logger');
+  const backupController = new BackupController(backupService, logger);
+
   const router = {};
 
-  router.listBackups = listBackups;
-  router.restoreBackup = restoreBackup;
-  router.viewBackup = viewBackup;
-  router.deleteBackup = deleteBackup;
+  router.listBackups = backupController.listBackups;
+  router.restoreBackup = backupController.restoreBackup;
+  router.viewBackup = backupController.viewBackup;
+  router.deleteBackup = backupController.deleteBackup;
 
   return router;
 }

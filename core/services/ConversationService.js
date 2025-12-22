@@ -1,28 +1,19 @@
 /**
  * Service for conversation-related business logic
+ * HTTP-agnostic: accepts models, returns models
  */
 export class ConversationService {
-  constructor(conversationRepository, serializationLib) {
+  constructor(conversationRepository) {
     this.conversationRepository = conversationRepository;
-    this.serializationLib = serializationLib;
   }
 
   /**
    * Get conversations with filters
+   * @param {ConversationFilters} filters - Typed filter model
+   * @returns {Array} Array of conversation objects (raw from repository)
    */
-  getConversations(filters = {}) {
-    const sanitizedFilters = {
-      sessionId: filters.sessionId || null,
-      method: filters.method || null,
-      status: filters.status || null,
-      jsonrpcId: filters.jsonrpcId || null,
-      startTime: filters.startTime ? BigInt(filters.startTime) : null,
-      endTime: filters.endTime ? BigInt(filters.endTime) : null,
-      limit: Number.parseInt(filters.limit) || 1000,
-      offset: Number.parseInt(filters.offset) || 0,
-    };
-
-    const conversations = this.conversationRepository.queryConversations(sanitizedFilters);
-    return this.serializationLib.serializeBigInt(conversations);
+  getConversations(filters) {
+    const repoFilters = filters.toRepositoryFilters();
+    return this.conversationRepository.queryConversations(repoFilters);
   }
 }
