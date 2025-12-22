@@ -11,6 +11,7 @@ import {
   BackupService,
   ConfigDetectionService,
   ConfigFileService,
+  ConfigPatchingService,
   ConfigService,
   ConfigTransformService,
   ConversationService,
