@@ -13,7 +13,9 @@ import { createBackupRoutes } from './server/routes/backups/index.js';
 import { createCompositeRoutes } from './server/routes/composite/index.js';
 import { createConfigRoutes } from './server/routes/config.js';
 import { createConversationsRoutes } from './server/routes/conversations.js';
+import { createDriftsRoutes } from './server/routes/drifts.js';
 import { createHelpRoutes } from './server/routes/help.js';
+import { createLlmRoutes } from './server/routes/llm.js';
 import { createLogsRoutes } from './server/routes/logs.js';
 import { createPlaygroundRoutes } from './server/routes/playground.js';
 import { createRequestsRoutes } from './server/routes/requests.js';
@@ -82,6 +84,8 @@ export function createUIServer() {
   const playgroundRoutes = createPlaygroundRoutes();
   const smartScanRoutes = createSmartScanRoutes();
   const settingsRoutes = createSettingsRoutes();
+  const llmRoutes = createLlmRoutes();
+  const driftsRoutes = createDriftsRoutes();
 
   app.get('/api/requests', requestsRoutes.getRequests);
   app.get('/api/packets', requestsRoutes.getRequests);
@@ -127,6 +131,9 @@ export function createUIServer() {
 
   app.post('/api/playground/proxy', playgroundRoutes.proxyRequest);
 
+  app.get('/api/drifts', driftsRoutes.listDrifts);
+  app.get('/api/drifts/:driftId', driftsRoutes.getDrift);
+
   app.post('/api/smartscan/scans', smartScanRoutes.createScan);
   app.get('/api/smartscan/scans', smartScanRoutes.listScans);
   app.get('/api/smartscan/scans/:scanId', smartScanRoutes.getScan);
@@ -138,6 +145,17 @@ export function createUIServer() {
   app.post('/api/smartscan/cache/clear', smartScanRoutes.clearCache);
 
   app.get('/api/settings', settingsRoutes.getSettings);
+  app.post('/api/settings/llm', settingsRoutes.updateLlmSettings);
+  app.post('/api/settings/llm/test', settingsRoutes.testLlmModel);
+
+  app.get('/api/llm/catalog', llmRoutes.getCatalog);
+  app.get('/api/llm/download/status', llmRoutes.getDownloadStatus);
+  app.post('/api/llm/download', llmRoutes.startDownload);
+  app.post('/api/llm/download/cancel', llmRoutes.cancelDownload);
+
+  app.get('/api/llm/deps/status', llmRoutes.getDepsStatus);
+  app.post('/api/llm/deps/install', llmRoutes.startDepsInstall);
+  app.post('/api/llm/deps/cancel', llmRoutes.cancelDepsInstall);
 
   const staticPath = path.join(__dirname, 'dist');
   app.use(express.static(staticPath));

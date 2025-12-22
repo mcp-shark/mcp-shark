@@ -1,86 +1,32 @@
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
-import { getDatabaseFile, getWorkingDirectory } from '#common/configs';
+import {
+  getDatabaseFile,
+  getLlmSettingsPath,
+  getModelsDirectory,
+  getWorkingDirectory,
+  readLlmSettings,
+  writeLlmSettings,
+} from '#common/configs';
+import { chooseModel } from '#llm/choose-model.js';
+import { isNodeLlamaCppInstalled } from '../utils/llm-runtime.js';
+import { testLoadModelInSubprocess } from '../utils/llm-test.js';
 import logger from '../utils/logger.js';
 import { getScanResultsDirectory } from '../utils/scan-cache/directory.js';
+import {
+  getAvailableModels,
+  getBackupCount,
+  getSmartScanTokenPath,
+  getSystemMemoryInfo,
+  getTokenMetadata,
+  toDisplayPath,
+} from '../utils/settings.js';
 
-const SMART_SCAN_TOKEN_NAME = 'smart-scan-token.json';
-
-function getSmartScanTokenPath() {
-  return join(getWorkingDirectory(), SMART_SCAN_TOKEN_NAME);
-}
-
-function getTokenMetadata() {
-  try {
-    const tokenPath = getSmartScanTokenPath();
-    if (existsSync(tokenPath)) {
-      const content = readFileSync(tokenPath, 'utf8');
-      const data = JSON.parse(content);
-      const stats = statSync(tokenPath);
-      return {
-        token: data.token || null,
-        updatedAt: data.updatedAt || stats.mtime.toISOString(),
-        path: tokenPath,
-        exists: true,
-      };
-    }
-    return {
-      token: null,
-      updatedAt: null,
-      path: tokenPath,
-      exists: false,
-    };
-  } catch (error) {
-    logger.error({ error: error.message }, 'Error reading Smart Scan token metadata');
-    return {
-      token: null,
-      updatedAt: null,
-      path: getSmartScanTokenPath(),
-      exists: false,
-    };
-  }
-}
-
-function getBackupCount() {
-  try {
-    const homeDir = homedir();
-    const backupDirs = [join(homeDir, '.cursor'), join(homeDir, '.codeium', 'windsurf')];
-
-    const newFormatCount = backupDirs.reduce((count, dir) => {
-      if (existsSync(dir)) {
-        const files = readdirSync(dir);
-        const matchingFiles = files.filter((file) => {
-          return /^\.(.+)-mcpshark\.\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.json$/.test(file);
-        });
-        return count + matchingFiles.length;
-      }
-      return count;
-    }, 0);
-
-    // Also count old .backup format
-    const commonPaths = [
-      join(homeDir, '.cursor', 'mcp.json'),
-      join(homeDir, '.codeium', 'windsurf', 'mcp_config.json'),
-    ];
-    const oldFormatCount = commonPaths.reduce((count, configPath) => {
-      if (existsSync(`${configPath}.backup`)) {
-        return count + 1;
-      }
-      return count;
-    }, 0);
-
-    return newFormatCount + oldFormatCount;
-  } catch (error) {
-    logger.error({ error: error.message }, 'Error counting backups');
-    return 0;
-  }
-}
-
-function toDisplayPath(absolutePath) {
-  const homeDir = homedir();
-  return absolutePath.replace(homeDir, '~');
-}
+const llmTestState = {
+  currentPromise: null,
+  lastStartedAt: 0,
+};
 
 export function createSettingsRoutes() {
   const router = {};
@@ -93,6 +39,10 @@ export function createSettingsRoutes() {
       const scanResultsDir = getScanResultsDirectory();
       const tokenPath = getSmartScanTokenPath();
       const tokenMetadata = getTokenMetadata();
+      const llmSettingsPath = getLlmSettingsPath();
+      const llmSettings = readLlmSettings();
+      const modelsDirectory = getModelsDirectory();
+      const availableModels = getAvailableModels();
 
       const cursorConfigPath = join(homeDir, '.cursor', 'mcp.json');
       const windsurfConfigPath = join(homeDir, '.codeium', 'windsurf', 'mcp_config.json');
@@ -146,6 +96,16 @@ export function createSettingsRoutes() {
               exists: existsSync(windsurfConfigPath),
             },
           },
+          llmSettings: {
+            absolute: llmSettingsPath,
+            display: toDisplayPath(llmSettingsPath),
+            exists: existsSync(llmSettingsPath),
+          },
+          modelsDirectory: {
+            absolute: modelsDirectory,
+            display: toDisplayPath(modelsDirectory),
+            exists: existsSync(modelsDirectory),
+          },
         },
         smartScan: {
           token: tokenMetadata.token,
@@ -165,9 +125,18 @@ export function createSettingsRoutes() {
         },
         system: {
           platform: process.platform,
+          memory: getSystemMemoryInfo(),
           homeDirectory: {
             absolute: homeDir,
             display: '~',
+          },
+        },
+        llm: {
+          settings: llmSettings,
+          availableModels,
+          recommendedModel: chooseModel(),
+          runtime: {
+            nodeLlamaCppInstalled: isNodeLlamaCppInstalled(),
           },
         },
         backups: {
@@ -190,6 +159,102 @@ export function createSettingsRoutes() {
       logger.error({ error: error.message }, 'Error getting settings');
       res.status(500).json({
         error: 'Failed to get settings',
+        details: error.message,
+      });
+    }
+  };
+
+  router.updateLlmSettings = (req, res) => {
+    try {
+      const nextSettings = writeLlmSettings(req.body || {});
+      res.json({ success: true, settings: nextSettings });
+    } catch (error) {
+      logger.error({ error: error.message }, 'Error updating LLM settings');
+      res.status(500).json({
+        error: 'Failed to update LLM settings',
+        details: error.message,
+      });
+    }
+  };
+
+  router.testLlmModel = async (req, res) => {
+    try {
+      const llmSettings = readLlmSettings();
+      const memory = getSystemMemoryInfo();
+
+      if (!llmSettings.enabled) {
+        res.status(400).json({
+          error: 'Local LLM analysis is disabled. Enable it in the MCP Server Setup tab first.',
+        });
+        return;
+      }
+
+      if (!isNodeLlamaCppInstalled()) {
+        res.status(400).json({
+          error:
+            'Local LLM dependency is not installed (node-llama-cpp). Run `npm install` in the MCP Shark repo or disable Local LLM analysis.',
+        });
+        return;
+      }
+
+      if (typeof memory.totalGb === 'number' && memory.totalGb < llmSettings.minRamGb) {
+        res.status(400).json({
+          error: `Insufficient RAM for local LLM analysis (have ${memory.totalGb}GB, need at least ${llmSettings.minRamGb}GB)`,
+        });
+        return;
+      }
+
+      const now = Date.now();
+      const cooldownMs = Math.max(0, Number(llmSettings.cooldownMs) || 0);
+      if (now - llmTestState.lastStartedAt < cooldownMs) {
+        res.status(429).json({
+          error: `Cooldown active. Try again in ${cooldownMs - (now - llmTestState.lastStartedAt)}ms`,
+        });
+        return;
+      }
+
+      const body = req.body && typeof req.body === 'object' ? req.body : {};
+      const modelMode = body.modelMode === 'manual' ? 'manual' : 'auto';
+      const modelName = typeof body.modelName === 'string' ? body.modelName : null;
+
+      const payload = {
+        modelMode,
+        modelName,
+        threads: body.threads ?? null,
+        contextTokens: body.contextTokens ?? null,
+        maxOutputTokens: body.maxOutputTokens ?? null,
+      };
+
+      if (llmTestState.currentPromise) {
+        const reused = await llmTestState.currentPromise;
+        res.json({
+          success: true,
+          message: `Model loaded successfully (${reused.modelName})`,
+          result: reused,
+          reused: true,
+        });
+        return;
+      }
+
+      llmTestState.lastStartedAt = now;
+      llmTestState.currentPromise = testLoadModelInSubprocess(payload, { timeoutMs: 120_000 });
+
+      try {
+        const result = await llmTestState.currentPromise;
+        res.json({
+          success: true,
+          message: `Model loaded successfully (${result.modelName})`,
+          result,
+          reused: false,
+        });
+      } finally {
+        llmTestState.currentPromise = null;
+      }
+    } catch (error) {
+      llmTestState.currentPromise = null;
+      logger.error({ error: error.message }, 'Error testing LLM model load');
+      res.status(500).json({
+        error: 'Failed to test model load',
         details: error.message,
       });
     }

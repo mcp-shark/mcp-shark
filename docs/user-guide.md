@@ -4,7 +4,7 @@ Complete guide to using MCP Shark's features and capabilities.
 
 ## UI Tabs Overview
 
-MCP Shark's interface is organized into five main tabs, each providing different functionality.
+MCP Shark's interface is organized into six main tabs, each providing different functionality.
 
 ### Traffic Capture
 
@@ -118,6 +118,23 @@ AI-powered security analysis for MCP servers.
 - Results are cached for quick access
 - No need to re-scan unless configuration changes
 - Clear cache option available
+
+### Tool Drifts
+
+Track changes in MCP server tool manifests over time (based on `tools/list` responses).
+
+**What you’ll see:**
+- A list of drift records (server key, timestamp, deterministic severity, summary)
+- A detail panel showing:
+  - Added/removed/changed tools
+  - Optional Local LLM findings (if enabled)
+  - Drift metadata (hashes, model/prompt info)
+
+**How drifts are created:**
+- MCP Shark automatically snapshots and diffs `tools/list` responses as it captures traffic.
+- If you haven’t seen any drifts yet, trigger at least one `tools/list` (e.g., open the Playground → Tools list).
+
+For the full feature details, see [Tool Drift Analysis](tool-drift-analysis.md).
 
 ### MCP Shark Logs
 

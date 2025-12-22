@@ -9,6 +9,8 @@ import {
   SettingsIcon,
   ShieldIcon,
 } from './components/TabNavigationIcons';
+
+const DriftsIcon = ShieldIcon;
 import { colors, fonts } from './theme';
 
 function TabNavigation({ activeTab, onTabChange }) {
@@ -42,6 +44,12 @@ function TabNavigation({ activeTab, onTabChange }) {
       label: 'Smart Scan',
       icon: ShieldIcon,
       description: 'AI-powered security analysis for MCP servers',
+    },
+    {
+      id: 'drifts',
+      label: 'Tool Drifts',
+      icon: DriftsIcon,
+      description: 'Track and analyze changes in MCP tool manifests',
     },
   ];
 

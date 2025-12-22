@@ -115,6 +115,29 @@ Returns:
 - Backup directories and counts
 - Configuration file paths
 - System information
+- Local LLM settings path and models directory (if using Local LLM Drift Analysis)
+
+## Local LLM Drift Analysis (optional)
+
+MCP Shark can optionally run local LLM analysis for tool drift (advanced feature). This is **disabled by default** and can be configured in the UI:
+
+- Settings file: `~/.mcp-shark/llm-settings.json`
+- Models directory: `~/.mcp-shark/models` (place `.gguf` files here)
+
+Resource warning:
+- Model files can be large (hundreds of MB to multiple GB)
+- Loading a local model can use significant RAM/CPU and may slow down your machine
+- Configure a `minRamGb` threshold to avoid running on low-memory machines
+
+### Interactive setup (UI)
+
+In **MCP Server Setup → Local LLM Drift Analysis**, MCP Shark can:
+- **Install local dependencies** (runs `npm install` in the MCP Shark repo)
+- **Download GGUF models** directly into the models directory with progress + cancel
+
+If you prefer manual setup:
+1. Run `npm install` in the MCP Shark repo
+2. Download a `.gguf` model and place it in `~/.mcp-shark/models`
 
 ## Environment Variables
 

@@ -124,6 +124,7 @@ Key capabilities:
 - **Traffic Capture**: Real-time monitoring with advanced filtering and search
 - **MCP Playground**: Interactive testing environment for tools, prompts, and resources
 - **Smart Scan**: AI-powered security analysis for MCP servers
+- **Tool Drift Analysis**: Track `tools/list` changes over time and optionally run local LLM analysis
 - **Session Management**: Track and analyze conversation sessions
 - **Export & Backup**: Export data in multiple formats and manage configuration backups
 - **Statistics & Analytics**: Performance metrics and traffic analysis
@@ -140,6 +141,7 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
 - **[Architecture](docs/architecture.md)** - System architecture and design
 - **[API Reference](docs/api-reference.md)** - API endpoints and WebSocket protocol
 - **[Configuration](docs/configuration.md)** - Configuration options and file formats
+- **[Tool Drift Analysis](docs/tool-drift-analysis.md)** - How tool drift tracking + optional local LLM analysis works
 - **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
 - **[Development](docs/development.md)** - Developer guide and contribution guidelines
 

@@ -33,7 +33,7 @@
   "scripts": {
     "start": "node scripts/start-ui.js",
     "predev": "npm run build:ui",
-    "dev": "node scripts/start-ui.js'",
+    "dev": "node scripts/start-ui.js",
     "build": "bash -c 'cd ui && vite build'",
     "build:ui": "bash -c 'cd ui && vite build'",
     "lint": "biome lint .",
@@ -76,17 +76,18 @@
     "@modelcontextprotocol/sdk": "^1.20.2",
     "@tabler/icons-react": "^3.0.0",
     "animejs": "^3.2.2",
+    "better-sqlite3": "^12.4.1",
     "commander": "^14.0.2",
     "consola": "^3.4.2",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "jsonrpc-lite": "^2.2.0",
-    "better-sqlite3": "^12.4.1",
+    "node-llama-cpp": "^3.14.5",
     "open": "^11.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "ws": "^8.16.0",
-    "node-llama-cpp": "^3.14.5"
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

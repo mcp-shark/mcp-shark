@@ -78,6 +78,18 @@ AI-powered security analysis for MCP servers.
 - Parallel batch processing
 - Real-time progress tracking
 
+## Tool Drift Analysis (Deterministic + Optional Local LLM)
+
+Track changes in MCP server tool manifests over time by snapshotting and diffing `tools/list` responses.
+
+**Core capabilities:**
+- **Deterministic drift tracking**: Stores tool manifest snapshots and creates drift records when changes occur
+- **Drift review UI**: A dedicated **Tool Drifts** tab shows drift history and details
+- **Optional Local LLM analysis**: If enabled, a local model can produce structured security findings from drifts
+- **Interactive setup**: UI helpers to install `node-llama-cpp` and download GGUF models (optional)
+
+See: [Tool Drift Analysis](tool-drift-analysis.md)
+
 ## IDE Integration
 
 Seamless integration with popular IDEs and editors.

@@ -409,6 +409,12 @@ Discover servers from config.
 
 Get all application settings and paths.
 
+Includes additional fields for local LLM configuration:
+- `paths.llmSettings` and `paths.modelsDirectory`
+- `system.memory` (RAM info)
+- `llm.settings`, `llm.availableModels`, `llm.recommendedModel`
+- `llm.runtime` (local runtime capability flags)
+
 **Response:**
 ```json
 {
@@ -450,6 +456,129 @@ Get all application settings and paths.
   }
 }
 ```
+
+### POST /api/settings/llm
+
+Update persisted Local LLM settings.
+
+**Request Body:**
+```json
+{
+  "enabled": true,
+  "autoAnalyzeOnDrift": true,
+  "modelMode": "auto",
+  "modelName": null,
+  "threads": null,
+  "contextTokens": 2048,
+  "maxOutputTokens": 800,
+  "cooldownMs": 30000,
+  "minRamGb": 8
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "settings": {
+    "enabled": true,
+    "autoAnalyzeOnDrift": true
+  }
+}
+```
+
+### POST /api/settings/llm/test
+
+Test loading the selected local model (runs in a short-lived subprocess to avoid permanently consuming RAM).
+
+**Notes:**
+- Requires `enabled: true` in Local LLM settings
+- May return `400` if your system RAM is below `minRamGb`
+- Subject to a cooldown (`cooldownMs`)
+
+**Request Body:**
+```json
+{
+  "modelMode": "auto",
+  "modelName": null
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Model loaded successfully (Qwen2.5-1.5B-Instruct-Q4_K_M.gguf)"
+}
+```
+
+## Local LLM Setup
+
+### GET /api/llm/catalog
+
+Get a small catalog of recommended GGUF models (plus their direct download URLs).
+
+**Response:**
+```json
+{
+  "models": [
+    {
+      "id": "qwen2.5-1.5b-instruct-q4_k_m",
+      "name": "Qwen2.5 1.5B Instruct (Q4_K_M)",
+      "fileName": "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf",
+      "url": "https://…",
+      "source": "huggingface",
+      "notes": "Small, fast, good default for drift analysis on 8GB+ machines."
+    }
+  ]
+}
+```
+
+### POST /api/llm/download
+
+Download a model into `~/.mcp-shark/models` (supports progress + cancel).
+
+**Request Body:**
+```json
+{
+  "url": "https://…/model.gguf",
+  "fileName": "model.gguf"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "status": {
+    "running": true,
+    "fileName": "model.gguf",
+    "downloadedBytes": 12345,
+    "totalBytes": 99999,
+    "percent": 12.3
+  }
+}
+```
+
+### GET /api/llm/download/status
+
+Get current download progress.
+
+### POST /api/llm/download/cancel
+
+Cancel the current download.
+
+### GET /api/llm/deps/status
+
+Check whether `node-llama-cpp` is installed and whether an install is currently running.
+
+### POST /api/llm/deps/install
+
+Run `npm install` in the MCP Shark repo to install local LLM dependencies (shows output in the UI).
+
+### POST /api/llm/deps/cancel
+
+Cancel the in-progress dependency install.
 
 ## WebSocket
 

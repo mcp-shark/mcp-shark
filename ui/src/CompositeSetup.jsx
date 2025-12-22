@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import BackupList from './components/BackupList';
 import ConfigFileSection from './components/ConfigFileSection';
 import ConfigViewerModal from './components/ConfigViewerModal';
+import { LlmSettingsSection } from './components/LlmSettings';
 import MessageDisplay from './components/MessageDisplay';
 import ServerControl from './components/ServerControl';
 import SetupHeader from './components/SetupHeader';
@@ -241,6 +242,8 @@ function CompositeSetup() {
           selectedServices={selectedServices}
           onSelectionChange={setSelectedServices}
         />
+
+        <LlmSettingsSection />
 
         <ServerControl
           status={status}

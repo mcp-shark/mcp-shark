@@ -206,7 +206,7 @@ export async function withAuditRequestResponseHandler(
 
   // Log response packet to database
   // Use the same session ID from the request
-  auditLogger.logResponsePacket({
+  await auditLogger.logResponsePacket({
     statusCode: wrappedRes.statusCode || 200,
     headers: resHeaders,
     body: resBodyJson || resBodyStr,
@@ -216,5 +216,6 @@ export async function withAuditRequestResponseHandler(
     sessionId: sessionId || null,
     userAgent: req.headers['user-agent'] || req.headers['User-Agent'] || null,
     remoteAddress: requestedMcpServer || null,
+    serverKey: requestedMcpServer || null,
   });
 }

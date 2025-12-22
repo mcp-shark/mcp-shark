@@ -7,6 +7,7 @@ import TabNavigation from './TabNavigation';
 import HelpButton from './components/App/HelpButton';
 import TrafficTab from './components/App/TrafficTab';
 import { useAppState } from './components/App/useAppState';
+import DriftsTab from './components/Drifts/DriftsTab';
 import McpPlayground from './components/McpPlayground';
 import { tourSteps } from './config/tourSteps.jsx';
 import { colors } from './theme';
@@ -144,6 +145,15 @@ function App() {
       {activeTab === 'smart-scan' && (
         <div data-tab-content style={{ flex: 1, overflow: 'auto', width: '100%', height: '100%' }}>
           <SmartScan />
+        </div>
+      )}
+
+      {activeTab === 'drifts' && (
+        <div
+          data-tab-content
+          style={{ flex: 1, overflow: 'hidden', width: '100%', height: '100%' }}
+        >
+          <DriftsTab />
         </div>
       )}
     </div>
