@@ -1,3 +1,29 @@
+# 🦈 MCP Shark v1.5.6 - MCP Server Status Endpoint
+
+## 🎉 What's New in v1.5.6
+
+### 🔍 MCP Server Status Endpoint
+
+- **New Endpoint** — `GET /api/mcp-server/status` to check if the MCP server (gateway) is running
+- **Clear Status Indication** — Returns running status with human-readable messages
+- **Traffic Page Guidance** — Helps users know when the MCP gateway is active before focusing on traffic monitoring
+- **Better UX** — Provides clear feedback on whether traffic will be captured
+
+**Response Example:**
+```json
+{
+  "running": true,
+  "message": "MCP server (gateway) is running and ready to receive traffic"
+}
+```
+
+### 📚 Documentation Updates
+
+- **API Reference** — Added documentation for the new MCP server status endpoint
+- **Swagger/OpenAPI** — Updated with complete endpoint specification and examples
+
+---
+
 # 🦈 MCP Shark v1.6.0 - API Documentation & Developer Experience
 
 ## 🎉 What's New in v1.6.0
