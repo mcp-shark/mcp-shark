@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import BackupList from './components/BackupList';
 import ConfigFileSection from './components/ConfigFileSection';
 import ConfigViewerModal from './components/ConfigViewerModal';
+import ConfirmationModal from './components/ConfirmationModal';
 import MessageDisplay from './components/MessageDisplay';
 import ServerControl from './components/ServerControl';
 import SetupHeader from './components/SetupHeader';
@@ -18,6 +19,8 @@ function CompositeSetup() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
+  const [showRestoreModal, setShowRestoreModal] = useState(false);
+  const [pendingRestore, setPendingRestore] = useState({ backupPath: null, originalPath: null });
 
   const { services, selectedServices, setSelectedServices } = useServiceExtraction(
     fileContent,
@@ -52,14 +55,14 @@ function CompositeSetup() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleRestore = async (backupPath, originalPath) => {
-    if (
-      !confirm(
-        'Are you sure you want to restore this backup? This will overwrite the current config file.'
-      )
-    ) {
-      return;
-    }
+  const handleRestoreClick = (backupPath, originalPath) => {
+    setPendingRestore({ backupPath, originalPath });
+    setShowRestoreModal(true);
+  };
+
+  const handleRestore = async () => {
+    const { backupPath, originalPath } = pendingRestore;
+    setShowRestoreModal(false);
 
     try {
       const res = await fetch('/api/config/restore', {
@@ -256,13 +259,24 @@ function CompositeSetup() {
           backups={backups}
           loadingBackups={loadingBackups}
           onRefresh={loadBackups}
-          onRestore={handleRestore}
+          onRestore={handleRestoreClick}
           onView={handleViewBackup}
           onDelete={handleDelete}
         />
 
         <WhatThisDoesSection filePath={filePath} updatePath={updatePath} />
       </div>
+
+      <ConfirmationModal
+        isOpen={showRestoreModal}
+        onClose={() => setShowRestoreModal(false)}
+        onConfirm={handleRestore}
+        title="Restore Backup"
+        message="Are you sure you want to restore this backup? This will overwrite the current config file."
+        confirmText="Restore"
+        cancelText="Cancel"
+        danger={false}
+      />
 
       <ConfigViewerModal
         viewingConfig={viewingConfig}

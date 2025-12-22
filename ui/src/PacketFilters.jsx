@@ -1,6 +1,7 @@
 import { IconSearch, IconTrash } from '@tabler/icons-react';
 import anime from 'animejs';
 import { useEffect, useRef, useState } from 'react';
+import AlertModal from './components/AlertModal';
 import ConfirmationModal from './components/ConfirmationModal';
 import ExportControls from './components/PacketFilters/ExportControls';
 import FilterInput from './components/PacketFilters/FilterInput';
@@ -10,6 +11,8 @@ import { fadeIn } from './utils/animations';
 function RequestFilters({ filters, onFilterChange, stats, onClear }) {
   const filtersRef = useRef(null);
   const [showClearModal, setShowClearModal] = useState(false);
+  const [showAlertModal, setShowAlertModal] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
 
   useEffect(() => {
     if (filtersRef.current) {
@@ -56,7 +59,8 @@ function RequestFilters({ filters, onFilterChange, stats, onClear }) {
       document.body.removeChild(a);
     } catch (error) {
       console.error('Failed to export traffic:', error);
-      alert('Failed to export traffic. Please try again.');
+      setAlertMessage('Failed to export traffic. Please try again.');
+      setShowAlertModal(true);
     }
   };
 
@@ -217,11 +221,13 @@ function RequestFilters({ filters, onFilterChange, stats, onClear }) {
               }
             } else {
               const error = await response.json();
-              alert(`Failed to clear traffic: ${error.error || 'Unknown error'}`);
+              setAlertMessage(`Failed to clear traffic: ${error.error || 'Unknown error'}`);
+              setShowAlertModal(true);
             }
           } catch (error) {
             console.error('Failed to clear traffic:', error);
-            alert('Failed to clear traffic. Please try again.');
+            setAlertMessage('Failed to clear traffic. Please try again.');
+            setShowAlertModal(true);
           }
         }}
         title="Clear All Captured Traffic"
@@ -229,6 +235,14 @@ function RequestFilters({ filters, onFilterChange, stats, onClear }) {
         confirmText="Clear All"
         cancelText="Cancel"
         danger={true}
+      />
+
+      <AlertModal
+        isOpen={showAlertModal}
+        onClose={() => setShowAlertModal(false)}
+        title="Error"
+        message={alertMessage}
+        type="error"
       />
     </div>
   );

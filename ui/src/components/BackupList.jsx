@@ -1,7 +1,12 @@
 import { IconEye, IconRefresh, IconRestore, IconTrash } from '@tabler/icons-react';
+import { useState } from 'react';
 import { colors, fonts, withOpacity } from '../theme';
+import ConfirmationModal from './ConfirmationModal';
 
 function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onDelete }) {
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState(null);
+
   if (backups.length === 0) {
     return null;
   }
@@ -126,9 +131,8 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onD
               <button
                 type="button"
                 onClick={() => {
-                  if (confirm('Are you sure you want to delete this backup?')) {
-                    onDelete(backup.backupPath);
-                  }
+                  setPendingDelete(backup.backupPath);
+                  setShowDeleteModal(true);
                 }}
                 style={{
                   padding: '6px 12px',
@@ -189,6 +193,26 @@ function BackupList({ backups, loadingBackups, onRefresh, onRestore, onView, onD
           </div>
         ))}
       </div>
+
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setPendingDelete(null);
+        }}
+        onConfirm={() => {
+          if (pendingDelete) {
+            onDelete(pendingDelete);
+          }
+          setShowDeleteModal(false);
+          setPendingDelete(null);
+        }}
+        title="Delete Backup"
+        message="Are you sure you want to delete this backup? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        danger={true}
+      />
     </div>
   );
 }
