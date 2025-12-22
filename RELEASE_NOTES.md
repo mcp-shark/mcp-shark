@@ -24,9 +24,9 @@
 
 ---
 
-# 🦈 MCP Shark v1.6.0 - API Documentation & Developer Experience
+# 🦈 MCP Shark v1.5.5 - API Documentation & Developer Experience
 
-## 🎉 What's New in v1.6.0
+## 🎉 What's New in v1.5.5
 
 ### 📡 Interactive API Documentation
 
