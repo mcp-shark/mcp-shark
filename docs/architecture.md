@@ -30,6 +30,20 @@ MCP Shark follows a clean architecture pattern with strict separation of concern
 ┌─────────────┐
 │  Database   │  (SQLite)
 └─────────────┘
+
+┌─────────────┐
+│  Libraries  │  (Pure Utilities - No dependencies)
+└─────────────┘
+       ▲
+       │ injected into
+       │
+┌─────────────┐
+│  Services   │
+└─────────────┘
+
+┌─────────────┐
+│ Constants   │  (Well-defined constants, no magic numbers)
+└─────────────┘
 ```
 
 ### Main Components
@@ -56,7 +70,119 @@ MCP Shark follows a clean architecture pattern with strict separation of concern
 - **Constants** (`core/constants/`): Well-defined constants (no magic numbers)
 - **MCP Server** (`core/mcp-server/`): Core MCP server implementation with audit logging
 
-For detailed core architecture documentation, see [Core README](../core/README.md).
+## Core Architecture Principles
+
+1. **Everything exposed as service classes** - All business logic is in service classes
+2. **All DB-related code as repositories** - Database access is encapsulated in repositories
+3. **Libraries cannot access services or repos** - Libraries are pure utilities with no dependencies
+4. **Libraries must be injected** - Dependency injection ensures loose coupling
+5. **SOLID principles** - Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion
+
+## Core Structure
+
+### Repositories (`core/repositories/`)
+- `PacketRepository` - Handles all packet/request database operations
+- `SessionRepository` - Handles session database operations
+- `ConversationRepository` - Handles conversation database operations
+- `AuditRepository` - Handles audit logging database operations
+- `StatisticsRepository` - Handles statistics database operations
+- `SchemaRepository` - Handles database schema creation
+
+### Services (`core/services/`)
+- `RequestService` - Business logic for requests/packets
+- `SessionService` - Business logic for sessions
+- `ConversationService` - Business logic for conversations
+- `StatisticsService` - Business logic for statistics
+- `AuditService` - Business logic for audit logging
+- `ConfigService` - Configuration management (composed of ConfigFileService, ConfigTransformService, ConfigDetectionService)
+- `BackupService` - Backup management
+- `ScanCacheService` - Smart Scan cache management
+- `TokenService` - Smart Scan token management
+- `SettingsService` - Application settings
+
+### Libraries (`core/libraries/`)
+- `SerializationLibrary` - BigInt serialization utilities
+- `LoggerLibrary` - Logging utilities wrapper
+- `ErrorLibrary` - Error handling utilities (CompositeError, isError, getErrors)
+
+### Models (`core/models/`)
+- `RequestFilters` - Typed model for request filtering
+- `SessionFilters` - Typed model for session filtering
+- `ConversationFilters` - Typed model for conversation filtering
+- `ExportFormat` - Export format constants
+
+### Constants (`core/constants/`)
+- `Defaults` - Default values (limits, offsets, etc.)
+- `HttpStatus` - HTTP status code constants
+- `StatusCodes` - Status code constants
+
+### Container (`core/container/`)
+- `DependencyContainer` - Dependency injection container that manages all dependencies
+
+### MCP Server (`core/mcp-server/`)
+- `index.js` - Main entry point for starting the MCP Shark server
+- `auditor/` - Audit logging for request/response packets
+- `server/external/` - External MCP server management
+- `server/internal/` - Internal MCP server implementation
+
+## Usage Examples
+
+### Creating a Container
+
+```javascript
+import { DependencyContainer } from '#core';
+import { openDb } from '#core/db/init';
+import { getDatabaseFile } from '#core/configs';
+
+const db = openDb(getDatabaseFile());
+const container = new DependencyContainer(db);
+```
+
+### Using Services in Controllers
+
+```javascript
+import { DependencyContainer } from '#core';
+
+export function createRequestsController(container) {
+  const requestService = container.getService('request');
+  const logger = container.getLibrary('logger');
+
+  return {
+    getRequests: (req, res) => {
+      try {
+        const requests = requestService.getRequests(req.query);
+        res.json(requests);
+      } catch (error) {
+        logger.error({ error: error.message }, 'Error in getRequests');
+        res.status(500).json({ error: 'Failed to query requests', details: error.message });
+      }
+    }
+  };
+}
+```
+
+### Getting Audit Logger
+
+```javascript
+const auditLogger = container.getAuditLogger();
+// auditLogger.logRequestPacket(options)
+// auditLogger.logResponsePacket(options)
+```
+
+## Import Paths
+
+All core imports use the `#core` alias defined in `package.json`:
+- `#core` - Main entry point (exports DependencyContainer and all core modules)
+- `#core/repositories/*` - Repository classes
+- `#core/services/*` - Service classes
+- `#core/libraries/*` - Library classes
+- `#core/container/*` - Container classes
+- `#core/models/*` - Model classes
+- `#core/constants/*` - Constant definitions
+- `#core/db/init` - Database initialization
+- `#core/configs` - Configuration utilities
+
+This eliminates the need for relative paths like `../../../core/index.js`.
 
 ## Architecture Diagram
 

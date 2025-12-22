@@ -149,6 +149,5 @@ grep -r "new Database\|Database(" . --include="*.js" | grep -v "core/db/init.js"
 ## Related Documentation
 
 - **[Database Architecture Rules](../rules/DB_ARCHITECTURE.md)** - Detailed database architecture rules and verification
-- **[Core Architecture](../core/README.md)** - Core architecture documentation
 - **[Architecture Guide](architecture.md)** - System architecture overview
 

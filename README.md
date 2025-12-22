@@ -71,7 +71,6 @@ MCP Shark is a monitoring and aggregation solution for Model Context Protocol (M
 - **[Architecture](docs/architecture.md)** - System architecture and design
 - **[Database Architecture](docs/database-architecture.md)** - Database architecture and repository pattern
 - **[API Reference](docs/api-reference.md)** - API endpoints and WebSocket protocol
-- **[Core Architecture](core/README.md)** - Detailed core architecture documentation
 
 ### Architecture & Coding Rules
 - **[Architecture Rules](rules/ARCHITECTURE_RULES.md)** - Architecture principles and guidelines
