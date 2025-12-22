@@ -40,6 +40,11 @@ npm run lint:fix      # Fix linting issues
 npm run format        # Format code
 npm run check         # Check linting and formatting
 npm run check:fix     # Fix linting and formatting issues
+
+# Package inspection (before publishing)
+npm run pack:inspect  # Quick inspection (shows first 50 files and count)
+npm run pack:list     # List all files that would be included
+npm run pack:extract  # Extract package for detailed inspection
 ```
 
 ## Project Structure
@@ -226,6 +231,48 @@ The database schema is managed in `lib/common/db/init.js`. See the schema defini
 - **Database locks**: Ensure only one process accesses database
 - **Build errors**: Clear node_modules and reinstall
 
+## Package Inspection
+
+Before publishing to npm, you can inspect the package contents to ensure only necessary files are included.
+
+### Quick Inspection
+
+```bash
+npm run pack:inspect
+```
+
+Shows the first 50 files and the total file count, then deletes the tarball.
+
+### List All Files
+
+```bash
+npm run pack:list
+```
+
+Lists all files that would be included in the published package.
+
+### Extract for Detailed Inspection
+
+```bash
+npm run pack:extract
+```
+
+Extracts the package tarball into `.package-inspect/package/` for manual browsing.
+
+### Verification Checklist
+
+When inspecting the package, ensure:
+
+- [ ] Only necessary files are included (check `package.json` `files` array)
+- [ ] No sensitive files (e.g., `.env`, private keys) are present
+- [ ] UI build output (`ui/dist/`) is correctly included
+- [ ] Core logic (`core/`) is present
+- [ ] Binary (`bin/`) is present
+- [ ] Documentation (`README.md`, `LICENSE`) is present
+- [ ] No unexpected large files
+
+See [Package Inspection Guide](package-inspection.md) for detailed documentation.
+
 ## Contributing
 
 See [CONTRIBUTING.md](../CONTRIBUTING.md) for detailed contribution guidelines.
@@ -243,6 +290,7 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for detailed contribution guidelines.
 - [CONTRIBUTING.md](../CONTRIBUTING.md): Contribution guidelines
 - [DEVELOPERS.md](../DEVELOPERS.md): Developer setup guide
 - [SETUP.md](../SETUP.md): Initial setup instructions
+- [Package Inspection Guide](package-inspection.md): Inspecting npm package before publishing
 - [rules/CODING_RULES.md](../rules/CODING_RULES.md): Coding standards
 - [rules/LINTING_RULES.md](../rules/LINTING_RULES.md): Linting rules
 
