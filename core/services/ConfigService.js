@@ -221,6 +221,8 @@ export class ConfigService {
 
   /**
    * Write config as JSON string
+   * @param {string} filePath - Path to config file
+   * @param {object} config - Config object to write
    */
   writeConfigAsJson(filePath, config) {
     const jsonContent = JSON.stringify(config, null, 2);

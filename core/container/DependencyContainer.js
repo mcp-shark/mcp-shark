@@ -117,6 +117,11 @@ export class DependencyContainer {
         libs.logger
       );
       this._services.backup = new BackupService(this._services.config, libs.logger);
+      this._services.configPatching = new ConfigPatchingService(
+        this._services.config,
+        this._services.backup,
+        libs.logger
+      );
       this._services.log = new LogService(libs.logger);
       this._services.scanCache = new ScanCacheService(libs.logger);
       this._services.scan = new ScanService(this._services.scanCache, libs.logger);
