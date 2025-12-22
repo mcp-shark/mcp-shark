@@ -24,8 +24,24 @@ function appendFilterParams(queryParams, filters) {
   }
 }
 
+const VALID_TABS = ['traffic', 'logs', 'setup', 'playground', 'smart-scan'];
+const DEFAULT_TAB = 'traffic';
+
+function getTabFromHash() {
+  const hash = window.location.hash.slice(1); // Remove '#'
+  const tab = hash.startsWith('/') ? hash.slice(1) : hash; // Remove leading '/'
+  return VALID_TABS.includes(tab) ? tab : DEFAULT_TAB;
+}
+
+function updateUrlHash(tab) {
+  const newHash = `#/${tab}`;
+  if (window.location.hash !== newHash) {
+    window.history.replaceState(null, '', newHash);
+  }
+}
+
 export function useAppState() {
-  const [activeTab, setActiveTab] = useState('traffic');
+  const [activeTab, setActiveTab] = useState(() => getTabFromHash());
   const [requests, setRequests] = useState([]);
   const [selected, setSelected] = useState(null);
   const [filters, setFilters] = useState({});
@@ -36,6 +52,32 @@ export function useAppState() {
   const wsRef = useRef(null);
   const prevTabRef = useRef(activeTab);
   const filtersRef = useRef(filters);
+
+  // Initialize URL hash on mount if missing
+  useEffect(() => {
+    if (!window.location.hash || window.location.hash === '#') {
+      const initialTab = getTabFromHash();
+      updateUrlHash(initialTab);
+    }
+  }, []);
+
+  // Sync URL hash with activeTab
+  useEffect(() => {
+    updateUrlHash(activeTab);
+  }, [activeTab]);
+
+  // Listen for hash changes (back/forward buttons)
+  useEffect(() => {
+    const handleHashChange = () => {
+      const tabFromHash = getTabFromHash();
+      if (tabFromHash !== activeTab) {
+        setActiveTab(tabFromHash);
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [activeTab]);
 
   const loadStatistics = async () => {
     try {
