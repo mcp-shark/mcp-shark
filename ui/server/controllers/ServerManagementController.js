@@ -1,3 +1,5 @@
+import { homedir } from 'node:os';
+
 import { StatusCodes } from '#core/constants/index.js';
 import { handleError } from '../utils/errorHandler.js';
 
@@ -31,6 +33,63 @@ export class ServerManagementController {
         return res.status(StatusCodes.BAD_REQUEST).json({
           error: 'Either filePath or fileContent is required',
         });
+      }
+
+      // If filePath is provided, check if config is already patched and restore if needed
+      if (filePath && !fileContent) {
+        const resolvedPath = this.configService.fileService.resolveFilePath(filePath);
+        const isPatched = this.configService.isFilePatched(resolvedPath);
+        if (isPatched) {
+          this.logger?.info(
+            { filePath: resolvedPath },
+            'Config file is already patched, attempting to restore original'
+          );
+
+          // First try to restore from in-memory backup (if available)
+          let restored = this.configService.restoreOriginalConfig();
+
+          // If that didn't work, try to find and restore from a backup file
+          if (!restored) {
+            const backups = this.backupService.listBackups();
+            const matchingBackup = backups.find(
+              (backup) =>
+                backup.originalPath === resolvedPath ||
+                backup.displayPath === resolvedPath.replace(homedir(), '~')
+            );
+
+            if (matchingBackup) {
+              this.logger?.info(
+                { backupPath: matchingBackup.backupPath },
+                'Found backup, restoring from backup'
+              );
+              const restoreResult = this.backupService.restoreBackup(
+                matchingBackup.backupPath,
+                resolvedPath,
+                false
+              );
+              if (restoreResult.success) {
+                restored = true;
+                this._addLogEntry(
+                  'info',
+                  '[RESTORE] Restored original config from backup before setup'
+                );
+              }
+            }
+          } else {
+            this._addLogEntry('info', '[RESTORE] Restored original config before setup');
+          }
+
+          if (!restored) {
+            this.logger?.warn(
+              { filePath: resolvedPath },
+              'Config is patched but could not restore original - setup may fail'
+            );
+            this._addLogEntry(
+              'warn',
+              '[WARNING] Config is patched but no backup found - original URLs may be lost'
+            );
+          }
+        }
       }
 
       const setupResult = this.configService.processSetup(filePath, fileContent, selectedServices);
