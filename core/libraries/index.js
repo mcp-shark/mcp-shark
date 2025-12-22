@@ -4,6 +4,7 @@
  */
 export { SerializationLibrary } from './SerializationLibrary.js';
 export { LoggerLibrary } from './LoggerLibrary.js';
+export { createTransport } from './TransportLibrary.js';
 export { CompositeError, isError, getErrors } from './ErrorLibrary.js';
 export {
   ApplicationError,
