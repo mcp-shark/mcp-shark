@@ -1,7 +1,7 @@
 # UI Endpoint Compliance Checklist
 
 ## Overview
-This checklist ensures that UI endpoints (routes/controllers) follow the architecture principles and WSO2 API Manager interoperability guidelines. UI endpoints should **ONLY** call services and handle HTTP concerns (request parsing, response formatting, error handling), with **NO business logic**.
+This checklist ensures that UI endpoints (routes/controllers) follow the architecture principles and interoperability guidelines. UI endpoints should **ONLY** call services and handle HTTP concerns (request parsing, response formatting, error handling), with **NO business logic**.
 
 ## Architecture Principle
 **Routes → Services → Repositories → Database**
@@ -150,7 +150,7 @@ These routes contain business logic that should be moved to services:
 
 ## WSO2 API Manager Interoperability Principles
 
-Based on WSO2 API Manager key concepts for interoperability and integrations:
+Based on key concepts for interoperability and integrations:
 
 ### ✅ Checklist for Interoperability
 
