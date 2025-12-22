@@ -5,10 +5,11 @@ import { handleError, handleValidationError } from '../utils/errorHandler.js';
  * Controller for server management HTTP endpoints
  */
 export class ServerManagementController {
-  constructor(serverManagementService, logService, logger) {
+  constructor(serverManagementService, logService, logger, configService = null) {
     this.serverManagementService = serverManagementService;
     this.logService = logService;
     this.logger = logger;
+    this.configService = configService;
   }
 
   /**
@@ -76,7 +77,11 @@ export class ServerManagementController {
   stop = async (_req, res) => {
     try {
       const stopped = await this.serverManagementService.stopServer();
-      const restored = this.configService.restoreOriginalConfig();
+      let restored = false;
+
+      if (this.configService) {
+        restored = this.configService.restoreOriginalConfig();
+      }
 
       if (stopped) {
         if (restored) {

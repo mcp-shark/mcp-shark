@@ -24,7 +24,6 @@ import { createSmartScanRoutes } from './routes/smartscan.js';
 import { createStatisticsRoutes } from './routes/statistics.js';
 import { swaggerSpec } from './swagger/swagger.js';
 import { performCleanup } from './utils/cleanup.js';
-import { restoreConfig } from './utils/config.js';
 import { getMcpSharkProcess, setMcpSharkProcess } from './utils/processState.js';
 import { broadcastLogUpdate, notifyClients } from './websocket/broadcast.js';
 import { handleWebSocketConnection } from './websocket/handler.js';
@@ -110,9 +109,7 @@ export function createUIServer() {
   app.post('/api/config/backup/delete', backupRoutes.deleteBackup);
 
   app.post('/api/composite/setup', compositeRoutes.setup);
-  app.post('/api/composite/stop', (req, res) => {
-    compositeRoutes.stop(req, res, () => restoreConfig(container));
-  });
+  app.post('/api/composite/stop', compositeRoutes.stop);
   app.get('/api/composite/status', compositeRoutes.getStatus);
   app.get('/api/mcp-server/status', compositeRoutes.getMcpServerStatus);
   app.post('/api/composite/shutdown', compositeRoutes.shutdown);

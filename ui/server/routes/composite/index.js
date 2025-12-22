@@ -37,6 +37,7 @@ export function createCompositeRoutes(
   const serverManagementService = container.getService('serverManagement');
   const logService = container.getService('log');
   const logger = container.getLibrary('logger');
+  const configService = container.getService('config');
 
   // Initialize log service with the log array
   logService.initialize(mcpSharkLogs);
@@ -56,7 +57,8 @@ export function createCompositeRoutes(
   const serverManagementController = new ServerManagementController(
     serverManagementService,
     logService,
-    logger
+    logger,
+    configService
   );
 
   // Set cleanup function for shutdown endpoint
