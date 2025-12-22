@@ -1,6 +1,6 @@
 {
   "name": "@mcp-shark/mcp-shark",
-  "version": "1.5.6",
+  "version": "1.5.7",
   "description": "Aggregate multiple Model Context Protocol (MCP) servers into a single unified interface with a powerful monitoring UI. Prov deep visibility into every request and response.",
   "type": "module",
   "main": "./bin/mcp-shark.js",
