@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 
-import { bootstrapLogger as serverLogger } from '#core/libraries';
 import { isError } from '#core/libraries/ErrorLibrary.js';
+import { bootstrapLogger as serverLogger } from '#core/libraries/index.js';
 import { runAllExternalServers } from './server/external/all.js';
 
 import { DependencyContainer } from '#core';
@@ -10,8 +10,8 @@ import {
   getDatabaseFile,
   getMcpConfigPath,
   prepareAppDataSpaces,
-} from '#core/configs';
-import { initDb } from '#core/db/init';
+} from '#core/configs/index.js';
+import { initDb } from '#core/db/init.js';
 import { withAuditRequestResponseHandler } from './auditor/audit.js';
 import { getInternalServer } from './server/internal/run.js';
 import { createInternalServerFactory } from './server/internal/server.js';

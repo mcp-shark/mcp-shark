@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { getWorkingDirectory, prepareAppDataSpaces } from '#core/configs';
+import { getWorkingDirectory, prepareAppDataSpaces } from '#core/configs/index.js';
 
 /**
  * Service for Smart Scan token management

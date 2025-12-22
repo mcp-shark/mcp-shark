@@ -1,4 +1,4 @@
-import { NotFoundError, ValidationError } from '#core/libraries';
+import { NotFoundError, ValidationError } from '#core/libraries/index.js';
 import { handleError } from '../utils/errorHandler.js';
 
 /**

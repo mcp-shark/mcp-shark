@@ -1,4 +1,4 @@
-import { SettingsController } from '#ui/server/controllers';
+import { SettingsController } from '#ui/server/controllers/index.js';
 
 /**
  * Create settings routes

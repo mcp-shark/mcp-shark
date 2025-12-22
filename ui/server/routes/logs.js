@@ -1,4 +1,4 @@
-import { LogController } from '#ui/server/controllers';
+import { LogController } from '#ui/server/controllers/index.js';
 
 /**
  * Create logs routes

@@ -1,4 +1,4 @@
-import { Defaults } from '#core/constants';
+import { Defaults } from '#core/constants/index.js';
 import { handleError } from '../utils/errorHandler.js';
 
 /**

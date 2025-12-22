@@ -5,10 +5,10 @@ import express from 'express';
 import { WebSocketServer } from 'ws';
 
 import { DependencyContainer, RequestFilters } from '#core';
-import { Environment, getDatabaseFile, prepareAppDataSpaces } from '#core/configs';
+import { Environment, getDatabaseFile, prepareAppDataSpaces } from '#core/configs/index.js';
 import { Server as ServerConstants } from '#core/constants/Server.js';
-import { openDb } from '#core/db/init';
-import { bootstrapLogger } from '#core/libraries';
+import { openDb } from '#core/db/init.js';
+import { bootstrapLogger } from '#core/libraries/index.js';
 
 import { createBackupRoutes } from './server/routes/backups/index.js';
 import { createCompositeRoutes } from './server/routes/composite/index.js';

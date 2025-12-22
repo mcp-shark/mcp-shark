@@ -1,4 +1,4 @@
-import { Defaults } from '#core/constants/Defaults';
+import { Defaults } from '#core/constants/Defaults.js';
 
 /**
  * Repository for packet-related database operations

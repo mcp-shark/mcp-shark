@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3';
-import { ensureDirectoryExists } from '#core/configs';
+import { ensureDirectoryExists } from '#core/configs/index.js';
 import { SchemaRepository } from '#core/repositories/SchemaRepository.js';
 
 function configureDatabase(db) {

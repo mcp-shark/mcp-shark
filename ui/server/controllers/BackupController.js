@@ -1,5 +1,5 @@
-import { StatusCodes } from '#core/constants';
-import { NotFoundError } from '#core/libraries';
+import { StatusCodes } from '#core/constants/index.js';
+import { NotFoundError } from '#core/libraries/index.js';
 import { handleError, handleValidationError } from '../utils/errorHandler.js';
 
 /**

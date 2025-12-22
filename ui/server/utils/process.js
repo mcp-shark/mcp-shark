@@ -1,4 +1,4 @@
-import { Defaults } from '#core/constants/Defaults';
+import { Defaults } from '#core/constants/Defaults.js';
 
 const MAX_LOG_LINES = Defaults.MAX_LOG_LINES;
 

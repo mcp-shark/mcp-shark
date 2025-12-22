@@ -1,4 +1,4 @@
-import { BackupController } from '#ui/server/controllers';
+import { BackupController } from '#ui/server/controllers/index.js';
 
 /**
  * Create backup routes

@@ -1,4 +1,8 @@
-import { McpDiscoveryController, ScanController, TokenController } from '#ui/server/controllers';
+import {
+  McpDiscoveryController,
+  ScanController,
+  TokenController,
+} from '#ui/server/controllers/index.js';
 
 /**
  * Create Smart Scan routes

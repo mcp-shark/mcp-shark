@@ -1,7 +1,7 @@
 import * as fs from 'node:fs';
 import { homedir } from 'node:os';
 import * as path from 'node:path';
-import { getMcpConfigPath } from '#core/configs';
+import { getMcpConfigPath } from '#core/configs/index.js';
 
 /**
  * Service for configuration file operations

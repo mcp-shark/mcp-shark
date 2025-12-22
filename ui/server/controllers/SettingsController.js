@@ -1,4 +1,4 @@
-import { StatusCodes } from '#core/constants';
+import { StatusCodes } from '#core/constants/index.js';
 
 /**
  * Controller for settings HTTP endpoints

@@ -6,7 +6,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 import open from 'open';
-import { bootstrapLogger as logger } from '#core/libraries';
+import { bootstrapLogger as logger } from '#core/libraries/index.js';
 
 const SERVER_URL = 'http://localhost:9853';
 const BROWSER_OPEN_DELAY = 1000;

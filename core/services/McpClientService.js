@@ -1,7 +1,7 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { Server as ServerConstants } from '#core/constants/Server.js';
-import { ValidationError } from '#core/libraries';
+import { ValidationError } from '#core/libraries/index.js';
 
 /**
  * Service for MCP client management (Playground)

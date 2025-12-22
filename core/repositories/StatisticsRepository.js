@@ -1,4 +1,4 @@
-import { StatusCodeRanges } from '#core/constants/StatusCodes';
+import { StatusCodeRanges } from '#core/constants/StatusCodes.js';
 
 /**
  * Repository for statistics-related database operations

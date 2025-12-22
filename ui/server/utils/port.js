@@ -1,5 +1,5 @@
 import { createConnection } from 'node:net';
-import { Defaults } from '#core/constants/Defaults';
+import { Defaults } from '#core/constants/Defaults.js';
 
 function tryConnect(port, host, startTime, timeout, resolve, reject) {
   const socket = createConnection(port, host);

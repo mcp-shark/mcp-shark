@@ -1,4 +1,4 @@
-import { McpClientController } from '#ui/server/controllers';
+import { McpClientController } from '#ui/server/controllers/index.js';
 
 /**
  * Create playground routes

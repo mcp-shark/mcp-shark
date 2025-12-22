@@ -1,4 +1,4 @@
-import { ConfigController } from '#ui/server/controllers';
+import { ConfigController } from '#ui/server/controllers/index.js';
 import { createBackupRoutes } from './backups/index.js';
 
 /**

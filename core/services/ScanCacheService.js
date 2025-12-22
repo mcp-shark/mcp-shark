@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { Defaults } from '#core/constants/Defaults';
+import { Defaults } from '#core/constants/Defaults.js';
 import {
   ensureScanResultsDirectory,
   getScanResultFilePath,

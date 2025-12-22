@@ -1,4 +1,4 @@
-import { ServerManagementController } from '#ui/server/controllers';
+import { ServerManagementController } from '#ui/server/controllers/index.js';
 import { getServers } from './servers.js';
 
 function getServerInstanceWrapper(getMcpSharkProcess, originalGetInstance) {
