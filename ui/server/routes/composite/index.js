@@ -35,10 +35,7 @@ export function createCompositeRoutes(
   cleanup
 ) {
   const serverManagementService = container.getService('serverManagement');
-  const configService = container.getService('config');
   const logService = container.getService('log');
-  const backupService = container.getService('backup');
-  const configPatchingService = container.getService('configPatching');
   const logger = container.getLibrary('logger');
 
   // Initialize log service with the log array
@@ -58,10 +55,7 @@ export function createCompositeRoutes(
 
   const serverManagementController = new ServerManagementController(
     serverManagementService,
-    configService,
     logService,
-    backupService,
-    configPatchingService,
     logger
   );
 

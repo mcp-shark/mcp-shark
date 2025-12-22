@@ -21,4 +21,5 @@ export { McpClientService } from './McpClientService.js';
 export { TokenService } from './TokenService.js';
 export { SettingsService } from './SettingsService.js';
 export { ConfigPatchingService } from './ConfigPatchingService.js';
+export { ExportService } from './ExportService.js';
 export * from './parsers/index.js';

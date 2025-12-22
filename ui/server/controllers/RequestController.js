@@ -8,8 +8,9 @@ import { RequestFilters } from '#core/models/RequestFilters.js';
  */
 
 export class RequestController {
-  constructor(requestService, serializationLib, logger) {
+  constructor(requestService, exportService, serializationLib, logger) {
     this.requestService = requestService;
+    this.exportService = exportService;
     this.serializationLib = serializationLib;
     this.logger = logger;
   }
@@ -43,79 +44,6 @@ export class RequestController {
       limit: reqQuery.limit,
       offset: reqQuery.offset,
     });
-  }
-
-  /**
-   * Format requests as CSV
-   */
-  _formatAsCsv(requests) {
-    const headers = [
-      'Frame',
-      'Time',
-      'Source',
-      'Destination',
-      'Protocol',
-      'Length',
-      'Method',
-      'Status',
-      'JSON-RPC Method',
-      'Session ID',
-      'Server Name',
-    ];
-    const rows = requests.map((req) => [
-      req.frame_number || '',
-      req.timestamp_iso || '',
-      req.request?.host || '',
-      req.request?.host || '',
-      'HTTP',
-      req.length || '',
-      req.request?.method || '',
-      req.response?.status_code || '',
-      req.jsonrpc_method || '',
-      req.session_id || '',
-      req.server_name || '',
-    ]);
-
-    const content = [
-      headers.join(','),
-      ...rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')),
-    ].join('\n');
-
-    return { content, contentType: 'text/csv', extension: 'csv' };
-  }
-
-  /**
-   * Format requests as TXT
-   */
-  _formatAsTxt(requests) {
-    const content = requests
-      .map((req, idx) => {
-        const lines = [
-          `=== Request/Response #${idx + 1} (Frame ${req.frame_number || 'N/A'}) ===`,
-          `Time: ${req.timestamp_iso || 'N/A'}`,
-          `Session ID: ${req.session_id || 'N/A'}`,
-          `Server: ${req.server_name || 'N/A'}`,
-          `Direction: ${req.direction || 'N/A'}`,
-          `Method: ${req.request?.method || 'N/A'}`,
-          `Status: ${req.response?.status_code || 'N/A'}`,
-          `JSON-RPC Method: ${req.jsonrpc_method || 'N/A'}`,
-          `JSON-RPC ID: ${req.jsonrpc_id || 'N/A'}`,
-          `Length: ${req.length || 0} bytes`,
-          '',
-          'Request:',
-          JSON.stringify(req.request || {}, null, 2),
-          '',
-          'Response:',
-          JSON.stringify(req.response || {}, null, 2),
-          '',
-          '---',
-          '',
-        ];
-        return lines.join('\n');
-      })
-      .join('\n');
-
-    return { content, contentType: 'text/plain', extension: 'txt' };
   }
 
   /**
@@ -176,24 +104,6 @@ export class RequestController {
   }
 
   /**
-   * Get export result based on format
-   */
-  _getExportResult(format, requests) {
-    if (format === ExportFormat.CSV) {
-      return this._formatAsCsv(requests);
-    }
-    if (format === ExportFormat.TXT) {
-      return this._formatAsTxt(requests);
-    }
-    const serialized = this.serializationLib.serializeBigInt(requests);
-    return {
-      content: JSON.stringify(serialized, null, 2),
-      contentType: 'application/json',
-      extension: 'json',
-    };
-  }
-
-  /**
    * GET /api/requests/export
    */
   exportRequests(req, res) {
@@ -202,7 +112,7 @@ export class RequestController {
       const filters = this._extractFilters(req.query);
       const requests = this.requestService.getRequestsForExport(filters);
 
-      const result = this._getExportResult(format, requests);
+      const result = this.exportService.exportRequests(requests, format, this.serializationLib);
 
       const filename = `mcp-shark-traffic-${new Date().toISOString().replace(/[:.]/g, '-')}.${result.extension}`;
       res.setHeader('Content-Type', result.contentType);

@@ -15,6 +15,7 @@ import {
   ConfigService,
   ConfigTransformService,
   ConversationService,
+  ExportService,
   LogService,
   McpClientService,
   McpDiscoveryService,
@@ -113,14 +114,15 @@ export class DependencyContainer {
         configDetectionService
       );
 
-      this._services.serverManagement = new ServerManagementService(
-        this._services.config,
-        libs.logger
-      );
       this._services.backup = new BackupService(this._services.config, libs.logger);
       this._services.configPatching = new ConfigPatchingService(
         this._services.config,
         this._services.backup,
+        libs.logger
+      );
+      this._services.serverManagement = new ServerManagementService(
+        this._services.config,
+        this._services.configPatching,
         libs.logger
       );
       this._services.log = new LogService(libs.logger);
@@ -134,6 +136,7 @@ export class DependencyContainer {
         this._services.backup,
         libs.logger
       );
+      this._services.export = new ExportService();
     }
 
     return this._services;

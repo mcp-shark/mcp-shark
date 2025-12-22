@@ -2,10 +2,11 @@ import { RequestController } from '../controllers/RequestController.js';
 
 export function createRequestsRoutes(container) {
   const requestService = container.getService('request');
+  const exportService = container.getService('export');
   const serializationLib = container.getLibrary('serialization');
   const logger = container.getLibrary('logger');
 
-  const controller = new RequestController(requestService, serializationLib, logger);
+  const controller = new RequestController(requestService, exportService, serializationLib, logger);
 
   const router = {};
 

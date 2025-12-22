@@ -5,10 +5,101 @@ import { initAuditLogger, startMcpSharkServer } from '#core/mcp-server/index.js'
  * Handles server startup, shutdown, and status
  */
 export class ServerManagementService {
-  constructor(configService, logger) {
+  constructor(configService, configPatchingService, logger) {
     this.configService = configService;
+    this.configPatchingService = configPatchingService;
     this.logger = logger;
     this.serverInstance = null;
+  }
+
+  /**
+   * Setup and start MCP Shark server
+   * Orchestrates the entire setup process: config processing, patching, and server startup
+   * @param {Object} options - Setup options
+   * @param {string} [options.filePath] - Path to config file
+   * @param {string} [options.fileContent] - Config file content
+   * @param {Array} [options.selectedServices] - Selected services to include
+   * @param {number} [options.port=9851] - Server port
+   * @param {Function} [options.onError] - Error callback
+   * @param {Function} [options.onReady] - Ready callback
+   * @returns {Promise<Object>} Setup result with convertedConfig, updatedConfig, filePath
+   */
+  async setup(options = {}) {
+    const { filePath, fileContent, selectedServices, port = 9851, onError, onReady } = options;
+
+    if (!filePath && !fileContent) {
+      return {
+        success: false,
+        error: 'Either filePath or fileContent is required',
+      };
+    }
+
+    // If filePath is provided, restore original config if already patched
+    // This ensures processSetup reads the original config, not the patched one
+    let restoreWarning = null;
+    if (filePath && !fileContent) {
+      const restoreResult = this.configPatchingService.restoreIfPatched(filePath);
+      if (restoreResult.warning) {
+        restoreWarning = restoreResult.warning;
+      }
+    }
+
+    // Process setup
+    const setupResult = this.configService.processSetup(filePath, fileContent, selectedServices);
+
+    if (!setupResult.success) {
+      return setupResult;
+    }
+
+    const { fileData, convertedConfig, updatedConfig } = setupResult;
+    const mcpsJsonPath = this.configService.getMcpConfigPath();
+
+    // Write converted config to MCP Shark config path
+    this.configService.writeConfigAsJson(mcpsJsonPath, convertedConfig);
+
+    // Stop existing server if running
+    if (this.serverInstance?.stop) {
+      await this.stopServer();
+    }
+
+    // Start server
+    await this.startServer({
+      configPath: mcpsJsonPath,
+      port,
+      onError: (err) => {
+        if (onError) {
+          onError(err);
+        }
+        throw err;
+      },
+      onReady: () => {
+        if (onReady) {
+          onReady();
+        }
+      },
+    });
+
+    // Patch the original config file if it exists
+    let patchWarning = null;
+    if (fileData.resolvedFilePath && this.configService.fileExists(fileData.resolvedFilePath)) {
+      const patchResult = this.configPatchingService.patchConfigFile(
+        fileData.resolvedFilePath,
+        updatedConfig
+      );
+      if (patchResult.warning) {
+        patchWarning = patchResult.warning;
+      }
+    }
+
+    return {
+      success: true,
+      message: 'MCP Shark server started successfully and config file updated',
+      convertedConfig,
+      updatedConfig,
+      filePath: fileData.resolvedFilePath || null,
+      backupPath: null, // TODO: Implement backup creation in BackupService
+      warning: restoreWarning || patchWarning || undefined,
+    };
   }
 
   /**

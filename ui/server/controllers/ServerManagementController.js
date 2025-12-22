@@ -1,23 +1,13 @@
 import { StatusCodes } from '#core/constants/index.js';
-import { handleError } from '../utils/errorHandler.js';
+import { handleError, handleValidationError } from '../utils/errorHandler.js';
 
 /**
  * Controller for server management HTTP endpoints
  */
 export class ServerManagementController {
-  constructor(
-    serverManagementService,
-    configService,
-    logService,
-    backupService,
-    configPatchingService,
-    logger
-  ) {
+  constructor(serverManagementService, logService, logger) {
     this.serverManagementService = serverManagementService;
-    this.configService = configService;
     this.logService = logService;
-    this.backupService = backupService;
-    this.configPatchingService = configPatchingService;
     this.logger = logger;
   }
 
@@ -36,42 +26,17 @@ export class ServerManagementController {
       const { filePath, fileContent, selectedServices } = req.body;
 
       if (!filePath && !fileContent) {
-        return res.status(StatusCodes.BAD_REQUEST).json({
-          error: 'Either filePath or fileContent is required',
-        });
+        return handleValidationError(
+          'Either filePath or fileContent is required',
+          res,
+          this.logger
+        );
       }
 
-      // If filePath is provided, restore original config if already patched
-      // This ensures processSetup reads the original config, not the patched one
-      if (filePath && !fileContent) {
-        const restoreResult = this.configPatchingService.restoreIfPatched(filePath);
-        if (restoreResult.warning) {
-          this._addLogEntry('warn', `[WARNING] ${restoreResult.warning}`);
-        }
-      }
-
-      const setupResult = this.configService.processSetup(filePath, fileContent, selectedServices);
-
-      if (!setupResult.success) {
-        const statusCode =
-          setupResult.error === 'File not found' ? StatusCodes.NOT_FOUND : StatusCodes.BAD_REQUEST;
-        return res.status(statusCode).json(setupResult);
-      }
-
-      const { fileData, convertedConfig, updatedConfig } = setupResult;
-      const mcpsJsonPath = this.configService.getMcpConfigPath();
-      this.configService.writeConfigAsJson(mcpsJsonPath, convertedConfig);
-
-      const currentServer = this.serverManagementService.getServerInstance();
-      if (currentServer?.stop) {
-        await this.serverManagementService.stopServer();
-      }
-
-      this._addLogEntry('info', '[UI Server] Starting MCP-Shark server as library...');
-      this._addLogEntry('info', `[UI Server] Config: ${mcpsJsonPath}`);
-
-      await this.serverManagementService.startServer({
-        configPath: mcpsJsonPath,
+      const setupResult = await this.serverManagementService.setup({
+        filePath,
+        fileContent,
+        selectedServices,
         port: 9851,
         onError: (err) => {
           this._addLogEntry('error', `Failed to start mcp-shark server: ${err.message}`);
@@ -82,27 +47,20 @@ export class ServerManagementController {
         },
       });
 
-      const backupPath = null; // TODO: Implement backup creation in BackupService
-
-      // Use patching service to handle already-patched configs
-      if (fileData.resolvedFilePath && this.configService.fileExists(fileData.resolvedFilePath)) {
-        const patchResult = this.configPatchingService.patchConfigFile(
-          fileData.resolvedFilePath,
-          updatedConfig
-        );
-        if (patchResult.warning) {
-          this._addLogEntry('warn', `[WARNING] ${patchResult.warning}`);
-        }
+      if (!setupResult.success) {
+        const statusCode =
+          setupResult.error === 'File not found' ? StatusCodes.NOT_FOUND : StatusCodes.BAD_REQUEST;
+        return res.status(statusCode).json(setupResult);
       }
 
-      res.json({
-        success: true,
-        message: 'MCP Shark server started successfully and config file updated',
-        convertedConfig,
-        updatedConfig,
-        filePath: fileData.resolvedFilePath || null,
-        backupPath: backupPath || null,
-      });
+      // Add log entries for setup process
+      this._addLogEntry('info', '[UI Server] Starting MCP-Shark server as library...');
+
+      if (setupResult.warning) {
+        this._addLogEntry('warn', `[WARNING] ${setupResult.warning}`);
+      }
+
+      res.json(setupResult);
     } catch (error) {
       const timestamp = new Date().toISOString();
       const errorLog = {
