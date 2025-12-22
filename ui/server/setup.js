@@ -2,6 +2,7 @@ import { createServer } from 'node:http';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
+import swaggerUi from 'swagger-ui-express';
 import { WebSocketServer } from 'ws';
 
 import { DependencyContainer } from '#core';
@@ -21,6 +22,7 @@ import { createSessionsRoutes } from './routes/sessions.js';
 import { createSettingsRoutes } from './routes/settings.js';
 import { createSmartScanRoutes } from './routes/smartscan.js';
 import { createStatisticsRoutes } from './routes/statistics.js';
+import { swaggerSpec } from './swagger/swagger.js';
 import { performCleanup } from './utils/cleanup.js';
 import { restoreConfig } from './utils/config.js';
 import { getMcpSharkProcess, setMcpSharkProcess } from './utils/processState.js';
@@ -44,6 +46,9 @@ export function createUIServer() {
   const wss = new WebSocketServer({ server });
 
   app.use(express.json());
+
+  // Swagger/OpenAPI documentation
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
   const clients = new Set();
   const mcpSharkLogs = [];

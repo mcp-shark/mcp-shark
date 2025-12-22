@@ -4,6 +4,7 @@ import CompositeSetup from './CompositeSetup';
 import IntroTour from './IntroTour';
 import SmartScan from './SmartScan';
 import TabNavigation from './TabNavigation';
+import ApiDocsButton from './components/App/ApiDocsButton';
 import HelpButton from './components/App/HelpButton';
 import TrafficTab from './components/App/TrafficTab';
 import { useAppState } from './components/App/useAppState';
@@ -83,6 +84,7 @@ function App() {
       <div style={{ position: 'relative' }} data-tour="tabs">
         <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
+      <ApiDocsButton />
       <HelpButton
         onClick={() => {
           if (showTour) {
