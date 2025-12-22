@@ -130,7 +130,7 @@ export function createUIServer() {
 
   app.get('/api/settings', settingsRoutes.getSettings);
 
-  const staticPath = path.join(__dirname, 'dist');
+  const staticPath = path.join(__dirname, '..', 'dist');
   app.use(express.static(staticPath));
 
   app.get('*', (_req, res) => {
