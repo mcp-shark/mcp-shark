@@ -7,7 +7,6 @@ import { WebSocketServer } from 'ws';
 import { getDatabaseFile, prepareAppDataSpaces } from '#common/configs';
 import { openDb } from '#common/db/init';
 import { DependencyContainer, RequestFilters } from '#core';
-import { restoreOriginalConfig } from '#ui/server/utils/config.js';
 
 import { createBackupRoutes } from './server/routes/backups/index.js';
 import { createCompositeRoutes } from './server/routes/composite/index.js';
@@ -61,7 +60,19 @@ export function createUIServer() {
   };
 
   const restoreConfig = () => {
-    return restoreOriginalConfig(mcpSharkLogs, broadcastLogUpdate);
+    const configService = container.getService('config');
+    const logService = container.getService('log');
+    const restored = configService.restoreOriginalConfig();
+    if (restored) {
+      const timestamp = new Date().toISOString();
+      const restoreLog = {
+        timestamp,
+        type: 'stdout',
+        line: '[RESTORE] Restored original config',
+      };
+      logService.addLog(restoreLog);
+    }
+    return restored;
   };
 
   const requestsRoutes = createRequestsRoutes(container);
