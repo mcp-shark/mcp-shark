@@ -158,5 +158,5 @@ export function createUIServer() {
 
   const intervalId = setInterval(checkTimestampAndNotify, ServerConstants.PACKET_CHECK_INTERVAL_MS);
 
-  return { server, cleanup, logger };
+  return { server, cleanup, logger, wss };
 }
