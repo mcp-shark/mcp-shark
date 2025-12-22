@@ -9,6 +9,31 @@ export class McpClientController {
     this.logger = logger;
   }
 
+  /**
+   * Execute MCP method with error handling
+   */
+  async _executeMethodWithErrorHandling(client, method, params, res) {
+    try {
+      return await this.mcpClientService.executeMethod(client, method, params);
+    } catch (error) {
+      if (error.message.includes('required')) {
+        res.status(HttpStatus.BAD_REQUEST).json({
+          error: 'Invalid request',
+          message: error.message,
+        });
+        return null;
+      }
+      if (error.message.includes('Unsupported method')) {
+        res.status(HttpStatus.BAD_REQUEST).json({
+          error: 'Unsupported method',
+          message: error.message,
+        });
+        return null;
+      }
+      throw error;
+    }
+  }
+
   proxyRequest = async (req, res) => {
     try {
       const { method, params, serverName } = req.body;
@@ -34,29 +59,7 @@ export class McpClientController {
 
       const { client } = await this.mcpClientService.getOrCreateClient(serverName, sessionId);
 
-      const executeMethod = async () => {
-        try {
-          return await this.mcpClientService.executeMethod(client, method, params);
-        } catch (error) {
-          if (error.message.includes('required')) {
-            res.status(HttpStatus.BAD_REQUEST).json({
-              error: 'Invalid request',
-              message: error.message,
-            });
-            return null;
-          }
-          if (error.message.includes('Unsupported method')) {
-            res.status(HttpStatus.BAD_REQUEST).json({
-              error: 'Unsupported method',
-              message: error.message,
-            });
-            return null;
-          }
-          throw error;
-        }
-      };
-
-      const result = await executeMethod();
+      const result = await this._executeMethodWithErrorHandling(client, method, params, res);
       if (result === null) {
         return;
       }

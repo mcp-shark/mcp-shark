@@ -12,6 +12,15 @@ export class ServerManagementController {
     this.logger = logger;
   }
 
+  /**
+   * Add log entry
+   */
+  _addLogEntry(type, message) {
+    const timestamp = new Date().toISOString();
+    const log = { timestamp, type, line: message };
+    this.logService.addLog(log);
+  }
+
   setup = async (req, res) => {
     try {
       const { filePath, fileContent, selectedServices } = req.body;
@@ -61,24 +70,18 @@ export class ServerManagementController {
         await this.serverManagementService.stopServer();
       }
 
-      const logEntry = (type, message) => {
-        const timestamp = new Date().toISOString();
-        const log = { timestamp, type, line: message };
-        this.logService.addLog(log);
-      };
-
-      logEntry('info', '[UI Server] Starting MCP-Shark server as library...');
-      logEntry('info', `[UI Server] Config: ${mcpsJsonPath}`);
+      this._addLogEntry('info', '[UI Server] Starting MCP-Shark server as library...');
+      this._addLogEntry('info', `[UI Server] Config: ${mcpsJsonPath}`);
 
       await this.serverManagementService.startServer({
         configPath: mcpsJsonPath,
         port: 9851,
         onError: (err) => {
-          logEntry('error', `Failed to start mcp-shark server: ${err.message}`);
+          this._addLogEntry('error', `Failed to start mcp-shark server: ${err.message}`);
           throw err;
         },
         onReady: () => {
-          logEntry('info', 'MCP Shark server is ready!');
+          this._addLogEntry('info', 'MCP Shark server is ready!');
         },
       });
 

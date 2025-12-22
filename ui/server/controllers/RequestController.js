@@ -175,6 +175,24 @@ export class RequestController {
   }
 
   /**
+   * Get export result based on format
+   */
+  _getExportResult(format, requests) {
+    if (format === ExportFormat.CSV) {
+      return this._formatAsCsv(requests);
+    }
+    if (format === ExportFormat.TXT) {
+      return this._formatAsTxt(requests);
+    }
+    const serialized = this.serializationLib.serializeBigInt(requests);
+    return {
+      content: JSON.stringify(serialized, null, 2),
+      contentType: 'application/json',
+      extension: 'json',
+    };
+  }
+
+  /**
    * GET /api/requests/export
    */
   exportRequests(req, res) {
@@ -183,22 +201,7 @@ export class RequestController {
       const filters = this._extractFilters(req.query);
       const requests = this.requestService.getRequestsForExport(filters);
 
-      const getExportResult = () => {
-        if (format === ExportFormat.CSV) {
-          return this._formatAsCsv(requests);
-        }
-        if (format === ExportFormat.TXT) {
-          return this._formatAsTxt(requests);
-        }
-        const serialized = this.serializationLib.serializeBigInt(requests);
-        return {
-          content: JSON.stringify(serialized, null, 2),
-          contentType: 'application/json',
-          extension: 'json',
-        };
-      };
-
-      const result = getExportResult();
+      const result = this._getExportResult(format, requests);
 
       const filename = `mcp-shark-traffic-${new Date().toISOString().replace(/[:.]/g, '-')}.${result.extension}`;
       res.setHeader('Content-Type', result.contentType);
