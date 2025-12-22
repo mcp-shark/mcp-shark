@@ -2,7 +2,7 @@
 
 This document verifies compliance with:
 1. **Coding Rules** (`rules/CODING_RULES.md`)
-2. **WSO2 API Manager Principles** (10 principles)
+2. **Principles** (10 principles)
 
 ## Coding Rules Compliance
 
@@ -74,7 +74,7 @@ This document verifies compliance with:
 - **Services**: All business logic in services, HTTP-agnostic
 - **Controllers**: Handle HTTP concerns only (parsing, formatting, error handling)
 
-## WSO2 API Manager Principles Compliance
+## Architecture Principles Compliance
 
 ### 1. Separation of Concerns ✅
 
