@@ -1,51 +1,13 @@
-import { queryRequests } from '#common/db/query';
-import logger from '../utils/logger.js';
-import { serializeBigInt } from '../utils/serialization.js';
+export function createRequestsRoutes(container) {
+  const requestService = container.getService('request');
+  const logger = container.getLibrary('logger');
 
-const sanitizeSearch = (value) => {
-  if (value !== undefined && value !== null) {
-    const trimmed = String(value).trim();
-    return trimmed.length > 0 ? trimmed : null;
-  }
-  return null;
-};
-
-export function createRequestsRoutes(db) {
   const router = {};
 
   router.getRequests = (req, res) => {
     try {
-      const limit = Number.parseInt(req.query.limit) || 1000;
-      const offset = Number.parseInt(req.query.offset) || 0;
-
-      // Sanitize search parameter - convert empty strings to null
-      const search = sanitizeSearch(req.query.search);
-
-      // Build filters object, ensuring all values are properly typed
-      const filters = {
-        sessionId: (req.query.sessionId && String(req.query.sessionId).trim()) || null,
-        direction: (req.query.direction && String(req.query.direction).trim()) || null,
-        method: (req.query.method && String(req.query.method).trim()) || null,
-        jsonrpcMethod: (req.query.jsonrpcMethod && String(req.query.jsonrpcMethod).trim()) || null,
-        statusCode: req.query.statusCode ? Number.parseInt(req.query.statusCode) : null,
-        jsonrpcId: (req.query.jsonrpcId && String(req.query.jsonrpcId).trim()) || null,
-        search: search,
-        serverName: (req.query.serverName && String(req.query.serverName).trim()) || null,
-        startTime: req.query.startTime ? BigInt(req.query.startTime) : null,
-        endTime: req.query.endTime ? BigInt(req.query.endTime) : null,
-        limit,
-        offset,
-      };
-
-      // Remove undefined values to avoid issues
-      Object.keys(filters).forEach((key) => {
-        if (filters[key] === undefined) {
-          filters[key] = null;
-        }
-      });
-
-      const requests = queryRequests(db, filters);
-      res.json(serializeBigInt(requests));
+      const requests = requestService.getRequests(req.query);
+      res.json(requests);
     } catch (error) {
       logger.error({ error: error.message }, 'Error in getRequests');
       res.status(500).json({ error: 'Failed to query requests', details: error.message });
@@ -53,77 +15,23 @@ export function createRequestsRoutes(db) {
   };
 
   router.getRequest = (req, res) => {
-    const stmt = db.prepare('SELECT * FROM packets WHERE frame_number = ?');
-    const request = stmt.get(Number.parseInt(req.params.frameNumber));
-    if (!request) {
-      return res.status(404).json({ error: 'Request not found' });
+    try {
+      const request = requestService.getRequest(req.params.frameNumber);
+      if (!request) {
+        return res.status(404).json({ error: 'Request not found' });
+      }
+      res.json(request);
+    } catch (error) {
+      logger.error({ error: error.message }, 'Error in getRequest');
+      res.status(500).json({ error: 'Failed to get request', details: error.message });
     }
-    res.json(serializeBigInt(request));
   };
 
   router.clearRequests = (_req, res) => {
     try {
-      // Disable foreign key constraints temporarily to avoid constraint violations
-      db.exec('PRAGMA foreign_keys = OFF');
-
-      // Get list of all tables in the database
-      const tablesResult = db
-        .prepare(
-          `
-        SELECT name FROM sqlite_master 
-        WHERE type='table' AND name NOT LIKE 'sqlite_%'
-      `
-        )
-        .all();
-
-      const existingTables = tablesResult.map((row) => row.name);
-
-      // Based on lib/common/db schema, these are the traffic-related tables:
-      // - packets: Individual HTTP request/response packets
-      // - conversations: Correlated request/response pairs
-      // - sessions: Session tracking
-      // Clear in order to respect any foreign key dependencies
-      const trafficTables = [
-        'conversations', // Clear conversations first (may reference packets)
-        'packets', // Clear packets (main traffic data)
-        'sessions', // Clear sessions (may reference packets)
-      ];
-
-      // Delete from each table that exists
-      const clearResults = trafficTables.reduce(
-        (acc, table) => {
-          if (existingTables.includes(table)) {
-            try {
-              db.exec(`DELETE FROM ${table}`);
-              return {
-                count: acc.count + 1,
-                tables: [...acc.tables, table],
-              };
-            } catch (err) {
-              logger.warn({ table, error: err.message }, 'Error clearing table');
-            }
-          }
-          return acc;
-        },
-        { count: 0, tables: [] }
-      );
-      const clearedCount = clearResults.count;
-      const clearedTables = clearResults.tables;
-
-      // Re-enable foreign key constraints
-      db.exec('PRAGMA foreign_keys = ON');
-
-      res.json({
-        success: true,
-        message: `Cleared ${clearedCount} table(s): ${clearedTables.join(', ')}. All captured traffic has been cleared.`,
-      });
+      const result = requestService.clearRequests();
+      res.json(result);
     } catch (error) {
-      // Make sure to re-enable foreign keys even if there's an error
-      try {
-        db.exec('PRAGMA foreign_keys = ON');
-      } catch (_e) {
-        // Ignore
-      }
       logger.error({ error: error.message }, 'Error clearing requests');
       res.status(500).json({ error: 'Failed to clear traffic', details: error.message });
     }
@@ -131,106 +39,15 @@ export function createRequestsRoutes(db) {
 
   router.exportRequests = (req, res) => {
     try {
-      // Sanitize search parameter - convert empty strings to null
-      const search = sanitizeSearch(req.query.search);
-
-      const filters = {
-        sessionId: req.query.sessionId || null,
-        direction: req.query.direction || null,
-        method: req.query.method || null,
-        jsonrpcMethod: req.query.jsonrpcMethod || null,
-        statusCode: req.query.statusCode ? Number.parseInt(req.query.statusCode) : null,
-        jsonrpcId: req.query.jsonrpcId || null,
-        search: search,
-        serverName: req.query.serverName || null,
-        startTime: req.query.startTime ? BigInt(req.query.startTime) : null,
-        endTime: req.query.endTime ? BigInt(req.query.endTime) : null,
-        limit: 100000,
-        offset: 0,
-      };
-
-      const requests = queryRequests(db, filters);
       const format = req.query.format || 'json';
-
-      const formatExport = (requests, format) => {
-        if (format === 'csv') {
-          const headers = [
-            'Frame',
-            'Time',
-            'Source',
-            'Destination',
-            'Protocol',
-            'Length',
-            'Method',
-            'Status',
-            'JSON-RPC Method',
-            'Session ID',
-            'Server Name',
-          ];
-          const rows = requests.map((req) => [
-            req.frame_number || '',
-            req.timestamp_iso || '',
-            req.request?.host || '',
-            req.request?.host || '',
-            'HTTP',
-            req.length || '',
-            req.request?.method || '',
-            req.response?.status_code || '',
-            req.jsonrpc_method || '',
-            req.session_id || '',
-            req.server_name || '',
-          ]);
-
-          const content = [
-            headers.join(','),
-            ...rows.map((row) =>
-              row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')
-            ),
-          ].join('\n');
-          return { content, contentType: 'text/csv', extension: 'csv' };
-        }
-
-        if (format === 'txt') {
-          const content = requests
-            .map((req, idx) => {
-              const lines = [
-                `=== Request/Response #${idx + 1} (Frame ${req.frame_number || 'N/A'}) ===`,
-                `Time: ${req.timestamp_iso || 'N/A'}`,
-                `Session ID: ${req.session_id || 'N/A'}`,
-                `Server: ${req.server_name || 'N/A'}`,
-                `Direction: ${req.direction || 'N/A'}`,
-                `Method: ${req.request?.method || 'N/A'}`,
-                `Status: ${req.response?.status_code || 'N/A'}`,
-                `JSON-RPC Method: ${req.jsonrpc_method || 'N/A'}`,
-                `JSON-RPC ID: ${req.jsonrpc_id || 'N/A'}`,
-                `Length: ${req.length || 0} bytes`,
-                '',
-                'Request:',
-                JSON.stringify(req.request || {}, null, 2),
-                '',
-                'Response:',
-                JSON.stringify(req.response || {}, null, 2),
-                '',
-                '---',
-                '',
-              ];
-              return lines.join('\n');
-            })
-            .join('\n');
-          return { content, contentType: 'text/plain', extension: 'txt' };
-        }
-
-        const content = JSON.stringify(serializeBigInt(requests), null, 2);
-        return { content, contentType: 'application/json', extension: 'json' };
-      };
-
-      const { content, contentType, extension } = formatExport(requests, format);
+      const { content, contentType, extension } = requestService.exportRequests(req.query, format);
 
       const filename = `mcp-shark-traffic-${new Date().toISOString().replace(/[:.]/g, '-')}.${extension}`;
       res.setHeader('Content-Type', contentType);
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       res.send(content);
     } catch (error) {
+      logger.error({ error: error.message }, 'Error exporting requests');
       res.status(500).json({ error: 'Failed to export traffic', details: error.message });
     }
   };

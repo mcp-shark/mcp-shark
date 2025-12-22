@@ -6,14 +6,16 @@ import { runAllExternalServers } from './lib/server/external/all.js';
 
 import { getDatabaseFile, getMcpConfigPath, prepareAppDataSpaces } from '#common/configs';
 import { initDb } from '#common/db/init';
-import { getLogger } from '#common/db/logger';
+import { DependencyContainer } from '#core';
 import { withAuditRequestResponseHandler } from './lib/auditor/audit.js';
 import { getInternalServer } from './lib/server/internal/run.js';
 import { createInternalServerFactory } from './lib/server/internal/server.js';
 
 function initAuditLogger(serverLogger) {
   serverLogger.info({ path: getDatabaseFile() }, 'Initializing audit logger at');
-  return getLogger(initDb(getDatabaseFile()));
+  const db = initDb(getDatabaseFile());
+  const container = new DependencyContainer(db);
+  return container.getAuditLogger();
 }
 
 /**

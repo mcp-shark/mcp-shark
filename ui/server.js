@@ -6,7 +6,7 @@ import { WebSocketServer } from 'ws';
 
 import { getDatabaseFile, prepareAppDataSpaces } from '#common/configs';
 import { openDb } from '#common/db/init';
-import { queryRequests } from '#common/db/query';
+import { DependencyContainer } from '#core';
 import { restoreOriginalConfig } from './server/utils/config.js';
 
 import { createBackupRoutes } from './server/routes/backups/index.js';
@@ -21,7 +21,6 @@ import { createSessionsRoutes } from './server/routes/sessions.js';
 import { createSettingsRoutes } from './server/routes/settings.js';
 import { createSmartScanRoutes } from './server/routes/smartscan.js';
 import { createStatisticsRoutes } from './server/routes/statistics.js';
-import { serializeBigInt } from './server/utils/serialization.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,6 +31,7 @@ export function createUIServer() {
   prepareAppDataSpaces();
 
   const db = openDb(getDatabaseFile());
+  const container = new DependencyContainer(db);
   const app = express();
   const server = createServer(app);
   const wss = new WebSocketServer({ server });
@@ -64,10 +64,10 @@ export function createUIServer() {
     return restoreOriginalConfig(mcpSharkLogs, broadcastLogUpdate);
   };
 
-  const requestsRoutes = createRequestsRoutes(db);
-  const conversationsRoutes = createConversationsRoutes(db);
-  const sessionsRoutes = createSessionsRoutes(db);
-  const statisticsRoutes = createStatisticsRoutes(db);
+  const requestsRoutes = createRequestsRoutes(container);
+  const conversationsRoutes = createConversationsRoutes(container);
+  const sessionsRoutes = createSessionsRoutes(container);
+  const statisticsRoutes = createStatisticsRoutes(container);
   const logsRoutes = createLogsRoutes(mcpSharkLogs, broadcastLogUpdate);
   const configRoutes = createConfigRoutes();
   const backupRoutes = createBackupRoutes();
@@ -146,9 +146,11 @@ export function createUIServer() {
     res.sendFile(path.join(staticPath, 'index.html'));
   });
 
+  const requestService = container.getService('request');
+
   const notifyClients = async () => {
-    const requests = queryRequests(db, { limit: 100 });
-    const message = JSON.stringify({ type: 'update', data: serializeBigInt(requests) });
+    const requests = requestService.getRequests({ limit: 100 });
+    const message = JSON.stringify({ type: 'update', data: requests });
     clients.forEach((client) => {
       if (client.readyState === 1) {
         client.send(message);
@@ -156,9 +158,11 @@ export function createUIServer() {
     });
   };
 
+  const packetRepository = container.getRepository('packet');
+
   const timestampState = { lastTs: 0 };
   const intervalId = setInterval(() => {
-    const lastCheck = db.prepare('SELECT MAX(timestamp_ns) as max_ts FROM packets').get();
+    const lastCheck = packetRepository.getMaxTimestamp();
     if (lastCheck && lastCheck.max_ts > timestampState.lastTs) {
       timestampState.lastTs = lastCheck.max_ts;
       notifyClients();

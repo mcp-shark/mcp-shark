@@ -14,7 +14,9 @@
     "#common/db/init": "./lib/common/db/init.js",
     "#common/db/logger": "./lib/common/db/logger.js",
     "#common/logger": "./lib/common/logger.js",
-    "#common/*": "./lib/common/*"
+    "#common/*": "./lib/common/*",
+    "#core": "./core/index.js",
+    "#core/*": "./core/*"
   },
   "bin": {
     "mcp-shark": "./bin/mcp-shark.js",
