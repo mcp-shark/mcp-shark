@@ -26,6 +26,14 @@
 - **Extract for Review** — `npm run pack:extract` extracts package for manual inspection
 - **Documentation** — Complete guide in `docs/package-inspection.md`
 
+### 🔌 IDE Integration Enhancements
+
+- **TOML Codex Support** — Full support for Codex's `config.toml` format with `[mcp_servers]` section
+- **Automatic Detection** — Automatically detects Codex config files at `~/.codex/config.toml` or `$CODEX_HOME/config.toml`
+- **Format Conversion** — Seamlessly converts Codex TOML format to MCP Shark's internal format
+- **Unified Config Parser** — New `ConfigParserFactory` supporting TOML, JSON, and legacy JSON formats
+- **Multi-Format Support** — Handles stdio and HTTP servers from Codex config with command, args, env, url, and headers
+
 ### 🔧 Configuration Management Improvements
 
 - **Config Patching Service** — New dedicated service for handling config file patching
