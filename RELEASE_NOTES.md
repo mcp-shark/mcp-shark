@@ -1,3 +1,62 @@
+# 🦈 MCP Shark v1.6.0 - API Documentation & Developer Experience
+
+## 🎉 What's New in v1.6.0
+
+### 📡 Interactive API Documentation
+
+- **Swagger/OpenAPI Integration** — Complete interactive API documentation with Swagger UI
+- **Discovery Button** — Quick access to API docs via satellite button (📡) in the UI
+- **Comprehensive Coverage** — All 40+ endpoints documented with request/response schemas
+- **Interactive Testing** — Test endpoints directly from the browser
+- **Organized by Category** — Endpoints grouped by functionality (Requests, Sessions, Config, etc.)
+- **Split Documentation** — OpenAPI specs organized into individual files per endpoint category
+
+### 🔗 URL-Based Tab Navigation
+
+- **Bookmarkable Tabs** — Each tab now has its own URL for direct navigation
+- **Shareable Links** — Copy and paste links to specific tabs
+- **Browser History** — Back/forward buttons work with tab navigation
+- **Hash-Based Routing** — Uses browser History API for seamless navigation
+
+### 🛠️ Package Inspection Tools
+
+- **Pre-Publish Verification** — New npm scripts to inspect package contents before publishing
+- **Quick Inspection** — `npm run pack:inspect` shows file count and sample files
+- **Full File List** — `npm run pack:list` lists all files in the package
+- **Extract for Review** — `npm run pack:extract` extracts package for manual inspection
+- **Documentation** — Complete guide in `docs/package-inspection.md`
+
+### 🔧 Configuration Management Improvements
+
+- **Config Patching Service** — New dedicated service for handling config file patching
+- **Smart Repatching** — Automatically detects and handles already-patched configs
+- **Restore Before Setup** — Restores original config before processing to prevent errors
+- **Better Error Handling** — Clear error messages for config-related issues
+
+### 🐛 Bug Fixes & Improvements
+
+- **Port Conflict Handling** — Graceful error handling when port 9853 is already in use
+- **Shutdown Timeout** — Reduced from 5s to 2s for faster cleanup
+- **Modal Components** — Replaced native `confirm()` and `alert()` with proper React modals
+- **Business Logic Separation** — Moved export formatting and setup orchestration to services
+- **File Organization** — Split large files to comply with size limits
+
+### 📚 Documentation Updates
+
+- **Developer Guide** — Added package inspection section
+- **API Reference** — Updated with Swagger/OpenAPI documentation details
+- **README** — Updated with API documentation feature
+- **Package Inspection Guide** — New comprehensive guide for package verification
+
+### 🏗️ Architecture Improvements
+
+- **Service Layer** — New `ExportService` for export formatting logic
+- **Service Layer** — Enhanced `ServerManagementService` with setup orchestration
+- **Controller Simplification** — Controllers now only handle HTTP concerns
+- **Better Separation of Concerns** — Strict adherence to architecture rules
+
+---
+
 # 🦈 MCP Shark v1.5.0 - Documentation & Stability Improvements
 
 ## 🎉 What's New in v1.5.0
