@@ -120,19 +120,19 @@ function rebuildReq(req, buf) {
   return r;
 }
 
+function finishOnce(state, resolve) {
+  if (!state.done) {
+    state.done = true;
+    resolve();
+  }
+}
+
 function waitForResponseFinish(res) {
   return new Promise((resolve) => {
     const state = { done: false };
 
-    function finishOnce() {
-      if (!state.done) {
-        state.done = true;
-        resolve();
-      }
-    }
-
-    res.on('finish', finishOnce);
-    res.on('close', finishOnce);
+    res.on('finish', () => finishOnce(state, resolve));
+    res.on('close', () => finishOnce(state, resolve));
   });
 }
 

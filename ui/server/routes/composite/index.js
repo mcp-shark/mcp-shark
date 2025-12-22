@@ -1,6 +1,19 @@
 import { ServerManagementController } from '#ui/server/controllers';
 import { getServers } from './servers.js';
 
+function createGetServerInstance(getMcpSharkProcess, originalGetInstance) {
+  return () => {
+    return getMcpSharkProcess() || originalGetInstance();
+  };
+}
+
+function createSetServerInstance(setMcpSharkProcess, serverManagementService) {
+  return (instance) => {
+    setMcpSharkProcess(instance);
+    serverManagementService.serverInstance = instance;
+  };
+}
+
 /**
  * Create composite routes
  * Routes delegate to controllers which call services
@@ -24,13 +37,11 @@ export function createCompositeRoutes(
   // Set server instance getter/setter
   const originalGetInstance =
     serverManagementService.getServerInstance.bind(serverManagementService);
-  serverManagementService.getServerInstance = () => {
-    return getMcpSharkProcess() || originalGetInstance();
-  };
-  serverManagementService.setServerInstance = (instance) => {
-    setMcpSharkProcess(instance);
-    serverManagementService.serverInstance = instance;
-  };
+  serverManagementService.getServerInstance = createGetServerInstance(
+    getMcpSharkProcess,
+    originalGetInstance
+  );
+  serverManagementService.setServerInstance = createSetServerInstance(setMcpSharkProcess, serverManagementService);
 
   const serverManagementController = new ServerManagementController(
     serverManagementService,

@@ -18,6 +18,37 @@ function initAuditLogger(serverLogger) {
   return container.getAuditLogger();
 }
 
+async function createStopFunction(server, externalServers, serverLogger) {
+  return async () => {
+    // Close all external server clients
+    for (const serverInfo of externalServers) {
+      if (serverInfo?.client && !isError(serverInfo)) {
+        try {
+          await serverInfo.client.close();
+        } catch (error) {
+          serverLogger.warn(
+            { error, message: error.message },
+            'Error closing external server client'
+          );
+        }
+      }
+    }
+
+    // Close all connections forcefully
+    if (server.closeAllConnections) {
+      server.closeAllConnections();
+    }
+
+    // Close the server
+    return new Promise((resolve) => {
+      server.close(() => {
+        serverLogger.info('MCP Shark server stopped');
+        resolve();
+      });
+    });
+  };
+}
+
 /**
  * Start the MCP Shark server
  * @param {Object} options - Configuration options
@@ -91,34 +122,7 @@ export async function startMcpSharkServer(options = {}) {
       });
     });
 
-    const stop = async () => {
-      // Close all external server clients
-      for (const serverInfo of externalServers) {
-        if (serverInfo?.client && !isError(serverInfo)) {
-          try {
-            await serverInfo.client.close();
-          } catch (error) {
-            serverLogger.warn(
-              { error, message: error.message },
-              'Error closing external server client'
-            );
-          }
-        }
-      }
-
-      // Close all connections forcefully
-      if (server.closeAllConnections) {
-        server.closeAllConnections();
-      }
-
-      // Close the server
-      return new Promise((resolve) => {
-        server.close(() => {
-          serverLogger.info('MCP Shark server stopped');
-          resolve();
-        });
-      });
-    };
+    const stop = createStopFunction(server, externalServers, serverLogger);
 
     return {
       app,

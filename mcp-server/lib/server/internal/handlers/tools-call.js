@@ -3,6 +3,13 @@ import { InternalServerError } from './error.js';
 
 const isAsyncIterable = (v) => v && typeof v[Symbol.asyncIterator] === 'function';
 
+async function* createLoggedStream(result, logger) {
+  for await (const chunk of result) {
+    logger.debug('Tool call chunk forwarded', chunk);
+    yield chunk;
+  }
+}
+
 export function createToolsCallHandler(logger, mcpServers, requestedMcpServer) {
   return async (req) => {
     const path = req.path;
@@ -21,13 +28,7 @@ export function createToolsCallHandler(logger, mcpServers, requestedMcpServer) {
     logger.debug('Tool call result', result);
 
     if (isAsyncIterable(result)) {
-      async function* loggedStream() {
-        for await (const chunk of result) {
-          logger.debug('Tool call chunk forwarded', chunk);
-          yield chunk;
-        }
-      }
-      return loggedStream();
+      return createLoggedStream(result, logger);
     }
 
     return result;

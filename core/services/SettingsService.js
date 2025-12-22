@@ -16,6 +16,45 @@ export class SettingsService {
   }
 
   /**
+   * Convert absolute path to display path (replace home with ~)
+   */
+  _toDisplayPath(homeDir, absolutePath) {
+    return absolutePath.replace(homeDir, '~');
+  }
+
+  /**
+   * Get backup count from backup directories
+   */
+  _getBackupCount(cursorBackupDir, windsurfBackupDir, cursorConfigPath, windsurfConfigPath) {
+    try {
+      const backupDirs = [cursorBackupDir, windsurfBackupDir];
+      const newFormatCount = backupDirs.reduce((count, dir) => {
+        if (existsSync(dir)) {
+          const files = readdirSync(dir);
+          const matchingFiles = files.filter((file) => {
+            return /^\.(.+)-mcpshark\.\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.json$/.test(file);
+          });
+          return count + matchingFiles.length;
+        }
+        return count;
+      }, 0);
+
+      const commonPaths = [cursorConfigPath, windsurfConfigPath];
+      const oldFormatCount = commonPaths.reduce((count, configPath) => {
+        if (existsSync(`${configPath}.backup`)) {
+          return count + 1;
+        }
+        return count;
+      }, 0);
+
+      return newFormatCount + oldFormatCount;
+    } catch (error) {
+      this.logger?.error({ error: error.message }, 'Error counting backups');
+      return 0;
+    }
+  }
+
+  /**
    * Get all settings
    */
   getSettings() {
@@ -31,82 +70,49 @@ export class SettingsService {
     const cursorBackupDir = join(homeDir, '.cursor');
     const windsurfBackupDir = join(homeDir, '.codeium', 'windsurf');
 
-    const toDisplayPath = (absolutePath) => {
-      return absolutePath.replace(homeDir, '~');
-    };
-
-    const getBackupCount = () => {
-      try {
-        const backupDirs = [cursorBackupDir, windsurfBackupDir];
-        const newFormatCount = backupDirs.reduce((count, dir) => {
-          if (existsSync(dir)) {
-            const files = readdirSync(dir);
-            const matchingFiles = files.filter((file) => {
-              return /^\.(.+)-mcpshark\.\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.json$/.test(file);
-            });
-            return count + matchingFiles.length;
-          }
-          return count;
-        }, 0);
-
-        const commonPaths = [cursorConfigPath, windsurfConfigPath];
-        const oldFormatCount = commonPaths.reduce((count, configPath) => {
-          if (existsSync(`${configPath}.backup`)) {
-            return count + 1;
-          }
-          return count;
-        }, 0);
-
-        return newFormatCount + oldFormatCount;
-      } catch (error) {
-        this.logger?.error({ error: error.message }, 'Error counting backups');
-        return 0;
-      }
-    };
-
     return {
       paths: {
         workingDirectory: {
           absolute: workingDir,
-          display: toDisplayPath(workingDir),
+          display: this._toDisplayPath(homeDir, workingDir),
           exists: existsSync(workingDir),
         },
         database: {
           absolute: databasePath,
-          display: toDisplayPath(databasePath),
+          display: this._toDisplayPath(homeDir, databasePath),
           exists: existsSync(databasePath),
         },
         smartScanResults: {
           absolute: scanResultsDir,
-          display: toDisplayPath(scanResultsDir),
+          display: this._toDisplayPath(homeDir, scanResultsDir),
           exists: existsSync(scanResultsDir),
         },
         smartScanToken: {
           absolute: tokenMetadata.path,
-          display: toDisplayPath(tokenMetadata.path),
+          display: this._toDisplayPath(homeDir, tokenMetadata.path),
           exists: tokenMetadata.exists,
         },
         backupDirectories: {
           cursor: {
             absolute: cursorBackupDir,
-            display: toDisplayPath(cursorBackupDir),
+            display: this._toDisplayPath(homeDir, cursorBackupDir),
             exists: existsSync(cursorBackupDir),
           },
           windsurf: {
             absolute: windsurfBackupDir,
-            display: toDisplayPath(windsurfBackupDir),
+            display: this._toDisplayPath(homeDir, windsurfBackupDir),
             exists: existsSync(windsurfBackupDir),
           },
         },
         configFiles: {
           cursor: {
             absolute: cursorConfigPath,
-            display: toDisplayPath(cursorConfigPath),
+            display: this._toDisplayPath(homeDir, cursorConfigPath),
             exists: existsSync(cursorConfigPath),
           },
           windsurf: {
             absolute: windsurfConfigPath,
-            display: toDisplayPath(windsurfConfigPath),
+            display: this._toDisplayPath(homeDir, windsurfConfigPath),
             exists: existsSync(windsurfConfigPath),
           },
         },
@@ -115,7 +121,7 @@ export class SettingsService {
         token: tokenMetadata.token,
         tokenPath: {
           absolute: tokenMetadata.path,
-          display: toDisplayPath(tokenMetadata.path),
+          display: this._toDisplayPath(homeDir, tokenMetadata.path),
         },
         tokenUpdatedAt: tokenMetadata.updatedAt,
         tokenExists: tokenMetadata.exists,
@@ -123,7 +129,7 @@ export class SettingsService {
       database: {
         path: {
           absolute: databasePath,
-          display: toDisplayPath(databasePath),
+          display: this._toDisplayPath(homeDir, databasePath),
         },
         exists: existsSync(databasePath),
       },
@@ -138,14 +144,14 @@ export class SettingsService {
         directories: [
           {
             absolute: cursorBackupDir,
-            display: toDisplayPath(cursorBackupDir),
+            display: this._toDisplayPath(homeDir, cursorBackupDir),
           },
           {
             absolute: windsurfBackupDir,
-            display: toDisplayPath(windsurfBackupDir),
+            display: this._toDisplayPath(homeDir, windsurfBackupDir),
           },
         ],
-        count: getBackupCount(),
+        count: this._getBackupCount(cursorBackupDir, windsurfBackupDir, cursorConfigPath, windsurfConfigPath),
       },
     };
   }

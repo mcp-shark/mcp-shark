@@ -88,6 +88,23 @@ export class AuditRepository {
   }
 
   /**
+   * Normalize body to raw string and JSON
+   */
+  _normalizeBody(body) {
+    if (!body) {
+      return { bodyRaw: '', bodyJson: null };
+    }
+    if (typeof body === 'string') {
+      return { bodyRaw: body, bodyJson: body };
+    }
+    if (typeof body === 'object') {
+      const raw = JSON.stringify(body);
+      return { bodyRaw: raw, bodyJson: raw };
+    }
+    return { bodyRaw: '', bodyJson: null };
+  }
+
+  /**
    * Log an HTTP request packet
    */
   logRequestPacket(options) {
