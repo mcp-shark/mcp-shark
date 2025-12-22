@@ -89,4 +89,27 @@ export class ServerManagementService {
   setServerInstance(instance) {
     this.serverInstance = instance;
   }
+
+  /**
+   * Shutdown the entire application
+   * @param {Function} cleanup - Cleanup function to execute
+   */
+  async shutdown(cleanup) {
+    if (!cleanup || typeof cleanup !== 'function') {
+      throw new Error('Cleanup function is required');
+    }
+
+    this.logger?.info('Initiating application shutdown...');
+
+    // Stop MCP Shark server if running
+    if (this.serverInstance?.stop) {
+      await this.stopServer();
+    }
+
+    // Execute cleanup
+    await cleanup();
+
+    this.logger?.info('Application shutdown complete');
+    return { success: true, message: 'Application shutdown initiated' };
+  }
 }

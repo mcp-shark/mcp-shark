@@ -23,6 +23,7 @@ export class ServerManagementController {
 
   setup = async (req, res) => {
     try {
+      console.log('setup', req.body);
       const { filePath, fileContent, selectedServices } = req.body;
 
       if (!filePath && !fileContent) {
@@ -132,6 +133,32 @@ export class ServerManagementController {
       this.logger?.error({ error: error.message }, 'Error getting server status');
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         error: 'Failed to get server status',
+        details: error.message,
+      });
+    }
+  };
+
+  shutdown = async (_req, res) => {
+    try {
+      if (!this.cleanup) {
+        return res.status(HttpStatus.SERVICE_UNAVAILABLE).json({
+          error: 'Shutdown not available',
+          details: 'Cleanup function not configured',
+        });
+      }
+
+      const result = await this.serverManagementService.shutdown(this.cleanup);
+
+      res.json(result);
+
+      // Give time for response to be sent before process exits
+      setTimeout(() => {
+        process.exit(0);
+      }, 100);
+    } catch (error) {
+      this.logger?.error({ error: error.message }, 'Error shutting down application');
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        error: 'Failed to shutdown application',
         details: error.message,
       });
     }

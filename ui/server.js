@@ -141,12 +141,17 @@ export function createUIServer() {
   const logsRoutes = createLogsRoutes(container, mcpSharkLogs);
   const configRoutes = createConfigRoutes(container);
   const backupRoutes = createBackupRoutes(container);
+  const cleanup = async () => {
+    return performCleanup(intervalId, processState, clients, wss, server, container);
+  };
+
   const compositeRoutes = createCompositeRoutes(
     container,
     () => getMcpSharkProcess(processState),
     (server) => setMcpSharkProcess(processState, server),
     mcpSharkLogs,
-    (logEntry) => broadcastLogUpdate(clients, logEntry)
+    (logEntry) => broadcastLogUpdate(clients, logEntry),
+    cleanup
   );
   const helpRoutes = createHelpRoutes();
   const playgroundRoutes = createPlaygroundRoutes(container);
@@ -185,6 +190,7 @@ export function createUIServer() {
     compositeRoutes.stop(req, res, () => restoreConfig(container));
   });
   app.get('/api/composite/status', compositeRoutes.getStatus);
+  app.post('/api/composite/shutdown', compositeRoutes.shutdown);
   app.get('/api/composite/servers', compositeRoutes.getServers);
 
   app.get('/api/help/state', helpRoutes.getState);
@@ -228,10 +234,6 @@ export function createUIServer() {
   }
 
   const intervalId = setInterval(checkTimestampAndNotify, 500);
-
-  const cleanup = async () => {
-    return performCleanup(intervalId, processState, clients, wss, server, container);
-  };
 
   return { server, cleanup };
 }

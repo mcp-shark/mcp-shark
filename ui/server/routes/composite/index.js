@@ -31,7 +31,8 @@ export function createCompositeRoutes(
   getMcpSharkProcess,
   setMcpSharkProcess,
   mcpSharkLogs,
-  _broadcastLogUpdate
+  _broadcastLogUpdate,
+  cleanup
 ) {
   const serverManagementService = container.getService('serverManagement');
   const configService = container.getService('config');
@@ -62,11 +63,17 @@ export function createCompositeRoutes(
     logger
   );
 
+  // Set cleanup function for shutdown endpoint
+  if (cleanup) {
+    serverManagementController.cleanup = cleanup;
+  }
+
   const router = {};
 
   router.setup = serverManagementController.setup;
   router.stop = serverManagementController.stop;
   router.getStatus = serverManagementController.getStatus;
+  router.shutdown = serverManagementController.shutdown;
   router.getServers = getServers(container);
 
   return router;
