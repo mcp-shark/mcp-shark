@@ -226,4 +226,23 @@ export class ConfigService {
     const jsonContent = JSON.stringify(config, null, 2);
     this.fileService.writeConfigFile(filePath, jsonContent);
   }
+
+  /**
+   * Check if config file is patched by mcp-shark
+   */
+  isConfigPatched(config) {
+    return this.transformService.isConfigPatched(config);
+  }
+
+  /**
+   * Check if a file path contains a patched config
+   */
+  isFilePatched(filePath) {
+    if (!this.fileService.fileExists(filePath)) {
+      return false;
+    }
+    const content = this.fileService.readConfigFile(filePath);
+    const parseResult = this.fileService.parseJsonConfig(content, filePath);
+    return parseResult.config ? this.isConfigPatched(parseResult.config) : false;
+  }
 }

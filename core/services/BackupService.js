@@ -104,6 +104,33 @@ export class BackupService {
   }
 
   /**
+   * Repatch config if it was patched and server is running
+   * @private
+   */
+  _repatchIfNeeded(wasPatched, serverIsRunning, config, targetPath) {
+    if (wasPatched && serverIsRunning && config) {
+      try {
+        // Repatch the restored config
+        const repatchedConfig = this.configService.updateConfigForMcpShark(config);
+        this.configService.writeConfigAsJson(targetPath, repatchedConfig);
+        this.logger?.info(
+          { path: targetPath },
+          'Repatched config after restore (server is running)'
+        );
+        return true;
+      } catch (error) {
+        this.logger?.error(
+          { error: error.message, path: targetPath },
+          'Failed to repatch config after restore'
+        );
+        // Continue anyway - at least the restore succeeded
+        return false;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Determine target path for restore
    */
   _determineTargetPath(originalPath, backupPath) {
@@ -128,8 +155,12 @@ export class BackupService {
 
   /**
    * Restore backup
+   * @param {string} backupPath - Path to backup file
+   * @param {string} originalPath - Path to original file (optional, will be determined from backup)
+   * @param {boolean} serverIsRunning - Whether MCP Shark server is currently running
+   * @returns {{success: boolean, error?: string, originalPath?: string, wasPatched?: boolean, repatched?: boolean}}
    */
-  restoreBackup(backupPath, originalPath) {
+  restoreBackup(backupPath, originalPath, serverIsRunning = false) {
     const resolvedBackupPath = this.configService.resolveFilePath(backupPath);
 
     if (!fs.existsSync(resolvedBackupPath)) {
@@ -141,15 +172,30 @@ export class BackupService {
       return { success: false, error: 'Could not determine original file path' };
     }
 
+    // Read backup content and check if it was patched
     const backupContent = fs.readFileSync(resolvedBackupPath, 'utf8');
+    const parseResult = this.configService.parseJsonConfig(backupContent, resolvedBackupPath);
+    const wasPatched = parseResult.config && this.configService.isConfigPatched(parseResult.config);
+
+    // Restore the backup
     fs.writeFileSync(targetPath, backupContent);
 
-    this.logger?.info({ path: targetPath }, 'Restored config from backup');
+    this.logger?.info({ path: targetPath, wasPatched }, 'Restored config from backup');
+
+    // If the backup was patched and server is running, repatch it
+    const repatched = this._repatchIfNeeded(
+      wasPatched,
+      serverIsRunning,
+      parseResult.config,
+      targetPath
+    );
 
     const homeDir = homedir();
     return {
       success: true,
       originalPath: targetPath.replace(homeDir, '~'),
+      wasPatched,
+      repatched,
     };
   }
 

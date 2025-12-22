@@ -139,6 +139,27 @@ export class ConfigTransformService {
     return selectedServiceNames;
   }
 
+  /**
+   * Check if config file is patched by mcp-shark
+   * A patched config has servers with URLs pointing to localhost:9851/mcp/
+   */
+  isConfigPatched(config) {
+    if (!config || typeof config !== 'object') {
+      return false;
+    }
+
+    const servers = config.servers || config.mcpServers || {};
+    for (const [_name, cfg] of Object.entries(servers)) {
+      if (cfg && typeof cfg === 'object' && cfg.url) {
+        if (cfg.url.includes('localhost:9851/mcp/') || cfg.url.includes('127.0.0.1:9851/mcp/')) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   _getServerObject(originalConfig) {
     const hasMcpServers =
       originalConfig.mcpServers && typeof originalConfig.mcpServers === 'object';
