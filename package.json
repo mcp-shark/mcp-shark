@@ -9,12 +9,6 @@
     "./mcp-server": "./core/mcp-server/index.js"
   },
   "imports": {
-    "#common/configs": "./lib/common/configs/index.js",
-    "#common/db/query": "./lib/common/db/query.js",
-    "#common/db/init": "./lib/common/db/init.js",
-    "#common/db/logger": "./lib/common/db/logger.js",
-    "#common/logger": "./lib/common/logger.js",
-    "#common/*": "./lib/common/*",
     "#core": "./core/index.js",
     "#core/*": "./core/*",
     "#ui/server/*": "./ui/server/*"
@@ -31,7 +25,7 @@
   "bugs": {
     "url": "https://github.com/mcp-shark/mcp-shark/issues"
   },
-  "files": ["bin", "ui", "core", "lib", "README.md", "LICENSE", "package.json"],
+  "files": ["bin", "ui", "core", "README.md", "LICENSE", "package.json"],
   "scripts": {
     "start": "node scripts/start-ui.js",
     "predev": "npm run build:ui",

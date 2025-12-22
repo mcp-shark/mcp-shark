@@ -6,7 +6,7 @@ import {
   ensureScanResultsDirectory,
   getScanResultFilePath,
   getScanResultsDirectory,
-} from '#ui/server/utils/scan-cache/directory.js';
+} from '#core/utils/scan-cache/directory.js';
 
 /**
  * Service for Smart Scan cache operations

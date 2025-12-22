@@ -104,7 +104,7 @@ This directory contains the core architecture following SOLID principles with de
 
 ```javascript
 import { DependencyContainer } from '#core';
-import { openDb } from '#common/db/init';
+import { openDb } from '#core/db/init';
 
 const db = openDb(getDatabaseFile());
 const container = new DependencyContainer(db);

@@ -2,7 +2,7 @@ import * as fs from 'node:fs';
 import { homedir } from 'node:os';
 import * as path from 'node:path';
 import { parse as parseToml } from '@iarna/toml';
-import { getMcpConfigPath } from '#common/configs';
+import { getMcpConfigPath } from '#core/configs';
 import { ConfigDetectionService } from './ConfigDetectionService.js';
 
 /**

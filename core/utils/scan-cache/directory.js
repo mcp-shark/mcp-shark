@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { getWorkingDirectory } from '#common/configs';
+import { getWorkingDirectory } from '#core/configs';
 
 const SCAN_RESULTS_DIR_NAME = 'scan-results';
 

@@ -1,4 +1,4 @@
-import { LoggerLibrary } from '#core/libraries/LoggerLibrary.js';
+import { LoggerLibrary } from './LoggerLibrary.js';
 
 /**
  * Bootstrap logger instance for use before DI container is available

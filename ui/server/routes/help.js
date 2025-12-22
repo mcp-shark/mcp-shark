@@ -1,4 +1,4 @@
-import { readHelpState, writeHelpState } from '#common/configs';
+import { readHelpState, writeHelpState } from '#core/configs';
 import { HttpStatus } from '#core/constants';
 
 export function createHelpRoutes() {

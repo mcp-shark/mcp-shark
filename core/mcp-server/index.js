@@ -1,12 +1,12 @@
 import { createServer } from 'node:http';
 
-import serverLogger from '#common/logger';
+import { bootstrapLogger as serverLogger } from '#core/libraries';
 import { isError } from '#core/libraries/ErrorLibrary.js';
 import { runAllExternalServers } from './server/external/all.js';
 
-import { getDatabaseFile, getMcpConfigPath, prepareAppDataSpaces } from '#common/configs';
-import { initDb } from '#common/db/init';
 import { DependencyContainer } from '#core';
+import { getDatabaseFile, getMcpConfigPath, prepareAppDataSpaces } from '#core/configs';
+import { initDb } from '#core/db/init';
 import { withAuditRequestResponseHandler } from './auditor/audit.js';
 import { getInternalServer } from './server/internal/run.js';
 import { createInternalServerFactory } from './server/internal/server.js';

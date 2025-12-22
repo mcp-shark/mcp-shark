@@ -69,9 +69,9 @@ The executable will:
 **Package Information:**
 - **Package Name**: `@mcp-shark/mcp-shark`
 - **npm Registry**: [https://www.npmjs.com/package/@mcp-shark/mcp-shark](https://www.npmjs.com/package/@mcp-shark/mcp-shark)
-- **Version**: 1.4.2
+- **Version**: 1.5.4
 - **License**: Source-Available Non-Commercial (see [LICENSE](LICENSE) for details)
-- **Node.js**: Requires Node.js 18+
+- **Node.js**: Requires Node.js 20.0.0 or higher
 
 ## Quick Start
 
@@ -103,32 +103,150 @@ For detailed instructions, see [Getting Started Guide](docs/getting-started.md).
 - [Quick Start](#quick-start)
 - [About](#about)
 - [Features](#features)
+- [Architecture](#architecture)
+- [Configuration Support](#configuration-support)
 - [Documentation](#documentation)
 - [Requirements](#requirements)
+- [Development](#development)
 - [License](#license)
 
 ## About
 
 MCP Shark is a monitoring and aggregation solution for Model Context Protocol (MCP) servers. It provides a unified interface for multiple MCP servers (both HTTP and stdio-based) with real-time traffic inspection, security analysis, and interactive testing capabilities.
 
-Key capabilities:
+**Key capabilities:**
 
 - **Multi-server aggregation**: Connect to multiple MCP servers simultaneously
 - **Real-time monitoring**: Wireshark-like interface for inspecting all MCP communications
 - **Interactive playground**: Test tools, prompts, and resources directly in the UI
 - **Security analysis**: AI-powered scanning for security risks and vulnerabilities
-- **IDE integration**: Automatic configuration for Cursor, Windsurf, and other IDEs
+- **IDE integration**: Automatic configuration detection for Cursor, Windsurf, Codex, and other IDEs
+- **Configuration management**: Support for JSON and TOML configuration formats
 
 ## Features
 
-- **Traffic Capture**: Real-time monitoring with advanced filtering and search
-- **MCP Playground**: Interactive testing environment for tools, prompts, and resources
-- **Smart Scan**: AI-powered security analysis for MCP servers
-- **Session Management**: Track and analyze conversation sessions
-- **Export & Backup**: Export data in multiple formats and manage configuration backups
-- **Statistics & Analytics**: Performance metrics and traffic analysis
+### Traffic Capture & Monitoring
+- **Real-time monitoring**: WebSocket-powered live traffic capture with automatic updates
+- **Advanced filtering**: Filter by method, status, protocol, session, server, direction, and more
+- **Full-text search**: Search across all fields including URLs, endpoints, and JSON-RPC methods
+- **Multiple view modes**: General list, grouped by session/server, grouped by server/session, and protocol view
+- **Detailed packet inspection**: Click any packet to see full headers, request/response body, timing information, and JSON-RPC details
+- **Multiple payload views**: Raw, JSON, and Hex views for data inspection
+- **Export capabilities**: Export data in JSON, CSV, or TXT formats
 
-For detailed feature documentation, see [Features Guide](docs/features.md).
+### MCP Playground
+- **Interactive testing**: Test tools, prompts, and resources directly in the UI
+- **Tool testing**: Browse all available tools, see descriptions and schemas, call tools with custom JSON arguments
+- **Prompt exploration**: List all prompts, view descriptions and argument schemas, test with different arguments
+- **Resource browsing**: List and read resources from all connected servers
+
+### Smart Scan
+- **AI-powered security analysis**: Automated scanning for security risks and vulnerabilities
+- **Cached results**: Local caching of scan results for faster access
+- **Batch scanning**: Scan multiple servers simultaneously
+- **Risk assessment**: Detailed risk level analysis for each server
+
+### Configuration Management
+- **Automatic detection**: Automatically detects configuration files from Cursor, Windsurf, and Codex
+- **Multiple format support**: Supports both JSON and TOML configuration formats
+- **Codex integration**: Full support for Codex `config.toml` format with automatic conversion
+- **Backup & restore**: Automatic backup creation before configuration changes
+- **Service selection**: Choose which servers to activate from your configuration
+
+### Session & Conversation Management
+- **Session tracking**: Track and analyze conversation sessions
+- **Conversation grouping**: Group requests and responses by conversation
+- **Statistics & analytics**: Performance metrics and traffic analysis
+
+## Architecture
+
+MCP Shark follows a clean architecture pattern with strict separation of concerns:
+
+```
+┌─────────────┐
+│ Controllers │  (HTTP handling: extraction, sanitization, serialization)
+└──────┬──────┘
+       │ uses models
+       ▼
+┌─────────────┐
+│   Models    │  (Typed data structures)
+└──────┬──────┘
+       │ used by
+       ▼
+┌─────────────┐
+│  Services   │  (Business Logic - HTTP-agnostic)
+└──────┬──────┘
+       │ uses
+       ▼
+┌─────────────┐
+│Repositories │  (Data Access)
+└──────┬──────┘
+       │ uses
+       ▼
+┌─────────────┐
+│  Database   │  (SQLite)
+└─────────────┘
+```
+
+### Architecture Principles
+
+- **Service-Oriented Architecture (SOA)**: All business logic is in service classes
+- **HTTP-Agnostic Services**: Services accept and return typed models, with no knowledge of HTTP
+- **Dependency Injection**: All dependencies are managed through `DependencyContainer`
+- **SOLID Principles**: Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion
+- **Clean Code**: No nested functions, all imports at top, file size limits (250 lines max for backend files)
+
+### Core Components
+
+- **Controllers** (`ui/server/controllers/`): Handle HTTP concerns (request parsing, response formatting, error handling)
+- **Services** (`core/services/`): Contain all business logic, HTTP-agnostic
+- **Repositories** (`core/repositories/`): Encapsulate database access
+- **Models** (`core/models/`): Typed data structures for data transfer
+- **Libraries** (`core/libraries/`): Pure utility functions with no dependencies
+- **Constants** (`core/constants/`): Well-defined constants (no magic numbers)
+- **MCP Server** (`core/mcp-server/`): Core MCP server implementation with audit logging
+
+For detailed architecture documentation, see [Architecture Guide](docs/architecture.md) and [Core README](core/README.md).
+
+## Configuration Support
+
+MCP Shark supports multiple configuration formats and automatically detects configurations from various IDEs:
+
+### Supported Formats
+
+- **JSON**: Standard MCP configuration format (used by Cursor, Windsurf)
+- **TOML**: Codex configuration format (`config.toml`)
+
+### Automatic Detection
+
+MCP Shark automatically detects configuration files from:
+
+- **Cursor**: `~/.cursor/mcp.json`
+- **Windsurf**: `~/.codeium/windsurf/mcp_config.json`
+- **Codex**: `~/.codex/config.toml` (or `$CODEX_HOME/config.toml`)
+
+### Codex Integration
+
+Full support for Codex's `config.toml` format:
+
+```toml
+[mcp_servers]
+server_name = { command = "node", args = ["server.js"], env = { KEY = "value" } }
+http_server = { url = "https://api.example.com", headers = { Authorization = "Bearer token" } }
+```
+
+MCP Shark automatically:
+- Detects Codex `config.toml` files
+- Parses the `[mcp_servers]` section
+- Converts to internal format (supports both stdio and HTTP servers)
+- Handles environment variables and headers
+
+### Configuration Features
+
+- **Automatic backup**: Configurations are automatically backed up before changes
+- **Service selection**: Choose which servers to activate from your configuration
+- **Format conversion**: Automatic conversion between formats when needed
+- **Validation**: Comprehensive validation of configuration files
 
 ## Documentation
 
@@ -143,11 +261,74 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
 - **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
 - **[Development](docs/development.md)** - Developer guide and contribution guidelines
 
+### Architecture Documentation
+
+- **[Core Architecture](core/README.md)** - Detailed core architecture documentation
+- **[Architecture Rules](rules/ARCHITECTURE_RULES.md)** - Architecture principles and guidelines
+- **[Coding Rules](rules/CODING_RULES.md)** - Coding standards and best practices
+- **[UI Endpoint Compliance](rules/UI_ENDPOINT_COMPLIANCE_CHECKLIST.md)** - UI endpoint compliance checklist
+
 ## Requirements
 
-- **Node.js**: 18.0.0 or higher
+- **Node.js**: 20.0.0 or higher
 - **npm**: Comes with Node.js
 - **Operating System**: macOS, Windows, or Linux
+
+## Development
+
+### Code Quality
+
+MCP Shark maintains strict code quality standards:
+
+- **Linting**: Biome for code linting and formatting
+- **Architecture Compliance**: Regular compliance checks ensure adherence to architecture principles
+- **File Size Limits**: Backend files must not exceed 250 lines
+- **No Nested Functions**: All functions must be at module or class level
+- **Imports at Top**: All imports must be at the top of files
+- **No Magic Numbers**: All constants must be well-defined
+
+### Running Locally
+
+```bash
+# Install dependencies
+npm install
+
+# Build UI
+npm run build:ui
+
+# Start development server
+npm run dev
+
+# Run linter
+npm run lint
+
+# Format code
+npm run format
+```
+
+### Project Structure
+
+```
+mcp-shark/
+├── bin/                    # Executable scripts
+├── core/                   # Core architecture
+│   ├── constants/         # Well-defined constants
+│   ├── container/         # Dependency injection
+│   ├── libraries/         # Pure utility libraries
+│   ├── models/           # Typed data models
+│   ├── mcp-server/       # MCP server implementation
+│   ├── repositories/     # Data access layer
+│   └── services/         # Business logic layer
+├── lib/                   # Common utilities
+├── ui/                    # Web UI
+│   ├── server/           # Express server and routes
+│   └── src/              # React frontend
+├── docs/                  # Documentation
+├── rules/                 # Architecture and coding rules
+└── scripts/               # Build and utility scripts
+```
+
+For detailed development information, see [Development Guide](docs/development.md) and [DEVELOPERS.md](DEVELOPERS.md).
 
 ## License
 
@@ -175,4 +356,4 @@ See the [LICENSE](LICENSE) file for full terms and conditions.
 
 ---
 
-**Version**: 1.5.0 | **Homepage**: [https://mcpshark.sh](https://mcpshark.sh)
+**Version**: 1.5.4 | **Homepage**: [https://mcpshark.sh](https://mcpshark.sh)

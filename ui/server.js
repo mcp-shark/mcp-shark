@@ -4,9 +4,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import express from 'express';
 import { WebSocketServer } from 'ws';
 
-import { getDatabaseFile, prepareAppDataSpaces } from '#common/configs';
-import { openDb } from '#common/db/init';
 import { DependencyContainer, RequestFilters } from '#core';
+import { getDatabaseFile, prepareAppDataSpaces } from '#core/configs';
+import { openDb } from '#core/db/init';
 
 import { createBackupRoutes } from './server/routes/backups/index.js';
 import { createCompositeRoutes } from './server/routes/composite/index.js';

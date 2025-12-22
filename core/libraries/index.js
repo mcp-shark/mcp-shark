@@ -5,3 +5,4 @@
 export { SerializationLibrary } from './SerializationLibrary.js';
 export { LoggerLibrary } from './LoggerLibrary.js';
 export { CompositeError, isError, getErrors } from './ErrorLibrary.js';
+export { default as bootstrapLogger } from './bootstrap-logger.js';

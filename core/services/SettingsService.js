@@ -1,8 +1,8 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
-import { getDatabaseFile, getWorkingDirectory } from '#common/configs';
-import { getScanResultsDirectory } from '#ui/server/utils/scan-cache/directory.js';
+import { getDatabaseFile, getWorkingDirectory } from '#core/configs';
+import { getScanResultsDirectory } from '#core/utils/scan-cache/directory.js';
 
 /**
  * Service for application settings

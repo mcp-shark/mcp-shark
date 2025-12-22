@@ -1,7 +1,7 @@
 import * as fs from 'node:fs';
 import { homedir } from 'node:os';
 import * as path from 'node:path';
-import { getCodexConfigPath } from '#common/configs';
+import { getCodexConfigPath } from '#core/configs';
 
 /**
  * Service for detecting configuration files on the system
