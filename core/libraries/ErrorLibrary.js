@@ -1,3 +1,7 @@
+/**
+ * Library for error handling utilities
+ * Pure utility - no dependencies on services or repositories
+ */
 export class CompositeError extends Error {
   constructor(name, message, error) {
     super(name, message);

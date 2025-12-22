@@ -4,7 +4,7 @@ import {
   ListToolsResultSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 
-import { CompositeError } from '../../../common/error.js';
+import { CompositeError } from '#core/libraries/ErrorLibrary.js';
 const METHOD_NOT_FOUND_CODE = '-32601';
 
 export class RequestError extends CompositeError {

@@ -48,7 +48,7 @@ npm run check:fix     # Fix linting and formatting issues
 mcp-shark/
 ├── bin/                    # CLI executable
 │   └── mcp-shark.js
-├── mcp-server/            # MCP server library
+├── core/mcp-server/      # MCP server library (core component)
 │   ├── index.js           # Library entry point
 │   ├── mcp-shark.js       # Server entry point
 │   └── lib/               # Server implementation

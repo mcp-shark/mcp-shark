@@ -1,4 +1,4 @@
-import { CompositeError, getErrors, isError } from '../../../common/error.js';
+import { CompositeError, getErrors, isError } from '#core/libraries/ErrorLibrary.js';
 import { createClient } from './client.js';
 import * as requests from './request.js';
 import { makeTransport } from './transport.js';
@@ -8,6 +8,21 @@ export class RunError extends CompositeError {
     super('RunError', message, error);
     this.errors = errors;
   }
+}
+
+function createCallTool(client, args) {
+  return client.callTool.bind(client)(args);
+}
+
+function createReadResource(client, resourceUri) {
+  return client.readResource.bind(client)(resourceUri);
+}
+
+function createGetPrompt(client, promptName, args) {
+  return client.getPrompt.bind(client)({
+    name: promptName,
+    arguments: args,
+  });
 }
 
 export async function runExternalServer({ logger, name, config }) {
@@ -44,21 +59,15 @@ export async function runExternalServer({ logger, name, config }) {
   }
 
   const [{ tools }, { resources }, { prompts }] = results.map((result) => result.value);
+
   return {
     name,
     client,
     tools,
     resources,
     prompts,
-    callTool: (args) => client.callTool.bind(client)(args),
-    readResource: (resourceUri) => {
-      return client.readResource.bind(client)(resourceUri);
-    },
-    getPrompt: (promptName, args) => {
-      return client.getPrompt.bind(client)({
-        name: promptName,
-        arguments: args,
-      });
-    },
+    callTool: (args) => createCallTool(client, args),
+    readResource: (resourceUri) => createReadResource(client, resourceUri),
+    getPrompt: (promptName, args) => createGetPrompt(client, promptName, args),
   };
 }

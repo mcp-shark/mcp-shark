@@ -2,11 +2,6 @@ import { Readable } from 'node:stream';
 import { parse as parseJsonRpc } from 'jsonrpc-lite';
 import { getSessionFromRequest } from '../server/internal/handlers/common.js';
 
-/* ---------- helpers ---------- */
-
-/**
- * Safely parse JSON string, returning null if parsing fails
- */
 function parseJsonSafely(jsonString) {
   try {
     return JSON.parse(jsonString);
@@ -53,37 +48,49 @@ async function readBody(req) {
   return Buffer.concat(chunks);
 }
 
+function writeHandlerFunction(chunks, target, chunk, ...args) {
+  if (chunk) {
+    const buf = toBuffer(chunk);
+    chunks.push(buf);
+  }
+  return target.write(chunk, ...args);
+}
+
 function createWriteHandler(chunks, target) {
   return (chunk, ...args) => {
-    if (chunk) {
-      const buf = toBuffer(chunk);
-      chunks.push(buf);
-    }
-    return target.write(chunk, ...args);
+    return writeHandlerFunction(chunks, target, chunk, ...args);
   };
+}
+
+function endHandlerFunction(chunks, target, chunk, ...args) {
+  if (chunk) {
+    const buf = toBuffer(chunk);
+    chunks.push(buf);
+  }
+  return target.end(chunk, ...args);
 }
 
 function createEndHandler(chunks, target) {
   return (chunk, ...args) => {
-    if (chunk) {
-      const buf = toBuffer(chunk);
-      chunks.push(buf);
-    }
-    return target.end(chunk, ...args);
+    return endHandlerFunction(chunks, target, chunk, ...args);
   };
+}
+
+function proxyGetHandlerFunction(chunks, target, prop, receiver) {
+  if (prop === 'write') {
+    return createWriteHandler(chunks, target);
+  }
+
+  if (prop === 'end') {
+    return createEndHandler(chunks, target);
+  }
+
+  return Reflect.get(target, prop, receiver);
 }
 
 function createProxyGetHandler(chunks) {
   return (target, prop, receiver) => {
-    if (prop === 'write') {
-      return createWriteHandler(chunks, target);
-    }
-
-    if (prop === 'end') {
-      return createEndHandler(chunks, target);
-    }
-
-    return Reflect.get(target, prop, receiver);
+    return proxyGetHandlerFunction(chunks, target, prop, receiver);
   };
 }
 
@@ -119,12 +126,16 @@ function tryParseJsonRpc(buf) {
   }
 }
 
+function createReadableRead(buf) {
+  return function read() {
+    this.push(buf);
+    this.push(null);
+  };
+}
+
 function rebuildReq(req, buf) {
   const r = new Readable({
-    read() {
-      this.push(buf);
-      this.push(null);
-    },
+    read: createReadableRead(buf),
   });
 
   r.headers = req.headers;
@@ -158,8 +169,6 @@ function waitForResponseFinish(res) {
   });
 }
 
-/* ---------- main handler ---------- */
-
 export async function withAuditRequestResponseHandler(
   transport,
   req,
@@ -171,8 +180,6 @@ export async function withAuditRequestResponseHandler(
   const reqBuf = await readBody(req);
   const reqJsonRpc = tryParseJsonRpc(reqBuf);
 
-  // Extract session ID from request
-  // If no session ID exists, it's an initiation request
   const sessionIdFromRequest = getSessionFromRequest(req);
   const sessionId =
     sessionIdFromRequest === null ||
@@ -202,14 +209,12 @@ export async function withAuditRequestResponseHandler(
 
   const parsedForTransport = reqJsonRpc ? parseJsonSafely(reqBuf.toString('utf8')) : undefined;
 
-  // hand over to transport
   if (!transport || typeof transport.handleRequest !== 'function') {
     res.status(500).json({ error: 'Transport not available' });
     return;
   }
   await transport.handleRequest(replayReq, wrappedRes, parsedForTransport);
 
-  // wait until response fully finished (important for SSE / streaming)
   await waitForResponseFinish(wrappedRes);
 
   const resBuf = getBody();
@@ -223,11 +228,8 @@ export async function withAuditRequestResponseHandler(
   const resBodyStr = resBuf.toString('utf8');
   const resBodyJson = parseJsonSafely(resBodyStr);
 
-  // Extract JSON-RPC ID from request for correlation
   const jsonrpcId = reqJsonRpc?.payload?.id !== undefined ? String(reqJsonRpc.payload.id) : null;
 
-  // Log response packet to database
-  // Use the same session ID from the request
   auditLogger.logResponsePacket({
     statusCode: wrappedRes.statusCode || 200,
     headers: resHeaders,

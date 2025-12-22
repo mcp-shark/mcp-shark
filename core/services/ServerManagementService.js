@@ -1,4 +1,4 @@
-import { startMcpSharkServer } from '@mcp-shark/mcp-shark/mcp-server';
+import { initAuditLogger, startMcpSharkServer } from '#core/mcp-server/index.js';
 
 /**
  * Service for managing MCP Shark server lifecycle
@@ -25,9 +25,12 @@ export class ServerManagementService {
 
     this.logger?.info({ path: mcpsJsonPath }, 'Starting MCP-Shark server as library...');
 
+    const auditLogger = initAuditLogger(this.logger);
+
     const serverInstance = await startMcpSharkServer({
       configPath: mcpsJsonPath,
       port,
+      auditLogger,
       onError: (err) => {
         this.logger?.error({ error: err.message }, 'Failed to start mcp-shark server');
         this.serverInstance = null;

@@ -1,4 +1,4 @@
-import { CompositeError } from '../../../common/error.js';
+import { CompositeError } from '#core/libraries/ErrorLibrary.js';
 
 export class InternalServerError extends CompositeError {
   constructor(message, error) {

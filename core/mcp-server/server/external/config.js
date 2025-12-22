@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { CompositeError, isError } from '../../common/error.js';
+import { CompositeError, isError } from '#core/libraries/ErrorLibrary.js';
 
 const DEFAULT_TYPE = 'stdio';
 export class ConfigError extends CompositeError {

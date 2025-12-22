@@ -95,7 +95,7 @@ make help
 
 ```
 mcp-shark/
-├── mcp-server/           # MCP aggregation server
+├── core/mcp-server/       # MCP aggregation server (core component)
 │   ├── mcp-shark.js      # Main entry point
 │   ├── lib/              # Server implementation
 │   └── temp/             # Config and database
@@ -109,7 +109,7 @@ mcp-shark/
 
 ## Architecture Overview
 
-- **`mcp-server/`**: MCP aggregation server implementation
+- **`core/mcp-server/`**: MCP aggregation server implementation (core component)
   - `mcp-shark.js`: Main entry point
   - `lib/`: Core server logic, transport handlers, audit logging
   - Uses SQLite for audit logging

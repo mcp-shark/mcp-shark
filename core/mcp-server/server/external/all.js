@@ -1,4 +1,4 @@
-import { CompositeError, getErrors } from '../../common/error.js';
+import { CompositeError, getErrors } from '#core/libraries/ErrorLibrary.js';
 import { normalizeConfig } from './config.js';
 import { buildKv } from './kv.js';
 import { runExternalServer } from './single/run.js';

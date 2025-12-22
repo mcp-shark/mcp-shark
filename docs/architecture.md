@@ -99,7 +99,7 @@ Stores all MCP communications with:
 mcp-shark/
 ├── bin/
 │   └── mcp-shark.js          # CLI entry point
-├── mcp-server/
+├── core/mcp-server/      # MCP server library (core component)
 │   ├── index.js              # Library entry point
 │   ├── mcp-shark.js          # Server entry point
 │   └── lib/

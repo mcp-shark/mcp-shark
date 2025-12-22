@@ -12,8 +12,12 @@ async function handleToolsList(req, logger, mcpServers, requestedMcpServer) {
   return result;
 }
 
+function createToolsListHandlerWrapper(req, logger, mcpServers, requestedMcpServer) {
+  return handleToolsList(req, logger, mcpServers, requestedMcpServer);
+}
+
 export function createToolsListHandler(logger, mcpServers, requestedMcpServer) {
   return async (req) => {
-    return handleToolsList(req, logger, mcpServers, requestedMcpServer);
+    return createToolsListHandlerWrapper(req, logger, mcpServers, requestedMcpServer);
   };
 }

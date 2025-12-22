@@ -17,8 +17,12 @@ async function handleResourcesRead(req, logger, mcpServers, requestedMcpServer) 
   return result;
 }
 
+function createResourcesReadHandlerWrapper(req, logger, mcpServers, requestedMcpServer) {
+  return handleResourcesRead(req, logger, mcpServers, requestedMcpServer);
+}
+
 export function createResourcesReadHandler(logger, mcpServers, requestedMcpServer) {
   return async (req) => {
-    return handleResourcesRead(req, logger, mcpServers, requestedMcpServer);
+    return createResourcesReadHandlerWrapper(req, logger, mcpServers, requestedMcpServer);
   };
 }

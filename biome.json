@@ -70,7 +70,7 @@
       }
     },
     {
-      "include": ["mcp-server/**"],
+      "include": ["core/mcp-server/**"],
       "linter": {
         "rules": {
           "suspicious": {

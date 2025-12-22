@@ -71,6 +71,7 @@ This directory contains the core architecture following SOLID principles with de
 ### Libraries (`core/libraries/`)
 - `SerializationLibrary` - BigInt serialization utilities
 - `LoggerLibrary` - Logging utilities wrapper
+- `ErrorLibrary` - Error handling utilities (CompositeError, isError, getErrors)
 
 ### Models (`core/models/`)
 - `RequestFilters` - Typed model for request filtering
@@ -85,6 +86,17 @@ This directory contains the core architecture following SOLID principles with de
 
 ### Container (`core/container/`)
 - `DependencyContainer` - Dependency injection container that manages all dependencies
+
+### MCP Server (`core/mcp-server/`)
+- `index.js` - Main entry point for starting the MCP Shark server
+- `auditor/` - Audit logging for request/response packets
+- `server/external/` - External MCP server management
+- `server/internal/` - Internal MCP server implementation
+
+### Libraries (`core/libraries/`)
+- `LoggerLibrary` - Logging utilities wrapper
+- `SerializationLibrary` - BigInt serialization utilities
+- `ErrorLibrary` - Error handling utilities (CompositeError, isError, getErrors)
 
 ## Usage
 

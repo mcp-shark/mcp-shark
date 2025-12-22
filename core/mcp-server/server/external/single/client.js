@@ -1,5 +1,5 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { CompositeError } from '../../../common/error.js';
+import { CompositeError } from '#core/libraries/ErrorLibrary.js';
 
 const DEFAULT_VERSION = '1.0.0';
 const DEFAULT_NAME = 'mcp-client';

@@ -61,8 +61,12 @@ function createInternalServerForRequested(logger, mcpServers, requestedMcpServer
   return createInternalServer(logger, mcpServers, requestedMcpServer);
 }
 
+function createInternalServerFactoryWrapper(logger, mcpServers, requestedMcpServer) {
+  return createInternalServerForRequested(logger, mcpServers, requestedMcpServer);
+}
+
 export function createInternalServerFactory(logger, mcpServers) {
   return (requestedMcpServer) => {
-    return createInternalServerForRequested(logger, mcpServers, requestedMcpServer);
+    return createInternalServerFactoryWrapper(logger, mcpServers, requestedMcpServer);
   };
 }

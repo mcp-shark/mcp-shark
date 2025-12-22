@@ -17,8 +17,12 @@ async function handlePromptsGet(req, logger, mcpServers, requestedMcpServer) {
   return result;
 }
 
+function createPromptsGetHandlerWrapper(req, logger, mcpServers, requestedMcpServer) {
+  return handlePromptsGet(req, logger, mcpServers, requestedMcpServer);
+}
+
 export function createPromptsGetHandler(logger, mcpServers, requestedMcpServer) {
   return async (req) => {
-    return handlePromptsGet(req, logger, mcpServers, requestedMcpServer);
+    return createPromptsGetHandlerWrapper(req, logger, mcpServers, requestedMcpServer);
   };
 }

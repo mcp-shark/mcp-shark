@@ -33,8 +33,12 @@ async function handleToolsCall(req, logger, mcpServers, requestedMcpServer) {
   return result;
 }
 
+function createToolsCallHandlerWrapper(req, logger, mcpServers, requestedMcpServer) {
+  return handleToolsCall(req, logger, mcpServers, requestedMcpServer);
+}
+
 export function createToolsCallHandler(logger, mcpServers, requestedMcpServer) {
   return async (req) => {
-    return handleToolsCall(req, logger, mcpServers, requestedMcpServer);
+    return createToolsCallHandlerWrapper(req, logger, mcpServers, requestedMcpServer);
   };
 }

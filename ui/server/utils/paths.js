@@ -23,10 +23,10 @@ function getNvmNodeBinPaths(homeDir) {
 
 export function findMcpServerPath() {
   const pathsToCheck = [
-    path.join(process.cwd(), '../mcp-server'),
-    path.join(__dirname, '../../mcp-server'),
-    path.join(process.cwd(), 'mcp-server'),
-    path.join(__dirname, '../../mcp-server'),
+    path.join(process.cwd(), 'core/mcp-server'),
+    path.join(__dirname, '../../../core/mcp-server'),
+    path.join(process.cwd(), '../core/mcp-server'),
+    path.join(__dirname, '../../../../core/mcp-server'),
   ];
 
   for (const possiblePath of pathsToCheck) {
@@ -35,7 +35,7 @@ export function findMcpServerPath() {
     }
   }
 
-  return path.join(process.cwd(), '../mcp-server');
+  return path.join(process.cwd(), 'core/mcp-server');
 }
 
 function getPathOutput(shell, shellName) {

@@ -10,8 +10,12 @@ async function handleResourcesList(req, logger, mcpServers, requestedMcpServer) 
   return result;
 }
 
+function createResourcesListHandlerWrapper(req, logger, mcpServers, requestedMcpServer) {
+  return handleResourcesList(req, logger, mcpServers, requestedMcpServer);
+}
+
 export function createResourcesListHandler(logger, mcpServers, requestedMcpServer) {
   return async (req) => {
-    return handleResourcesList(req, logger, mcpServers, requestedMcpServer);
+    return createResourcesListHandlerWrapper(req, logger, mcpServers, requestedMcpServer);
   };
 }

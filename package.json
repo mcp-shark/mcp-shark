@@ -6,7 +6,7 @@
   "main": "./bin/mcp-shark.js",
   "exports": {
     ".": "./bin/mcp-shark.js",
-    "./mcp-server": "./mcp-server/index.js"
+    "./mcp-server": "./core/mcp-server/index.js"
   },
   "imports": {
     "#common/configs": "./lib/common/configs/index.js",
@@ -31,7 +31,7 @@
   "bugs": {
     "url": "https://github.com/mcp-shark/mcp-shark/issues"
   },
-  "files": ["bin", "ui", "mcp-server", "lib", "README.md", "LICENSE", "package.json"],
+  "files": ["bin", "ui", "core", "lib", "README.md", "LICENSE", "package.json"],
   "scripts": {
     "start": "node scripts/start-ui.js",
     "predev": "npm run build:ui",

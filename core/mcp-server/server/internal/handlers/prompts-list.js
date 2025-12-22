@@ -10,8 +10,12 @@ async function handlePromptsList(req, logger, mcpServers, requestedMcpServer) {
   return result;
 }
 
+function createPromptsListHandlerWrapper(req, logger, mcpServers, requestedMcpServer) {
+  return handlePromptsList(req, logger, mcpServers, requestedMcpServer);
+}
+
 export function createPromptsListHandler(logger, mcpServers, requestedMcpServer) {
   return async (req) => {
-    return handlePromptsList(req, logger, mcpServers, requestedMcpServer);
+    return createPromptsListHandlerWrapper(req, logger, mcpServers, requestedMcpServer);
   };
 }
