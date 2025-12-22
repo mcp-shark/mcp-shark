@@ -41,6 +41,15 @@ export class ServerManagementController {
         });
       }
 
+      // If filePath is provided, restore original config if already patched
+      // This ensures processSetup reads the original config, not the patched one
+      if (filePath && !fileContent) {
+        const restoreResult = this.configPatchingService.restoreIfPatched(filePath);
+        if (restoreResult.warning) {
+          this._addLogEntry('warn', `[WARNING] ${restoreResult.warning}`);
+        }
+      }
+
       const setupResult = this.configService.processSetup(filePath, fileContent, selectedServices);
 
       if (!setupResult.success) {
