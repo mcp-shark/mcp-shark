@@ -39,6 +39,9 @@ export class ServerManagementController {
         fileContent,
         selectedServices,
         port: 9851,
+        onLog: (type, message) => {
+          this._addLogEntry(type, message);
+        },
         onError: (err) => {
           this._addLogEntry('error', `Failed to start mcp-shark server: ${err.message}`);
           throw err;

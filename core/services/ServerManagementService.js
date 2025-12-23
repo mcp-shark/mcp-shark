@@ -33,6 +33,7 @@ export class ServerManagementService {
       port = Defaults.DEFAULT_MCP_SERVER_PORT,
       onError,
       onReady,
+      onLog,
     } = options;
 
     if (!filePath && !fileContent) {
@@ -71,6 +72,7 @@ export class ServerManagementService {
     await this.startServer({
       configPath: mcpsJsonPath,
       port,
+      onLog,
       onError: (err) => {
         if (onError) {
           onError(err);
@@ -106,7 +108,13 @@ export class ServerManagementService {
    * Start MCP Shark server
    */
   async startServer(options = {}) {
-    const { configPath, port = Defaults.DEFAULT_MCP_SERVER_PORT, onError, onReady } = options;
+    const {
+      configPath,
+      port = Defaults.DEFAULT_MCP_SERVER_PORT,
+      onError,
+      onReady,
+      onLog,
+    } = options;
 
     const mcpsJsonPath = configPath || this.configService.getMcpConfigPath();
 
@@ -123,8 +131,12 @@ export class ServerManagementService {
       port,
       auditLogger,
       logger: this.logger,
+      onLog,
       onError: (err) => {
-        this.logger?.error({ error: err.message }, 'Failed to start mcp-shark server');
+        this.logger?.error(
+          { message: err.message, stack: err.stack, error: err },
+          'Failed to start mcp-shark server'
+        );
         this.serverInstance = null;
         if (onError) {
           onError(err);

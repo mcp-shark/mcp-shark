@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 
 import { isError } from '#core/libraries/ErrorLibrary.js';
-import { bootstrapLogger } from '#core/libraries/index.js';
+import { bootstrapLogger as serverLogger } from '#core/libraries/index.js';
 import { runAllExternalServers } from './server/external/all.js';
 
 import { DependencyContainer } from '#core';
@@ -115,6 +115,7 @@ function createServerPromise(httpServer, port, serverLogger, onError, onReady) {
  * @param {number} [options.port=9851] - Port to listen on
  * @param {Function} [options.onError] - Error callback
  * @param {Function} [options.onReady] - Ready callback
+ * @param {Function} [options.onLog] - Log callback: (type: string, message: string) => void
  * @param {Object} options.auditLogger - Required audit logger instance (use initAuditLogger() to create)
  * @returns {Promise<{app: Express, server: http.Server, stop: Function}>} Server instance
  */
@@ -124,18 +125,17 @@ export async function startMcpSharkServer(options = {}) {
     port = Defaults.DEFAULT_MCP_SERVER_PORT,
     onError,
     onReady,
+    onLog,
     auditLogger: providedAuditLogger,
-    logger,
   } = options;
 
-  const serverLogger = logger || bootstrapLogger();
   prepareAppDataSpaces();
 
-  serverLogger.info({ port }, '[MCP-Shark] Starting MCP server...');
-  serverLogger.info(`[MCP-Shark] Config path: ${configPath}`);
-  serverLogger.info(`[MCP-Shark] Database path: ${getDatabaseFile()}`);
-  serverLogger.info(`[MCP-Shark] Working directory: ${process.cwd()}`);
-  serverLogger.info({ path: Environment.getPath() }, '[MCP-Shark] PATH');
+  logServerInfo(serverLogger, onLog, 'Starting MCP server...', { port });
+  logServerInfo(serverLogger, onLog, 'Config path', { path: configPath });
+  logServerInfo(serverLogger, onLog, 'Database path', { path: getDatabaseFile() });
+  logServerInfo(serverLogger, onLog, 'Working directory', { path: process.cwd() });
+  logServerInfo(serverLogger, onLog, 'PATH', { path: Environment.getPath() });
 
   try {
     if (!providedAuditLogger) {
@@ -191,5 +191,18 @@ export async function startMcpSharkServer(options = {}) {
       onError(error);
     }
     throw error;
+  }
+}
+
+function logServerInfo(serverLogger, onLog, message, metadata) {
+  const finalMessage = `[MCP Server] ${message}`;
+  serverLogger.info({ ...metadata, message: finalMessage }, finalMessage);
+  if (onLog) {
+    onLog(
+      'stdout',
+      `${finalMessage} ${Object.entries(metadata)
+        .map(([key, value]) => `${key}=${value}`)
+        .join(' ')}`
+    );
   }
 }
