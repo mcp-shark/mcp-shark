@@ -2,8 +2,8 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { WebSocketClientTransport } from '@modelcontextprotocol/sdk/client/websocket.js';
 
+import { Environment } from '#core/configs/environment.js';
 import { CompositeError } from '#core/libraries/ErrorLibrary.js';
-
 export class TransportError extends CompositeError {
   constructor(message, error) {
     super('TransportError', message, error);
@@ -20,7 +20,7 @@ export function makeTransport({
 }) {
   // Start with enhanced PATH
   const env = {
-    ...process.env,
+    ...Environment.getEnv(),
     ...configEnv,
   };
 

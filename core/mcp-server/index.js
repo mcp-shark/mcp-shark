@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 
 import { isError } from '#core/libraries/ErrorLibrary.js';
-import { bootstrapLogger as serverLogger } from '#core/libraries/index.js';
+import { bootstrapLogger } from '#core/libraries/index.js';
 import { runAllExternalServers } from './server/external/all.js';
 
 import { DependencyContainer } from '#core';
@@ -11,6 +11,7 @@ import {
   getMcpConfigPath,
   prepareAppDataSpaces,
 } from '#core/configs/index.js';
+import { Defaults } from '#core/constants/Defaults.js';
 import { initDb } from '#core/db/init.js';
 import { withAuditRequestResponseHandler } from './auditor/audit.js';
 import { getInternalServer } from './server/internal/run.js';
@@ -120,15 +121,17 @@ function createServerPromise(httpServer, port, serverLogger, onError, onReady) {
 export async function startMcpSharkServer(options = {}) {
   const {
     configPath = getMcpConfigPath(),
-    port = 9851,
+    port = Defaults.DEFAULT_MCP_SERVER_PORT,
     onError,
     onReady,
     auditLogger: providedAuditLogger,
+    logger,
   } = options;
 
+  const serverLogger = logger || bootstrapLogger();
   prepareAppDataSpaces();
 
-  serverLogger.info('[MCP-Shark] Starting MCP server...');
+  serverLogger.info({ port }, '[MCP-Shark] Starting MCP server...');
   serverLogger.info(`[MCP-Shark] Config path: ${configPath}`);
   serverLogger.info(`[MCP-Shark] Database path: ${getDatabaseFile()}`);
   serverLogger.info(`[MCP-Shark] Working directory: ${process.cwd()}`);

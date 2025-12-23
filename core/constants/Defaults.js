@@ -12,4 +12,6 @@ export const Defaults = {
 
   // Statistics defaults
   STATISTICS_LIMIT: 1000000,
+
+  DEFAULT_MCP_SERVER_PORT: 9851,
 };

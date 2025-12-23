@@ -7,14 +7,9 @@ import { Server } from '#core/constants/Server.js';
  * Provides validated access to environment variables with defaults
  */
 export const Environment = {
-  /**
-   * Get Codex home directory
-   * @returns {string} Codex home path
-   */
-  getCodexHome() {
-    return process.env.CODEX_HOME || join(homedir(), '.codex');
+  getEnv() {
+    return process.env;
   },
-
   /**
    * Get UI server port
    * @returns {number} UI server port (default: 9853)
@@ -47,5 +42,13 @@ export const Environment = {
    */
   getMcpSharkHome() {
     return process.env.MCP_SHARK_HOME || join(homedir(), '.mcp-shark');
+  },
+
+  getUserProfile() {
+    return process.env.USERPROFILE || homedir();
+  },
+
+  getCodexHome() {
+    return process.env.CODEX_HOME || join(homedir(), '.codex');
   },
 };

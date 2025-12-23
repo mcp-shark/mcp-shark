@@ -1,3 +1,4 @@
+import { Defaults } from '#core/constants/Defaults.js';
 import { initAuditLogger, startMcpSharkServer } from '#core/mcp-server/index.js';
 
 /**
@@ -19,13 +20,20 @@ export class ServerManagementService {
    * @param {string} [options.filePath] - Path to config file
    * @param {string} [options.fileContent] - Config file content
    * @param {Array} [options.selectedServices] - Selected services to include
-   * @param {number} [options.port=9851] - Server port
+   * @param {number} [options.port=Defaults.DEFAULT_MCP_SERVER_PORT] - Server port
    * @param {Function} [options.onError] - Error callback
    * @param {Function} [options.onReady] - Ready callback
    * @returns {Promise<Object>} Setup result with convertedConfig, updatedConfig, filePath
    */
   async setup(options = {}) {
-    const { filePath, fileContent, selectedServices, port = 9851, onError, onReady } = options;
+    const {
+      filePath,
+      fileContent,
+      selectedServices,
+      port = Defaults.DEFAULT_MCP_SERVER_PORT,
+      onError,
+      onReady,
+    } = options;
 
     if (!filePath && !fileContent) {
       return {
@@ -98,7 +106,7 @@ export class ServerManagementService {
    * Start MCP Shark server
    */
   async startServer(options = {}) {
-    const { configPath, port = 9851, onError, onReady } = options;
+    const { configPath, port = Defaults.DEFAULT_MCP_SERVER_PORT, onError, onReady } = options;
 
     const mcpsJsonPath = configPath || this.configService.getMcpConfigPath();
 
@@ -114,6 +122,7 @@ export class ServerManagementService {
       configPath: mcpsJsonPath,
       port,
       auditLogger,
+      logger: this.logger,
       onError: (err) => {
         this.logger?.error({ error: err.message }, 'Failed to start mcp-shark server');
         this.serverInstance = null;

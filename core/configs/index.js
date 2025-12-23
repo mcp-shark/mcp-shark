@@ -2,7 +2,6 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 
-export * from './codex.js';
 export { Environment } from './environment.js';
 
 const WORKING_DIRECTORY_NAME = '.mcp-shark';

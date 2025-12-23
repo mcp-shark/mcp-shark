@@ -2,6 +2,8 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { WebSocketClientTransport } from '@modelcontextprotocol/sdk/client/websocket.js';
 
+import { Environment } from '#core/configs/environment.js';
+
 /**
  * Library for MCP transport creation utilities
  * Pure utility - no dependencies on services or repositories
@@ -31,7 +33,7 @@ export function createTransport(serverConfig, serverName = null) {
   } = serverConfig;
 
   const env = {
-    ...process.env,
+    ...Environment.getEnv(),
     ...configEnv,
   };
 
