@@ -46,7 +46,7 @@
     "publish:dry-run": "npm publish --dry-run"
   },
   "lint-staged": {
-    "*": ["biome check --write"]
+    "*.{js,jsx,ts,tsx,json}": ["biome check --write"]
   },
   "keywords": [
     "mcp",

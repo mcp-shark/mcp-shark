@@ -7,7 +7,7 @@ Complete reference for MCP Shark's API endpoints and WebSocket protocol.
 **Swagger/OpenAPI Documentation** is available at `/api-docs` when the server is running:
 
 - **Local**: [http://localhost:9853/api-docs](http://localhost:9853/api-docs)
-- **Discovery Button**: Click the API docs button (📡) in the bottom-right corner of the UI
+- **Discovery Button**: Click the menu button (☰) in the bottom-right corner of the UI, then select the API docs button (📡) from the expandable action menu
 
 The Swagger UI provides:
 - Complete endpoint documentation with request/response schemas

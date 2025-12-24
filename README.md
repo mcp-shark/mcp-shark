@@ -54,6 +54,7 @@ MCP Shark is a monitoring and aggregation solution for Model Context Protocol (M
 - **Security analysis**: AI-powered scanning for security risks and vulnerabilities
 - **IDE integration**: Automatic configuration detection for Cursor, Windsurf, Codex, and other IDEs
 - **API documentation**: Comprehensive Swagger/OpenAPI documentation for all endpoints with interactive testing
+- **Action menu**: Expandable menu providing quick access to API docs, help tour, and server shutdown
 
 ## Documentation
 
@@ -72,7 +73,7 @@ MCP Shark is a monitoring and aggregation solution for Model Context Protocol (M
 - **[Architecture](docs/architecture.md)** - System architecture and design
 - **[Database Architecture](docs/database-architecture.md)** - Database architecture and repository pattern
 - **[API Reference](docs/api-reference.md)** - API endpoints and WebSocket protocol
-- **API Documentation** - Interactive Swagger/OpenAPI documentation available at `/api-docs` when server is running (or click the 📡 button in the UI)
+- **API Documentation** - Interactive Swagger/OpenAPI documentation available at `/api-docs` when server is running (or click the menu button ☰ in the bottom-right corner, then select the API docs button 📡)
 
 ### Architecture & Coding Rules
 - **[Architecture Rules](rules/ARCHITECTURE_RULES.md)** - Architecture principles and guidelines
@@ -111,4 +112,4 @@ See the [LICENSE](LICENSE) file for full terms and conditions.
 
 ---
 
-**Version**: 1.5.4 | **Homepage**: [https://mcpshark.sh](https://mcpshark.sh)
+**Version**: 1.5.9 | **Homepage**: [https://mcpshark.sh](https://mcpshark.sh)

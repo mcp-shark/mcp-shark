@@ -180,6 +180,33 @@ Configuration and server management.
 - Backup directories and counts
 - Configuration file paths
 
+## UI Controls
+
+### Action Menu
+
+The expandable action menu provides quick access to essential functions from anywhere in the UI.
+
+**Location:** Bottom-right corner of the screen
+
+**Access:**
+1. Click the menu button (☰) in the bottom-right corner
+2. The menu expands to show three options:
+   - **API Documentation** (📡): Opens Swagger/OpenAPI documentation in a new tab
+   - **Help Tour** (📚): Starts or restarts the interactive tour
+   - **Shutdown** (⚡): Shuts down the MCP Shark server
+
+**Features:**
+- Smooth expand/collapse animation
+- Auto-closes when clicking outside the menu
+- Auto-closes after selecting an option
+- Visual feedback on hover
+
+**Shutdown Process:**
+- Click the shutdown button (⚡) from the action menu
+- Confirm the shutdown in the confirmation dialog
+- A spinner modal appears while the server shuts down
+- The page automatically redirects to the home page after shutdown
+
 ## Advanced Features
 
 ### Exporting Data

@@ -1,3 +1,47 @@
+# 🦈 MCP Shark v1.5.9 - UI Improvements & Action Menu
+
+## 🎉 What's New in v1.5.9
+
+### 🎨 UI Enhancements
+
+- **Expandable Action Menu** — New unified menu grouping API docs, help tour, and shutdown buttons
+  - Click the menu button (☰) in the bottom-right corner to expand
+  - Smooth animations and auto-close functionality
+  - Better organization and reduced UI clutter
+  - Prevents accidental clicks by grouping related actions
+
+- **Spinner-Based Shutdown** — Replaced countdown timer with animated spinner
+  - Uses `IconLoader2` from `@tabler/icons-react` for professional loading indicator
+  - Continuous rotation animation during shutdown process
+  - Cleaner, more modern visual feedback
+
+### 🔧 Code Quality Improvements
+
+- **Component Refactoring** — Refactored button components for better reusability
+  - `ShutdownButton`, `ApiDocsButton`, and `HelpButton` now accept style props
+  - Removed code duplication by using components in the action menu
+  - Better separation of concerns with button-specific logic in each component
+
+- **Architecture Improvements** — Improved component structure
+  - Created `ActionMenu` component to manage expandable menu state
+  - Centralized menu behavior (expand/collapse, click outside to close)
+  - Consistent styling and animations across all menu items
+
+### 📚 Documentation Updates
+
+- **User Guide** — Added new "UI Controls" section describing the action menu
+- **API Reference** — Updated API docs access instructions for new menu
+- **Features Documentation** — Updated UI/UX features section
+- **README** — Added mention of expandable action menu feature
+
+### 🐛 Bug Fixes
+
+- **Button Visibility** — Fixed shutdown button positioning in expandable menu
+- **Style Conflicts** — Resolved positioning conflicts between fixed and absolute positioning
+- **Menu Behavior** — Improved menu auto-close and click-outside handling
+
+---
+
 # 🦈 MCP Shark v1.5.7 - Bug Fixes & Code Quality
 
 ## 🎉 What's New in v1.5.7
