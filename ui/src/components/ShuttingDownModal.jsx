@@ -1,30 +1,10 @@
-import { useEffect, useState } from 'react';
+import { IconLoader2 } from '@tabler/icons-react';
 import { colors, fonts } from '../theme';
 
 /**
- * Modal showing shutdown progress with countdown timer
+ * Modal showing shutdown progress with spinner
  */
-function ShuttingDownModal({ isOpen, initialSeconds = 3 }) {
-  const [seconds, setSeconds] = useState(initialSeconds);
-
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const interval = setInterval(() => {
-      setSeconds((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [isOpen]);
-
+function ShuttingDownModal({ isOpen }) {
   if (!isOpen) {
     return null;
   }
@@ -85,32 +65,33 @@ function ShuttingDownModal({ isOpen, initialSeconds = 3 }) {
         </p>
         <div
           style={{
-            fontSize: '48px',
-            fontWeight: '700',
-            color: colors.error,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
             marginBottom: '16px',
           }}
         >
-          {seconds}
-        </div>
-        <div
-          style={{
-            width: '100%',
-            height: '4px',
-            background: colors.bgTertiary,
-            borderRadius: '2px',
-            overflow: 'hidden',
-          }}
-        >
-          <div
+          <IconLoader2
+            size={48}
+            stroke={2}
+            color={colors.error}
             style={{
-              width: `${((initialSeconds - seconds) / initialSeconds) * 100}%`,
-              height: '100%',
-              background: colors.error,
-              transition: 'width 1s linear',
+              animation: 'shutdown-spin 1s linear infinite',
             }}
           />
         </div>
+        <style>
+          {`
+            @keyframes shutdown-spin {
+              from {
+                transform: rotate(0deg);
+              }
+              to {
+                transform: rotate(360deg);
+              }
+            }
+          `}
+        </style>
       </div>
     </dialog>
   );

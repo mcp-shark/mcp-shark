@@ -8,8 +8,13 @@ import ShuttingDownModal from '../ShuttingDownModal';
 /**
  * Shutdown button component
  * Shuts down the MCP Shark application
+ * @param {Object} props
+ * @param {Object} props.style - Custom styles for the button
+ * @param {Function} props.onClick - Optional callback when button is clicked
+ * @param {Function} props.onMouseEnter - Optional mouse enter handler
+ * @param {Function} props.onMouseLeave - Optional mouse leave handler
  */
-export default function ShutdownButton() {
+export default function ShutdownButton({ style, onClick, onMouseEnter, onMouseLeave }) {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [showShuttingDownModal, setShowShuttingDownModal] = useState(false);
@@ -31,6 +36,53 @@ export default function ShutdownButton() {
 
   const handleClick = () => {
     setShowConfirmModal(true);
+    if (onClick) {
+      onClick();
+    }
+  };
+
+  const defaultStyle = {
+    position: 'fixed',
+    bottom: '20px',
+    left: '20px',
+    background: colors.bgCard,
+    border: `1px solid ${colors.borderLight}`,
+    borderRadius: '50%',
+    width: '48px',
+    height: '48px',
+    padding: 0,
+    color: colors.textSecondary,
+    cursor: 'pointer',
+    fontFamily: fonts.body,
+    boxShadow: `0 4px 12px ${colors.shadowMd}`,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 9999,
+    transition: 'all 0.2s ease',
+    ...style,
+  };
+
+  const handleMouseEnter = (e) => {
+    e.currentTarget.style.background = colors.bgHover;
+    e.currentTarget.style.color = colors.error;
+    e.currentTarget.style.borderColor = colors.borderMedium;
+    e.currentTarget.style.transform = 'scale(1.1)';
+    e.currentTarget.style.boxShadow = `0 6px 16px ${colors.shadowLg}`;
+    if (onMouseEnter) {
+      onMouseEnter(e);
+    }
+  };
+
+  const handleMouseLeave = (e) => {
+    e.currentTarget.style.background = colors.bgCard;
+    e.currentTarget.style.color = colors.textSecondary;
+    e.currentTarget.style.borderColor = colors.borderLight;
+    e.currentTarget.style.transform = 'scale(1)';
+    e.currentTarget.style.boxShadow = `0 4px 12px ${colors.shadowMd}`;
+    if (onMouseLeave) {
+      onMouseLeave(e);
+    }
   };
 
   return (
@@ -39,40 +91,9 @@ export default function ShutdownButton() {
         type="button"
         onClick={handleClick}
         data-tour="shutdown-button"
-        style={{
-          position: 'fixed',
-          bottom: '20px',
-          left: '20px',
-          background: colors.bgCard,
-          border: `1px solid ${colors.borderLight}`,
-          borderRadius: '50%',
-          width: '48px',
-          height: '48px',
-          padding: 0,
-          color: colors.textSecondary,
-          cursor: 'pointer',
-          fontFamily: fonts.body,
-          boxShadow: `0 4px 12px ${colors.shadowMd}`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 9999,
-          transition: 'all 0.2s ease',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = colors.bgHover;
-          e.currentTarget.style.color = colors.error;
-          e.currentTarget.style.borderColor = colors.borderMedium;
-          e.currentTarget.style.transform = 'scale(1.1)';
-          e.currentTarget.style.boxShadow = `0 6px 16px ${colors.shadowLg}`;
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = colors.bgCard;
-          e.currentTarget.style.color = colors.textSecondary;
-          e.currentTarget.style.borderColor = colors.borderLight;
-          e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.boxShadow = `0 4px 12px ${colors.shadowMd}`;
-        }}
+        style={defaultStyle}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         title="Shutdown MCP Shark"
       >
         <IconPower size={20} stroke={1.5} />
@@ -94,7 +115,7 @@ export default function ShutdownButton() {
         message={errorMessage}
         type="error"
       />
-      <ShuttingDownModal isOpen={showShuttingDownModal} initialSeconds={3} />
+      <ShuttingDownModal isOpen={showShuttingDownModal} />
     </>
   );
 }

@@ -5,9 +5,7 @@ import IntroTour from './IntroTour';
 import ShutdownPage from './ShutdownPage';
 import SmartScan from './SmartScan';
 import TabNavigation from './TabNavigation';
-import ApiDocsButton from './components/App/ApiDocsButton';
-import HelpButton from './components/App/HelpButton';
-import ShutdownButton from './components/App/ShutdownButton';
+import ActionMenu from './components/App/ActionMenu';
 import TrafficTab from './components/App/TrafficTab';
 import { useAppState } from './components/App/useAppState';
 import McpPlayground from './components/McpPlayground';
@@ -86,10 +84,8 @@ function App() {
       <div style={{ position: 'relative' }} data-tour="tabs">
         <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
-      <ApiDocsButton />
-      <ShutdownButton />
-      <HelpButton
-        onClick={() => {
+      <ActionMenu
+        onHelpClick={() => {
           if (showTour) {
             setShowTour(false);
             setTourKey((prev) => prev + 1);
