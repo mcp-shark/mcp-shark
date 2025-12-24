@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 import CompositeLogs from './CompositeLogs';
 import CompositeSetup from './CompositeSetup';
 import IntroTour from './IntroTour';
+import ShutdownPage from './ShutdownPage';
 import SmartScan from './SmartScan';
 import TabNavigation from './TabNavigation';
 import ApiDocsButton from './components/App/ApiDocsButton';
 import HelpButton from './components/App/HelpButton';
+import ShutdownButton from './components/App/ShutdownButton';
 import TrafficTab from './components/App/TrafficTab';
 import { useAppState } from './components/App/useAppState';
 import McpPlayground from './components/McpPlayground';
@@ -85,6 +87,7 @@ function App() {
         <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
       <ApiDocsButton />
+      <ShutdownButton />
       <HelpButton
         onClick={() => {
           if (showTour) {
@@ -146,6 +149,15 @@ function App() {
       {activeTab === 'smart-scan' && (
         <div data-tab-content style={{ flex: 1, overflow: 'auto', width: '100%', height: '100%' }}>
           <SmartScan />
+        </div>
+      )}
+
+      {activeTab === 'shutdown' && (
+        <div
+          data-tab-content
+          style={{ flex: 1, overflow: 'hidden', width: '100%', height: '100%' }}
+        >
+          <ShutdownPage />
         </div>
       )}
     </div>
