@@ -133,6 +133,49 @@ export class SchemaRepository {
       CREATE INDEX IF NOT EXISTS idx_findings_scan_id ON security_findings(scan_id);
       CREATE INDEX IF NOT EXISTS idx_findings_type ON security_findings(finding_type);
       CREATE INDEX IF NOT EXISTS idx_findings_rule ON security_findings(rule_id);
+
+      -- Security rules table for community YARA rules
+      CREATE TABLE IF NOT EXISTS security_rules (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        rule_id TEXT UNIQUE NOT NULL,
+        source TEXT NOT NULL,
+        source_url TEXT,
+        name TEXT NOT NULL,
+        description TEXT,
+        author TEXT,
+        reference TEXT,
+        content TEXT NOT NULL,
+        owasp_id TEXT,
+        severity TEXT CHECK(severity IN ('critical', 'high', 'medium', 'low', 'info')),
+        tags TEXT,
+        enabled INTEGER DEFAULT 1,
+        version TEXT,
+        file_path TEXT,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+
+      -- Security rules indexes
+      CREATE INDEX IF NOT EXISTS idx_rules_source ON security_rules(source);
+      CREATE INDEX IF NOT EXISTS idx_rules_severity ON security_rules(severity);
+      CREATE INDEX IF NOT EXISTS idx_rules_enabled ON security_rules(enabled);
+      CREATE INDEX IF NOT EXISTS idx_rules_owasp ON security_rules(owasp_id);
+
+      -- Rule sources table for tracking sync status
+      CREATE TABLE IF NOT EXISTS rule_sources (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE NOT NULL,
+        url TEXT NOT NULL,
+        type TEXT NOT NULL CHECK(type IN ('github', 'url', 'local')),
+        branch TEXT DEFAULT 'main',
+        path_filter TEXT,
+        enabled INTEGER DEFAULT 1,
+        last_sync TEXT,
+        last_sync_status TEXT,
+        rule_count INTEGER DEFAULT 0,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
     `);
   }
 }

@@ -4,6 +4,7 @@ import {
   ConversationRepository,
   PacketRepository,
   SecurityFindingsRepository,
+  SecurityRulesRepository,
   SessionRepository,
   StatisticsRepository,
 } from '#core/repositories/index.js';
@@ -21,6 +22,7 @@ import {
   McpClientService,
   McpDiscoveryService,
   RequestService,
+  RulesManagerService,
   ScanCacheService,
   ScanService,
   SecurityDetectionService,
@@ -31,6 +33,7 @@ import {
   StatisticsService,
   TokenService,
   TrafficAnalysisService,
+  YaraEngineService,
 } from '#core/services/index.js';
 import { ConfigParserFactory } from '#core/services/parsers/ConfigParserFactory.js';
 
@@ -68,6 +71,9 @@ export class DependencyContainer {
     }
     if (!this._repositories.securityFindings) {
       this._repositories.securityFindings = new SecurityFindingsRepository(this.db);
+    }
+    if (!this._repositories.securityRules) {
+      this._repositories.securityRules = new SecurityRulesRepository(this.db);
     }
 
     return this._repositories;
@@ -155,6 +161,12 @@ export class DependencyContainer {
       this._services.trafficAnalysis = new TrafficAnalysisService(
         this._services.staticRules,
         repos.securityFindings,
+        libs.logger
+      );
+      this._services.yaraEngine = new YaraEngineService(this._services.staticRules, libs.logger);
+      this._services.rulesManager = new RulesManagerService(
+        repos.securityRules,
+        this._services.yaraEngine,
         libs.logger
       );
 

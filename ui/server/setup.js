@@ -135,7 +135,7 @@ export function createUIServer() {
 
   app.get('/api/settings', settingsRoutes.getSettings);
 
-  // Security routes
+  // Security routes - Static rules and scanning
   app.get('/api/security/rules', securityRoutes.getRules);
   app.post('/api/security/scan', securityRoutes.scanServer);
   app.post('/api/security/scan/batch', securityRoutes.scanMultipleServers);
@@ -145,6 +145,24 @@ export function createUIServer() {
   app.get('/api/security/summary', securityRoutes.getSummary);
   app.post('/api/security/findings/clear', securityRoutes.clearFindings);
   app.delete('/api/security/scan/:scanId', securityRoutes.deleteScanFindings);
+
+  // Security routes - YARA engine
+  app.get('/api/security/engine/status', securityRoutes.getEngineStatus);
+  app.post('/api/security/engine/load', securityRoutes.loadRulesIntoEngine);
+
+  // Security routes - Rule sources
+  app.get('/api/security/sources', securityRoutes.getRuleSources);
+  app.post('/api/security/sources', securityRoutes.addRuleSource);
+  app.delete('/api/security/sources/:name', securityRoutes.removeRuleSource);
+  app.post('/api/security/sources/:name/sync', securityRoutes.syncRuleSource);
+  app.post('/api/security/sources/sync', securityRoutes.syncAllRuleSources);
+  app.post('/api/security/sources/initialize', securityRoutes.initializeSources);
+
+  // Security routes - Community rules
+  app.get('/api/security/community-rules', securityRoutes.getCommunityRules);
+  app.patch('/api/security/community-rules/:ruleId/enabled', securityRoutes.setRuleEnabled);
+  app.delete('/api/security/community-rules/:ruleId', securityRoutes.deleteCommunityRule);
+  app.post('/api/security/community-rules', securityRoutes.addCustomRule);
 
   const staticPath = path.join(__dirname, '..', 'dist');
   app.use(express.static(staticPath));

@@ -9,6 +9,13 @@ export function useSecurity() {
   const [filters, setFilters] = useState({});
   const [selectedFinding, setSelectedFinding] = useState(null);
 
+  // Community rules state
+  const [communityRules, setCommunityRules] = useState([]);
+  const [ruleSources, setRuleSources] = useState([]);
+  const [rulesSummary, setRulesSummary] = useState(null);
+  const [syncing, setSyncing] = useState(false);
+  const [engineStatus, setEngineStatus] = useState(null);
+
   const loadRules = useCallback(async () => {
     try {
       const response = await fetch('/api/security/rules');
@@ -98,16 +105,143 @@ export function useSecurity() {
     }
   }, [loadSummary]);
 
+  // Community rules functions
+  const loadCommunityRules = useCallback(async () => {
+    try {
+      const response = await fetch('/api/security/community-rules');
+      const data = await response.json();
+      if (data.success) {
+        setCommunityRules(data.rules);
+        setRulesSummary(data.summary);
+      }
+    } catch (err) {
+      console.error('Failed to load community rules:', err);
+    }
+  }, []);
+
+  const loadRuleSources = useCallback(async () => {
+    try {
+      const response = await fetch('/api/security/sources');
+      const data = await response.json();
+      if (data.success) {
+        setRuleSources(data.sources);
+      }
+    } catch (err) {
+      console.error('Failed to load rule sources:', err);
+    }
+  }, []);
+
+  const loadEngineStatus = useCallback(async () => {
+    try {
+      const response = await fetch('/api/security/engine/status');
+      const data = await response.json();
+      if (data.success) {
+        setEngineStatus(data);
+      }
+    } catch (err) {
+      console.error('Failed to load engine status:', err);
+    }
+  }, []);
+
+  const initializeSources = useCallback(async () => {
+    try {
+      const response = await fetch('/api/security/sources/initialize', {
+        method: 'POST',
+      });
+      const data = await response.json();
+      if (data.success) {
+        await loadRuleSources();
+      }
+      return data;
+    } catch (err) {
+      console.error('Failed to initialize sources:', err);
+      return { success: false, error: err.message };
+    }
+  }, [loadRuleSources]);
+
+  const syncAllSources = useCallback(async () => {
+    setSyncing(true);
+    try {
+      const response = await fetch('/api/security/sources/sync', {
+        method: 'POST',
+      });
+      const data = await response.json();
+      if (data.success) {
+        await loadCommunityRules();
+        await loadRuleSources();
+      }
+      return data;
+    } catch (err) {
+      console.error('Failed to sync sources:', err);
+      return { success: false, error: err.message };
+    } finally {
+      setSyncing(false);
+    }
+  }, [loadCommunityRules, loadRuleSources]);
+
+  const syncSource = useCallback(
+    async (sourceName) => {
+      setSyncing(true);
+      try {
+        const response = await fetch(
+          `/api/security/sources/${encodeURIComponent(sourceName)}/sync`,
+          {
+            method: 'POST',
+          }
+        );
+        const data = await response.json();
+        if (data.success) {
+          await loadCommunityRules();
+          await loadRuleSources();
+        }
+        return data;
+      } catch (err) {
+        console.error('Failed to sync source:', err);
+        return { success: false, error: err.message };
+      } finally {
+        setSyncing(false);
+      }
+    },
+    [loadCommunityRules, loadRuleSources]
+  );
+
+  const setRuleEnabled = useCallback(
+    async (ruleId, enabled) => {
+      try {
+        const response = await fetch(
+          `/api/security/community-rules/${encodeURIComponent(ruleId)}/enabled`,
+          {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ enabled }),
+          }
+        );
+        const data = await response.json();
+        if (data.success) {
+          await loadCommunityRules();
+        }
+        return data;
+      } catch (err) {
+        console.error('Failed to set rule enabled:', err);
+        return { success: false, error: err.message };
+      }
+    },
+    [loadCommunityRules]
+  );
+
   // Load initial data
   useEffect(() => {
     loadRules();
     loadFindings();
     loadSummary();
-  }, [loadRules, loadFindings, loadSummary]);
+    loadRuleSources();
+    loadEngineStatus();
+  }, [loadRules, loadFindings, loadSummary, loadRuleSources, loadEngineStatus]);
 
   // Note: loadFindings already depends on filters via useCallback
 
   return {
+    // Static rules and findings
     rules,
     findings,
     summary,
@@ -121,5 +255,18 @@ export function useSecurity() {
     setFilters,
     selectedFinding,
     setSelectedFinding,
+
+    // Community rules
+    communityRules,
+    ruleSources,
+    rulesSummary,
+    syncing,
+    engineStatus,
+    loadCommunityRules,
+    loadRuleSources,
+    initializeSources,
+    syncAllSources,
+    syncSource,
+    setRuleEnabled,
   };
 }

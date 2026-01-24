@@ -5,9 +5,17 @@ import { handleError, handleValidationError } from '../utils/errorHandler.js';
  * Controller for Security Detection HTTP endpoints
  */
 export class SecurityController {
-  constructor(securityDetectionService, mcpDiscoveryService, logger) {
+  constructor(
+    securityDetectionService,
+    mcpDiscoveryService,
+    rulesManagerService,
+    yaraEngineService,
+    logger
+  ) {
     this.securityService = securityDetectionService;
     this.mcpDiscoveryService = mcpDiscoveryService;
+    this.rulesManager = rulesManagerService;
+    this.yaraEngine = yaraEngineService;
     this.logger = logger;
   }
 
@@ -216,6 +224,259 @@ export class SecurityController {
       });
     } catch (error) {
       handleError(error, res, this.logger, 'Error deleting scan findings');
+    }
+  };
+
+  // =====================
+  // Community Rules Endpoints
+  // =====================
+
+  /**
+   * Get YARA engine status
+   */
+  getEngineStatus = (_req, res) => {
+    try {
+      const status = this.yaraEngine.getStatus();
+      return res.json({
+        success: true,
+        ...status,
+      });
+    } catch (error) {
+      handleError(error, res, this.logger, 'Error getting engine status');
+    }
+  };
+
+  /**
+   * Get all rule sources
+   */
+  getRuleSources = (_req, res) => {
+    try {
+      const sources = this.rulesManager.getSources();
+      return res.json({
+        success: true,
+        sources,
+        count: sources.length,
+      });
+    } catch (error) {
+      handleError(error, res, this.logger, 'Error getting rule sources');
+    }
+  };
+
+  /**
+   * Add a new rule source
+   */
+  addRuleSource = (req, res) => {
+    try {
+      const { name, url, type, branch, path_filter, enabled } = req.body;
+
+      if (!name || !url) {
+        return handleValidationError('Name and URL are required', res, this.logger);
+      }
+
+      this.rulesManager.addSource({
+        name,
+        url,
+        type: type || 'github',
+        branch: branch || 'main',
+        path_filter,
+        enabled: enabled !== false,
+      });
+
+      return res.json({
+        success: true,
+        message: `Source "${name}" added successfully`,
+      });
+    } catch (error) {
+      handleError(error, res, this.logger, 'Error adding rule source');
+    }
+  };
+
+  /**
+   * Remove a rule source
+   */
+  removeRuleSource = (req, res) => {
+    try {
+      const { name } = req.params;
+
+      if (!name) {
+        return handleValidationError('Source name is required', res, this.logger);
+      }
+
+      const result = this.rulesManager.removeSource(name);
+      return res.json({
+        success: true,
+        message: `Source "${name}" removed`,
+        rulesDeleted: result.rulesDeleted,
+      });
+    } catch (error) {
+      handleError(error, res, this.logger, 'Error removing rule source');
+    }
+  };
+
+  /**
+   * Sync rules from a specific source
+   */
+  syncRuleSource = async (req, res) => {
+    try {
+      const { name } = req.params;
+
+      if (!name) {
+        return handleValidationError('Source name is required', res, this.logger);
+      }
+
+      const result = await this.rulesManager.syncSource(name);
+      return res.json(result);
+    } catch (error) {
+      handleError(error, res, this.logger, 'Error syncing rule source');
+    }
+  };
+
+  /**
+   * Sync all rule sources
+   */
+  syncAllRuleSources = async (_req, res) => {
+    try {
+      const result = await this.rulesManager.syncAllSources();
+      return res.json({
+        success: true,
+        ...result,
+      });
+    } catch (error) {
+      handleError(error, res, this.logger, 'Error syncing all rule sources');
+    }
+  };
+
+  /**
+   * Get community rules with filters
+   */
+  getCommunityRules = (req, res) => {
+    try {
+      const filters = {
+        source: req.query.source,
+        severity: req.query.severity,
+        enabled:
+          req.query.enabled === 'true' ? true : req.query.enabled === 'false' ? false : undefined,
+        owasp_id: req.query.owasp_id,
+        search: req.query.search,
+        limit: req.query.limit ? Number.parseInt(req.query.limit, 10) : 100,
+      };
+
+      const rules = this.rulesManager.getRules(filters);
+      const summary = this.rulesManager.getSummary();
+
+      return res.json({
+        success: true,
+        rules,
+        count: rules.length,
+        summary,
+      });
+    } catch (error) {
+      handleError(error, res, this.logger, 'Error getting community rules');
+    }
+  };
+
+  /**
+   * Enable or disable a community rule
+   */
+  setRuleEnabled = (req, res) => {
+    try {
+      const { ruleId } = req.params;
+      const { enabled } = req.body;
+
+      if (!ruleId) {
+        return handleValidationError('Rule ID is required', res, this.logger);
+      }
+
+      if (enabled === undefined) {
+        return handleValidationError('Enabled status is required', res, this.logger);
+      }
+
+      this.rulesManager.setRuleEnabled(ruleId, enabled);
+      return res.json({
+        success: true,
+        message: `Rule ${ruleId} ${enabled ? 'enabled' : 'disabled'}`,
+      });
+    } catch (error) {
+      handleError(error, res, this.logger, 'Error setting rule enabled');
+    }
+  };
+
+  /**
+   * Delete a community rule
+   */
+  deleteCommunityRule = (req, res) => {
+    try {
+      const { ruleId } = req.params;
+
+      if (!ruleId) {
+        return handleValidationError('Rule ID is required', res, this.logger);
+      }
+
+      this.rulesManager.deleteRule(ruleId);
+      return res.json({
+        success: true,
+        message: `Rule ${ruleId} deleted`,
+      });
+    } catch (error) {
+      handleError(error, res, this.logger, 'Error deleting community rule');
+    }
+  };
+
+  /**
+   * Add a custom rule
+   */
+  addCustomRule = (req, res) => {
+    try {
+      const { content, name, description, severity } = req.body;
+
+      if (!content) {
+        return handleValidationError('Rule content is required', res, this.logger);
+      }
+
+      const result = this.rulesManager.addCustomRule({
+        content,
+        name,
+        description,
+        severity,
+      });
+
+      if (!result.success) {
+        return res.status(StatusCodes.BAD_REQUEST).json(result);
+      }
+
+      return res.json(result);
+    } catch (error) {
+      handleError(error, res, this.logger, 'Error adding custom rule');
+    }
+  };
+
+  /**
+   * Load community rules into YARA engine
+   */
+  loadRulesIntoEngine = async (_req, res) => {
+    try {
+      const result = await this.rulesManager.loadRulesIntoEngine();
+      return res.json({
+        success: true,
+        ...result,
+      });
+    } catch (error) {
+      handleError(error, res, this.logger, 'Error loading rules into engine');
+    }
+  };
+
+  /**
+   * Initialize default rule sources
+   */
+  initializeSources = (_req, res) => {
+    try {
+      const count = this.rulesManager.initializeSources();
+      return res.json({
+        success: true,
+        message: `Initialized ${count} default source(s)`,
+      });
+    } catch (error) {
+      handleError(error, res, this.logger, 'Error initializing sources');
     }
   };
 }
