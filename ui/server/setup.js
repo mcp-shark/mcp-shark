@@ -18,6 +18,7 @@ import { createHelpRoutes } from './routes/help.js';
 import { createLogsRoutes } from './routes/logs.js';
 import { createPlaygroundRoutes } from './routes/playground.js';
 import { createRequestsRoutes } from './routes/requests.js';
+import { createSecurityRoutes } from './routes/security.js';
 import { createSessionsRoutes } from './routes/sessions.js';
 import { createSettingsRoutes } from './routes/settings.js';
 import { createSmartScanRoutes } from './routes/smartscan.js';
@@ -80,6 +81,7 @@ export function createUIServer() {
   const playgroundRoutes = createPlaygroundRoutes(container);
   const smartScanRoutes = createSmartScanRoutes(container);
   const settingsRoutes = createSettingsRoutes(container);
+  const securityRoutes = createSecurityRoutes(container);
 
   app.get('/api/requests', requestsRoutes.getRequests);
   app.get('/api/packets', requestsRoutes.getRequests);
@@ -132,6 +134,17 @@ export function createUIServer() {
   app.post('/api/smartscan/cache/clear', smartScanRoutes.clearCache);
 
   app.get('/api/settings', settingsRoutes.getSettings);
+
+  // Security routes
+  app.get('/api/security/rules', securityRoutes.getRules);
+  app.post('/api/security/scan', securityRoutes.scanServer);
+  app.post('/api/security/scan/batch', securityRoutes.scanMultipleServers);
+  app.post('/api/security/scan/discover', securityRoutes.discoverAndScan);
+  app.get('/api/security/findings', securityRoutes.getFindings);
+  app.get('/api/security/findings/:id', securityRoutes.getFinding);
+  app.get('/api/security/summary', securityRoutes.getSummary);
+  app.post('/api/security/findings/clear', securityRoutes.clearFindings);
+  app.delete('/api/security/scan/:scanId', securityRoutes.deleteScanFindings);
 
   const staticPath = path.join(__dirname, '..', 'dist');
   app.use(express.static(staticPath));

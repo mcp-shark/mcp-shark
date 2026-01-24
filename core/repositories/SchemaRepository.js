@@ -102,6 +102,37 @@ export class SchemaRepository {
       
       CREATE INDEX IF NOT EXISTS idx_sessions_first_seen ON sessions(first_seen_ns);
       CREATE INDEX IF NOT EXISTS idx_sessions_last_seen ON sessions(last_seen_ns);
+
+      -- Security findings table for OWASP vulnerability detection
+      CREATE TABLE IF NOT EXISTS security_findings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        rule_id TEXT NOT NULL,
+        finding_type TEXT NOT NULL CHECK(finding_type IN ('config', 'traffic')),
+        target_type TEXT NOT NULL CHECK(target_type IN ('tool', 'prompt', 'resource', 'packet')),
+        target_name TEXT,
+        server_name TEXT,
+        session_id TEXT,
+        frame_number INTEGER,
+        severity TEXT NOT NULL CHECK(severity IN ('critical', 'high', 'medium', 'low', 'info')),
+        owasp_id TEXT,
+        title TEXT NOT NULL,
+        description TEXT,
+        evidence TEXT,
+        recommendation TEXT,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        scan_id TEXT,
+        
+        FOREIGN KEY (frame_number) REFERENCES packets(frame_number)
+      );
+
+      -- Security findings indexes
+      CREATE INDEX IF NOT EXISTS idx_findings_severity ON security_findings(severity);
+      CREATE INDEX IF NOT EXISTS idx_findings_owasp_id ON security_findings(owasp_id);
+      CREATE INDEX IF NOT EXISTS idx_findings_server ON security_findings(server_name);
+      CREATE INDEX IF NOT EXISTS idx_findings_created ON security_findings(created_at);
+      CREATE INDEX IF NOT EXISTS idx_findings_scan_id ON security_findings(scan_id);
+      CREATE INDEX IF NOT EXISTS idx_findings_type ON security_findings(finding_type);
+      CREATE INDEX IF NOT EXISTS idx_findings_rule ON security_findings(rule_id);
     `);
   }
 }

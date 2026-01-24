@@ -8,6 +8,7 @@ import {
   IconNetwork,
   IconSettings,
   IconShield,
+  IconShieldCheck,
 } from '@tabler/icons-react';
 
 // Wrapper components to match existing API
@@ -37,4 +38,8 @@ export const MenuIcon = ({ size = 16, color = 'currentColor' }) => (
 
 export const ChevronDownIcon = ({ size = 16, color = 'currentColor' }) => (
   <IconChevronDown size={size} stroke={1.5} color={color} />
+);
+
+export const SecurityIcon = ({ size = 16, color = 'currentColor' }) => (
+  <IconShieldCheck size={size} stroke={1.5} color={color} />
 );

@@ -125,3 +125,4 @@ vite.config.ts.timestamp-*
 **/.server.pid
 **/.ui.log
 **/.server.log
+.cursor/features/

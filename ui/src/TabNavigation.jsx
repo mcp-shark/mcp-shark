@@ -6,6 +6,7 @@ import {
   LogsIcon,
   NetworkIcon,
   PlaygroundIcon,
+  SecurityIcon,
   SettingsIcon,
   ShieldIcon,
 } from './components/TabNavigationIcons';
@@ -42,6 +43,12 @@ function TabNavigation({ activeTab, onTabChange }) {
       label: 'Smart Scan',
       icon: ShieldIcon,
       description: 'AI-powered security analysis for MCP servers',
+    },
+    {
+      id: 'security',
+      label: 'Security',
+      icon: SecurityIcon,
+      description: 'OWASP vulnerability detection for MCP servers',
     },
   ];
 

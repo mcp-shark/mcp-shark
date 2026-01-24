@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import CompositeLogs from './CompositeLogs';
 import CompositeSetup from './CompositeSetup';
 import IntroTour from './IntroTour';
+import Security from './Security';
 import ShutdownPage from './ShutdownPage';
 import SmartScan from './SmartScan';
 import TabNavigation from './TabNavigation';
@@ -154,6 +155,12 @@ function App() {
           style={{ flex: 1, overflow: 'hidden', width: '100%', height: '100%' }}
         >
           <ShutdownPage />
+        </div>
+      )}
+
+      {activeTab === 'security' && (
+        <div data-tab-content style={{ flex: 1, overflow: 'auto', width: '100%', height: '100%' }}>
+          <Security />
         </div>
       )}
     </div>

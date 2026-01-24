@@ -10,6 +10,15 @@ export class AuditService {
     this.auditRepository = auditRepository;
     this.sessionRepository = sessionRepository;
     this.conversationRepository = conversationRepository;
+    this.trafficAnalyzer = null;
+  }
+
+  /**
+   * Set the traffic analyzer for real-time security analysis
+   * @param {TrafficAnalysisService} analyzer - The traffic analysis service
+   */
+  setTrafficAnalyzer(analyzer) {
+    this.trafficAnalyzer = analyzer;
   }
 
   /**
@@ -78,6 +87,15 @@ export class AuditService {
       );
     }
 
+    // Analyze request for security issues (async, non-blocking)
+    if (this.trafficAnalyzer) {
+      this.trafficAnalyzer.analyzeRequest({
+        frameNumber: result.frameNumber,
+        body: options.body,
+        sessionId: result.sessionId,
+      });
+    }
+
     return result;
   }
 
@@ -137,6 +155,15 @@ export class AuditService {
           );
         }
       }
+    }
+
+    // Analyze response for security issues (async, non-blocking)
+    if (this.trafficAnalyzer) {
+      this.trafficAnalyzer.analyzeResponse({
+        frameNumber: result.frameNumber,
+        body: options.body,
+        sessionId: result.sessionId,
+      });
     }
 
     return result;

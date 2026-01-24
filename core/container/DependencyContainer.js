@@ -3,6 +3,7 @@ import {
   AuditRepository,
   ConversationRepository,
   PacketRepository,
+  SecurityFindingsRepository,
   SessionRepository,
   StatisticsRepository,
 } from '#core/repositories/index.js';
@@ -22,11 +23,14 @@ import {
   RequestService,
   ScanCacheService,
   ScanService,
+  SecurityDetectionService,
   ServerManagementService,
   SessionService,
   SettingsService,
+  StaticRulesService,
   StatisticsService,
   TokenService,
+  TrafficAnalysisService,
 } from '#core/services/index.js';
 import { ConfigParserFactory } from '#core/services/parsers/ConfigParserFactory.js';
 
@@ -61,6 +65,9 @@ export class DependencyContainer {
     }
     if (!this._repositories.statistics) {
       this._repositories.statistics = new StatisticsRepository(this.db);
+    }
+    if (!this._repositories.securityFindings) {
+      this._repositories.securityFindings = new SecurityFindingsRepository(this.db);
     }
 
     return this._repositories;
@@ -137,6 +144,22 @@ export class DependencyContainer {
         libs.logger
       );
       this._services.export = new ExportService();
+
+      // Security services
+      this._services.staticRules = new StaticRulesService(libs.logger);
+      this._services.securityDetection = new SecurityDetectionService(
+        this._services.staticRules,
+        repos.securityFindings,
+        libs.logger
+      );
+      this._services.trafficAnalysis = new TrafficAnalysisService(
+        this._services.staticRules,
+        repos.securityFindings,
+        libs.logger
+      );
+
+      // Wire up traffic analyzer to audit service for real-time analysis
+      this._services.audit.setTrafficAnalyzer(this._services.trafficAnalysis);
     }
 
     return this._services;

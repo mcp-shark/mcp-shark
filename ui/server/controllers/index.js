@@ -15,3 +15,4 @@ export { McpClientController } from './McpClientController.js';
 export { TokenController } from './TokenController.js';
 export { SettingsController } from './SettingsController.js';
 export { ServerManagementController } from './ServerManagementController.js';
+export { SecurityController } from './SecurityController.js';
