@@ -69,17 +69,68 @@ export class AuditRepository {
     return `${statusCode}${rpcInfo}`;
   }
 
+  _isCharacterCodeObject(obj) {
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
+      return false;
+    }
+
+    const keys = Object.keys(obj);
+    if (keys.length === 0) {
+      return false;
+    }
+
+    // Check if all keys are numeric strings starting from "0"
+    for (let i = 0; i < keys.length; i++) {
+      if (keys[i] !== String(i)) {
+        return false;
+      }
+      // Check if values are numbers (character codes)
+      if (typeof obj[keys[i]] !== 'number') {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  _convertCharacterCodeObjectToString(obj) {
+    const chars = [];
+    const keys = Object.keys(obj).sort((a, b) => Number(a) - Number(b));
+    for (const key of keys) {
+      chars.push(String.fromCharCode(obj[key]));
+    }
+    return chars.join('');
+  }
+
   _normalizeBody(body) {
     if (!body) {
       return { bodyRaw: '', bodyJson: null };
     }
+
+    // Handle String objects (created with new String())
+    if (Object.prototype.toString.call(body) === '[object String]') {
+      const str = String(body);
+      return { bodyRaw: str, bodyJson: str };
+    }
+
+    // Handle primitive strings
     if (typeof body === 'string') {
       return { bodyRaw: body, bodyJson: body };
     }
+
+    // Handle objects
     if (typeof body === 'object') {
+      // Check if it's a character code object and convert it back to string
+      if (this._isCharacterCodeObject(body)) {
+        const str = this._convertCharacterCodeObjectToString(body);
+        return { bodyRaw: str, bodyJson: str };
+      }
+
+      // Otherwise, stringify normally
       const raw = JSON.stringify(body);
       return { bodyRaw: raw, bodyJson: raw };
     }
+
     return { bodyRaw: '', bodyJson: null };
   }
 

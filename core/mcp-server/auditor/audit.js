@@ -226,14 +226,13 @@ export async function withAuditRequestResponseHandler(
 
   // Extract response body as string
   const resBodyStr = resBuf.toString('utf8');
-  const resBodyJson = parseJsonSafely(resBodyStr);
 
   const jsonrpcId = reqJsonRpc?.payload?.id !== undefined ? String(reqJsonRpc.payload.id) : null;
 
   auditLogger.logResponsePacket({
     statusCode: wrappedRes.statusCode || 200,
     headers: resHeaders,
-    body: resBodyJson || resBodyStr,
+    body: resBodyStr,
     requestFrameNumber: requestResult?.frameNumber || null,
     requestTimestampNs: requestResult?.timestampNs || null,
     jsonrpcId,
