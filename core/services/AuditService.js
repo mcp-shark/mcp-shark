@@ -19,6 +19,9 @@ export class AuditService {
    */
   setTrafficAnalyzer(analyzer) {
     this.trafficAnalyzer = analyzer;
+    if (analyzer) {
+      console.log('[AuditService] Traffic analyzer connected for real-time security analysis');
+    }
   }
 
   /**
@@ -87,13 +90,18 @@ export class AuditService {
       );
     }
 
-    // Analyze request for security issues (async, non-blocking)
+    // Analyze request for security issues (non-blocking)
     if (this.trafficAnalyzer) {
-      this.trafficAnalyzer.analyzeRequest({
-        frameNumber: result.frameNumber,
-        body: options.body,
-        sessionId: result.sessionId,
-      });
+      try {
+        this.trafficAnalyzer.analyzeRequest({
+          frameNumber: result.frameNumber,
+          body: options.body,
+          sessionId: result.sessionId,
+        });
+      } catch (error) {
+        // Log but don't fail the request
+        console.error('Error in traffic analysis (request):', error.message);
+      }
     }
 
     return result;
@@ -157,13 +165,18 @@ export class AuditService {
       }
     }
 
-    // Analyze response for security issues (async, non-blocking)
+    // Analyze response for security issues (non-blocking)
     if (this.trafficAnalyzer) {
-      this.trafficAnalyzer.analyzeResponse({
-        frameNumber: result.frameNumber,
-        body: options.body,
-        sessionId: result.sessionId,
-      });
+      try {
+        this.trafficAnalyzer.analyzeResponse({
+          frameNumber: result.frameNumber,
+          body: options.body,
+          sessionId: result.sessionId,
+        });
+      } catch (error) {
+        // Log but don't fail the response
+        console.error('Error in traffic analysis (response):', error.message);
+      }
     }
 
     return result;

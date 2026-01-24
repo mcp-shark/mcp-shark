@@ -31,6 +31,7 @@ export class TrafficAnalysisService {
    */
   analyzeRequest(packetData) {
     if (!this.enabled) {
+      this.logger?.debug('Traffic analysis disabled, skipping request');
       return [];
     }
 
@@ -41,13 +42,18 @@ export class TrafficAnalysisService {
         direction: 'request',
       };
 
+      this.logger?.debug(
+        { frameNumber: packetData.frameNumber, hasBody: !!packetData.body },
+        'Analyzing request packet for security issues'
+      );
+
       const findings = this.staticRulesService.analyzePacket(packet, packetData.sessionId);
 
       if (findings.length > 0) {
         this.findingsRepository.insertFindings(findings);
-        this.logger?.debug(
+        this.logger?.info(
           { frameNumber: packetData.frameNumber, count: findings.length },
-          'Security findings in request'
+          'Security findings detected in request'
         );
       }
 
@@ -64,6 +70,7 @@ export class TrafficAnalysisService {
    */
   analyzeResponse(packetData) {
     if (!this.enabled) {
+      this.logger?.debug('Traffic analysis disabled, skipping response');
       return [];
     }
 
@@ -74,13 +81,18 @@ export class TrafficAnalysisService {
         direction: 'response',
       };
 
+      this.logger?.debug(
+        { frameNumber: packetData.frameNumber, hasBody: !!packetData.body },
+        'Analyzing response packet for security issues'
+      );
+
       const findings = this.staticRulesService.analyzePacket(packet, packetData.sessionId);
 
       if (findings.length > 0) {
         this.findingsRepository.insertFindings(findings);
-        this.logger?.debug(
+        this.logger?.info(
           { frameNumber: packetData.frameNumber, count: findings.length },
-          'Security findings in response'
+          'Security findings detected in response'
         );
       }
 

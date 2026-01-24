@@ -59,45 +59,45 @@ function Security() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
             gap: '24px',
             flexWrap: 'wrap',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-            <SecurityHeader />
-            {activeTab === 'scanner' && (
-              <SecurityControls
-                onScan={discoverAndScan}
-                scanning={scanning}
-                onClear={clearFindings}
-                onRefresh={loadFindings}
-              />
-            )}
-          </div>
+          <SecurityHeader />
+          {activeTab === 'scanner' && (
+            <SecurityControls
+              onScan={discoverAndScan}
+              scanning={scanning}
+              onClear={clearFindings}
+              onRefresh={loadFindings}
+            />
+          )}
 
           {/* Tab Switcher */}
           <div
             style={{
               display: 'flex',
-              gap: '4px',
-              background: colors.surface,
-              borderRadius: '6px',
+              gap: '8px',
+              border: `1px solid ${colors.borderLight}`,
+              borderRadius: '8px',
               padding: '4px',
+              background: colors.bgSecondary,
             }}
           >
             <button
               type="button"
               onClick={() => setActiveTab('scanner')}
               style={{
-                padding: '6px 16px',
+                padding: '6px 14px',
+                background: activeTab === 'scanner' ? colors.bgCard : 'transparent',
                 border: 'none',
-                borderRadius: '4px',
+                color: activeTab === 'scanner' ? colors.textPrimary : colors.textSecondary,
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontFamily: fonts.body,
+                fontWeight: activeTab === 'scanner' ? '600' : '400',
                 cursor: 'pointer',
-                fontSize: fonts.sizes.sm,
-                fontWeight: 500,
-                background: activeTab === 'scanner' ? colors.accent : 'transparent',
-                color: activeTab === 'scanner' ? '#fff' : colors.textMuted,
+                transition: 'all 0.2s',
               }}
             >
               Scanner
@@ -106,14 +106,16 @@ function Security() {
               type="button"
               onClick={() => setActiveTab('rules')}
               style={{
-                padding: '6px 16px',
+                padding: '6px 14px',
+                background: activeTab === 'rules' ? colors.bgCard : 'transparent',
                 border: 'none',
-                borderRadius: '4px',
+                color: activeTab === 'rules' ? colors.textPrimary : colors.textSecondary,
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontFamily: fonts.body,
+                fontWeight: activeTab === 'rules' ? '600' : '400',
                 cursor: 'pointer',
-                fontSize: fonts.sizes.sm,
-                fontWeight: 500,
-                background: activeTab === 'rules' ? colors.accent : 'transparent',
-                color: activeTab === 'rules' ? '#fff' : colors.textMuted,
+                transition: 'all 0.2s',
               }}
             >
               Community Rules

@@ -26,6 +26,7 @@ describe('SecurityDetectionService', () => {
       })),
       deleteFindingsByScanId: mock.fn(() => 0),
       deleteAllFindings: mock.fn(() => 0),
+      deleteConfigFindingsByServers: mock.fn(() => 0),
     };
     service = new SecurityDetectionService(staticRulesService, mockRepository, null);
   });

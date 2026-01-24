@@ -8,12 +8,15 @@ export const colors = {
   bgHover: '#f1f3f4', // Gmail hover color
   bgSelected: '#e8f0fe', // Gmail selected blue tint
   bgUnpaired: '#fef7e0', // Very light orange/yellow for unpaired requests/responses
+  surface: '#f8f9fa', // Alias for bgSecondary
 
   // Text - Gmail style
   textPrimary: '#202124', // Gmail primary text (almost black)
   textSecondary: '#5f6368', // Gmail secondary text (medium gray)
   textTertiary: '#80868b', // Gmail tertiary text (light gray)
   textInverse: '#ffffff', // White text
+  text: '#202124', // Alias for textPrimary
+  textMuted: '#5f6368', // Alias for textSecondary
 
   // Borders - Gmail style
   borderLight: '#dadce0', // Gmail light border
@@ -21,6 +24,7 @@ export const colors = {
   borderDark: '#9aa0a6', // Gmail dark border
 
   // Accents - Gmail/Google Material colors
+  accent: '#1a73e8', // Alias for accentBlue
   accentBlue: '#1a73e8', // Gmail primary blue
   accentBlueHover: '#1557b0', // Darker blue on hover
   accentGreen: '#34a853', // Google green
@@ -32,6 +36,7 @@ export const colors = {
   success: '#34a853', // Google green
   warning: '#fbbc04', // Google yellow
   error: '#ea4335', // Google red
+  errorBg: '#fef2f2', // Light red background for error messages
   info: '#1a73e8', // Gmail blue
 
   // Interactive - Gmail style (lighter, less sharp)
@@ -61,5 +66,13 @@ export function withOpacity(color, opacity) {
 
 export const fonts = {
   body: "'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  heading: "'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   mono: "'Roboto Mono', 'JetBrains Mono', 'Fira Code', 'Consolas', monospace",
+  sizes: {
+    xs: '11px',
+    sm: '13px',
+    md: '14px',
+    lg: '16px',
+    xl: '18px',
+  },
 };

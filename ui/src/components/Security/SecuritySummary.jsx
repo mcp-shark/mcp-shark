@@ -1,62 +1,45 @@
-import {
-  IconAlertCircle,
-  IconAlertTriangle,
-  IconInfoCircle,
-  IconShieldCheck,
-} from '@tabler/icons-react';
+import { IconShieldCheck } from '@tabler/icons-react';
 import { colors, fonts } from '../../theme';
 
 const SEVERITY_CONFIG = {
-  critical: { color: '#dc2626', bg: '#fef2f2', icon: IconAlertCircle, label: 'Critical' },
-  high: { color: '#ea580c', bg: '#fff7ed', icon: IconAlertTriangle, label: 'High' },
-  medium: { color: '#ca8a04', bg: '#fefce8', icon: IconAlertTriangle, label: 'Medium' },
-  low: { color: '#2563eb', bg: '#eff6ff', icon: IconInfoCircle, label: 'Low' },
-  info: { color: '#6b7280', bg: '#f9fafb', icon: IconInfoCircle, label: 'Info' },
+  critical: { color: '#dc2626', label: 'Critical' },
+  high: { color: '#ea580c', label: 'High' },
+  medium: { color: '#ca8a04', label: 'Medium' },
+  low: { color: '#2563eb', label: 'Low' },
 };
 
-function SeverityCard({ severity, count }) {
-  const config = SEVERITY_CONFIG[severity] || SEVERITY_CONFIG.info;
-  const Icon = config.icon;
-
+function StatTile({ count, label, color }) {
   return (
     <div
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '12px',
-        padding: '16px',
-        background: config.bg,
-        borderRadius: '8px',
-        border: `1px solid ${config.color}20`,
-        minWidth: '140px',
+        gap: '6px',
+        padding: '6px 12px',
+        background: colors.bgCard,
+        border: `1px solid ${colors.borderLight}`,
+        borderRadius: '6px',
       }}
     >
-      <Icon size={24} color={config.color} />
-      <div>
-        <div
-          style={{
-            fontSize: '24px',
-            fontWeight: '700',
-            color: config.color,
-            fontFamily: fonts.heading,
-            lineHeight: 1,
-          }}
-        >
-          {count || 0}
-        </div>
-        <div
-          style={{
-            fontSize: '12px',
-            color: config.color,
-            fontFamily: fonts.body,
-            textTransform: 'uppercase',
-            fontWeight: '500',
-            marginTop: '4px',
-          }}
-        >
-          {config.label}
-        </div>
-      </div>
+      <span
+        style={{
+          fontSize: '13px',
+          fontWeight: '600',
+          color: count > 0 ? color : colors.textTertiary,
+          fontFamily: fonts.body,
+        }}
+      >
+        {count || 0}
+      </span>
+      <span
+        style={{
+          fontSize: '11px',
+          color: colors.textSecondary,
+          fontFamily: fonts.body,
+        }}
+      >
+        {label}
+      </span>
     </div>
   );
 }
@@ -68,37 +51,24 @@ function SecuritySummary({ summary }) {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '12px',
-          padding: '24px',
+          gap: '8px',
+          padding: '6px 12px',
           background: colors.bgCard,
-          borderRadius: '12px',
           border: `1px solid ${colors.borderLight}`,
-          marginBottom: '24px',
+          borderRadius: '6px',
+          marginBottom: '16px',
         }}
       >
-        <IconShieldCheck size={32} color={colors.success} />
-        <div>
-          <div
-            style={{
-              fontSize: '16px',
-              fontWeight: '600',
-              color: colors.textPrimary,
-              fontFamily: fonts.heading,
-            }}
-          >
-            No security scans yet
-          </div>
-          <div
-            style={{
-              fontSize: '13px',
-              color: colors.textSecondary,
-              fontFamily: fonts.body,
-              marginTop: '4px',
-            }}
-          >
-            Click "Discover & Scan" to analyze your MCP servers for OWASP vulnerabilities
-          </div>
-        </div>
+        <IconShieldCheck size={14} color={colors.success} />
+        <span
+          style={{
+            fontSize: '12px',
+            color: colors.textSecondary,
+            fontFamily: fonts.body,
+          }}
+        >
+          Click "Discover & Scan" to analyze MCP servers
+        </span>
       </div>
     );
   }
@@ -106,50 +76,24 @@ function SecuritySummary({ summary }) {
   const { total, bySeverity } = summary;
 
   return (
-    <div style={{ marginBottom: '24px' }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '16px',
-          marginBottom: '16px',
-        }}
-      >
-        <h3
-          style={{
-            fontSize: '14px',
-            fontWeight: '600',
-            color: colors.textSecondary,
-            fontFamily: fonts.heading,
-            margin: 0,
-            textTransform: 'uppercase',
-          }}
-        >
-          Security Summary
-        </h3>
-        <div
-          style={{
-            fontSize: '13px',
-            color: colors.textSecondary,
-            fontFamily: fonts.body,
-          }}
-        >
-          {total} total finding{total !== 1 ? 's' : ''}
-        </div>
-      </div>
-
-      <div
-        style={{
-          display: 'flex',
-          gap: '16px',
-          flexWrap: 'wrap',
-        }}
-      >
-        <SeverityCard severity="critical" count={bySeverity?.critical} />
-        <SeverityCard severity="high" count={bySeverity?.high} />
-        <SeverityCard severity="medium" count={bySeverity?.medium} />
-        <SeverityCard severity="low" count={bySeverity?.low} />
-      </div>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        marginBottom: '16px',
+        flexWrap: 'wrap',
+      }}
+    >
+      <StatTile count={total} label="findings" color={colors.textPrimary} />
+      <StatTile
+        count={bySeverity?.critical}
+        label="critical"
+        color={SEVERITY_CONFIG.critical.color}
+      />
+      <StatTile count={bySeverity?.high} label="high" color={SEVERITY_CONFIG.high.color} />
+      <StatTile count={bySeverity?.medium} label="medium" color={SEVERITY_CONFIG.medium.color} />
+      <StatTile count={bySeverity?.low} label="low" color={SEVERITY_CONFIG.low.color} />
     </div>
   );
 }

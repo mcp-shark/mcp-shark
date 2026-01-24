@@ -238,6 +238,16 @@ export function useSecurity() {
     loadEngineStatus();
   }, [loadRules, loadFindings, loadSummary, loadRuleSources, loadEngineStatus]);
 
+  // Poll for new findings every 3 seconds (real-time traffic detection)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadFindings();
+      loadSummary();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [loadFindings, loadSummary]);
+
   // Note: loadFindings already depends on filters via useCallback
 
   return {

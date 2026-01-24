@@ -52,6 +52,20 @@ export class SecurityDetectionService {
     const allFindings = [];
     const results = [];
 
+    // Get server names for cleanup
+    const serverNames = servers.map((s) => s.name).filter(Boolean);
+
+    // Delete old config findings for these servers to avoid duplicates
+    if (serverNames.length > 0) {
+      const deletedCount = this.findingsRepository.deleteConfigFindingsByServers(serverNames);
+      if (deletedCount > 0) {
+        this.logger?.debug(
+          { serverNames, deletedCount },
+          'Cleared old config findings before rescan'
+        );
+      }
+    }
+
     for (const server of servers) {
       const findings = this.staticRulesService.analyzeServerConfig(server);
       allFindings.push(...findings);

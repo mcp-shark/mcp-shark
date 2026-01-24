@@ -19,8 +19,30 @@ function toBuffer(body) {
     return body;
   }
 
+  // Handle Uint8Array and other TypedArrays
+  if (ArrayBuffer.isView(body)) {
+    return Buffer.from(body.buffer, body.byteOffset, body.byteLength);
+  }
+
+  // Handle ArrayBuffer
+  if (body instanceof ArrayBuffer) {
+    return Buffer.from(body);
+  }
+
   if (typeof body === 'object' && body.type === 'Buffer' && Array.isArray(body.data)) {
     return Buffer.from(body.data);
+  }
+
+  // Handle character code objects (e.g., {"0":123,"1":34,...})
+  if (typeof body === 'object' && !Array.isArray(body)) {
+    const keys = Object.keys(body);
+    if (keys.length > 0 && keys.every((k, i) => k === String(i) && typeof body[k] === 'number')) {
+      // This is a character code object, convert it back to a string
+      const chars = keys
+        .sort((a, b) => Number(a) - Number(b))
+        .map((k) => String.fromCharCode(body[k]));
+      return Buffer.from(chars.join(''), 'utf8');
+    }
   }
 
   if (typeof body === 'string') {

@@ -242,6 +242,51 @@ export function analyzeResource(resource) {
   return findings.map((f) => ({ ...f, target_type: 'resource', target_name: resourceUri }));
 }
 
+// Suspicious tool names that suggest manipulation attempts
+const SUSPICIOUS_TOOL_NAME_PATTERNS = [
+  { pattern: /override/i, name: 'Override Tool', severity: 'critical' },
+  { pattern: /bypass/i, name: 'Bypass Tool', severity: 'critical' },
+  { pattern: /ignore/i, name: 'Ignore Tool', severity: 'high' },
+  { pattern: /disable/i, name: 'Disable Tool', severity: 'high' },
+  { pattern: /jailbreak/i, name: 'Jailbreak Tool', severity: 'critical' },
+  { pattern: /hack/i, name: 'Hack Tool', severity: 'critical' },
+  { pattern: /exploit/i, name: 'Exploit Tool', severity: 'critical' },
+  { pattern: /inject/i, name: 'Inject Tool', severity: 'high' },
+  { pattern: /escape/i, name: 'Escape Tool', severity: 'medium' },
+  { pattern: /sudo|admin|root/i, name: 'Privilege Escalation Tool', severity: 'high' },
+  {
+    pattern: /system_prompt|systemprompt/i,
+    name: 'System Prompt Access Tool',
+    severity: 'critical',
+  },
+  { pattern: /instruction/i, name: 'Instruction Manipulation Tool', severity: 'high' },
+];
+
+function checkToolName(toolName) {
+  const findings = [];
+
+  if (!toolName || typeof toolName !== 'string') {
+    return findings;
+  }
+
+  for (const { pattern, name, severity } of SUSPICIOUS_TOOL_NAME_PATTERNS) {
+    if (pattern.test(toolName)) {
+      findings.push({
+        rule_id: 'mcp06-prompt-injection',
+        severity,
+        owasp_id: 'MCP06',
+        title: `Suspicious Tool Name: ${name}`,
+        description: `Tool "${toolName}" has a suspicious name suggesting potential prompt injection or manipulation capability.`,
+        evidence: toolName,
+        recommendation:
+          'Review tool purpose and ensure it cannot be used to manipulate AI behavior or bypass security controls.',
+      });
+    }
+  }
+
+  return findings;
+}
+
 /**
  * Analyze packet content for prompt injection
  * This is the primary use case - analyzing live traffic
@@ -253,9 +298,16 @@ export function analyzePacket(packet) {
     const bodyStr = typeof packet.body === 'string' ? packet.body : JSON.stringify(packet.body);
     findings.push(...checkText(bodyStr, 'packet body'));
 
-    // Check specifically for tool call arguments
+    // Check specifically for tool call arguments and tool names
     try {
       const parsed = typeof packet.body === 'string' ? JSON.parse(packet.body) : packet.body;
+
+      // Check for suspicious tool names in tools/call requests
+      if (parsed.method === 'tools/call' && parsed.params?.name) {
+        findings.push(...checkToolName(parsed.params.name));
+      }
+
+      // Check tool arguments for injection patterns
       if (parsed.params?.arguments) {
         const args = parsed.params.arguments;
         for (const [key, value] of Object.entries(args)) {

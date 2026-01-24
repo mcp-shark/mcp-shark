@@ -264,6 +264,20 @@ export class SecurityFindingsRepository {
   }
 
   /**
+   * Delete config findings for specific servers
+   * Used to replace old config findings when rescanning
+   */
+  deleteConfigFindingsByServers(serverNames) {
+    if (!serverNames || serverNames.length === 0) {
+      return 0;
+    }
+
+    const placeholders = serverNames.map(() => '?').join(',');
+    const sql = `DELETE FROM security_findings WHERE finding_type = 'config' AND server_name IN (${placeholders})`;
+    return this.db.prepare(sql).run(...serverNames).changes;
+  }
+
+  /**
    * Delete findings by scan ID
    */
   deleteFindingsByScanId(scanId) {
