@@ -25,14 +25,26 @@
   "bugs": {
     "url": "https://github.com/mcp-shark/mcp-shark/issues"
   },
-  "files": ["bin", "ui", "core", "README.md", "LICENSE", "package.json"],
+  "files": [
+    "bin",
+    "ui",
+    "core",
+    "!**/__tests__",
+    "!**/*.test.js",
+    "!**/*.spec.js",
+    "README.md",
+    "LICENSE",
+    "package.json"
+  ],
   "scripts": {
     "start": "node scripts/start-ui.js",
     "predev": "npm run build:ui",
     "dev": "node scripts/start-ui.js",
     "build": "bash -c 'cd ui && vite build'",
     "build:ui": "bash -c 'cd ui && vite build'",
-    "test": "node --test",
+    "test": "c8 node --test --test-name-pattern='.*' --test-reporter spec $(find core ui/server -path '*/__tests__/*.test.js' -type f)",
+    "test:ui": "vitest run --coverage",
+    "test:all": "npm run test:coverage && npm run test:ui",
     "lint": "biome lint .",
     "lint:fix": "biome lint --write .",
     "format": "biome format --write .",
@@ -94,9 +106,21 @@
     "@biomejs/biome": "^1.9.4",
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
+    "@testing-library/jest-dom": "^6.4.0",
+    "@testing-library/react": "^16.0.0",
     "@vitejs/plugin-react": "^4.2.1",
+    "@vitest/coverage-v8": "^4.0.18",
+    "c8": "^10.1.2",
     "husky": "^9.1.6",
+    "jsdom": "^25.0.0",
     "lint-staged": "^15.2.10",
-    "vite": "^7.3.0"
+    "vite": "^7.3.0",
+    "vitest": "^4.0.18"
+  },
+  "c8": {
+    "include": ["core/**/*.js", "ui/server/**/*.js"],
+    "exclude": ["**/__tests__/**", "**/*.test.js", "**/index.js"],
+    "reporter": ["text", "html"],
+    "check-coverage": false
   }
 }
