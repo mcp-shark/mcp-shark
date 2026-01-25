@@ -1,4 +1,6 @@
-import { SecurityController } from '#ui/server/controllers/SecurityController.js';
+import { RuleSourcesController } from '#ui/server/controllers/RuleSourcesController.js';
+import { SecurityFindingsController } from '#ui/server/controllers/SecurityFindingsController.js';
+import { YaraRulesController } from '#ui/server/controllers/YaraRulesController.js';
 
 /**
  * Create Security routes
@@ -11,44 +13,52 @@ export function createSecurityRoutes(container) {
   const yaraEngineService = container.getService('yaraEngine');
   const logger = container.getLibrary('logger');
 
-  const securityController = new SecurityController(
+  const findingsController = new SecurityFindingsController(
     securityDetectionService,
     mcpDiscoveryService,
+    logger
+  );
+
+  const sourcesController = new RuleSourcesController(
     rulesManagerService,
     yaraEngineService,
     logger
   );
 
+  const rulesController = new YaraRulesController(rulesManagerService, logger);
+
   const router = {};
 
-  // Static rules and scanning
-  router.getRules = securityController.getRules;
-  router.scanServer = securityController.scanServer;
-  router.scanMultipleServers = securityController.scanMultipleServers;
-  router.discoverAndScan = securityController.discoverAndScan;
-  router.getFindings = securityController.getFindings;
-  router.getFinding = securityController.getFinding;
-  router.getSummary = securityController.getSummary;
-  router.clearFindings = securityController.clearFindings;
-  router.deleteScanFindings = securityController.deleteScanFindings;
+  // Static rules and scanning (SecurityFindingsController)
+  router.getRules = findingsController.getRules;
+  router.scanServer = findingsController.scanServer;
+  router.scanMultipleServers = findingsController.scanMultipleServers;
+  router.discoverAndScan = findingsController.discoverAndScan;
+  router.getFindings = findingsController.getFindings;
+  router.getFinding = findingsController.getFinding;
+  router.getSummary = findingsController.getSummary;
+  router.clearFindings = findingsController.clearFindings;
+  router.deleteScanFindings = findingsController.deleteScanFindings;
 
-  // YARA engine
-  router.getEngineStatus = securityController.getEngineStatus;
-  router.loadRulesIntoEngine = securityController.loadRulesIntoEngine;
+  // YARA engine (RuleSourcesController)
+  router.getEngineStatus = sourcesController.getEngineStatus;
+  router.loadRulesIntoEngine = sourcesController.loadRulesIntoEngine;
 
-  // Rule sources
-  router.getRuleSources = securityController.getRuleSources;
-  router.addRuleSource = securityController.addRuleSource;
-  router.removeRuleSource = securityController.removeRuleSource;
-  router.syncRuleSource = securityController.syncRuleSource;
-  router.syncAllRuleSources = securityController.syncAllRuleSources;
-  router.initializeSources = securityController.initializeSources;
+  // Rule sources (RuleSourcesController)
+  router.getRuleSources = sourcesController.getRuleSources;
+  router.addRuleSource = sourcesController.addRuleSource;
+  router.removeRuleSource = sourcesController.removeRuleSource;
+  router.syncRuleSource = sourcesController.syncRuleSource;
+  router.syncAllRuleSources = sourcesController.syncAllRuleSources;
+  router.initializeSources = sourcesController.initializeSources;
 
-  // Community rules
-  router.getCommunityRules = securityController.getCommunityRules;
-  router.setRuleEnabled = securityController.setRuleEnabled;
-  router.deleteCommunityRule = securityController.deleteCommunityRule;
-  router.addCustomRule = securityController.addCustomRule;
+  // Community rules (YaraRulesController)
+  router.getCommunityRules = rulesController.getCommunityRules;
+  router.setRuleEnabled = rulesController.setRuleEnabled;
+  router.deleteCommunityRule = rulesController.deleteCommunityRule;
+  router.addCustomRule = rulesController.addCustomRule;
+  router.updateRule = rulesController.updateRule;
+  router.resetPredefinedRules = rulesController.resetPredefinedRules;
 
   return router;
 }

@@ -12,6 +12,7 @@ import {
   postCustomRule,
   postDiscoverAndScan,
   postInitializeSources,
+  postResetDefaults,
   postSyncAllSources,
   postSyncSource,
 } from './securityApi.js';
@@ -234,13 +235,27 @@ export function useSecurity() {
     [loadCommunityRules]
   );
 
+  const resetDefaults = useCallback(async () => {
+    try {
+      const data = await postResetDefaults();
+      if (data.success) {
+        await loadCommunityRules();
+      }
+      return data;
+    } catch (err) {
+      console.error('Failed to reset defaults:', err);
+      return { success: false, error: err.message };
+    }
+  }, [loadCommunityRules]);
+
   useEffect(() => {
     loadRules();
     loadFindings();
     loadSummary();
     loadRuleSources();
     loadEngineStatus();
-  }, [loadRules, loadFindings, loadSummary, loadRuleSources, loadEngineStatus]);
+    loadCommunityRules();
+  }, [loadRules, loadFindings, loadSummary, loadRuleSources, loadEngineStatus, loadCommunityRules]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -278,5 +293,6 @@ export function useSecurity() {
     setRuleEnabled,
     saveCustomRule,
     deleteCustomRule,
+    resetDefaults,
   };
 }

@@ -158,11 +158,25 @@ export function createUIServer() {
   app.post('/api/security/sources/sync', securityRoutes.syncAllRuleSources);
   app.post('/api/security/sources/initialize', securityRoutes.initializeSources);
 
-  // Security routes - Community rules
+  // Security routes - YARA rules management
   app.get('/api/security/community-rules', securityRoutes.getCommunityRules);
   app.patch('/api/security/community-rules/:ruleId/enabled', securityRoutes.setRuleEnabled);
+  app.patch('/api/security/community-rules/:ruleId', securityRoutes.updateRule);
   app.delete('/api/security/community-rules/:ruleId', securityRoutes.deleteCommunityRule);
   app.post('/api/security/community-rules', securityRoutes.addCustomRule);
+  app.post('/api/security/yara/reset-defaults', securityRoutes.resetPredefinedRules);
+
+  // Initialize YARA rules on startup (async, non-blocking)
+  const rulesManager = container.getService('rulesManager');
+  rulesManager.initializeSources();
+  rulesManager
+    .loadRulesIntoEngine()
+    .then((result) => {
+      logger.info({ loaded: result.loaded, failed: result.failed }, 'YARA rules loaded on startup');
+    })
+    .catch((err) => {
+      logger.warn({ error: err.message }, 'Failed to load YARA rules on startup');
+    });
 
   const staticPath = path.join(__dirname, '..', 'dist');
   app.use(express.static(staticPath));

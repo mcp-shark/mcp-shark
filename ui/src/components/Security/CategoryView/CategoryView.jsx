@@ -10,7 +10,7 @@ function CategoryView({ findings, selectedFinding, onSelectFinding }) {
     return acc;
   }, {});
 
-  const categoryOrder = ['owasp-mcp', 'agentic-security', 'general-security'];
+  const categoryOrder = ['owasp-mcp', 'agentic-security', 'yara', 'general-security'];
   const sortedCategories = categoryOrder.filter((cat) => byCategory[cat]?.length > 0);
 
   if (sortedCategories.length === 0) {

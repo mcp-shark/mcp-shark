@@ -39,12 +39,13 @@ function EmptyState() {
   );
 }
 
-export function YaraEditor({ rules = [], onSave, onDelete, onToggle }) {
+export function YaraEditor({ rules = [], onSave, onDelete, onToggle, onResetDefaults }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editingRule, setEditingRule] = useState(null);
   const [content, setContent] = useState('');
   const [validation, setValidation] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   const handleNew = useCallback(() => {
     setContent(SAMPLE_RULE);
@@ -88,11 +89,30 @@ export function YaraEditor({ rules = [], onSave, onDelete, onToggle }) {
     }
   }, [content, editingRule, onSave, handleCancel]);
 
+  const handleResetDefaults = useCallback(async () => {
+    if (!onResetDefaults) return;
+    setResetting(true);
+    try {
+      await onResetDefaults();
+    } finally {
+      setResetting(false);
+    }
+  }, [onResetDefaults]);
+
+  // Separate rules by source
+  const predefinedRules = rules.filter((r) => r.source === 'predefined');
   const customRules = rules.filter((r) => r.source === 'custom');
 
   return (
     <div style={{ marginTop: '24px' }}>
-      <YaraEditorHeader isEditing={isEditing} onNew={handleNew} onCancel={handleCancel} />
+      <YaraEditorHeader
+        isEditing={isEditing}
+        onNew={handleNew}
+        onCancel={handleCancel}
+        onResetDefaults={handleResetDefaults}
+        resetting={resetting}
+        hasPredefined={predefinedRules.length > 0 || customRules.length > 0}
+      />
 
       {isEditing && (
         <YaraRuleEditor
@@ -105,18 +125,51 @@ export function YaraEditor({ rules = [], onSave, onDelete, onToggle }) {
         />
       )}
 
-      {!isEditing && customRules.length === 0 && <EmptyState />}
+      {!isEditing && rules.length === 0 && <EmptyState />}
 
-      {!isEditing &&
-        customRules.map((rule) => (
-          <YaraRuleCard
-            key={rule.rule_id}
-            rule={rule}
-            onEdit={handleEdit}
-            onDelete={onDelete}
-            onToggle={onToggle}
-          />
-        ))}
+      {!isEditing && predefinedRules.length > 0 && (
+        <RulesSection
+          title="Predefined Rules"
+          rules={predefinedRules}
+          handlers={{ handleEdit, onDelete, onToggle }}
+        />
+      )}
+
+      {!isEditing && customRules.length > 0 && (
+        <RulesSection
+          title="Custom Rules"
+          rules={customRules}
+          handlers={{ handleEdit, onDelete, onToggle }}
+        />
+      )}
+    </div>
+  );
+}
+
+function RulesSection({ title, rules, handlers }) {
+  return (
+    <div style={{ marginBottom: '24px' }}>
+      <h4
+        style={{
+          fontSize: '12px',
+          fontWeight: 600,
+          color: colors.textSecondary,
+          fontFamily: fonts.body,
+          textTransform: 'uppercase',
+          marginBottom: '12px',
+        }}
+      >
+        {title} ({rules.length})
+      </h4>
+      {rules.map((rule) => (
+        <YaraRuleCard
+          key={rule.rule_id}
+          rule={rule}
+          onEdit={handlers.handleEdit}
+          onDelete={handlers.onDelete}
+          onToggle={handlers.onToggle}
+        />
+      ))}
     </div>
   );
 }

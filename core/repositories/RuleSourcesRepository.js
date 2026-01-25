@@ -85,7 +85,8 @@ export class RuleSourcesRepository {
   initializeDefaultSources() {
     const customSource = {
       name: 'custom',
-      type: 'custom',
+      url: 'local://custom-rules',
+      type: 'local',
       enabled: true,
     };
 

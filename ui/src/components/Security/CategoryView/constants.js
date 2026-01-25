@@ -1,4 +1,4 @@
-import { IconRobot, IconShield, IconShieldLock } from '@tabler/icons-react';
+import { IconCode, IconRobot, IconShield, IconShieldLock } from '@tabler/icons-react';
 import { colors } from '../../../theme.js';
 
 export const CATEGORIES = {
@@ -15,6 +15,13 @@ export const CATEGORIES = {
     description: 'AI agent behavioral issues',
     icon: IconRobot,
     color: colors.accentBlue,
+  },
+  yara: {
+    id: 'yara',
+    name: 'YARA Detection',
+    description: 'Pattern-based security detection',
+    icon: IconCode,
+    color: colors.accentOrange || '#f59e0b',
   },
   'general-security': {
     id: 'general-security',
@@ -84,6 +91,11 @@ export const SEVERITY_COLORS = {
 };
 
 export function getCategory(finding) {
+  // Check for YARA detection (rule_id starts with 'yara-')
+  if (finding.rule_id?.startsWith('yara-')) {
+    return 'yara';
+  }
+
   const owaspId = finding.owasp_id?.toUpperCase();
   if (owaspId && OWASP_CATEGORY_MAP[owaspId]) {
     return OWASP_CATEGORY_MAP[owaspId];

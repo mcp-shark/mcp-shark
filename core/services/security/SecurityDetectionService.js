@@ -6,9 +6,10 @@
 import { randomUUID } from 'node:crypto';
 
 export class SecurityDetectionService {
-  constructor(staticRulesService, securityFindingsRepository, logger) {
+  constructor(staticRulesService, securityFindingsRepository, yaraEngine, logger) {
     this.staticRulesService = staticRulesService;
     this.findingsRepository = securityFindingsRepository;
+    this.yaraEngine = yaraEngine;
     this.logger = logger;
   }
 
@@ -22,15 +23,19 @@ export class SecurityDetectionService {
   /**
    * Scan a single MCP server configuration
    */
-  scanServerConfig(serverConfig) {
+  async scanServerConfig(serverConfig) {
     const scanId = randomUUID();
     const findings = this.staticRulesService.analyzeServerConfig(serverConfig);
 
+    // Run YARA scans on server config content
+    const yaraFindings = await this._runYaraConfigScan(serverConfig);
+    const allFindings = [...findings, ...yaraFindings];
+
     // Store findings
-    if (findings.length > 0) {
-      this.findingsRepository.insertFindings(findings, scanId);
+    if (allFindings.length > 0) {
+      this.findingsRepository.insertFindings(allFindings, scanId);
       this.logger?.info(
-        { serverName: serverConfig.name, findingsCount: findings.length, scanId },
+        { serverName: serverConfig.name, findingsCount: allFindings.length, scanId },
         'Security scan completed'
       );
     }
@@ -38,16 +43,47 @@ export class SecurityDetectionService {
     return {
       scanId,
       serverName: serverConfig.name,
-      findingsCount: findings.length,
-      findings,
-      summary: this.staticRulesService.summarizeFindings(findings),
+      findingsCount: allFindings.length,
+      findings: allFindings,
+      summary: this.staticRulesService.summarizeFindings(allFindings),
     };
+  }
+
+  /**
+   * Run YARA scans on server configuration content
+   */
+  async _runYaraConfigScan(serverConfig) {
+    if (!this.yaraEngine) {
+      return [];
+    }
+
+    const findings = [];
+    const serverName = serverConfig.name;
+    const scanItems = [
+      { items: serverConfig.tools, targetType: 'tool' },
+      { items: serverConfig.prompts, targetType: 'prompt' },
+      { items: serverConfig.resources, targetType: 'resource' },
+    ];
+
+    for (const { items, targetType } of scanItems) {
+      if (!items || !Array.isArray(items)) {
+        continue;
+      }
+      for (const item of items) {
+        const result = await this.yaraEngine.scan(JSON.stringify(item), { serverName, targetType });
+        if (result.findings?.length > 0) {
+          findings.push(...result.findings);
+        }
+      }
+    }
+
+    return findings;
   }
 
   /**
    * Scan multiple MCP servers
    */
-  scanMultipleServers(servers) {
+  async scanMultipleServers(servers) {
     const scanId = randomUUID();
     const allFindings = [];
     const results = [];
@@ -68,11 +104,14 @@ export class SecurityDetectionService {
 
     for (const server of servers) {
       const findings = this.staticRulesService.analyzeServerConfig(server);
-      allFindings.push(...findings);
+      const yaraFindings = await this._runYaraConfigScan(server);
+      const serverFindings = [...findings, ...yaraFindings];
+
+      allFindings.push(...serverFindings);
       results.push({
         serverName: server.name,
-        findingsCount: findings.length,
-        summary: this.staticRulesService.summarizeFindings(findings),
+        findingsCount: serverFindings.length,
+        summary: this.staticRulesService.summarizeFindings(serverFindings),
       });
     }
 
@@ -99,19 +138,40 @@ export class SecurityDetectionService {
    * Analyze a single packet for security issues
    * Called in real-time as traffic flows through
    */
-  analyzePacket(packet, sessionId = null) {
+  async analyzePacket(packet, sessionId = null) {
     const findings = this.staticRulesService.analyzePacket(packet, sessionId);
 
+    // Run YARA scan on packet content
+    const yaraFindings = await this._runYaraPacketScan(packet, sessionId);
+    const allFindings = [...findings, ...yaraFindings];
+
     // Store findings immediately for real-time traffic
-    if (findings.length > 0) {
-      this.findingsRepository.insertFindings(findings);
+    if (allFindings.length > 0) {
+      this.findingsRepository.insertFindings(allFindings);
       this.logger?.debug(
-        { frameNumber: packet.frameNumber, findingsCount: findings.length },
+        { frameNumber: packet.frameNumber, findingsCount: allFindings.length },
         'Security findings in packet'
       );
     }
 
-    return findings;
+    return allFindings;
+  }
+
+  /**
+   * Run YARA scan on packet content
+   */
+  async _runYaraPacketScan(packet, sessionId) {
+    if (!this.yaraEngine || !packet.body) {
+      return [];
+    }
+
+    const result = await this.yaraEngine.scan(packet.body, {
+      sessionId,
+      targetType: 'packet',
+      frameNumber: packet.frameNumber,
+    });
+
+    return result.findings || [];
   }
 
   /**

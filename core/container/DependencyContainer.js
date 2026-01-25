@@ -153,9 +153,11 @@ export class DependencyContainer {
 
       // Security services
       this._services.staticRules = new StaticRulesService(libs.logger);
+      this._services.yaraEngine = new YaraEngineService(this._services.staticRules, libs.logger);
       this._services.securityDetection = new SecurityDetectionService(
         this._services.staticRules,
         repos.securityFindings,
+        this._services.yaraEngine,
         libs.logger
       );
       this._services.trafficAnalysis = new TrafficAnalysisService(
@@ -163,7 +165,6 @@ export class DependencyContainer {
         repos.securityFindings,
         libs.logger
       );
-      this._services.yaraEngine = new YaraEngineService(this._services.staticRules, libs.logger);
       this._services.rulesManager = new RulesManagerService(
         repos.securityRules,
         this._services.yaraEngine,

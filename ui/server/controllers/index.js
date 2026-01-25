@@ -15,4 +15,6 @@ export { McpClientController } from './McpClientController.js';
 export { TokenController } from './TokenController.js';
 export { SettingsController } from './SettingsController.js';
 export { ServerManagementController } from './ServerManagementController.js';
-export { SecurityController } from './SecurityController.js';
+export { SecurityFindingsController } from './SecurityFindingsController.js';
+export { RuleSourcesController } from './RuleSourcesController.js';
+export { YaraRulesController } from './YaraRulesController.js';

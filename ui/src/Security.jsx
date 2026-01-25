@@ -22,19 +22,13 @@ function Security() {
     loadSummary,
     selectedFinding,
     setSelectedFinding,
-    // Community rules
+    // YARA rules
     communityRules,
-    ruleSources,
-    rulesSummary,
-    syncing,
     engineStatus,
-    initializeSources,
-    syncAllSources,
-    syncSource,
     setRuleEnabled,
-    // Custom YARA rules
     saveCustomRule,
     deleteCustomRule,
+    resetDefaults,
   } = useSecurity();
 
   return (
@@ -95,17 +89,12 @@ function Security() {
 
       {activeTab === 'rules' && (
         <RulesManager
-          ruleSources={ruleSources}
           communityRules={communityRules}
-          rulesSummary={rulesSummary}
-          syncing={syncing}
           engineStatus={engineStatus}
-          onInitialize={initializeSources}
-          onSyncAll={syncAllSources}
-          onSyncSource={syncSource}
           onToggleRule={setRuleEnabled}
           onSaveRule={saveCustomRule}
           onDeleteRule={deleteCustomRule}
+          onResetDefaults={resetDefaults}
         />
       )}
     </div>

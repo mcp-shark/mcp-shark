@@ -1,8 +1,9 @@
+import { convertToSecurityRule, parseYaraFile, validateYaraRule } from './YaraRuleParser.js';
 /**
  * Rules Manager Service (Simplified)
  * Manages user-defined YARA rules for extensibility
  */
-import { convertToSecurityRule, parseYaraFile, validateYaraRule } from './YaraRuleParser.js';
+import { getPredefinedRules } from './predefinedYaraRules.js';
 
 export class RulesManagerService {
   constructor(securityRulesRepository, yaraEngineService, logger) {
@@ -26,7 +27,56 @@ export class RulesManagerService {
   }
 
   initializeSources() {
+    this.seedPredefinedRules();
     return this.rulesRepository.initializeDefaultSources();
+  }
+
+  /**
+   * Seed predefined YARA rules to database (if not already present)
+   */
+  seedPredefinedRules() {
+    const predefinedRules = getPredefinedRules();
+    let seeded = 0;
+
+    for (const rule of predefinedRules) {
+      const existing = this.rulesRepository.getRuleById(rule.rule_id);
+      if (!existing) {
+        this.rulesRepository.upsertRule(rule);
+        seeded++;
+      }
+    }
+
+    if (seeded > 0) {
+      this.logger?.info({ seeded, total: predefinedRules.length }, 'Seeded predefined YARA rules');
+    }
+
+    return { seeded, total: predefinedRules.length };
+  }
+
+  /**
+   * Reset predefined rules to defaults (delete and re-seed)
+   */
+  resetPredefinedRules() {
+    const predefinedRules = getPredefinedRules();
+    const ruleIds = predefinedRules.map((r) => r.rule_id);
+
+    // Delete existing predefined rules
+    let deleted = 0;
+    for (const ruleId of ruleIds) {
+      const result = this.rulesRepository.deleteRule(ruleId);
+      if (result.changes > 0) {
+        deleted++;
+      }
+    }
+
+    // Re-seed all predefined rules
+    for (const rule of predefinedRules) {
+      this.rulesRepository.upsertRule(rule);
+    }
+
+    this.logger?.info({ deleted, reseeded: predefinedRules.length }, 'Reset predefined YARA rules');
+
+    return { deleted, reseeded: predefinedRules.length };
   }
 
   async syncSource(_sourceName) {
@@ -84,12 +134,17 @@ export class RulesManagerService {
       return { success: false, errors: ['No valid rules found in content'] };
     }
 
+    const parsedRule = convertToSecurityRule(parsed[0], 'custom');
     const dbRule = {
-      ...convertToSecurityRule(parsed[0], 'custom'),
+      ...parsedRule,
       content: rule.content,
       source: 'custom',
       enabled: rule.enabled !== false,
-      ...rule,
+      // Only override with caller values if explicitly provided
+      ...(rule.name && { name: rule.name }),
+      ...(rule.description && { description: rule.description }),
+      ...(rule.severity && { severity: rule.severity }),
+      ...(rule.rule_id && { rule_id: rule.rule_id }),
     };
 
     this.rulesRepository.upsertRule(dbRule);
@@ -113,20 +168,24 @@ export class RulesManagerService {
   }
 
   async loadRulesIntoEngine() {
-    const rules = this.getEnabledRules();
+    // Load all enabled rules from database (predefined + custom are both in DB)
+    const enabledRules = this.getEnabledRules();
 
-    if (!rules.length) {
+    if (!enabledRules.length) {
       return { loaded: 0, failed: 0 };
     }
 
     const results = await this.yaraEngine.loadRules(
-      rules.map((r) => ({ id: r.rule_id, content: r.content }))
+      enabledRules.map((r) => ({ id: r.rule_id, content: r.content }))
     );
 
     const loaded = results.filter((r) => r.success).length;
     const failed = results.filter((r) => !r.success).length;
 
-    this.logger?.info({ loaded, failed }, 'Loaded custom rules into engine');
+    this.logger?.info(
+      { loaded, failed, total: enabledRules.length },
+      'Loaded YARA rules into engine'
+    );
 
     return { loaded, failed, results };
   }

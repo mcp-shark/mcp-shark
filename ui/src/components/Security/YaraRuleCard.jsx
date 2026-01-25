@@ -55,6 +55,21 @@ export function YaraRuleCard({ rule, onEdit, onDelete, onToggle }) {
               {rule.severity}
             </span>
           )}
+          {rule.source && (
+            <span
+              style={{
+                background: rule.source === 'predefined' ? colors.infoBg : colors.bgSecondary,
+                color: rule.source === 'predefined' ? colors.info : colors.textTertiary,
+                padding: '2px 8px',
+                borderRadius: '4px',
+                fontSize: '10px',
+                fontFamily: fonts.body,
+                textTransform: 'uppercase',
+              }}
+            >
+              {rule.source}
+            </span>
+          )}
         </div>
         {rule.description && (
           <p style={{ color: colors.textSecondary, fontSize: '12px', margin: 0 }}>
