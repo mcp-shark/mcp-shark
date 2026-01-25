@@ -37,7 +37,7 @@ export default function ScannerEmptyState() {
           margin: '0 0 8px 0',
         }}
       >
-        No Security Findings
+        No Findings
       </h3>
       <p
         style={{
@@ -49,8 +49,8 @@ export default function ScannerEmptyState() {
           lineHeight: '1.5',
         }}
       >
-        Click &quot;Discover &amp; Scan&quot; to analyze your MCP servers for security
-        vulnerabilities aligned with OWASP MCP Top 10.
+        Click &quot;Discover &amp; Scan&quot; to run local static analysis on captured MCP traffic
+        using YARA rules aligned with OWASP MCP Top 10.
       </p>
     </div>
   );

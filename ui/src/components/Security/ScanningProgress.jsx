@@ -46,7 +46,7 @@ export default function ScanningProgress({ scanning }) {
           margin: '0 0 8px 0',
         }}
       >
-        Scanning MCP Servers...
+        Running Local Analysis...
       </h3>
       <p
         style={{
@@ -58,7 +58,7 @@ export default function ScanningProgress({ scanning }) {
           lineHeight: '1.5',
         }}
       >
-        Discovering servers and analyzing for security vulnerabilities.
+        Scanning captured MCP traffic with YARA rules.
       </p>
     </div>
   );

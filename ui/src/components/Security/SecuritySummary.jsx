@@ -1,45 +1,158 @@
-import { IconShieldCheck } from '@tabler/icons-react';
+import {
+  IconAlertCircle,
+  IconAlertTriangle,
+  IconInfoCircle,
+  IconShieldCheck,
+} from '@tabler/icons-react';
 import { colors, fonts } from '../../theme';
 
 const SEVERITY_CONFIG = {
-  critical: { color: '#dc2626', label: 'Critical' },
-  high: { color: '#ea580c', label: 'High' },
-  medium: { color: '#ca8a04', label: 'Medium' },
-  low: { color: '#2563eb', label: 'Low' },
+  critical: {
+    color: '#dc2626',
+    bg: '#fef2f2',
+    border: '#fecaca',
+    icon: IconAlertCircle,
+    label: 'Critical',
+  },
+  high: {
+    color: '#ea580c',
+    bg: '#fff7ed',
+    border: '#fed7aa',
+    icon: IconAlertTriangle,
+    label: 'High',
+  },
+  medium: {
+    color: '#ca8a04',
+    bg: '#fefce8',
+    border: '#fef08a',
+    icon: IconAlertTriangle,
+    label: 'Medium',
+  },
+  low: {
+    color: '#2563eb',
+    bg: '#eff6ff',
+    border: '#bfdbfe',
+    icon: IconInfoCircle,
+    label: 'Low',
+  },
 };
 
-function StatTile({ count, label, color }) {
+function SeverityCard({ count, config }) {
+  const Icon = config.icon;
+  const hasFindings = count > 0;
+
   return (
     <div
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '6px',
-        padding: '6px 12px',
-        background: colors.bgCard,
-        border: `1px solid ${colors.borderLight}`,
-        borderRadius: '6px',
+        gap: '12px',
+        padding: '12px 16px',
+        background: hasFindings ? config.bg : colors.bgCard,
+        border: `1px solid ${hasFindings ? config.border : colors.borderLight}`,
+        borderRadius: '10px',
+        minWidth: '120px',
+        transition: 'all 0.2s ease',
       }}
     >
-      <span
+      <div
         style={{
-          fontSize: '13px',
-          fontWeight: '600',
-          color: count > 0 ? color : colors.textTertiary,
-          fontFamily: fonts.body,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '36px',
+          height: '36px',
+          borderRadius: '8px',
+          background: hasFindings ? `${config.color}20` : colors.bgSecondary,
+          flexShrink: 0,
         }}
       >
-        {count || 0}
-      </span>
-      <span
+        <Icon size={18} color={hasFindings ? config.color : colors.textTertiary} />
+      </div>
+      <div>
+        <div
+          style={{
+            fontSize: '20px',
+            fontWeight: '700',
+            color: hasFindings ? config.color : colors.textTertiary,
+            fontFamily: fonts.body,
+            lineHeight: 1,
+          }}
+        >
+          {count || 0}
+        </div>
+        <div
+          style={{
+            fontSize: '11px',
+            fontWeight: '500',
+            color: hasFindings ? config.color : colors.textTertiary,
+            fontFamily: fonts.body,
+            textTransform: 'uppercase',
+            opacity: 0.8,
+          }}
+        >
+          {config.label}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TotalCard({ total }) {
+  const hasFindings = total > 0;
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        padding: '12px 16px',
+        background: hasFindings ? `${colors.error}08` : `${colors.success}08`,
+        border: `1px solid ${hasFindings ? `${colors.error}30` : `${colors.success}30`}`,
+        borderRadius: '10px',
+        minWidth: '140px',
+      }}
+    >
+      <div
         style={{
-          fontSize: '11px',
-          color: colors.textSecondary,
-          fontFamily: fonts.body,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '36px',
+          height: '36px',
+          borderRadius: '8px',
+          background: hasFindings ? `${colors.error}15` : `${colors.success}15`,
+          flexShrink: 0,
         }}
       >
-        {label}
-      </span>
+        <IconShieldCheck size={18} color={hasFindings ? colors.error : colors.success} />
+      </div>
+      <div>
+        <div
+          style={{
+            fontSize: '20px',
+            fontWeight: '700',
+            color: hasFindings ? colors.error : colors.success,
+            fontFamily: fonts.body,
+            lineHeight: 1,
+          }}
+        >
+          {total || 0}
+        </div>
+        <div
+          style={{
+            fontSize: '11px',
+            fontWeight: '500',
+            color: hasFindings ? colors.error : colors.success,
+            fontFamily: fonts.body,
+            textTransform: 'uppercase',
+            opacity: 0.8,
+          }}
+        >
+          {hasFindings ? 'Total Findings' : 'No Issues'}
+        </div>
+      </div>
     </div>
   );
 }
@@ -52,22 +165,21 @@ function SecuritySummary({ summary }) {
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
-          padding: '6px 12px',
+          padding: '12px 16px',
           background: colors.bgCard,
           border: `1px solid ${colors.borderLight}`,
-          borderRadius: '6px',
-          marginBottom: '16px',
+          borderRadius: '10px',
         }}
       >
-        <IconShieldCheck size={14} color={colors.success} />
+        <IconShieldCheck size={16} color={colors.textTertiary} />
         <span
           style={{
-            fontSize: '12px',
+            fontSize: '13px',
             color: colors.textSecondary,
             fontFamily: fonts.body,
           }}
         >
-          Click "Discover & Scan" to analyze MCP servers
+          Click "Discover & Scan" to run local static analysis
         </span>
       </div>
     );
@@ -79,21 +191,30 @@ function SecuritySummary({ summary }) {
     <div
       style={{
         display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        marginBottom: '16px',
+        alignItems: 'stretch',
+        gap: '12px',
         flexWrap: 'wrap',
       }}
     >
-      <StatTile count={total} label="findings" color={colors.textPrimary} />
-      <StatTile
-        count={bySeverity?.critical}
-        label="critical"
-        color={SEVERITY_CONFIG.critical.color}
+      <TotalCard total={total} />
+
+      <div
+        style={{
+          width: '1px',
+          background: colors.borderLight,
+          alignSelf: 'stretch',
+          margin: '0 4px',
+        }}
       />
-      <StatTile count={bySeverity?.high} label="high" color={SEVERITY_CONFIG.high.color} />
-      <StatTile count={bySeverity?.medium} label="medium" color={SEVERITY_CONFIG.medium.color} />
-      <StatTile count={bySeverity?.low} label="low" color={SEVERITY_CONFIG.low.color} />
+
+      {Object.entries(SEVERITY_CONFIG).map(([severity, config]) => (
+        <SeverityCard
+          key={severity}
+          severity={severity}
+          count={bySeverity?.[severity] || 0}
+          config={config}
+        />
+      ))}
     </div>
   );
 }

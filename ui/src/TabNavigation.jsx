@@ -42,13 +42,13 @@ function TabNavigation({ activeTab, onTabChange }) {
       id: 'smart-scan',
       label: 'Smart Scan',
       icon: ShieldIcon,
-      description: 'AI-powered security analysis for MCP servers',
+      description: 'AI-powered security analysis via remote API',
     },
     {
       id: 'security',
-      label: 'Security',
+      label: 'Local Analysis',
       icon: SecurityIcon,
-      description: 'OWASP vulnerability detection for MCP servers',
+      description: 'Local static analysis of captured MCP traffic',
     },
   ];
 

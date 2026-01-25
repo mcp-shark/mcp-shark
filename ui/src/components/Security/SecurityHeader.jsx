@@ -37,7 +37,7 @@ function SecurityHeader() {
             letterSpacing: '-0.2px',
           }}
         >
-          OWASP Security Scanner
+          Local Static Analysis
         </h1>
         <p
           style={{
@@ -48,7 +48,7 @@ function SecurityHeader() {
             lineHeight: '1.3',
           }}
         >
-          Local vulnerability detection aligned with OWASP MCP Top 10
+          Offline YARA-based scanning of captured MCP traffic
         </p>
       </div>
     </div>
