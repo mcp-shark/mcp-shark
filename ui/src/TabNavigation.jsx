@@ -39,16 +39,16 @@ function TabNavigation({ activeTab, onTabChange }) {
       description: 'Test and interact with MCP tools, prompts, and resources',
     },
     {
-      id: 'smart-scan',
-      label: 'Smart Scan',
-      icon: ShieldIcon,
-      description: 'AI-powered security analysis via remote API',
-    },
-    {
       id: 'security',
       label: 'Local Analysis',
       icon: SecurityIcon,
       description: 'Local static analysis of captured MCP traffic',
+    },
+    {
+      id: 'smart-scan',
+      label: 'Smart Scan',
+      icon: ShieldIcon,
+      description: 'AI-powered security analysis via remote API',
     },
   ];
 
