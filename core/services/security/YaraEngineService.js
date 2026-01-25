@@ -1,8 +1,9 @@
 /**
  * YARA Engine Service
- * Provides optional native YARA scanning with fallback to static rules
+ * Provides optional native YARA scanning with fallback to regex-based matching
  * Note: Native YARA requires @automattic/yara to be installed separately
  */
+import { fallbackScan } from './YaraFallbackScanner.js';
 import { convertMatchesToFindings, formatMatch } from './YaraMatchConverter.js';
 
 // Module-level state for YARA availability (const objects with mutable properties)
@@ -128,7 +129,7 @@ export class YaraEngineService {
   }
 
   /**
-   * Scan content with YARA rules (native) or static rules (fallback)
+   * Scan content with YARA rules (native) or regex fallback
    */
   async scan(content, options = {}) {
     if (!this.initialized) {
@@ -152,15 +153,18 @@ export class YaraEngineService {
       }
     }
 
-    // Fallback to static rules
+    // Fallback: use regex-based pattern matching from loaded YARA rules
     const contentStr = Buffer.isBuffer(content) ? content.toString('utf8') : String(content);
-    const packet = { frameNumber: options.frameNumber || 0, body: contentStr };
-    const findings = this.staticRulesService.analyzePacket(packet, sessionId);
+    const yaraFindings = fallbackScan(contentStr, this.loadedRules, {
+      serverName,
+      sessionId,
+      targetType,
+    });
 
     return {
       native: false,
       matches: [],
-      findings: findings.map((f) => ({ ...f, server_name: serverName || f.server_name })),
+      findings: yaraFindings,
     };
   }
 
