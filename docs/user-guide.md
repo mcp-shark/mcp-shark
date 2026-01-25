@@ -4,7 +4,7 @@ Complete guide to using MCP Shark's features and capabilities.
 
 ## UI Tabs Overview
 
-MCP Shark's interface is organized into five main tabs, each providing different functionality.
+MCP Shark's interface is organized into six main tabs, each providing different functionality.
 
 ### Traffic Capture
 
@@ -83,6 +83,45 @@ Interactive testing environment for MCP servers.
 - Switch between servers dynamically
 - View server status and availability
 
+### Local Analysis
+
+Static analysis for MCP servers connected through the proxy.
+
+**Prerequisites:**
+- MCP servers must be started via the Setup tab
+- The Analyse button is disabled until servers are running
+
+**Running Analysis:**
+1. Go to the **Setup** tab and start your MCP servers
+2. Navigate to the **Local Analysis** tab
+3. Click **Analyse** to scan connected servers
+4. View findings in the dashboard
+
+**View Modes:**
+- **Dashboard**: Overview with charts and summary statistics
+- **By Severity**: Group findings by severity level (Critical, High, Medium, Low)
+- **By Category**: Group by security category (MCP Top 10, Agentic Top 10)
+- **By Target**: Group by server or tool name
+
+**Controls:**
+- **Analyse**: Run static analysis on all connected proxy servers
+- **History**: Toggle to view past scan results
+- **Clear**: Remove all findings and scan history
+
+**Scan History:**
+- View all previous scans with timestamps
+- See finding counts and severity breakdown
+- Click on a historical scan to view its findings
+- Compare results across different scans
+
+**YARA Rules:**
+- Switch to the "YARA Detection" tab to manage rules
+- View predefined rules for MCP and Agentic security
+- Create custom YARA rules for specific patterns
+- Enable/disable individual rules
+
+> **See Also**: [Local Analysis Guide](local-analysis.md) for detailed documentation including YARA rule syntax and API reference.
+
 ### Smart Scan
 
 AI-powered security analysis for MCP servers.
@@ -118,6 +157,10 @@ AI-powered security analysis for MCP servers.
 - Results are cached for quick access
 - No need to re-scan unless configuration changes
 - Clear cache option available
+
+**When to Use Local vs Smart Scan:**
+- Use **Local Analysis** for quick, rule-based pattern checks on running servers
+- Use **Smart Scan** for comprehensive AI-powered security analysis
 
 ### MCP Shark Logs
 

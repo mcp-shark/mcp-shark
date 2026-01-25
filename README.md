@@ -51,7 +51,8 @@ MCP Shark is a monitoring and aggregation solution for Model Context Protocol (M
 - **Multi-server aggregation**: Connect to multiple MCP servers simultaneously
 - **Real-time monitoring**: Wireshark-like interface for inspecting all MCP communications
 - **Interactive playground**: Test tools, prompts, and resources directly in the UI
-- **Security analysis**: AI-powered scanning for security risks and vulnerabilities
+- **Local analysis**: Rule-based static analysis with YARA detection for connected servers
+- **Smart Scan**: AI-powered scanning for security risks and vulnerabilities
 - **IDE integration**: Automatic configuration detection for Cursor, Windsurf, Codex, and other IDEs
 - **API documentation**: Comprehensive Swagger/OpenAPI documentation for all endpoints with interactive testing
 - **Action menu**: Expandable menu providing quick access to API docs, help tour, and server shutdown
@@ -65,6 +66,7 @@ MCP Shark is a monitoring and aggregation solution for Model Context Protocol (M
 ### User Guides
 - **[Features](docs/features.md)** - Detailed feature documentation
 - **[User Guide](docs/user-guide.md)** - Complete guide to using MCP Shark
+- **[Local Analysis](docs/local-analysis.md)** - Static security analysis with YARA detection
 - **[Configuration](docs/configuration.md)** - Configuration options and file formats
 - **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
 

@@ -57,6 +57,28 @@ Interactive testing environment for exploring and testing MCP servers.
 - Maintains context across multiple tool calls
 - Test stateful workflows and conversations
 
+## Local Analysis
+
+Rule-based static analysis for MCP servers running through the proxy.
+
+**Key Features:**
+- **Analyse Running Servers**: Scans only MCP servers currently connected via the proxy
+- **YARA-Based Detection**: Uses YARA rules for pattern matching and vulnerability detection
+- **Scan History**: View and compare past analysis results
+- **Multiple View Modes**: Dashboard, By Severity, By Category, By Target
+
+**Security Categories:**
+- **MCP Top 10**: Based on OWASP MCP security guidelines
+- **Agentic Top 10**: Agentic security risk categories
+- **Custom Rules**: Define your own YARA detection rules
+
+**UI Controls:**
+- **Analyse**: Run static analysis (disabled until servers are running)
+- **History**: Toggle scan history view
+- **Clear**: Remove all findings and history
+
+> **See Also**: [Local Analysis Guide](local-analysis.md) for detailed documentation including YARA rule creation and API reference.
+
 ## Smart Scan
 
 AI-powered security analysis for MCP servers.
@@ -77,6 +99,15 @@ AI-powered security analysis for MCP servers.
 - Selective scanning of specific servers
 - Parallel batch processing
 - Real-time progress tracking
+
+**Local vs Smart Scan:**
+| Feature | Local Analysis | Smart Scan |
+|---------|---------------|------------|
+| Analysis Type | Static (rule-based) | Dynamic (AI-powered) |
+| Detection | YARA patterns | Semantic analysis |
+| Requires | Running proxy servers | Server configuration |
+| Speed | Fast | Varies by server count |
+| Use Case | Quick pattern checks | Deep security analysis |
 
 ## IDE Integration
 
