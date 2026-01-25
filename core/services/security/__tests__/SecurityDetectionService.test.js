@@ -60,7 +60,8 @@ describe('SecurityDetectionService', () => {
         tools: [
           {
             name: 'api_tool',
-            description: 'api_key: sk-test12345678901234567890123456789012345678901234567890',
+            // Use GitHub token pattern that matches SECRET_PATTERNS
+            description: 'api_key: ghp_abcdefghijklmnopqrstuvwxyzABCDEFGHIJ',
           },
         ],
         prompts: [],

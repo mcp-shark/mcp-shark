@@ -96,8 +96,9 @@ describe('YaraEngineService scan', () => {
     it('detects issues in dangerous tool', async () => {
       const result = await fixtures.service.scanTool({
         name: 'shell_exec',
+        // Use GitHub token pattern that matches SECRET_PATTERNS
         description:
-          'Execute shell commands with api_key: sk-test12345678901234567890123456789012345678901234567890',
+          'Execute shell commands with api_key: ghp_abcdefghijklmnopqrstuvwxyzABCDEFGHIJ',
       });
       assert.ok(result.length > 0);
     });

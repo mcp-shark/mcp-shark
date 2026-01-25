@@ -1,6 +1,6 @@
 /**
- * Repository for rule sources operations
- * Handles storage and retrieval of YARA rule sources (GitHub repos, URLs)
+ * Repository for rule sources operations (Simplified)
+ * Handles storage of custom YARA rule metadata
  */
 export class RuleSourcesRepository {
   constructor(db) {
@@ -25,9 +25,9 @@ export class RuleSourcesRepository {
 
     return stmt.run(
       source.name,
-      source.url,
-      source.type || 'github',
-      source.branch || 'main',
+      source.url || null,
+      source.type || 'custom',
+      source.branch || null,
       source.path_filter || null,
       source.enabled !== false ? 1 : 0
     );
@@ -80,35 +80,20 @@ export class RuleSourcesRepository {
   }
 
   /**
-   * Initialize default rule sources
+   * Initialize default source for custom rules
    */
   initializeDefaultSources() {
-    const defaultSources = [
-      {
-        name: 'yara-rules',
-        url: 'https://github.com/Yara-Rules/rules',
-        type: 'github',
-        branch: 'master',
-        path_filter: null,
-        enabled: true,
-      },
-      {
-        name: 'deepfence-yara',
-        url: 'https://github.com/deepfence/yara-rules',
-        type: 'github',
-        branch: 'main',
-        path_filter: null,
-        enabled: true,
-      },
-    ];
+    const customSource = {
+      name: 'custom',
+      type: 'custom',
+      enabled: true,
+    };
 
-    for (const source of defaultSources) {
-      const existing = this.getSourceByName(source.name);
-      if (!existing) {
-        this.upsertSource(source);
-      }
+    const existing = this.getSourceByName('custom');
+    if (!existing) {
+      this.upsertSource(customSource);
     }
 
-    return defaultSources.length;
+    return 1;
   }
 }

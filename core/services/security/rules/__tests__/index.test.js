@@ -6,11 +6,18 @@ describe('rules/index', () => {
   describe('staticRules', () => {
     it('exports all rules', () => {
       assert.ok(typeof staticRules === 'object');
-      assert.ok('mcp01-token-exposure' in staticRules);
+      // MCP OWASP Top 10
+      assert.ok('mcp01-token-mismanagement' in staticRules);
       assert.ok('mcp03-tool-poisoning' in staticRules);
       assert.ok('mcp05-command-injection' in staticRules);
       assert.ok('mcp06-prompt-injection' in staticRules);
-      assert.ok('mcp10-context-oversharing' in staticRules);
+      assert.ok('mcp10-context-injection' in staticRules);
+      // Agentic Security
+      assert.ok('asi01-goal-hijack' in staticRules);
+      assert.ok('asi05-rce' in staticRules);
+      // General Security
+      assert.ok('hardcoded-secrets' in staticRules);
+      assert.ok('command-injection' in staticRules);
     });
   });
 
@@ -34,7 +41,7 @@ describe('rules/index', () => {
 
   describe('getRule', () => {
     it('returns rule for valid id', () => {
-      const rule = getRule('mcp01-token-exposure');
+      const rule = getRule('mcp01-token-mismanagement');
       assert.ok(rule, 'Should return rule');
       assert.ok(typeof rule.analyzeTool === 'function');
       assert.ok(typeof rule.analyzePrompt === 'function');
