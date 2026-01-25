@@ -1,25 +1,25 @@
 import ReactECharts from 'echarts-for-react';
 import { colors, fonts } from '../../theme';
 
-// Severity configuration
+// Consistent color palette matching theme
 const SEVERITY_COLORS = {
-  critical: '#dc2626',
+  critical: colors.error,
   high: '#ea580c',
-  medium: '#ca8a04',
-  low: '#2563eb',
-  info: '#6b7280',
+  medium: '#b45309',
+  low: colors.accentBlue,
+  info: colors.textTertiary,
 };
 
 const CATEGORY_COLORS = {
-  'owasp-mcp': '#7c3aed',
-  'agentic-security': '#0891b2',
-  'general-security': '#059669',
+  'owasp-mcp': colors.accentPurple,
+  'agentic-security': colors.accentBlue,
+  'general-security': colors.accentGreen,
 };
 
 const CATEGORY_NAMES = {
   'owasp-mcp': 'OWASP MCP',
-  'agentic-security': 'Agentic Security',
-  'general-security': 'General Security',
+  'agentic-security': 'Agentic',
+  'general-security': 'General',
 };
 
 const OWASP_CATEGORY_MAP = {
@@ -53,8 +53,37 @@ function getCategory(finding) {
   return 'general-security';
 }
 
+function ChartCard({ title, children, height = '180px' }) {
+  return (
+    <div
+      style={{
+        background: colors.bgCard,
+        borderRadius: '8px',
+        border: `1px solid ${colors.borderLight}`,
+        padding: '14px',
+        boxShadow: `0 1px 3px ${colors.shadowSm}`,
+      }}
+    >
+      <h4
+        style={{
+          fontSize: '10px',
+          fontWeight: '600',
+          color: colors.textTertiary,
+          fontFamily: fonts.body,
+          margin: '0 0 10px 0',
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+        }}
+      >
+        {title}
+      </h4>
+      <div style={{ height }}>{children}</div>
+    </div>
+  );
+}
+
 /**
- * Severity Distribution - Vertical Bar Chart
+ * Severity Distribution Bar Chart
  */
 export function SeverityDistributionChart({ findings }) {
   const severityCounts = findings.reduce((acc, f) => {
@@ -64,8 +93,8 @@ export function SeverityDistributionChart({ findings }) {
   }, {});
 
   const severities = ['critical', 'high', 'medium', 'low', 'info'];
-  const severityLabels = ['Critical', 'High', 'Medium', 'Low', 'Info'];
-  const severityData = severities.map((sev) => severityCounts[sev] || 0);
+  const labels = ['Critical', 'High', 'Medium', 'Low', 'Info'];
+  const data = severities.map((sev) => severityCounts[sev] || 0);
 
   const option = {
     tooltip: {
@@ -73,57 +102,37 @@ export function SeverityDistributionChart({ findings }) {
       axisPointer: { type: 'shadow' },
       backgroundColor: colors.bgCard,
       borderColor: colors.borderLight,
-      textStyle: {
-        color: colors.textPrimary,
-        fontFamily: fonts.body,
-      },
+      textStyle: { color: colors.textPrimary, fontFamily: fonts.body, fontSize: 11 },
     },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      top: '10%',
-      containLabel: true,
-    },
+    grid: { left: '3%', right: '4%', bottom: '3%', top: '8%', containLabel: true },
     xAxis: {
       type: 'category',
-      data: severityLabels,
-      axisLabel: {
-        color: colors.textSecondary,
-        fontFamily: fonts.body,
-        fontSize: 11,
-      },
+      data: labels,
+      axisLabel: { color: colors.textSecondary, fontFamily: fonts.body, fontSize: 10 },
       axisLine: { lineStyle: { color: colors.borderLight } },
       axisTick: { show: false },
     },
     yAxis: {
       type: 'value',
-      axisLabel: {
-        color: colors.textSecondary,
-        fontFamily: fonts.body,
-        fontSize: 11,
-      },
+      axisLabel: { color: colors.textTertiary, fontFamily: fonts.body, fontSize: 10 },
       axisLine: { show: false },
       splitLine: { lineStyle: { color: colors.borderLight, type: 'dashed' } },
     },
     series: [
       {
         type: 'bar',
-        data: severityData.map((count, idx) => ({
+        data: data.map((count, idx) => ({
           value: count,
           itemStyle: { color: SEVERITY_COLORS[severities[idx]] },
         })),
         barWidth: '50%',
-        itemStyle: {
-          borderRadius: [4, 4, 0, 0],
-        },
+        itemStyle: { borderRadius: [3, 3, 0, 0] },
         label: {
           show: true,
           position: 'top',
-          color: colors.textSecondary,
+          color: colors.textTertiary,
           fontFamily: fonts.body,
-          fontSize: 12,
-          fontWeight: 'bold',
+          fontSize: 10,
           formatter: (params) => (params.value > 0 ? params.value : ''),
         },
       },
@@ -131,34 +140,14 @@ export function SeverityDistributionChart({ findings }) {
   };
 
   return (
-    <div
-      style={{
-        background: colors.bgCard,
-        borderRadius: '12px',
-        border: `1px solid ${colors.borderLight}`,
-        padding: '16px',
-      }}
-    >
-      <h4
-        style={{
-          fontSize: '13px',
-          fontWeight: '600',
-          color: colors.textSecondary,
-          fontFamily: fonts.body,
-          margin: '0 0 12px 0',
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-        }}
-      >
-        Severity Distribution
-      </h4>
-      <ReactECharts option={option} style={{ height: '220px' }} />
-    </div>
+    <ChartCard title="Severity Distribution">
+      <ReactECharts option={option} style={{ height: '100%' }} />
+    </ChartCard>
   );
 }
 
 /**
- * Top Vulnerability Types - Horizontal Bar Chart
+ * Top Vulnerability Types Chart
  */
 export function TopVulnerabilityTypesChart({ findings }) {
   const owaspCounts = findings.reduce((acc, f) => {
@@ -167,15 +156,12 @@ export function TopVulnerabilityTypesChart({ findings }) {
     return acc;
   }, {});
 
-  // Sort by count descending, take top 10
   const sortedData = Object.entries(owaspCounts)
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 10);
+    .slice(0, 8);
 
   const owaspIds = sortedData.map(([id]) => id).reverse();
   const counts = sortedData.map(([, count]) => count).reverse();
-
-  // Color by category
   const itemColors = owaspIds.map((id) => {
     const cat = OWASP_CATEGORY_MAP[id] || 'general-security';
     return CATEGORY_COLORS[cat];
@@ -187,37 +173,19 @@ export function TopVulnerabilityTypesChart({ findings }) {
       axisPointer: { type: 'shadow' },
       backgroundColor: colors.bgCard,
       borderColor: colors.borderLight,
-      textStyle: {
-        color: colors.textPrimary,
-        fontFamily: fonts.body,
-      },
+      textStyle: { color: colors.textPrimary, fontFamily: fonts.body, fontSize: 11 },
     },
-    grid: {
-      left: '3%',
-      right: '12%',
-      bottom: '3%',
-      top: '3%',
-      containLabel: true,
-    },
+    grid: { left: '3%', right: '12%', bottom: '3%', top: '3%', containLabel: true },
     xAxis: {
       type: 'value',
-      axisLabel: {
-        color: colors.textSecondary,
-        fontFamily: fonts.body,
-        fontSize: 11,
-      },
+      axisLabel: { color: colors.textTertiary, fontFamily: fonts.body, fontSize: 10 },
       axisLine: { show: false },
       splitLine: { lineStyle: { color: colors.borderLight, type: 'dashed' } },
     },
     yAxis: {
       type: 'category',
       data: owaspIds,
-      axisLabel: {
-        color: colors.textSecondary,
-        fontFamily: fonts.mono,
-        fontSize: 11,
-        fontWeight: 'bold',
-      },
+      axisLabel: { color: colors.textSecondary, fontFamily: fonts.mono, fontSize: 10 },
       axisLine: { lineStyle: { color: colors.borderLight } },
       axisTick: { show: false },
     },
@@ -229,61 +197,35 @@ export function TopVulnerabilityTypesChart({ findings }) {
           itemStyle: { color: itemColors[idx] },
         })),
         barWidth: '60%',
-        itemStyle: {
-          borderRadius: [0, 4, 4, 0],
-        },
+        itemStyle: { borderRadius: [0, 3, 3, 0] },
         label: {
           show: true,
           position: 'right',
-          color: colors.textSecondary,
+          color: colors.textTertiary,
           fontFamily: fonts.body,
-          fontSize: 11,
-          fontWeight: 'bold',
+          fontSize: 10,
         },
       },
     ],
   };
 
+  const chartHeight = Math.max(160, sortedData.length * 22);
+
   return (
-    <div
-      style={{
-        background: colors.bgCard,
-        borderRadius: '12px',
-        border: `1px solid ${colors.borderLight}`,
-        padding: '16px',
-      }}
-    >
-      <h4
-        style={{
-          fontSize: '13px',
-          fontWeight: '600',
-          color: colors.textSecondary,
-          fontFamily: fonts.body,
-          margin: '0 0 12px 0',
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-        }}
-      >
-        Top Vulnerability Types
-      </h4>
-      <ReactECharts
-        option={option}
-        style={{ height: `${Math.max(200, sortedData.length * 28)}px` }}
-      />
-    </div>
+    <ChartCard title="Top Vulnerability Types" height={`${chartHeight}px`}>
+      <ReactECharts option={option} style={{ height: '100%' }} />
+    </ChartCard>
   );
 }
 
 /**
- * Sankey Diagram - Flow from Category → OWASP ID → Severity
+ * Sankey Flow Chart
  */
 export function SankeyChart({ findings }) {
-  // Build nodes and links for Sankey
   const nodes = [];
   const links = [];
   const nodeSet = new Set();
 
-  // Collect unique categories, OWASP IDs, and severities
   const categoryToOwasp = {};
   const owaspToSeverity = {};
 
@@ -292,15 +234,12 @@ export function SankeyChart({ findings }) {
     const owaspId = f.owasp_id || 'OTHER';
     const severity = f.severity || 'info';
 
-    // Category -> OWASP
     const catOwaspKey = `${category}|${owaspId}`;
     categoryToOwasp[catOwaspKey] = (categoryToOwasp[catOwaspKey] || 0) + 1;
 
-    // OWASP -> Severity
     const owaspSevKey = `${owaspId}|${severity}`;
     owaspToSeverity[owaspSevKey] = (owaspToSeverity[owaspSevKey] || 0) + 1;
 
-    // Add nodes
     if (!nodeSet.has(category)) {
       nodeSet.add(category);
       nodes.push({
@@ -313,7 +252,7 @@ export function SankeyChart({ findings }) {
       const cat = OWASP_CATEGORY_MAP[owaspId] || 'general-security';
       nodes.push({
         name: owaspId,
-        itemStyle: { color: `${CATEGORY_COLORS[cat]}99` },
+        itemStyle: { color: CATEGORY_COLORS[cat] },
       });
     }
     if (!nodeSet.has(severity)) {
@@ -325,7 +264,6 @@ export function SankeyChart({ findings }) {
     }
   }
 
-  // Create links
   for (const [key, value] of Object.entries(categoryToOwasp)) {
     const [category, owaspId] = key.split('|');
     links.push({
@@ -350,67 +288,32 @@ export function SankeyChart({ findings }) {
       triggerOn: 'mousemove',
       backgroundColor: colors.bgCard,
       borderColor: colors.borderLight,
-      textStyle: {
-        color: colors.textPrimary,
-        fontFamily: fonts.body,
-      },
+      textStyle: { color: colors.textPrimary, fontFamily: fonts.body, fontSize: 11 },
     },
     series: [
       {
         type: 'sankey',
         layout: 'none',
-        emphasis: {
-          focus: 'adjacency',
-        },
+        emphasis: { focus: 'adjacency' },
         nodeAlign: 'left',
         data: nodes,
         links,
-        lineStyle: {
-          color: 'gradient',
-          curveness: 0.5,
-          opacity: 0.4,
-        },
-        label: {
-          color: colors.textPrimary,
-          fontFamily: fonts.body,
-          fontSize: 11,
-        },
-        itemStyle: {
-          borderWidth: 0,
-        },
+        lineStyle: { color: 'gradient', curveness: 0.5, opacity: 0.25 },
+        label: { color: colors.textSecondary, fontFamily: fonts.body, fontSize: 10 },
+        itemStyle: { borderWidth: 0 },
       },
     ],
   };
 
   return (
-    <div
-      style={{
-        background: colors.bgCard,
-        borderRadius: '12px',
-        border: `1px solid ${colors.borderLight}`,
-        padding: '16px',
-      }}
-    >
-      <h4
-        style={{
-          fontSize: '13px',
-          fontWeight: '600',
-          color: colors.textSecondary,
-          fontFamily: fonts.body,
-          margin: '0 0 12px 0',
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-        }}
-      >
-        Findings Flow (Category → Type → Severity)
-      </h4>
-      <ReactECharts option={option} style={{ height: '280px' }} />
-    </div>
+    <ChartCard title="Findings Flow" height="200px">
+      <ReactECharts option={option} style={{ height: '100%' }} />
+    </ChartCard>
   );
 }
 
 /**
- * Main Security Dashboard with selected charts
+ * Main Dashboard
  */
 export default function SecurityCharts({ findings }) {
   if (!findings || findings.length === 0) {
@@ -422,8 +325,8 @@ export default function SecurityCharts({ findings }) {
       style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: '16px',
-        marginBottom: '24px',
+        gap: '12px',
+        marginBottom: '16px',
       }}
     >
       <SeverityDistributionChart findings={findings} />

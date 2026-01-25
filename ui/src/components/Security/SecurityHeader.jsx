@@ -19,12 +19,12 @@ function SecurityHeader() {
           width: '40px',
           height: '40px',
           borderRadius: '10px',
-          background: `linear-gradient(135deg, ${colors.error}20, ${colors.warning}20)`,
-          border: `2px solid ${colors.error}40`,
+          background: `${colors.error}15`,
+          border: `1px solid ${colors.error}30`,
           flexShrink: 0,
         }}
       >
-        <IconShieldCheck size={20} color={colors.error} />
+        <IconShieldCheck size={20} color={colors.error} stroke={1.5} />
       </div>
       <div>
         <h1

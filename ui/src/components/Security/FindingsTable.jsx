@@ -1,25 +1,17 @@
-import {
-  IconAlertCircle,
-  IconAlertTriangle,
-  IconFilter,
-  IconInfoCircle,
-} from '@tabler/icons-react';
 import { useState } from 'react';
 import { colors, fonts } from '../../theme';
 import FindingCard from './FindingCard.jsx';
 
 const SEVERITY_FILTERS = [
-  { id: 'all', label: 'All', color: colors.textSecondary },
-  { id: 'critical', label: 'Critical', color: '#dc2626', icon: IconAlertCircle },
-  { id: 'high', label: 'High', color: '#ea580c', icon: IconAlertTriangle },
-  { id: 'medium', label: 'Medium', color: '#ca8a04', icon: IconAlertTriangle },
-  { id: 'low', label: 'Low', color: '#2563eb', icon: IconInfoCircle },
-  { id: 'info', label: 'Info', color: '#6b7280', icon: IconInfoCircle },
+  { id: 'all', label: 'All' },
+  { id: 'critical', label: 'Critical', color: colors.error },
+  { id: 'high', label: 'High', color: '#ea580c' },
+  { id: 'medium', label: 'Medium', color: '#b45309' },
+  { id: 'low', label: 'Low', color: colors.accentBlue },
+  { id: 'info', label: 'Info', color: colors.textTertiary },
 ];
 
 function FilterButton({ filter, isActive, count, onClick }) {
-  const Icon = filter.icon;
-
   return (
     <button
       onClick={onClick}
@@ -27,44 +19,49 @@ function FilterButton({ filter, isActive, count, onClick }) {
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: '6px',
-        padding: '6px 12px',
-        background: isActive ? `${filter.color}15` : colors.bgCard,
-        color: isActive ? filter.color : colors.textSecondary,
-        border: `1px solid ${isActive ? filter.color : colors.borderLight}`,
-        borderRadius: '8px',
-        fontSize: '12px',
-        fontWeight: isActive ? '600' : '500',
+        gap: '4px',
+        padding: '4px 10px',
+        background: isActive ? `${colors.accentBlue}15` : colors.bgCard,
+        color: isActive ? colors.accentBlue : colors.textSecondary,
+        border: `1px solid ${isActive ? colors.accentBlue : colors.borderLight}`,
+        borderRadius: '6px',
+        fontSize: '11px',
+        fontWeight: isActive ? '600' : '400',
         fontFamily: fonts.body,
         cursor: 'pointer',
-        transition: 'all 0.15s ease',
+        transition: 'all 0.15s',
       }}
       onMouseEnter={(e) => {
         if (!isActive) {
-          e.currentTarget.style.background = colors.bgSecondary;
-          e.currentTarget.style.borderColor = colors.borderMedium;
+          e.currentTarget.style.background = colors.bgTertiary;
         }
       }}
       onMouseLeave={(e) => {
         if (!isActive) {
           e.currentTarget.style.background = colors.bgCard;
-          e.currentTarget.style.borderColor = colors.borderLight;
         }
       }}
     >
-      {Icon && <Icon size={14} />}
+      {filter.color && (
+        <span
+          style={{
+            width: '6px',
+            height: '6px',
+            borderRadius: '50%',
+            background: filter.color,
+          }}
+        />
+      )}
       {filter.label}
       {count > 0 && (
         <span
           style={{
-            padding: '2px 6px',
-            background: isActive ? filter.color : colors.bgSecondary,
-            color: isActive ? '#fff' : colors.textSecondary,
-            borderRadius: '10px',
-            fontSize: '10px',
+            padding: '1px 5px',
+            background: isActive ? colors.accentBlue : colors.bgTertiary,
+            color: isActive ? colors.textInverse : colors.textSecondary,
+            borderRadius: '8px',
+            fontSize: '9px',
             fontWeight: '600',
-            minWidth: '18px',
-            textAlign: 'center',
           }}
         >
           {count}
@@ -82,37 +79,35 @@ function FindingsTable({ findings, selectedFinding, onSelectFinding, showFilter 
       <div
         style={{
           background: colors.bgCard,
-          borderRadius: '12px',
+          borderRadius: '8px',
           border: `1px solid ${colors.borderLight}`,
-          padding: '48px',
+          padding: '40px',
           textAlign: 'center',
         }}
       >
-        <div
+        <p
           style={{
-            fontSize: '16px',
+            fontSize: '13px',
             color: colors.textSecondary,
             fontFamily: fonts.body,
+            margin: 0,
           }}
         >
           No findings yet. Run a scan to detect vulnerabilities.
-        </div>
+        </p>
       </div>
     );
   }
 
-  // Count findings by severity
   const severityCounts = findings.reduce((acc, finding) => {
     const severity = finding.severity || 'info';
     acc[severity] = (acc[severity] || 0) + 1;
     return acc;
   }, {});
 
-  // Filter findings
   const filteredFindings =
     severityFilter === 'all' ? findings : findings.filter((f) => f.severity === severityFilter);
 
-  // Sort by severity (critical first)
   const severityOrder = { critical: 0, high: 1, medium: 2, low: 3, info: 4 };
   const sortedFindings = [...filteredFindings].sort(
     (a, b) => (severityOrder[a.severity] || 4) - (severityOrder[b.severity] || 4)
@@ -120,87 +115,73 @@ function FindingsTable({ findings, selectedFinding, onSelectFinding, showFilter 
 
   return (
     <div>
-      {/* Header with filters - only show when showFilter is true */}
       {showFilter && (
-        <>
+        <div style={{ marginBottom: '12px' }}>
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              marginBottom: '16px',
-              flexWrap: 'wrap',
-              gap: '12px',
+              marginBottom: '10px',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <IconFilter size={14} color={colors.textSecondary} />
-              <span
-                style={{
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: colors.textSecondary,
-                  fontFamily: fonts.body,
-                  textTransform: 'uppercase',
-                }}
-              >
-                Filter by Severity
-              </span>
-            </div>
-
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {SEVERITY_FILTERS.map((filter) => (
-                <FilterButton
-                  key={filter.id}
-                  filter={filter}
-                  isActive={severityFilter === filter.id}
-                  count={filter.id === 'all' ? findings.length : severityCounts[filter.id] || 0}
-                  onClick={() => setSeverityFilter(filter.id)}
-                />
-              ))}
-            </div>
+            <span
+              style={{
+                fontSize: '10px',
+                fontWeight: '600',
+                color: colors.textTertiary,
+                fontFamily: fonts.body,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
+              Filter by Severity
+            </span>
+            <span
+              style={{
+                fontSize: '11px',
+                color: colors.textTertiary,
+                fontFamily: fonts.body,
+              }}
+            >
+              {sortedFindings.length} of {findings.length}
+            </span>
           </div>
-
-          {/* Results count */}
-          <div
-            style={{
-              fontSize: '13px',
-              color: colors.textSecondary,
-              fontFamily: fonts.body,
-              marginBottom: '16px',
-            }}
-          >
-            Showing <strong style={{ color: colors.textPrimary }}>{sortedFindings.length}</strong>
-            {severityFilter !== 'all' && <span> {severityFilter} </span>}
-            {sortedFindings.length === 1 ? ' finding' : ' findings'}
-            {severityFilter !== 'all' && findings.length !== sortedFindings.length && (
-              <span style={{ color: colors.textTertiary }}> (of {findings.length} total)</span>
-            )}
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            {SEVERITY_FILTERS.map((filter) => (
+              <FilterButton
+                key={filter.id}
+                filter={filter}
+                isActive={severityFilter === filter.id}
+                count={filter.id === 'all' ? findings.length : severityCounts[filter.id] || 0}
+                onClick={() => setSeverityFilter(filter.id)}
+              />
+            ))}
           </div>
-        </>
+        </div>
       )}
 
-      {/* Findings list */}
       <div>
         {sortedFindings.length === 0 ? (
           <div
             style={{
               background: colors.bgCard,
-              borderRadius: '12px',
+              borderRadius: '8px',
               border: `1px solid ${colors.borderLight}`,
-              padding: '32px',
+              padding: '24px',
               textAlign: 'center',
             }}
           >
-            <div
+            <p
               style={{
-                fontSize: '14px',
+                fontSize: '12px',
                 color: colors.textSecondary,
                 fontFamily: fonts.body,
+                margin: 0,
               }}
             >
-              No {severityFilter} severity findings found.
-            </div>
+              No {severityFilter} severity findings.
+            </p>
           </div>
         ) : (
           sortedFindings.map((finding) => (

@@ -1,5 +1,5 @@
-import { IconLoader2 } from '@tabler/icons-react';
 import { colors, fonts } from '../../theme';
+import { LoadingSpinner } from '../SmartScanIcons';
 
 export default function ScanningProgress({ scanning }) {
   if (!scanning) {
@@ -9,57 +9,41 @@ export default function ScanningProgress({ scanning }) {
   return (
     <div
       style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '64px 24px',
-        textAlign: 'center',
+        background: colors.bgCard,
+        border: `1px solid ${colors.borderLight}`,
+        borderRadius: '12px',
+        padding: '24px',
+        marginBottom: '24px',
+        boxShadow: `0 2px 8px ${colors.shadowSm}`,
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '80px',
-          height: '80px',
-          borderRadius: '20px',
-          background: `linear-gradient(135deg, ${colors.accentBlue}15, ${colors.accentGreen}15)`,
-          border: `2px solid ${colors.accentBlue}40`,
-          marginBottom: '24px',
-        }}
-      >
-        <IconLoader2
-          size={40}
-          color={colors.accentBlue}
-          stroke={1.5}
-          style={{ animation: 'spin 1s linear infinite' }}
-        />
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <LoadingSpinner size={20} />
+        <div style={{ flex: 1 }}>
+          <p
+            style={{
+              fontSize: '14px',
+              fontWeight: '600',
+              color: colors.textPrimary,
+              fontFamily: fonts.body,
+              margin: 0,
+              marginBottom: '4px',
+            }}
+          >
+            Running Local Analysis...
+          </p>
+          <p
+            style={{
+              fontSize: '12px',
+              color: colors.textSecondary,
+              fontFamily: fonts.body,
+              margin: 0,
+            }}
+          >
+            Scanning captured MCP traffic with YARA rules
+          </p>
+        </div>
       </div>
-      <h3
-        style={{
-          fontSize: '18px',
-          fontWeight: '600',
-          color: colors.textPrimary,
-          fontFamily: fonts.body,
-          margin: '0 0 8px 0',
-        }}
-      >
-        Running Local Analysis...
-      </h3>
-      <p
-        style={{
-          fontSize: '14px',
-          color: colors.textSecondary,
-          fontFamily: fonts.body,
-          margin: 0,
-          maxWidth: '400px',
-          lineHeight: '1.5',
-        }}
-      >
-        Scanning captured MCP traffic with YARA rules.
-      </p>
     </div>
   );
 }

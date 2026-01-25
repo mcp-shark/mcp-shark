@@ -1,9 +1,6 @@
 import {
-  IconAlertCircle,
-  IconAlertTriangle,
   IconChevronDown,
   IconChevronRight,
-  IconInfoCircle,
   IconRobot,
   IconShield,
   IconShieldLock,
@@ -12,35 +9,30 @@ import { useState } from 'react';
 import { colors, fonts } from '../../theme';
 import FindingCard from './FindingCard.jsx';
 
-// Category definitions
 const CATEGORIES = {
   'owasp-mcp': {
     id: 'owasp-mcp',
     name: 'OWASP MCP Top 10',
-    description: 'Model Context Protocol security vulnerabilities',
+    description: 'Model Context Protocol vulnerabilities',
     icon: IconShieldLock,
-    color: '#7c3aed',
-    prefix: 'MCP',
+    color: colors.accentPurple,
   },
   'agentic-security': {
     id: 'agentic-security',
     name: 'Agentic Security',
-    description: 'AI agent behavioral security issues',
+    description: 'AI agent behavioral issues',
     icon: IconRobot,
-    color: '#0891b2',
-    prefix: 'ASI',
+    color: colors.accentBlue,
   },
   'general-security': {
     id: 'general-security',
     name: 'General Security',
-    description: 'Common security vulnerabilities',
+    description: 'Common vulnerabilities',
     icon: IconShield,
-    color: '#059669',
-    prefix: null,
+    color: colors.accentGreen,
   },
 };
 
-// OWASP ID to category mapping
 const OWASP_CATEGORY_MAP = {
   MCP01: 'owasp-mcp',
   MCP02: 'owasp-mcp',
@@ -64,7 +56,6 @@ const OWASP_CATEGORY_MAP = {
   ASI10: 'agentic-security',
 };
 
-// OWASP ID descriptions
 const OWASP_DESCRIPTIONS = {
   MCP01: 'Token Mismanagement',
   MCP02: 'Scope Creep',
@@ -92,12 +83,12 @@ const OWASP_DESCRIPTIONS = {
   AMBIG: 'Tool Name Ambiguity',
 };
 
-const SEVERITY_CONFIG = {
-  critical: { color: '#dc2626', icon: IconAlertCircle },
-  high: { color: '#ea580c', icon: IconAlertTriangle },
-  medium: { color: '#ca8a04', icon: IconAlertTriangle },
-  low: { color: '#2563eb', icon: IconInfoCircle },
-  info: { color: '#6b7280', icon: IconInfoCircle },
+const SEVERITY_COLORS = {
+  critical: colors.error,
+  high: '#ea580c',
+  medium: '#b45309',
+  low: colors.accentBlue,
+  info: colors.textTertiary,
 };
 
 function getCategory(finding) {
@@ -108,50 +99,28 @@ function getCategory(finding) {
   return 'general-security';
 }
 
-function SeverityDot({ severity }) {
-  const config = SEVERITY_CONFIG[severity] || SEVERITY_CONFIG.info;
-  return (
-    <span
-      style={{
-        display: 'inline-block',
-        width: '8px',
-        height: '8px',
-        borderRadius: '50%',
-        background: config.color,
-      }}
-    />
-  );
-}
-
 function OwaspGroup({ owaspId, findings, selectedFinding, onSelectFinding }) {
   const [isExpanded, setIsExpanded] = useState(true);
   const description = OWASP_DESCRIPTIONS[owaspId] || owaspId;
 
-  // Count by severity
   const severityCounts = findings.reduce((acc, f) => {
-    const sev = f.severity || 'info';
-    acc[sev] = (acc[sev] || 0) + 1;
+    acc[f.severity || 'info'] = (acc[f.severity || 'info'] || 0) + 1;
     return acc;
   }, {});
 
-  // Get highest severity
   const severities = ['critical', 'high', 'medium', 'low', 'info'];
   const highestSeverity = severities.find((s) => severityCounts[s] > 0) || 'info';
-  const severityConfig = SEVERITY_CONFIG[highestSeverity];
-
-  const ChevronIcon = isExpanded ? IconChevronDown : IconChevronRight;
 
   return (
     <div
       style={{
-        marginBottom: '8px',
+        marginBottom: '6px',
         background: colors.bgCard,
-        borderRadius: '10px',
+        borderRadius: '6px',
         border: `1px solid ${colors.borderLight}`,
         overflow: 'hidden',
       }}
     >
-      {/* OWASP Group Header */}
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -159,51 +128,47 @@ function OwaspGroup({ owaspId, findings, selectedFinding, onSelectFinding }) {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '12px',
-          padding: '12px 16px',
-          cursor: 'pointer',
-          borderLeft: `3px solid ${severityConfig.color}`,
-          transition: 'background 0.15s ease',
+          gap: '10px',
+          padding: '8px 12px',
           width: '100%',
           background: 'transparent',
           border: 'none',
-          borderLeftWidth: '3px',
-          borderLeftStyle: 'solid',
-          borderLeftColor: severityConfig.color,
+          borderLeft: `3px solid ${SEVERITY_COLORS[highestSeverity]}`,
+          cursor: 'pointer',
           textAlign: 'left',
+          transition: 'background 0.15s',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = colors.bgSecondary;
+          e.currentTarget.style.background = colors.bgTertiary;
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.background = 'transparent';
         }}
       >
-        <ChevronIcon size={16} color={colors.textSecondary} />
+        {isExpanded ? (
+          <IconChevronDown size={12} color={colors.textTertiary} />
+        ) : (
+          <IconChevronRight size={12} color={colors.textTertiary} />
+        )}
 
-        {/* OWASP ID Badge */}
         <span
           style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            padding: '4px 8px',
-            background: `${severityConfig.color}15`,
-            color: severityConfig.color,
-            borderRadius: '6px',
-            fontSize: '12px',
-            fontWeight: '700',
+            padding: '2px 6px',
+            background: colors.bgTertiary,
+            color: colors.textSecondary,
+            borderRadius: '4px',
+            fontSize: '10px',
+            fontWeight: '600',
             fontFamily: fonts.mono,
           }}
         >
           {owaspId}
         </span>
 
-        {/* Description */}
         <span
           style={{
             flex: 1,
-            fontSize: '13px',
-            fontWeight: '500',
+            fontSize: '12px',
             color: colors.textPrimary,
             fontFamily: fonts.body,
           }}
@@ -211,8 +176,7 @@ function OwaspGroup({ owaspId, findings, selectedFinding, onSelectFinding }) {
           {description}
         </span>
 
-        {/* Severity counts */}
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
           {severities.map(
             (sev) =>
               severityCounts[sev] > 0 && (
@@ -221,43 +185,46 @@ function OwaspGroup({ owaspId, findings, selectedFinding, onSelectFinding }) {
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '4px',
-                    fontSize: '11px',
-                    color: SEVERITY_CONFIG[sev].color,
-                    fontWeight: '600',
-                    fontFamily: fonts.body,
+                    gap: '2px',
+                    fontSize: '10px',
+                    color: SEVERITY_COLORS[sev],
+                    fontWeight: '500',
                   }}
                 >
-                  <SeverityDot severity={sev} />
+                  <span
+                    style={{
+                      width: '5px',
+                      height: '5px',
+                      borderRadius: '50%',
+                      background: SEVERITY_COLORS[sev],
+                    }}
+                  />
                   {severityCounts[sev]}
                 </span>
               )
           )}
         </div>
 
-        {/* Total count */}
         <span
           style={{
-            padding: '2px 8px',
-            background: colors.bgSecondary,
-            borderRadius: '10px',
-            fontSize: '11px',
-            fontWeight: '600',
+            padding: '2px 6px',
+            background: colors.bgTertiary,
+            borderRadius: '8px',
+            fontSize: '10px',
             color: colors.textSecondary,
-            fontFamily: fonts.body,
+            fontWeight: '500',
           }}
         >
           {findings.length}
         </span>
       </button>
 
-      {/* Expanded findings */}
       {isExpanded && (
         <div
           style={{
-            padding: '12px 16px',
-            paddingLeft: '28px',
-            background: colors.bgSecondary,
+            padding: '10px',
+            paddingLeft: '24px',
+            background: colors.bgTertiary,
             borderTop: `1px solid ${colors.borderLight}`,
           }}
         >
@@ -280,7 +247,6 @@ function CategorySection({ category, findings, selectedFinding, onSelectFinding 
   const categoryInfo = CATEGORIES[category];
   const Icon = categoryInfo.icon;
 
-  // Group findings by OWASP ID
   const byOwaspId = findings.reduce((acc, finding) => {
     const owaspId = finding.owasp_id || 'OTHER';
     if (!acc[owaspId]) acc[owaspId] = [];
@@ -288,23 +254,14 @@ function CategorySection({ category, findings, selectedFinding, onSelectFinding 
     return acc;
   }, {});
 
-  // Sort OWASP IDs
   const sortedOwaspIds = Object.keys(byOwaspId).sort((a, b) => {
-    // Sort by prefix first, then by number
     const aNum = Number.parseInt(a.replace(/\D/g, ''), 10) || 999;
     const bNum = Number.parseInt(b.replace(/\D/g, ''), 10) || 999;
     return aNum - bNum;
   });
 
-  const ChevronIcon = isExpanded ? IconChevronDown : IconChevronRight;
-
   return (
-    <div
-      style={{
-        marginBottom: '24px',
-      }}
-    >
-      {/* Category Header */}
+    <div style={{ marginBottom: '16px' }}>
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -312,22 +269,22 @@ function CategorySection({ category, findings, selectedFinding, onSelectFinding 
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '12px',
-          padding: '16px 20px',
-          background: `linear-gradient(135deg, ${categoryInfo.color}15, ${categoryInfo.color}08)`,
-          border: `1px solid ${categoryInfo.color}30`,
-          borderRadius: '12px',
-          cursor: 'pointer',
-          marginBottom: isExpanded ? '12px' : 0,
-          transition: 'all 0.2s ease',
+          gap: '10px',
+          padding: '12px 14px',
           width: '100%',
+          background: colors.bgCard,
+          border: `1px solid ${colors.borderLight}`,
+          borderRadius: '8px',
+          cursor: 'pointer',
           textAlign: 'left',
+          marginBottom: isExpanded ? '10px' : 0,
+          transition: 'background 0.15s',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = `${categoryInfo.color}50`;
+          e.currentTarget.style.background = colors.bgTertiary;
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = `${categoryInfo.color}30`;
+          e.currentTarget.style.background = colors.bgCard;
         }}
       >
         <div
@@ -335,74 +292,63 @@ function CategorySection({ category, findings, selectedFinding, onSelectFinding 
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '40px',
-            height: '40px',
-            borderRadius: '10px',
-            background: `${categoryInfo.color}20`,
-            flexShrink: 0,
+            width: '32px',
+            height: '32px',
+            borderRadius: '6px',
+            background: `${categoryInfo.color}15`,
+            border: `1px solid ${categoryInfo.color}30`,
           }}
         >
-          <Icon size={20} color={categoryInfo.color} />
+          <Icon size={16} color={categoryInfo.color} stroke={1.5} />
         </div>
 
         <div style={{ flex: 1 }}>
-          <h3
+          <div
             style={{
-              fontSize: '15px',
-              fontWeight: '600',
+              fontSize: '13px',
+              fontWeight: '500',
               color: colors.textPrimary,
               fontFamily: fonts.body,
-              margin: 0,
             }}
           >
             {categoryInfo.name}
-          </h3>
-          <p
+          </div>
+          <div
             style={{
-              fontSize: '12px',
-              color: colors.textSecondary,
+              fontSize: '11px',
+              color: colors.textTertiary,
               fontFamily: fonts.body,
-              margin: 0,
             }}
           >
             {categoryInfo.description}
-          </p>
+          </div>
         </div>
 
-        {/* Issue type count */}
-        <div
-          style={{
-            textAlign: 'right',
-          }}
-        >
+        <div style={{ textAlign: 'right', marginRight: '6px' }}>
           <div
             style={{
-              fontSize: '20px',
-              fontWeight: '700',
+              fontSize: '16px',
+              fontWeight: '600',
               color: categoryInfo.color,
-              fontFamily: fonts.body,
               lineHeight: 1,
             }}
           >
             {findings.length}
           </div>
-          <div
-            style={{
-              fontSize: '11px',
-              color: colors.textSecondary,
-              fontFamily: fonts.body,
-            }}
-          >
+          <div style={{ fontSize: '10px', color: colors.textTertiary }}>
             {findings.length === 1 ? 'finding' : 'findings'}
           </div>
         </div>
 
-        <ChevronIcon size={20} color={colors.textSecondary} />
+        {isExpanded ? (
+          <IconChevronDown size={16} color={colors.textTertiary} />
+        ) : (
+          <IconChevronRight size={16} color={colors.textTertiary} />
+        )}
       </button>
 
-      {/* OWASP Groups */}
       {isExpanded && (
-        <div style={{ marginLeft: '16px' }}>
+        <div style={{ marginLeft: '10px' }}>
           {sortedOwaspIds.map((owaspId) => (
             <OwaspGroup
               key={owaspId}
@@ -419,7 +365,6 @@ function CategorySection({ category, findings, selectedFinding, onSelectFinding 
 }
 
 function CategoryView({ findings, selectedFinding, onSelectFinding }) {
-  // Group findings by category
   const byCategory = findings.reduce((acc, finding) => {
     const cat = getCategory(finding);
     if (!acc[cat]) acc[cat] = [];
@@ -427,7 +372,6 @@ function CategoryView({ findings, selectedFinding, onSelectFinding }) {
     return acc;
   }, {});
 
-  // Determine category order (those with findings first, then by priority)
   const categoryOrder = ['owasp-mcp', 'agentic-security', 'general-security'];
   const sortedCategories = categoryOrder.filter((cat) => byCategory[cat]?.length > 0);
 
@@ -436,21 +380,22 @@ function CategoryView({ findings, selectedFinding, onSelectFinding }) {
       <div
         style={{
           background: colors.bgCard,
-          borderRadius: '12px',
+          borderRadius: '8px',
           border: `1px solid ${colors.borderLight}`,
-          padding: '48px',
+          padding: '40px',
           textAlign: 'center',
         }}
       >
-        <div
+        <p
           style={{
-            fontSize: '16px',
+            fontSize: '13px',
             color: colors.textSecondary,
             fontFamily: fonts.body,
+            margin: 0,
           }}
         >
-          No findings yet. Run a scan to detect vulnerabilities.
-        </div>
+          No findings yet.
+        </p>
       </div>
     );
   }

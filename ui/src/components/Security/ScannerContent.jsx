@@ -21,13 +21,12 @@ function ViewModeToggle({ viewMode, onViewModeChange }) {
   return (
     <div
       style={{
-        display: 'flex',
+        display: 'inline-flex',
         alignItems: 'center',
-        gap: '4px',
-        padding: '4px',
-        background: colors.bgSecondary,
-        borderRadius: '10px',
+        background: colors.bgTertiary,
+        borderRadius: '6px',
         border: `1px solid ${colors.borderLight}`,
+        padding: '2px',
       }}
     >
       {VIEW_MODES.map((mode) => {
@@ -42,31 +41,31 @@ function ViewModeToggle({ viewMode, onViewModeChange }) {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
-              padding: '8px 14px',
+              gap: '5px',
+              padding: '5px 10px',
               background: isActive ? colors.bgCard : 'transparent',
               color: isActive ? colors.textPrimary : colors.textSecondary,
               border: 'none',
-              borderRadius: '8px',
-              fontSize: '12px',
-              fontWeight: isActive ? '600' : '500',
+              borderRadius: '4px',
+              fontSize: '11px',
+              fontWeight: isActive ? '500' : '400',
               fontFamily: fonts.body,
               cursor: 'pointer',
-              transition: 'all 0.15s ease',
-              boxShadow: isActive ? `0 1px 3px ${colors.shadowSm}` : 'none',
+              transition: 'all 0.15s',
+              boxShadow: isActive ? `0 1px 2px ${colors.shadowSm}` : 'none',
             }}
             onMouseEnter={(e) => {
               if (!isActive) {
-                e.currentTarget.style.background = colors.bgCard;
+                e.currentTarget.style.color = colors.textPrimary;
               }
             }}
             onMouseLeave={(e) => {
               if (!isActive) {
-                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = colors.textSecondary;
               }
             }}
           >
-            <Icon size={14} />
+            <Icon size={12} stroke={1.5} />
             {mode.label}
           </button>
         );
@@ -82,7 +81,6 @@ export default function ScannerContent({
   summary,
   selectedFinding,
   onSelectFinding,
-  rules,
   loadSummary,
 }) {
   const [viewMode, setViewMode] = useState('dashboard');
@@ -95,7 +93,7 @@ export default function ScannerContent({
         flex: 1,
         overflowY: 'auto',
         overflowX: 'hidden',
-        padding: '24px',
+        padding: '20px',
         background: colors.bgPrimary,
       }}
     >
@@ -106,14 +104,13 @@ export default function ScannerContent({
 
       {hasFindings && !scanning && (
         <>
-          {/* Header row with summary and view toggle */}
           <div
             style={{
               display: 'flex',
-              alignItems: 'flex-start',
+              alignItems: 'center',
               justifyContent: 'space-between',
-              gap: '16px',
-              marginBottom: '24px',
+              gap: '12px',
+              marginBottom: '16px',
               flexWrap: 'wrap',
             }}
           >
@@ -121,7 +118,6 @@ export default function ScannerContent({
             <ViewModeToggle viewMode={viewMode} onViewModeChange={setViewMode} />
           </div>
 
-          {/* Dashboard view with charts */}
           {viewMode === 'dashboard' && (
             <>
               <SecurityCharts findings={findings} />
@@ -129,23 +125,19 @@ export default function ScannerContent({
                 findings={findings}
                 selectedFinding={selectedFinding}
                 onSelectFinding={onSelectFinding}
-                rules={rules}
                 showFilter={false}
               />
             </>
           )}
 
-          {/* Severity list view */}
           {viewMode === 'severity' && (
             <FindingsTable
               findings={findings}
               selectedFinding={selectedFinding}
               onSelectFinding={onSelectFinding}
-              rules={rules}
             />
           )}
 
-          {/* Category grouped view */}
           {viewMode === 'category' && (
             <CategoryView
               findings={findings}
@@ -154,7 +146,6 @@ export default function ScannerContent({
             />
           )}
 
-          {/* Target grouped view */}
           {viewMode === 'target' && (
             <TargetView
               findings={findings}

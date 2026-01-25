@@ -1,44 +1,14 @@
-import {
-  IconAlertCircle,
-  IconAlertTriangle,
-  IconInfoCircle,
-  IconShieldCheck,
-} from '@tabler/icons-react';
+import { IconShieldCheck } from '@tabler/icons-react';
 import { colors, fonts } from '../../theme';
 
 const SEVERITY_CONFIG = {
-  critical: {
-    color: '#dc2626',
-    bg: '#fef2f2',
-    border: '#fecaca',
-    icon: IconAlertCircle,
-    label: 'Critical',
-  },
-  high: {
-    color: '#ea580c',
-    bg: '#fff7ed',
-    border: '#fed7aa',
-    icon: IconAlertTriangle,
-    label: 'High',
-  },
-  medium: {
-    color: '#ca8a04',
-    bg: '#fefce8',
-    border: '#fef08a',
-    icon: IconAlertTriangle,
-    label: 'Medium',
-  },
-  low: {
-    color: '#2563eb',
-    bg: '#eff6ff',
-    border: '#bfdbfe',
-    icon: IconInfoCircle,
-    label: 'Low',
-  },
+  critical: { color: colors.error, label: 'Critical' },
+  high: { color: '#ea580c', label: 'High' },
+  medium: { color: '#b45309', label: 'Medium' },
+  low: { color: colors.accentBlue, label: 'Low' },
 };
 
-function SeverityCard({ count, config }) {
-  const Icon = config.icon;
+function StatCard({ count, label, color }) {
   const hasFindings = count > 0;
 
   return (
@@ -46,113 +16,32 @@ function SeverityCard({ count, config }) {
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '12px',
-        padding: '12px 16px',
-        background: hasFindings ? config.bg : colors.bgCard,
-        border: `1px solid ${hasFindings ? config.border : colors.borderLight}`,
-        borderRadius: '10px',
-        minWidth: '120px',
-        transition: 'all 0.2s ease',
+        gap: '8px',
+        padding: '6px 10px',
+        background: hasFindings ? `${color}10` : colors.bgTertiary,
+        border: `1px solid ${hasFindings ? `${color}30` : colors.borderLight}`,
+        borderRadius: '6px',
       }}
     >
-      <div
+      <span
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '36px',
-          height: '36px',
-          borderRadius: '8px',
-          background: hasFindings ? `${config.color}20` : colors.bgSecondary,
-          flexShrink: 0,
+          fontSize: '14px',
+          fontWeight: '600',
+          color: hasFindings ? color : colors.textTertiary,
+          fontFamily: fonts.body,
         }}
       >
-        <Icon size={18} color={hasFindings ? config.color : colors.textTertiary} />
-      </div>
-      <div>
-        <div
-          style={{
-            fontSize: '20px',
-            fontWeight: '700',
-            color: hasFindings ? config.color : colors.textTertiary,
-            fontFamily: fonts.body,
-            lineHeight: 1,
-          }}
-        >
-          {count || 0}
-        </div>
-        <div
-          style={{
-            fontSize: '11px',
-            fontWeight: '500',
-            color: hasFindings ? config.color : colors.textTertiary,
-            fontFamily: fonts.body,
-            textTransform: 'uppercase',
-            opacity: 0.8,
-          }}
-        >
-          {config.label}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function TotalCard({ total }) {
-  const hasFindings = total > 0;
-
-  return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        padding: '12px 16px',
-        background: hasFindings ? `${colors.error}08` : `${colors.success}08`,
-        border: `1px solid ${hasFindings ? `${colors.error}30` : `${colors.success}30`}`,
-        borderRadius: '10px',
-        minWidth: '140px',
-      }}
-    >
-      <div
+        {count || 0}
+      </span>
+      <span
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '36px',
-          height: '36px',
-          borderRadius: '8px',
-          background: hasFindings ? `${colors.error}15` : `${colors.success}15`,
-          flexShrink: 0,
+          fontSize: '11px',
+          color: hasFindings ? color : colors.textTertiary,
+          fontFamily: fonts.body,
         }}
       >
-        <IconShieldCheck size={18} color={hasFindings ? colors.error : colors.success} />
-      </div>
-      <div>
-        <div
-          style={{
-            fontSize: '20px',
-            fontWeight: '700',
-            color: hasFindings ? colors.error : colors.success,
-            fontFamily: fonts.body,
-            lineHeight: 1,
-          }}
-        >
-          {total || 0}
-        </div>
-        <div
-          style={{
-            fontSize: '11px',
-            fontWeight: '500',
-            color: hasFindings ? colors.error : colors.success,
-            fontFamily: fonts.body,
-            textTransform: 'uppercase',
-            opacity: 0.8,
-          }}
-        >
-          {hasFindings ? 'Total Findings' : 'No Issues'}
-        </div>
-      </div>
+        {label}
+      </span>
     </div>
   );
 }
@@ -165,21 +54,21 @@ function SecuritySummary({ summary }) {
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
-          padding: '12px 16px',
-          background: colors.bgCard,
+          padding: '8px 12px',
+          background: colors.bgTertiary,
           border: `1px solid ${colors.borderLight}`,
-          borderRadius: '10px',
+          borderRadius: '6px',
         }}
       >
-        <IconShieldCheck size={16} color={colors.textTertiary} />
+        <IconShieldCheck size={14} color={colors.textTertiary} stroke={1.5} />
         <span
           style={{
-            fontSize: '13px',
+            fontSize: '12px',
             color: colors.textSecondary,
             fontFamily: fonts.body,
           }}
         >
-          Click "Discover & Scan" to run local static analysis
+          Run a scan to analyze MCP traffic
         </span>
       </div>
     );
@@ -191,28 +80,49 @@ function SecuritySummary({ summary }) {
     <div
       style={{
         display: 'flex',
-        alignItems: 'stretch',
-        gap: '12px',
+        alignItems: 'center',
+        gap: '8px',
         flexWrap: 'wrap',
       }}
     >
-      <TotalCard total={total} />
-
       <div
         style={{
-          width: '1px',
-          background: colors.borderLight,
-          alignSelf: 'stretch',
-          margin: '0 4px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '6px 12px',
+          background: total > 0 ? `${colors.error}10` : `${colors.accentGreen}10`,
+          border: `1px solid ${total > 0 ? `${colors.error}30` : `${colors.accentGreen}30`}`,
+          borderRadius: '6px',
         }}
-      />
+      >
+        <span
+          style={{
+            fontSize: '16px',
+            fontWeight: '700',
+            color: total > 0 ? colors.error : colors.accentGreen,
+            fontFamily: fonts.body,
+          }}
+        >
+          {total}
+        </span>
+        <span
+          style={{
+            fontSize: '12px',
+            color: total > 0 ? colors.error : colors.accentGreen,
+            fontFamily: fonts.body,
+          }}
+        >
+          {total === 1 ? 'Finding' : 'Findings'}
+        </span>
+      </div>
 
       {Object.entries(SEVERITY_CONFIG).map(([severity, config]) => (
-        <SeverityCard
+        <StatCard
           key={severity}
-          severity={severity}
           count={bySeverity?.[severity] || 0}
-          config={config}
+          label={config.label}
+          color={config.color}
         />
       ))}
     </div>

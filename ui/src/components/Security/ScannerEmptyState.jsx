@@ -1,4 +1,3 @@
-import { IconShieldCheck } from '@tabler/icons-react';
 import { colors, fonts } from '../../theme';
 
 export default function ScannerEmptyState() {
@@ -9,32 +8,37 @@ export default function ScannerEmptyState() {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '64px 24px',
+        minHeight: '400px',
         textAlign: 'center',
+        padding: '40px',
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '80px',
-          height: '80px',
-          borderRadius: '20px',
-          background: `linear-gradient(135deg, ${colors.accentBlue}15, ${colors.accentGreen}15)`,
-          border: `2px solid ${colors.borderLight}`,
-          marginBottom: '24px',
-        }}
-      >
-        <IconShieldCheck size={40} color={colors.accentBlue} stroke={1.5} />
+      <div style={{ marginBottom: '24px', opacity: 0.6 }}>
+        <svg
+          width={64}
+          height={64}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={colors.textTertiary}
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ opacity: 0.5 }}
+          role="img"
+          aria-label="Security scan icon"
+        >
+          <title>Security scan icon</title>
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          <path d="M9 12l2 2 4-4" />
+        </svg>
       </div>
       <h3
         style={{
-          fontSize: '18px',
+          fontSize: '20px',
           fontWeight: '600',
           color: colors.textPrimary,
           fontFamily: fonts.body,
-          margin: '0 0 8px 0',
+          marginBottom: '8px',
         }}
       >
         No Findings
@@ -44,13 +48,12 @@ export default function ScannerEmptyState() {
           fontSize: '14px',
           color: colors.textSecondary,
           fontFamily: fonts.body,
-          margin: 0,
           maxWidth: '400px',
-          lineHeight: '1.5',
+          lineHeight: '1.6',
         }}
       >
-        Click &quot;Discover &amp; Scan&quot; to run local static analysis on captured MCP traffic
-        using YARA rules aligned with OWASP MCP Top 10.
+        Click "Discover & Scan" to run local static analysis on captured MCP traffic using YARA
+        rules.
       </p>
     </div>
   );
