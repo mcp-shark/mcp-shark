@@ -172,12 +172,14 @@ export default function ScannerContent({
       <ErrorDisplay error={error} />
       <ScanningProgress scanning={scanning} />
 
+      {!error && !scanning && (
+        <StaticAnalysisBanner onNavigateToSmartScan={onNavigateToSmartScan} />
+      )}
+
       {showEmpty && <ScannerEmptyState />}
 
       {hasFindings && !scanning && (
         <>
-          <StaticAnalysisBanner onNavigateToSmartScan={onNavigateToSmartScan} />
-
           <div
             style={{
               display: 'flex',
