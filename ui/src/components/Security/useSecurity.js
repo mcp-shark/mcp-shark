@@ -2,10 +2,11 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   fetchFindings,
   fetchRules,
+  fetchRunningServersCount,
   fetchScanHistory,
   fetchSummary,
+  postAnalyseRunningServers,
   postClearFindings,
-  postDiscoverAndScan,
 } from './securityApi.js';
 import { useYaraRules } from './useYaraRules.js';
 
@@ -22,6 +23,9 @@ export function useSecurity() {
   // Scan history state
   const [scanHistory, setScanHistory] = useState([]);
   const [selectedScanId, setSelectedScanId] = useState(null);
+
+  // Running servers state
+  const [runningServersCount, setRunningServersCount] = useState(0);
 
   // Use YARA rules hook
   const yaraRules = useYaraRules();
@@ -70,6 +74,17 @@ export function useSecurity() {
     }
   }, []);
 
+  const checkRunningServers = useCallback(async () => {
+    try {
+      const data = await fetchRunningServersCount();
+      if (data.success) {
+        setRunningServersCount(data.count);
+      }
+    } catch (err) {
+      console.error('Failed to check running servers:', err);
+    }
+  }, []);
+
   const discoverAndScan = useCallback(async () => {
     setScanning(true);
     setError(null);
@@ -77,17 +92,22 @@ export function useSecurity() {
     setSummary(null);
     setSelectedScanId(null); // Clear history selection for new scan
     try {
-      const data = await postDiscoverAndScan();
+      const data = await postAnalyseRunningServers();
       if (!data.success) {
-        setError(data.error || 'Scan failed');
+        // Return special error with requiresSetup flag
+        const errorInfo = {
+          message: data.error || 'Analysis failed',
+          requiresSetup: data.requiresSetup || false,
+        };
+        setError(errorInfo);
       } else {
         await loadFindings();
         await loadSummary();
         await loadScanHistory(); // Refresh history
       }
     } catch (err) {
-      console.error('Scan error:', err);
-      setError(err.message);
+      console.error('Analysis error:', err);
+      setError({ message: err.message, requiresSetup: false });
     } finally {
       setScanning(false);
     }
@@ -133,7 +153,8 @@ export function useSecurity() {
   useEffect(() => {
     loadRules();
     loadScanHistory();
-  }, [loadRules, loadScanHistory]);
+    checkRunningServers();
+  }, [loadRules, loadScanHistory, checkRunningServers]);
 
   return {
     rules,
@@ -153,6 +174,8 @@ export function useSecurity() {
     scanHistory,
     selectedScanId,
     selectHistoricalScan,
+    runningServersCount,
+    checkRunningServers,
     // YARA rules (spread from useYaraRules)
     ...yaraRules,
   };

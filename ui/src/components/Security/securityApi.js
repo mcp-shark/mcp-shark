@@ -46,6 +46,19 @@ export async function postDiscoverAndScan() {
   return response.json();
 }
 
+export async function postAnalyseRunningServers() {
+  const response = await fetch('/api/security/analyse', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  return response.json();
+}
+
+export async function fetchRunningServersCount() {
+  const response = await fetch('/api/server/connected');
+  return response.json();
+}
+
 export async function postClearFindings() {
   const response = await fetch('/api/security/findings/clear', {
     method: 'POST',

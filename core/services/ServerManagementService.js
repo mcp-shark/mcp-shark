@@ -181,6 +181,24 @@ export class ServerManagementService {
   }
 
   /**
+   * Get list of currently connected/running MCP servers
+   * Returns servers that the proxy is actively connected to
+   */
+  getConnectedServers() {
+    if (!this.serverInstance?.externalServers) {
+      return [];
+    }
+    return this.serverInstance.externalServers
+      .filter((s) => s && !s.error && s.client)
+      .map((s) => ({
+        name: s.name,
+        tools: s.tools || [],
+        resources: s.resources || [],
+        prompts: s.prompts || [],
+      }));
+  }
+
+  /**
    * Get current server instance
    */
   getServerInstance() {

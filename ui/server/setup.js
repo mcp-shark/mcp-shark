@@ -114,6 +114,7 @@ export function createUIServer() {
   app.post('/api/composite/stop', compositeRoutes.stop);
   app.get('/api/composite/status', compositeRoutes.getStatus);
   app.get('/api/mcp-server/status', compositeRoutes.getMcpServerStatus);
+  app.get('/api/server/connected', compositeRoutes.getConnectedServers);
   app.post('/api/composite/shutdown', compositeRoutes.shutdown);
   app.get('/api/composite/servers', compositeRoutes.getServers);
 
@@ -140,6 +141,7 @@ export function createUIServer() {
   app.post('/api/security/scan', securityRoutes.scanServer);
   app.post('/api/security/scan/batch', securityRoutes.scanMultipleServers);
   app.post('/api/security/scan/discover', securityRoutes.discoverAndScan);
+  app.post('/api/security/analyse', securityRoutes.analyseRunningServers);
   app.get('/api/security/findings', securityRoutes.getFindings);
   app.get('/api/security/findings/:id', securityRoutes.getFinding);
   app.get('/api/security/summary', securityRoutes.getSummary);

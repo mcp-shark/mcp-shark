@@ -180,6 +180,7 @@ export async function startMcpSharkServer(options = {}) {
       server,
       stop,
       auditLogger,
+      externalServers,
     };
   } catch (error) {
     const errorMsg = 'Error starting MCP server';

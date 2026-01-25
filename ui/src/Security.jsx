@@ -26,6 +26,8 @@ function Security({ onNavigateToSmartScan, onNavigateToSetup }) {
     scanHistory,
     selectedScanId,
     selectHistoricalScan,
+    // Running servers
+    runningServersCount,
     // YARA rules
     communityRules,
     engineStatus,
@@ -74,6 +76,7 @@ function Security({ onNavigateToSmartScan, onNavigateToSetup }) {
               onToggleHistory={() => setShowHistory((prev) => !prev)}
               showHistory={showHistory}
               historyCount={scanHistory.length}
+              serversAvailable={runningServersCount > 0}
             />
           )}
         </div>
@@ -96,6 +99,7 @@ function Security({ onNavigateToSmartScan, onNavigateToSetup }) {
           selectedScanId={selectedScanId}
           onSelectScan={selectHistoricalScan}
           showHistory={showHistory}
+          serversAvailable={runningServersCount > 0}
         />
       )}
 

@@ -160,6 +160,7 @@ export default function ScannerContent({
   selectedScanId,
   onSelectScan,
   showHistory,
+  serversAvailable,
 }) {
   const [viewMode, setViewMode] = useState('dashboard');
   const hasFindings = findings && findings.length > 0;
@@ -193,7 +194,12 @@ export default function ScannerContent({
       )}
 
       {/* Empty State - only when not showing history */}
-      {showEmpty && <ScannerEmptyState onNavigateToSetup={onNavigateToSetup} />}
+      {showEmpty && (
+        <ScannerEmptyState
+          onNavigateToSetup={onNavigateToSetup}
+          serversAvailable={serversAvailable}
+        />
+      )}
 
       {/* Dashboard View - show when not in history mode OR when a historical scan is selected */}
       {hasFindings && !scanning && !error && (

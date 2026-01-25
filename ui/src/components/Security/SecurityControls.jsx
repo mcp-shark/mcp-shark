@@ -9,37 +9,41 @@ function SecurityControls({
   onToggleHistory,
   showHistory,
   historyCount,
+  serversAvailable,
 }) {
+  const analyseDisabled = scanning || !serversAvailable;
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
       <button
         type="button"
         onClick={onScan}
-        disabled={scanning}
+        disabled={analyseDisabled}
+        title={!serversAvailable ? 'No MCP servers running. Go to Setup to start servers.' : ''}
         style={{
           display: 'flex',
           alignItems: 'center',
           gap: '6px',
           padding: '8px 14px',
-          background: scanning ? colors.buttonSecondary : colors.buttonPrimary,
-          color: scanning ? colors.textTertiary : colors.textInverse,
+          background: analyseDisabled ? colors.buttonSecondary : colors.buttonPrimary,
+          color: analyseDisabled ? colors.textTertiary : colors.textInverse,
           border: 'none',
           borderRadius: '6px',
           fontSize: '12px',
           fontFamily: fonts.body,
           fontWeight: '600',
-          cursor: scanning ? 'not-allowed' : 'pointer',
+          cursor: analyseDisabled ? 'not-allowed' : 'pointer',
+          opacity: !serversAvailable && !scanning ? 0.6 : 1,
           transition: 'all 0.2s ease',
           whiteSpace: 'nowrap',
         }}
         onMouseEnter={(e) => {
-          if (!scanning) {
+          if (!analyseDisabled) {
             e.currentTarget.style.background = colors.buttonPrimaryHover;
             e.currentTarget.style.transform = 'translateY(-1px)';
           }
         }}
         onMouseLeave={(e) => {
-          if (!scanning) {
+          if (!analyseDisabled) {
             e.currentTarget.style.background = colors.buttonPrimary;
             e.currentTarget.style.transform = 'translateY(0)';
           }

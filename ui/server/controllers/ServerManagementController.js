@@ -133,6 +133,23 @@ export class ServerManagementController {
     }
   };
 
+  /**
+   * GET /api/server/connected
+   * Get the list of currently connected/running MCP servers
+   */
+  getConnectedServers = (_req, res) => {
+    try {
+      const servers = this.serverManagementService.getConnectedServers();
+      res.json({
+        success: true,
+        count: servers.length,
+        servers: servers.map((s) => s.name),
+      });
+    } catch (error) {
+      handleError(error, res, this.logger, 'Error getting connected servers');
+    }
+  };
+
   shutdown = async (_req, res) => {
     try {
       if (!this.cleanup) {

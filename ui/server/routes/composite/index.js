@@ -72,6 +72,7 @@ export function createCompositeRoutes(
   router.stop = serverManagementController.stop;
   router.getStatus = serverManagementController.getStatus;
   router.getMcpServerStatus = serverManagementController.getMcpServerStatus;
+  router.getConnectedServers = serverManagementController.getConnectedServers;
   router.shutdown = serverManagementController.shutdown;
   router.getServers = getServers(container);
 

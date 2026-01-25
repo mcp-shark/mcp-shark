@@ -5,9 +5,10 @@ import { handleError, handleValidationError } from '../utils/errorHandler.js';
  * Controller for Security Detection and Findings HTTP endpoints
  */
 export class SecurityFindingsController {
-  constructor(securityDetectionService, mcpDiscoveryService, logger) {
+  constructor(securityDetectionService, mcpDiscoveryService, serverManagementService, logger) {
     this.securityService = securityDetectionService;
     this.mcpDiscoveryService = mcpDiscoveryService;
+    this.serverManagementService = serverManagementService;
     this.logger = logger;
   }
 
@@ -123,6 +124,37 @@ export class SecurityFindingsController {
       });
     } catch (error) {
       handleError(error, res, this.logger, 'Error discovering and scanning servers');
+    }
+  };
+
+  /**
+   * Analyse only currently running/connected MCP servers
+   * Uses servers that MCP Shark proxy is actively connected to
+   */
+  analyseRunningServers = async (_req, res) => {
+    try {
+      // Check if proxy is running and get connected servers
+      const connectedServers = this.serverManagementService.getConnectedServers();
+
+      if (connectedServers.length === 0) {
+        return res.json({
+          success: false,
+          error: 'No MCP servers are running. Start servers via the Setup tab.',
+          requiresSetup: true,
+          serversScanned: 0,
+          totalFindings: 0,
+          results: [],
+        });
+      }
+
+      const result = await this.securityService.scanMultipleServers(connectedServers);
+
+      return res.json({
+        success: true,
+        ...result,
+      });
+    } catch (error) {
+      handleError(error, res, this.logger, 'Error analysing running servers');
     }
   };
 

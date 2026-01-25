@@ -6,13 +6,19 @@ export default function ErrorDisplay({ error, onNavigateToSetup }) {
     return null;
   }
 
+  // Handle both string and object error formats
+  const errorMessage = typeof error === 'string' ? error : error.message || 'An error occurred';
+  const requiresSetup = typeof error === 'object' && error.requiresSetup;
+
+  // Check for setup-related errors by message content or explicit flag
   const isNoServersError =
-    typeof error === 'string' &&
-    (error.toLowerCase().includes('no mcp servers') ||
-      error.toLowerCase().includes('no servers found') ||
-      error.toLowerCase().includes('config file not found') ||
-      error.toLowerCase().includes('failed to connect') ||
-      error.toLowerCase().includes('servers are running'));
+    requiresSetup ||
+    errorMessage.toLowerCase().includes('no mcp servers') ||
+    errorMessage.toLowerCase().includes('no servers found') ||
+    errorMessage.toLowerCase().includes('config file not found') ||
+    errorMessage.toLowerCase().includes('failed to connect') ||
+    errorMessage.toLowerCase().includes('servers are running') ||
+    errorMessage.toLowerCase().includes('start servers via');
 
   return (
     <div
@@ -49,7 +55,7 @@ export default function ErrorDisplay({ error, onNavigateToSetup }) {
             lineHeight: '1.4',
           }}
         >
-          {error}
+          {errorMessage}
         </p>
 
         {isNoServersError && onNavigateToSetup && (
