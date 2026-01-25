@@ -38,7 +38,7 @@ function SecurityControls({ onScan, scanning, onClear, clearing, onRefresh }) {
         }}
       >
         {scanning ? <IconLoader2 size={12} className="spin" /> : <IconSearch size={12} />}
-        {scanning ? 'Scanning...' : 'Discover & Scan'}
+        {scanning ? 'Analysing...' : 'Analyse'}
       </button>
 
       <button

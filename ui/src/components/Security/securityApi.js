@@ -33,6 +33,11 @@ export async function fetchSummary() {
   return response.json();
 }
 
+export async function fetchScanHistory(limit = 20) {
+  const response = await fetch(`/api/security/history?limit=${limit}`);
+  return response.json();
+}
+
 export async function postDiscoverAndScan() {
   const response = await fetch('/api/security/scan/discover', {
     method: 'POST',

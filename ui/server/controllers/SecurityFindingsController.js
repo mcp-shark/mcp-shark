@@ -202,6 +202,23 @@ export class SecurityFindingsController {
   };
 
   /**
+   * Get scan history
+   */
+  getScanHistory = (req, res) => {
+    try {
+      const limit = req.query.limit ? Number.parseInt(req.query.limit, 10) : 20;
+      const history = this.securityService.getScanHistory(limit);
+      return res.json({
+        success: true,
+        history,
+        count: history.length,
+      });
+    } catch (error) {
+      handleError(error, res, this.logger, 'Error getting scan history');
+    }
+  };
+
+  /**
    * Clear all findings
    */
   clearFindings = (_req, res) => {

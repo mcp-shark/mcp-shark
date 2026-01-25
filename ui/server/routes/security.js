@@ -37,6 +37,7 @@ export function createSecurityRoutes(container) {
   router.getFindings = findingsController.getFindings;
   router.getFinding = findingsController.getFinding;
   router.getSummary = findingsController.getSummary;
+  router.getScanHistory = findingsController.getScanHistory;
   router.clearFindings = findingsController.clearFindings;
   router.deleteScanFindings = findingsController.deleteScanFindings;
 

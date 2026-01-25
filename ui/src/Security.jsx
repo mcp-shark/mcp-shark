@@ -22,6 +22,10 @@ function Security({ onNavigateToSmartScan, onNavigateToSetup }) {
     loadSummary,
     selectedFinding,
     setSelectedFinding,
+    // Scan history
+    scanHistory,
+    selectedScanId,
+    selectHistoricalScan,
     // YARA rules
     communityRules,
     engineStatus,
@@ -86,6 +90,9 @@ function Security({ onNavigateToSmartScan, onNavigateToSetup }) {
           loadSummary={loadSummary}
           onNavigateToSmartScan={onNavigateToSmartScan}
           onNavigateToSetup={onNavigateToSetup}
+          scanHistory={scanHistory}
+          selectedScanId={selectedScanId}
+          onSelectScan={selectHistoricalScan}
         />
       )}
 

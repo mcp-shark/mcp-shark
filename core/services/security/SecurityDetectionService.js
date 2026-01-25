@@ -217,6 +217,13 @@ export class SecurityDetectionService {
   }
 
   /**
+   * Get scan history
+   */
+  getScanHistory(limit = 20) {
+    return this.findingsRepository.getScanHistory(limit);
+  }
+
+  /**
    * Calculate overall risk level from findings
    */
   calculateRiskLevel(findings) {

@@ -1,0 +1,192 @@
+import { useCallback, useEffect, useState } from 'react';
+import {
+  deleteRule,
+  fetchCommunityRules,
+  fetchEngineStatus,
+  fetchRuleSources,
+  patchRuleEnabled,
+  postCustomRule,
+  postInitializeSources,
+  postResetDefaults,
+  postSyncAllSources,
+  postSyncSource,
+} from './securityApi.js';
+
+/**
+ * Hook for managing YARA rules, rule sources, and engine status
+ */
+export function useYaraRules() {
+  const [communityRules, setCommunityRules] = useState([]);
+  const [ruleSources, setRuleSources] = useState([]);
+  const [rulesSummary, setRulesSummary] = useState(null);
+  const [syncing, setSyncing] = useState(false);
+  const [engineStatus, setEngineStatus] = useState(null);
+
+  const loadCommunityRules = useCallback(async () => {
+    try {
+      const data = await fetchCommunityRules();
+      if (data.success) {
+        setCommunityRules(data.rules);
+        setRulesSummary(data.summary);
+      }
+    } catch (err) {
+      console.error('Failed to load community rules:', err);
+    }
+  }, []);
+
+  const loadRuleSources = useCallback(async () => {
+    try {
+      const data = await fetchRuleSources();
+      if (data.success) {
+        setRuleSources(data.sources);
+      }
+    } catch (err) {
+      console.error('Failed to load rule sources:', err);
+    }
+  }, []);
+
+  const loadEngineStatus = useCallback(async () => {
+    try {
+      const data = await fetchEngineStatus();
+      if (data.success) {
+        setEngineStatus(data);
+      }
+    } catch (err) {
+      console.error('Failed to load engine status:', err);
+    }
+  }, []);
+
+  const initializeSources = useCallback(async () => {
+    try {
+      const data = await postInitializeSources();
+      if (data.success) {
+        await loadRuleSources();
+      }
+      return data;
+    } catch (err) {
+      console.error('Failed to initialize sources:', err);
+      return { success: false, error: err.message };
+    }
+  }, [loadRuleSources]);
+
+  const syncAllSources = useCallback(async () => {
+    setSyncing(true);
+    try {
+      const data = await postSyncAllSources();
+      if (data.success) {
+        await loadCommunityRules();
+        await loadRuleSources();
+      }
+      return data;
+    } catch (err) {
+      console.error('Failed to sync sources:', err);
+      return { success: false, error: err.message };
+    } finally {
+      setSyncing(false);
+    }
+  }, [loadCommunityRules, loadRuleSources]);
+
+  const syncSource = useCallback(
+    async (sourceName) => {
+      setSyncing(true);
+      try {
+        const data = await postSyncSource(sourceName);
+        if (data.success) {
+          await loadCommunityRules();
+          await loadRuleSources();
+        }
+        return data;
+      } catch (err) {
+        console.error('Failed to sync source:', err);
+        return { success: false, error: err.message };
+      } finally {
+        setSyncing(false);
+      }
+    },
+    [loadCommunityRules, loadRuleSources]
+  );
+
+  const setRuleEnabled = useCallback(
+    async (ruleId, enabled) => {
+      try {
+        const data = await patchRuleEnabled(ruleId, enabled);
+        if (data.success) {
+          await loadCommunityRules();
+        }
+        return data;
+      } catch (err) {
+        console.error('Failed to set rule enabled:', err);
+        return { success: false, error: err.message };
+      }
+    },
+    [loadCommunityRules]
+  );
+
+  const saveCustomRule = useCallback(
+    async (ruleData) => {
+      try {
+        const data = await postCustomRule(ruleData);
+        if (data.success) {
+          await loadCommunityRules();
+        }
+        return data;
+      } catch (err) {
+        console.error('Failed to save custom rule:', err);
+        return { success: false, error: err.message };
+      }
+    },
+    [loadCommunityRules]
+  );
+
+  const deleteCustomRule = useCallback(
+    async (ruleId) => {
+      try {
+        const data = await deleteRule(ruleId);
+        if (data.success) {
+          await loadCommunityRules();
+        }
+        return data;
+      } catch (err) {
+        console.error('Failed to delete custom rule:', err);
+        return { success: false, error: err.message };
+      }
+    },
+    [loadCommunityRules]
+  );
+
+  const resetDefaults = useCallback(async () => {
+    try {
+      const data = await postResetDefaults();
+      if (data.success) {
+        await loadCommunityRules();
+      }
+      return data;
+    } catch (err) {
+      console.error('Failed to reset defaults:', err);
+      return { success: false, error: err.message };
+    }
+  }, [loadCommunityRules]);
+
+  useEffect(() => {
+    loadRuleSources();
+    loadEngineStatus();
+    loadCommunityRules();
+  }, [loadRuleSources, loadEngineStatus, loadCommunityRules]);
+
+  return {
+    communityRules,
+    ruleSources,
+    rulesSummary,
+    syncing,
+    engineStatus,
+    loadCommunityRules,
+    loadRuleSources,
+    initializeSources,
+    syncAllSources,
+    syncSource,
+    setRuleEnabled,
+    saveCustomRule,
+    deleteCustomRule,
+    resetDefaults,
+  };
+}

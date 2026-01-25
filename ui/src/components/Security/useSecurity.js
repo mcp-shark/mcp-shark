@@ -1,21 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
-  deleteRule,
-  fetchCommunityRules,
-  fetchEngineStatus,
   fetchFindings,
-  fetchRuleSources,
   fetchRules,
+  fetchScanHistory,
   fetchSummary,
-  patchRuleEnabled,
   postClearFindings,
-  postCustomRule,
   postDiscoverAndScan,
-  postInitializeSources,
-  postResetDefaults,
-  postSyncAllSources,
-  postSyncSource,
 } from './securityApi.js';
+import { useYaraRules } from './useYaraRules.js';
 
 export function useSecurity() {
   const [rules, setRules] = useState([]);
@@ -27,12 +19,12 @@ export function useSecurity() {
   const [filters, setFilters] = useState({});
   const [selectedFinding, setSelectedFinding] = useState(null);
 
-  // Community rules state
-  const [communityRules, setCommunityRules] = useState([]);
-  const [ruleSources, setRuleSources] = useState([]);
-  const [rulesSummary, setRulesSummary] = useState(null);
-  const [syncing, setSyncing] = useState(false);
-  const [engineStatus, setEngineStatus] = useState(null);
+  // Scan history state
+  const [scanHistory, setScanHistory] = useState([]);
+  const [selectedScanId, setSelectedScanId] = useState(null);
+
+  // Use YARA rules hook
+  const yaraRules = useYaraRules();
 
   const loadRules = useCallback(async () => {
     try {
@@ -67,11 +59,23 @@ export function useSecurity() {
     }
   }, []);
 
+  const loadScanHistory = useCallback(async () => {
+    try {
+      const data = await fetchScanHistory();
+      if (data.success) {
+        setScanHistory(data.history);
+      }
+    } catch (err) {
+      console.error('Failed to load scan history:', err);
+    }
+  }, []);
+
   const discoverAndScan = useCallback(async () => {
     setScanning(true);
     setError(null);
     setFindings([]); // Clear findings before scan
     setSummary(null);
+    setSelectedScanId(null); // Clear history selection for new scan
     try {
       const data = await postDiscoverAndScan();
       if (!data.success) {
@@ -79,13 +83,15 @@ export function useSecurity() {
       } else {
         await loadFindings();
         await loadSummary();
+        await loadScanHistory(); // Refresh history
       }
     } catch (err) {
+      console.error('Scan error:', err);
       setError(err.message);
     } finally {
       setScanning(false);
     }
-  }, [loadFindings, loadSummary]);
+  }, [loadFindings, loadSummary, loadScanHistory]);
 
   const clearFindings = useCallback(async () => {
     setClearing(true);
@@ -95,166 +101,39 @@ export function useSecurity() {
         setFindings([]);
         setSummary(null);
         setSelectedFinding(null);
+        setSelectedScanId(null);
         setError(null);
+        await loadScanHistory(); // Refresh history after clear
       }
     } catch (err) {
       console.error('Failed to clear findings:', err);
     } finally {
       setClearing(false);
     }
-  }, []);
+  }, [loadScanHistory]);
 
-  const loadCommunityRules = useCallback(async () => {
+  const selectHistoricalScan = useCallback(async (scanId) => {
+    setSelectedScanId(scanId);
+    setError(null);
     try {
-      const data = await fetchCommunityRules();
+      // Fetch findings filtered by scan_id
+      const params = new URLSearchParams();
+      params.append('scan_id', scanId);
+      params.append('limit', '100');
+      const response = await fetch(`/api/security/findings?${params.toString()}`);
+      const data = await response.json();
       if (data.success) {
-        setCommunityRules(data.rules);
-        setRulesSummary(data.summary);
+        setFindings(data.findings);
       }
     } catch (err) {
-      console.error('Failed to load community rules:', err);
+      console.error('Failed to load historical findings:', err);
     }
   }, []);
-
-  const loadRuleSources = useCallback(async () => {
-    try {
-      const data = await fetchRuleSources();
-      if (data.success) {
-        setRuleSources(data.sources);
-      }
-    } catch (err) {
-      console.error('Failed to load rule sources:', err);
-    }
-  }, []);
-
-  const loadEngineStatus = useCallback(async () => {
-    try {
-      const data = await fetchEngineStatus();
-      if (data.success) {
-        setEngineStatus(data);
-      }
-    } catch (err) {
-      console.error('Failed to load engine status:', err);
-    }
-  }, []);
-
-  const initializeSources = useCallback(async () => {
-    try {
-      const data = await postInitializeSources();
-      if (data.success) {
-        await loadRuleSources();
-      }
-      return data;
-    } catch (err) {
-      console.error('Failed to initialize sources:', err);
-      return { success: false, error: err.message };
-    }
-  }, [loadRuleSources]);
-
-  const syncAllSources = useCallback(async () => {
-    setSyncing(true);
-    try {
-      const data = await postSyncAllSources();
-      if (data.success) {
-        await loadCommunityRules();
-        await loadRuleSources();
-      }
-      return data;
-    } catch (err) {
-      console.error('Failed to sync sources:', err);
-      return { success: false, error: err.message };
-    } finally {
-      setSyncing(false);
-    }
-  }, [loadCommunityRules, loadRuleSources]);
-
-  const syncSource = useCallback(
-    async (sourceName) => {
-      setSyncing(true);
-      try {
-        const data = await postSyncSource(sourceName);
-        if (data.success) {
-          await loadCommunityRules();
-          await loadRuleSources();
-        }
-        return data;
-      } catch (err) {
-        console.error('Failed to sync source:', err);
-        return { success: false, error: err.message };
-      } finally {
-        setSyncing(false);
-      }
-    },
-    [loadCommunityRules, loadRuleSources]
-  );
-
-  const setRuleEnabled = useCallback(
-    async (ruleId, enabled) => {
-      try {
-        const data = await patchRuleEnabled(ruleId, enabled);
-        if (data.success) {
-          await loadCommunityRules();
-        }
-        return data;
-      } catch (err) {
-        console.error('Failed to set rule enabled:', err);
-        return { success: false, error: err.message };
-      }
-    },
-    [loadCommunityRules]
-  );
-
-  const saveCustomRule = useCallback(
-    async (ruleData) => {
-      try {
-        const data = await postCustomRule(ruleData);
-        if (data.success) {
-          await loadCommunityRules();
-        }
-        return data;
-      } catch (err) {
-        console.error('Failed to save custom rule:', err);
-        return { success: false, error: err.message };
-      }
-    },
-    [loadCommunityRules]
-  );
-
-  const deleteCustomRule = useCallback(
-    async (ruleId) => {
-      try {
-        const data = await deleteRule(ruleId);
-        if (data.success) {
-          await loadCommunityRules();
-        }
-        return data;
-      } catch (err) {
-        console.error('Failed to delete custom rule:', err);
-        return { success: false, error: err.message };
-      }
-    },
-    [loadCommunityRules]
-  );
-
-  const resetDefaults = useCallback(async () => {
-    try {
-      const data = await postResetDefaults();
-      if (data.success) {
-        await loadCommunityRules();
-      }
-      return data;
-    } catch (err) {
-      console.error('Failed to reset defaults:', err);
-      return { success: false, error: err.message };
-    }
-  }, [loadCommunityRules]);
 
   useEffect(() => {
     loadRules();
-    loadRuleSources();
-    loadEngineStatus();
-    loadCommunityRules();
-  }, [loadRules, loadRuleSources, loadEngineStatus, loadCommunityRules]);
+    loadScanHistory();
+  }, [loadRules, loadScanHistory]);
 
   return {
     rules,
@@ -271,19 +150,10 @@ export function useSecurity() {
     setFilters,
     selectedFinding,
     setSelectedFinding,
-    communityRules,
-    ruleSources,
-    rulesSummary,
-    syncing,
-    engineStatus,
-    loadCommunityRules,
-    loadRuleSources,
-    initializeSources,
-    syncAllSources,
-    syncSource,
-    setRuleEnabled,
-    saveCustomRule,
-    deleteCustomRule,
-    resetDefaults,
+    scanHistory,
+    selectedScanId,
+    selectHistoricalScan,
+    // YARA rules (spread from useYaraRules)
+    ...yaraRules,
   };
 }

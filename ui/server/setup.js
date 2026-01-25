@@ -143,6 +143,7 @@ export function createUIServer() {
   app.get('/api/security/findings', securityRoutes.getFindings);
   app.get('/api/security/findings/:id', securityRoutes.getFinding);
   app.get('/api/security/summary', securityRoutes.getSummary);
+  app.get('/api/security/history', securityRoutes.getScanHistory);
   app.post('/api/security/findings/clear', securityRoutes.clearFindings);
   app.delete('/api/security/scan/:scanId', securityRoutes.deleteScanFindings);
 

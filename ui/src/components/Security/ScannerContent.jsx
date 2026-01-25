@@ -12,6 +12,7 @@ import { colors, fonts } from '../../theme';
 import CategoryView from './CategoryView/index.js';
 import ErrorDisplay from './ErrorDisplay.jsx';
 import FindingsTable from './FindingsTable.jsx';
+import ScanHistory from './ScanHistory.jsx';
 import ScannerEmptyState from './ScannerEmptyState.jsx';
 import ScanningProgress from './ScanningProgress.jsx';
 import SecurityCharts from './SecurityCharts/index.js';
@@ -155,6 +156,9 @@ export default function ScannerContent({
   loadSummary,
   onNavigateToSmartScan,
   onNavigateToSetup,
+  scanHistory,
+  selectedScanId,
+  onSelectScan,
 }) {
   const [viewMode, setViewMode] = useState('dashboard');
   const hasFindings = findings && findings.length > 0;
@@ -175,6 +179,14 @@ export default function ScannerContent({
 
       {!error && !scanning && (
         <StaticAnalysisBanner onNavigateToSmartScan={onNavigateToSmartScan} />
+      )}
+
+      {!scanning && scanHistory && scanHistory.length > 0 && (
+        <ScanHistory
+          history={scanHistory}
+          onSelectScan={onSelectScan}
+          selectedScanId={selectedScanId}
+        />
       )}
 
       {showEmpty && <ScannerEmptyState onNavigateToSetup={onNavigateToSetup} />}

@@ -54,7 +54,7 @@ export default function ScannerEmptyState({ onNavigateToSetup }) {
           marginBottom: '24px',
         }}
       >
-        Click "Discover & Scan" to run local static analysis on your MCP servers.
+        Click "Analyse" to run local static analysis on your MCP servers.
       </p>
 
       <div

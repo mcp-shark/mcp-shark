@@ -298,4 +298,27 @@ export class SecurityFindingsRepository {
     return this.db.prepare('DELETE FROM security_findings WHERE created_at < ?').run(dateString)
       .changes;
   }
+
+  /**
+   * Get scan history (unique scan_ids with metadata)
+   */
+  getScanHistory(limit = 20) {
+    const sql = `
+      SELECT 
+        scan_id,
+        MIN(created_at) as scan_time,
+        COUNT(*) as finding_count,
+        GROUP_CONCAT(DISTINCT server_name) as servers,
+        SUM(CASE WHEN severity = 'critical' THEN 1 ELSE 0 END) as critical_count,
+        SUM(CASE WHEN severity = 'high' THEN 1 ELSE 0 END) as high_count,
+        SUM(CASE WHEN severity = 'medium' THEN 1 ELSE 0 END) as medium_count,
+        SUM(CASE WHEN severity = 'low' THEN 1 ELSE 0 END) as low_count
+      FROM security_findings
+      WHERE scan_id IS NOT NULL
+      GROUP BY scan_id
+      ORDER BY scan_time DESC
+      LIMIT ?
+    `;
+    return this.db.prepare(sql).all(limit);
+  }
 }
