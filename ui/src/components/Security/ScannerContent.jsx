@@ -41,7 +41,7 @@ function StaticAnalysisBanner({ onNavigateToSmartScan }) {
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <IconCode size={16} stroke={1.5} style={{ color: colors.textMuted }} />
+        <IconCode size={16} stroke={1.5} style={{ color: colors.textMuted, flexShrink: 0 }} />
         <span
           style={{
             fontSize: '12px',
@@ -49,7 +49,9 @@ function StaticAnalysisBanner({ onNavigateToSmartScan }) {
             fontFamily: fonts.body,
           }}
         >
-          Static pattern-based analysis
+          <strong style={{ color: colors.textPrimary }}>Static Analysis</strong> — Rule-based
+          pattern matching on MCP configurations. For deeper semantic analysis, try AI-powered
+          scanning.
         </span>
       </div>
 
