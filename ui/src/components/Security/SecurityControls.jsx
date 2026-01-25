@@ -107,7 +107,11 @@ function SecurityControls({ onScan, scanning, onClear, clearing, onRefresh }) {
           }
         }}
       >
-        {clearing ? <IconLoader2 size={14} className="spin" /> : <IconTrash size={14} stroke={1.5} />}
+        {clearing ? (
+          <IconLoader2 size={14} className="spin" />
+        ) : (
+          <IconTrash size={14} stroke={1.5} />
+        )}
         {clearing ? 'Clearing...' : 'Clear'}
       </button>
     </div>

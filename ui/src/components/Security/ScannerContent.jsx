@@ -1,14 +1,14 @@
 import { IconCategory, IconChartBar, IconList, IconTool } from '@tabler/icons-react';
 import { useState } from 'react';
 import { colors, fonts } from '../../theme';
-import CategoryView from './CategoryView.jsx';
+import CategoryView from './CategoryView/index.js';
 import ErrorDisplay from './ErrorDisplay.jsx';
 import FindingsTable from './FindingsTable.jsx';
 import ScannerEmptyState from './ScannerEmptyState.jsx';
 import ScanningProgress from './ScanningProgress.jsx';
-import SecurityCharts from './SecurityCharts.jsx';
+import SecurityCharts from './SecurityCharts/index.js';
 import SecuritySummary from './SecuritySummary.jsx';
-import TargetView from './TargetView.jsx';
+import TargetView from './TargetView/index.js';
 
 const VIEW_MODES = [
   { id: 'dashboard', label: 'Dashboard', icon: IconChartBar },

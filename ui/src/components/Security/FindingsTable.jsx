@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { colors, fonts } from '../../theme';
-import FindingCard from './FindingCard.jsx';
+import FindingCard from './FindingCard/index.js';
 
 const SEVERITY_FILTERS = [
   { id: 'all', label: 'All' },
