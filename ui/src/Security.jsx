@@ -7,7 +7,7 @@ import SecurityViewTabs from './components/Security/SecurityViewTabs';
 import { useSecurity } from './components/Security/useSecurity';
 import { colors } from './theme';
 
-function Security({ onNavigateToSmartScan }) {
+function Security({ onNavigateToSmartScan, onNavigateToSetup }) {
   const [activeTab, setActiveTab] = useState('scanner');
   const {
     rules,
@@ -85,6 +85,7 @@ function Security({ onNavigateToSmartScan }) {
           rules={rules}
           loadSummary={loadSummary}
           onNavigateToSmartScan={onNavigateToSmartScan}
+          onNavigateToSetup={onNavigateToSetup}
         />
       )}
 

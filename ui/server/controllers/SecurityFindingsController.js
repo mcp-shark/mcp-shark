@@ -77,9 +77,9 @@ export class SecurityFindingsController {
       const discoveryResult = await this.mcpDiscoveryService.discoverAllServers();
 
       if (!discoveryResult.success) {
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        return res.json({
           success: false,
-          error: 'Failed to discover MCP servers',
+          error: discoveryResult.error || 'Failed to discover MCP servers',
           details: discoveryResult.errors,
         });
       }
@@ -88,15 +88,35 @@ export class SecurityFindingsController {
 
       if (servers.length === 0) {
         return res.json({
-          success: true,
-          message: 'No MCP servers discovered',
+          success: false,
+          error: 'No MCP servers configured',
           serversScanned: 0,
           totalFindings: 0,
           results: [],
         });
       }
 
-      const result = await this.securityService.scanMultipleServers(servers);
+      // Check if all servers failed to connect
+      const connectedServers = servers.filter((s) => !s.error);
+      const failedServers = servers.filter((s) => s.error);
+
+      if (connectedServers.length === 0) {
+        const errorDetails = failedServers.map((s) => `${s.name}: ${s.error}`).join('; ');
+        return res.json({
+          success: false,
+          error: 'All MCP servers failed to connect. Make sure your servers are running.',
+          details: errorDetails,
+          failedServers: failedServers.length,
+        });
+      }
+
+      const result = await this.securityService.scanMultipleServers(connectedServers);
+
+      // Include info about failed servers in response
+      if (failedServers.length > 0) {
+        result.failedServers = failedServers.map((s) => ({ name: s.name, error: s.error }));
+      }
+
       return res.json({
         success: true,
         ...result,

@@ -70,6 +70,8 @@ export function useSecurity() {
   const discoverAndScan = useCallback(async () => {
     setScanning(true);
     setError(null);
+    setFindings([]); // Clear findings before scan
+    setSummary(null);
     try {
       const data = await postDiscoverAndScan();
       if (!data.success) {
@@ -93,15 +95,14 @@ export function useSecurity() {
         setFindings([]);
         setSummary(null);
         setSelectedFinding(null);
-        await loadFindings();
-        await loadSummary();
+        setError(null);
       }
     } catch (err) {
       console.error('Failed to clear findings:', err);
     } finally {
       setClearing(false);
     }
-  }, [loadFindings, loadSummary]);
+  }, []);
 
   const loadCommunityRules = useCallback(async () => {
     try {
@@ -250,20 +251,10 @@ export function useSecurity() {
 
   useEffect(() => {
     loadRules();
-    loadFindings();
-    loadSummary();
     loadRuleSources();
     loadEngineStatus();
     loadCommunityRules();
-  }, [loadRules, loadFindings, loadSummary, loadRuleSources, loadEngineStatus, loadCommunityRules]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      loadFindings();
-      loadSummary();
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [loadFindings, loadSummary]);
+  }, [loadRules, loadRuleSources, loadEngineStatus, loadCommunityRules]);
 
   return {
     rules,

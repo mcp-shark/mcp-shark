@@ -160,7 +160,10 @@ function App() {
 
       {activeTab === 'security' && (
         <div data-tab-content style={{ flex: 1, overflow: 'auto', width: '100%', height: '100%' }}>
-          <Security onNavigateToSmartScan={() => setActiveTab('smart-scan')} />
+          <Security
+            onNavigateToSmartScan={() => setActiveTab('smart-scan')}
+            onNavigateToSetup={() => setActiveTab('setup')}
+          />
         </div>
       )}
     </div>

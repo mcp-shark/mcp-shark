@@ -1,6 +1,7 @@
+import { IconArrowRight, IconSettings } from '@tabler/icons-react';
 import { colors, fonts } from '../../theme';
 
-export default function ScannerEmptyState() {
+export default function ScannerEmptyState({ onNavigateToSetup }) {
   return (
     <div
       style={{
@@ -50,11 +51,64 @@ export default function ScannerEmptyState() {
           fontFamily: fonts.body,
           maxWidth: '400px',
           lineHeight: '1.6',
+          marginBottom: '24px',
         }}
       >
-        Click "Discover & Scan" to run local static analysis on captured MCP traffic using YARA
-        rules.
+        Click "Discover & Scan" to run local static analysis on your MCP servers.
       </p>
+
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '12px 16px',
+          background: colors.bgSecondary,
+          border: `1px solid ${colors.borderLight}`,
+          borderRadius: '8px',
+        }}
+      >
+        <IconSettings size={16} stroke={1.5} style={{ color: colors.textMuted }} />
+        <span
+          style={{
+            fontSize: '13px',
+            color: colors.textSecondary,
+            fontFamily: fonts.body,
+          }}
+        >
+          No MCP servers configured?
+        </span>
+        <button
+          type="button"
+          onClick={onNavigateToSetup}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            padding: '4px 10px',
+            background: 'transparent',
+            color: colors.accentGreen,
+            border: `1px solid ${colors.accentGreen}`,
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontWeight: 500,
+            fontFamily: fonts.body,
+            cursor: 'pointer',
+            transition: 'all 0.15s',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = colors.accentGreen;
+            e.currentTarget.style.color = '#fff';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'transparent';
+            e.currentTarget.style.color = colors.accentGreen;
+          }}
+        >
+          Go to Setup
+          <IconArrowRight size={12} stroke={2} />
+        </button>
+      </div>
     </div>
   );
 }

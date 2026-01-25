@@ -154,6 +154,7 @@ export default function ScannerContent({
   onSelectFinding,
   loadSummary,
   onNavigateToSmartScan,
+  onNavigateToSetup,
 }) {
   const [viewMode, setViewMode] = useState('dashboard');
   const hasFindings = findings && findings.length > 0;
@@ -169,16 +170,16 @@ export default function ScannerContent({
         background: colors.bgPrimary,
       }}
     >
-      <ErrorDisplay error={error} />
+      <ErrorDisplay error={error} onNavigateToSetup={onNavigateToSetup} />
       <ScanningProgress scanning={scanning} />
 
       {!error && !scanning && (
         <StaticAnalysisBanner onNavigateToSmartScan={onNavigateToSmartScan} />
       )}
 
-      {showEmpty && <ScannerEmptyState />}
+      {showEmpty && <ScannerEmptyState onNavigateToSetup={onNavigateToSetup} />}
 
-      {hasFindings && !scanning && (
+      {hasFindings && !scanning && !error && (
         <>
           <div
             style={{
