@@ -1,3 +1,48 @@
+# 🦈 MCP Shark v1.5.11 - Local Static Analysis
+
+## 🎉 What's New in v1.5.11
+
+### 🛡️ Local Static Analysis
+
+New offline security scanning feature with YARA-based detection rules:
+
+- **OWASP MCP Top 10 Detection** — Built-in rules for all MCP security categories (MCP-01 through MCP-10)
+- **Agentic Top 10 Detection** — Security checks for agentic AI vulnerabilities (AGENTIC-01 through AGENTIC-10)
+- **YARA Rule Engine** — Industry-standard pattern matching for security detection
+- **Custom Rules** — Create and manage your own YARA detection rules
+- **Analyse Running Servers** — Scans only MCP servers currently connected through the proxy
+- **Scan History** — Track and review past analysis results with timestamps and severity breakdown
+
+### 🎨 UI Enhancements
+
+- **Professional Dashboard** — New security dashboard with severity distribution charts
+- **Multiple View Modes** — Dashboard, By Severity, By Category, and By Target views
+- **Static Analysis Banner** — Quick navigation to AI-powered Smart Scan
+- **History Panel** — View and restore historical scan results
+- **Neutral Color Palette** — Updated styling with professional gray tones
+- **Setup Navigation** — Disabled Analyse button with guidance when no servers running
+
+### 🔧 Architecture Improvements
+
+- **YARA Engine Service** — Dedicated service for YARA rule compilation and matching
+- **Rules Manager Service** — Manages predefined and custom detection rules
+- **Security Findings Controller** — Refactored to analyse only running proxy servers
+- **Removed Discovery Scan** — Deprecated auto-discovery in favor of explicit proxy connections
+
+### 📚 Documentation
+
+- **Local Analysis Guide** — Comprehensive documentation at `docs/local-analysis.md`
+- **Updated Features Doc** — Added Local Analysis vs Smart Scan comparison
+- **Updated User Guide** — New section covering Local Analysis workflow
+
+### 🧪 Testing
+
+- **ServerManagementService Tests** — Unit tests for `getConnectedServers()` method
+- **YARA Module Tests** — Tests for rule compilation and pattern matching
+- **Security Scanner Tests** — Coverage for all OWASP detection rules
+
+---
+
 # 🦈 MCP Shark v1.5.9 - UI Improvements & Action Menu
 
 ## 🎉 What's New in v1.5.9
