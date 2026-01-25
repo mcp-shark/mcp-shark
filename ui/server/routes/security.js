@@ -8,7 +8,6 @@ import { YaraRulesController } from '#ui/server/controllers/YaraRulesController.
  */
 export function createSecurityRoutes(container) {
   const securityDetectionService = container.getService('securityDetection');
-  const mcpDiscoveryService = container.getService('mcpDiscovery');
   const serverManagementService = container.getService('serverManagement');
   const rulesManagerService = container.getService('rulesManager');
   const yaraEngineService = container.getService('yaraEngine');
@@ -16,7 +15,6 @@ export function createSecurityRoutes(container) {
 
   const findingsController = new SecurityFindingsController(
     securityDetectionService,
-    mcpDiscoveryService,
     serverManagementService,
     logger
   );
@@ -35,7 +33,6 @@ export function createSecurityRoutes(container) {
   router.getRules = findingsController.getRules;
   router.scanServer = findingsController.scanServer;
   router.scanMultipleServers = findingsController.scanMultipleServers;
-  router.discoverAndScan = findingsController.discoverAndScan;
   router.analyseRunningServers = findingsController.analyseRunningServers;
   router.getFindings = findingsController.getFindings;
   router.getFinding = findingsController.getFinding;

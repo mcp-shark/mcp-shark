@@ -5,9 +5,8 @@ import { handleError, handleValidationError } from '../utils/errorHandler.js';
  * Controller for Security Detection and Findings HTTP endpoints
  */
 export class SecurityFindingsController {
-  constructor(securityDetectionService, mcpDiscoveryService, serverManagementService, logger) {
+  constructor(securityDetectionService, serverManagementService, logger) {
     this.securityService = securityDetectionService;
-    this.mcpDiscoveryService = mcpDiscoveryService;
     this.serverManagementService = serverManagementService;
     this.logger = logger;
   }
@@ -67,63 +66,6 @@ export class SecurityFindingsController {
       });
     } catch (error) {
       handleError(error, res, this.logger, 'Error scanning multiple servers');
-    }
-  };
-
-  /**
-   * Discover and scan all configured MCP servers
-   */
-  discoverAndScan = async (_req, res) => {
-    try {
-      const discoveryResult = await this.mcpDiscoveryService.discoverAllServers();
-
-      if (!discoveryResult.success) {
-        return res.json({
-          success: false,
-          error: discoveryResult.error || 'Failed to discover MCP servers',
-          details: discoveryResult.errors,
-        });
-      }
-
-      const servers = discoveryResult.servers || [];
-
-      if (servers.length === 0) {
-        return res.json({
-          success: false,
-          error: 'No MCP servers configured',
-          serversScanned: 0,
-          totalFindings: 0,
-          results: [],
-        });
-      }
-
-      // Check if all servers failed to connect
-      const connectedServers = servers.filter((s) => !s.error);
-      const failedServers = servers.filter((s) => s.error);
-
-      if (connectedServers.length === 0) {
-        const errorDetails = failedServers.map((s) => `${s.name}: ${s.error}`).join('; ');
-        return res.json({
-          success: false,
-          error: 'All MCP servers failed to connect. Make sure your servers are running.',
-          details: errorDetails,
-          failedServers: failedServers.length,
-        });
-      }
-
-      const result = await this.securityService.scanMultipleServers(connectedServers);
-
-      // Include info about failed servers in response
-      if (failedServers.length > 0) {
-        result.failedServers = failedServers.map((s) => ({ name: s.name, error: s.error }));
-      }
-
-      return res.json({
-        success: true,
-        ...result,
-      });
-    } catch (error) {
-      handleError(error, res, this.logger, 'Error discovering and scanning servers');
     }
   };
 
