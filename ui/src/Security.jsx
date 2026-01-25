@@ -14,6 +14,7 @@ function Security() {
     findings,
     summary,
     scanning,
+    clearing,
     error,
     discoverAndScan,
     clearFindings,
@@ -69,6 +70,7 @@ function Security() {
               onScan={discoverAndScan}
               scanning={scanning}
               onClear={clearFindings}
+              clearing={clearing}
               onRefresh={loadFindings}
             />
           )}

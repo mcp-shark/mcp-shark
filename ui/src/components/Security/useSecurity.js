@@ -5,6 +5,7 @@ export function useSecurity() {
   const [findings, setFindings] = useState([]);
   const [summary, setSummary] = useState(null);
   const [scanning, setScanning] = useState(false);
+  const [clearing, setClearing] = useState(false);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({});
   const [selectedFinding, setSelectedFinding] = useState(null);
@@ -91,6 +92,7 @@ export function useSecurity() {
   }, [loadFindings, loadSummary]);
 
   const clearFindings = useCallback(async () => {
+    setClearing(true);
     try {
       const response = await fetch('/api/security/findings/clear', {
         method: 'POST',
@@ -98,12 +100,18 @@ export function useSecurity() {
       const data = await response.json();
       if (data.success) {
         setFindings([]);
+        setSummary(null);
+        setSelectedFinding(null);
+        // Reload to confirm deletion
+        await loadFindings();
         await loadSummary();
       }
     } catch (err) {
       console.error('Failed to clear findings:', err);
+    } finally {
+      setClearing(false);
     }
-  }, [loadSummary]);
+  }, [loadFindings, loadSummary]);
 
   // Community rules functions
   const loadCommunityRules = useCallback(async () => {
@@ -256,6 +264,7 @@ export function useSecurity() {
     findings,
     summary,
     scanning,
+    clearing,
     error,
     discoverAndScan,
     clearFindings,

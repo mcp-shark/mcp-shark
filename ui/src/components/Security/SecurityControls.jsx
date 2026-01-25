@@ -1,7 +1,7 @@
 import { IconLoader2, IconRefresh, IconSearch, IconTrash } from '@tabler/icons-react';
 import { colors, fonts } from '../../theme';
 
-function SecurityControls({ onScan, scanning, onClear, onRefresh }) {
+function SecurityControls({ onScan, scanning, onClear, clearing, onRefresh }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
       <button
@@ -76,33 +76,39 @@ function SecurityControls({ onScan, scanning, onClear, onRefresh }) {
       <button
         type="button"
         onClick={onClear}
+        disabled={clearing}
         style={{
           display: 'flex',
           alignItems: 'center',
           gap: '6px',
           padding: '8px 14px',
           background: colors.buttonSecondary,
-          color: colors.textSecondary,
+          color: clearing ? colors.textTertiary : colors.textSecondary,
           border: `1px solid ${colors.borderLight}`,
           borderRadius: '8px',
           fontSize: '12px',
           fontFamily: fonts.body,
           fontWeight: '500',
-          cursor: 'pointer',
+          cursor: clearing ? 'not-allowed' : 'pointer',
+          opacity: clearing ? 0.6 : 1,
           transition: 'all 0.2s ease',
           whiteSpace: 'nowrap',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = colors.buttonSecondaryHover;
-          e.currentTarget.style.color = colors.textPrimary;
+          if (!clearing) {
+            e.currentTarget.style.background = colors.buttonSecondaryHover;
+            e.currentTarget.style.color = colors.textPrimary;
+          }
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.background = colors.buttonSecondary;
-          e.currentTarget.style.color = colors.textSecondary;
+          if (!clearing) {
+            e.currentTarget.style.background = colors.buttonSecondary;
+            e.currentTarget.style.color = colors.textSecondary;
+          }
         }}
       >
-        <IconTrash size={14} stroke={1.5} />
-        Clear
+        {clearing ? <IconLoader2 size={14} className="spin" /> : <IconTrash size={14} stroke={1.5} />}
+        {clearing ? 'Clearing...' : 'Clear'}
       </button>
     </div>
   );
