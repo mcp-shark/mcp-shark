@@ -13,36 +13,18 @@
 
 ## Quick Start
 
-### Desktop Application
-
-Download the native desktop application for macOS, Windows, or Linux:
-
-| Platform    | Download                                                                                                                  |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------- |
-| **macOS**   | [Download (ARM64)](https://github.com/mcp-shark/mcp-shark-app/releases/download/v1.3.0/MCP.Shark-1.3.0-arm64-mac.zip)     |
-| **Windows** | [Download (Installer)](https://github.com/mcp-shark/mcp-shark-app/releases/download/v1.3.0/MCP.Shark.Setup.1.3.0.exe)     |
-| **Linux**   | [Download (ARM64 DEB)](https://github.com/mcp-shark/mcp-shark-app/releases/download/v1.3.0/mcp-shark-app_1.3.0_arm64.deb) |
-
-The desktop application provides a native experience with automatic updates and system integration. No Node.js installation required.
-
-### npm Package
-
-**Install globally:**
-```bash
-npm install -g @mcp-shark/mcp-shark
-```
-
-**Run:**
-```bash
-mcp-shark --open
-```
-
-**Or use npx (no installation):**
+**Run instantly with npx (no installation required):**
 ```bash
 npx @mcp-shark/mcp-shark --open
 ```
 
-The server will start on `http://localhost:9853` and optionally open your browser automatically.
+The server will start on `http://localhost:9853` and automatically open your browser.
+
+**Or install globally:**
+```bash
+npm install -g @mcp-shark/mcp-shark
+mcp-shark --open
+```
 
 ## What is MCP Shark?
 
@@ -60,7 +42,7 @@ MCP Shark is a monitoring and aggregation solution for Model Context Protocol (M
 ## Documentation
 
 ### Getting Started
-- **[Installation & Setup](docs/getting-started.md)** - Complete installation guide for desktop app and npm package
+- **[Installation & Setup](docs/getting-started.md)** - Complete installation guide
 - **[Quick Start Guide](docs/getting-started.md#quick-start)** - Get up and running in minutes
 
 ### User Guides
@@ -102,7 +84,6 @@ See the [LICENSE](LICENSE) file for full terms and conditions.
 
 ## Related Projects
 
-- **[mcp-shark-app](https://github.com/mcp-shark/mcp-shark-app)**: Electron desktop application wrapper
 - **[mcp-shark-site](https://github.com/mcp-shark/mcp-shark-site)**: Official website and documentation
 - **[smart-scan-web-app](https://github.com/mcp-shark/smart-scan-web-app)**: Smart Scan web interface
 
