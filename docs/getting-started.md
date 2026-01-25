@@ -4,37 +4,25 @@ This guide will help you install and set up MCP Shark for the first time.
 
 ## Installation
 
-### npm Package
+**Run instantly with npx (recommended - no installation required):**
 
-**Global installation (recommended):**
+```bash
+npx @mcp-shark/mcp-shark --open
+```
+
+**Or install globally:**
 
 ```bash
 npm install -g @mcp-shark/mcp-shark
+mcp-shark --open
 ```
 
 **Local installation:**
 
 ```bash
 npm install @mcp-shark/mcp-shark
+npx mcp-shark --open
 ```
-
-**Using npx (no installation required):**
-
-```bash
-npx @mcp-shark/mcp-shark
-```
-
-### Desktop App
-
-Pre-built desktop applications are available for macOS, Windows, and Linux:
-
-| Platform    | Download                                                                                                                  |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------- |
-| **macOS**   | [Download (ARM64)](https://github.com/mcp-shark/mcp-shark-app/releases/download/v1.3.0/MCP.Shark-1.3.0-arm64-mac.zip)     |
-| **Windows** | [Download (Installer)](https://github.com/mcp-shark/mcp-shark-app/releases/download/v1.3.0/MCP.Shark.Setup.1.3.0.exe)     |
-| **Linux**   | [Download (ARM64 DEB)](https://github.com/mcp-shark/mcp-shark-app/releases/download/v1.3.0/mcp-shark-app_1.3.0_arm64.deb) |
-
-> **Note**: Desktop app versions may differ from npm package versions. Check the [releases page](https://github.com/mcp-shark/mcp-shark-app/releases) for the latest version.
 
 ## First Run
 
