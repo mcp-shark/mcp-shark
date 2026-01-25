@@ -11,58 +11,68 @@ export class RulesManagerService {
     this.logger = logger;
   }
 
-  /**
-   * Get all user-defined rules
-   */
+  // === Source Management (simplified - no remote syncing) ===
+
+  getSources() {
+    return this.rulesRepository.getSources();
+  }
+
+  addSource(source) {
+    return this.rulesRepository.upsertSource(source);
+  }
+
+  removeSource(sourceName) {
+    return this.rulesRepository.deleteSource(sourceName);
+  }
+
+  initializeSources() {
+    return this.rulesRepository.initializeDefaultSources();
+  }
+
+  async syncSource(_sourceName) {
+    // Simplified: no remote syncing, just return success
+    return { success: true, source: _sourceName, rulesCount: 0, message: 'Local rules only' };
+  }
+
+  async syncAllSources() {
+    // Simplified: no remote syncing
+    return { totalSources: 0, successful: 0, failed: 0, totalRules: 0, results: [] };
+  }
+
+  // === Rule Management ===
+
   getRules(filters = {}) {
     return this.rulesRepository.getRules(filters);
   }
 
-  /**
-   * Get enabled rules
-   */
   getEnabledRules() {
     return this.rulesRepository.getEnabledRules();
   }
 
-  /**
-   * Get a single rule by ID
-   */
   getRule(ruleId) {
     return this.rulesRepository.getRuleById(ruleId);
   }
 
-  /**
-   * Enable or disable a rule
-   */
   setRuleEnabled(ruleId, enabled) {
     return this.rulesRepository.setRuleEnabled(ruleId, enabled);
   }
 
-  /**
-   * Delete a rule
-   */
   deleteRule(ruleId) {
     return this.rulesRepository.deleteRule(ruleId);
   }
 
-  /**
-   * Get summary of all rules
-   */
   getSummary() {
     return this.rulesRepository.getSummary();
   }
 
-  /**
-   * Validate a YARA rule before adding
-   */
   validateRule(content) {
     return validateYaraRule(content);
   }
 
-  /**
-   * Add or update a custom YARA rule
-   */
+  addCustomRule(rule) {
+    return this.saveRule(rule);
+  }
+
   saveRule(rule) {
     const validation = this.validateRule(rule.content);
     if (!validation.valid) {
@@ -88,9 +98,6 @@ export class RulesManagerService {
     return { success: true, rule: dbRule };
   }
 
-  /**
-   * Parse YARA content without saving (for preview)
-   */
   parseRule(content) {
     const validation = this.validateRule(content);
     if (!validation.valid) {
@@ -105,9 +112,6 @@ export class RulesManagerService {
     return { success: true, rules: parsed, warnings: validation.warnings };
   }
 
-  /**
-   * Load enabled rules into YARA engine
-   */
   async loadRulesIntoEngine() {
     const rules = this.getEnabledRules();
 
@@ -127,9 +131,6 @@ export class RulesManagerService {
     return { loaded, failed, results };
   }
 
-  /**
-   * Get sample YARA rule template
-   */
   getTemplateRule() {
     return {
       content: `rule sample_mcp_rule : security
