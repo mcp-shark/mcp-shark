@@ -1,4 +1,12 @@
-import { IconCategory, IconChartBar, IconList, IconTool } from '@tabler/icons-react';
+import {
+  IconArrowRight,
+  IconCategory,
+  IconChartBar,
+  IconCode,
+  IconList,
+  IconSparkles,
+  IconTool,
+} from '@tabler/icons-react';
 import { useState } from 'react';
 import { colors, fonts } from '../../theme';
 import CategoryView from './CategoryView/index.js';
@@ -16,6 +24,67 @@ const VIEW_MODES = [
   { id: 'category', label: 'By Category', icon: IconCategory },
   { id: 'target', label: 'By Target', icon: IconTool },
 ];
+
+function StaticAnalysisBanner({ onNavigateToSmartScan }) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '16px',
+        padding: '10px 16px',
+        marginBottom: '16px',
+        background: colors.bgSecondary,
+        border: `1px solid ${colors.borderLight}`,
+        borderRadius: '6px',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <IconCode size={16} stroke={1.5} style={{ color: colors.textMuted }} />
+        <span
+          style={{
+            fontSize: '12px',
+            color: colors.textSecondary,
+            fontFamily: fonts.body,
+          }}
+        >
+          Static pattern-based analysis
+        </span>
+      </div>
+
+      <button
+        type="button"
+        onClick={onNavigateToSmartScan}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          padding: '6px 12px',
+          background: colors.accentGreen,
+          color: '#fff',
+          border: 'none',
+          borderRadius: '4px',
+          fontSize: '11px',
+          fontWeight: 500,
+          fontFamily: fonts.body,
+          cursor: 'pointer',
+          transition: 'opacity 0.15s',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.opacity = '0.9';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.opacity = '1';
+        }}
+      >
+        <IconSparkles size={13} stroke={2} />
+        Try AI-Powered Smart Scan
+        <IconArrowRight size={12} stroke={2} />
+      </button>
+    </div>
+  );
+}
 
 function ViewModeToggle({ viewMode, onViewModeChange }) {
   return (
@@ -82,6 +151,7 @@ export default function ScannerContent({
   selectedFinding,
   onSelectFinding,
   loadSummary,
+  onNavigateToSmartScan,
 }) {
   const [viewMode, setViewMode] = useState('dashboard');
   const hasFindings = findings && findings.length > 0;
@@ -104,6 +174,8 @@ export default function ScannerContent({
 
       {hasFindings && !scanning && (
         <>
+          <StaticAnalysisBanner onNavigateToSmartScan={onNavigateToSmartScan} />
+
           <div
             style={{
               display: 'flex',

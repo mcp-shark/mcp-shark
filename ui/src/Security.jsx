@@ -7,7 +7,7 @@ import SecurityViewTabs from './components/Security/SecurityViewTabs';
 import { useSecurity } from './components/Security/useSecurity';
 import { colors } from './theme';
 
-function Security() {
+function Security({ onNavigateToSmartScan }) {
   const [activeTab, setActiveTab] = useState('scanner');
   const {
     rules,
@@ -84,6 +84,7 @@ function Security() {
           onSelectFinding={setSelectedFinding}
           rules={rules}
           loadSummary={loadSummary}
+          onNavigateToSmartScan={onNavigateToSmartScan}
         />
       )}
 
