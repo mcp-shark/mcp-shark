@@ -5,13 +5,14 @@
  */
 import { fallbackScan } from './YaraFallbackScanner.js';
 import { convertMatchesToFindings, formatMatch } from './YaraMatchConverter.js';
+import yaraModule from './yaraLoader.js';
 
 // Module-level state for YARA availability (const objects with mutable properties)
 const yaraState = {
-  module: null,
-  available: false,
-  loadError: null,
-  initAttempted: false,
+  module: yaraModule,
+  available: yaraModule !== null,
+  loadError: yaraModule === null ? 'YARA module not installed' : null,
+  initAttempted: true,
 };
 
 export class YaraEngineService {
@@ -38,38 +39,12 @@ export class YaraEngineService {
   }
 
   /**
-   * Attempt to load native YARA module
-   */
-  async _tryLoadNativeYara() {
-    if (yaraState.initAttempted) {
-      return yaraState.available;
-    }
-
-    yaraState.initAttempted = true;
-
-    try {
-      const module = await import('@automattic/yara').catch(() => null);
-      if (module) {
-        yaraState.module = module;
-        yaraState.available = true;
-        return true;
-      }
-    } catch (error) {
-      yaraState.loadError = error.message;
-    }
-
-    return false;
-  }
-
-  /**
    * Initialize the YARA engine (if native is available)
    */
   async initialize() {
     if (this.initialized) {
       return { success: true, native: yaraState.available };
     }
-
-    await this._tryLoadNativeYara();
 
     if (!yaraState.available) {
       this.logger?.info('Native YARA not available, using static rules fallback');
@@ -129,7 +104,7 @@ export class YaraEngineService {
   }
 
   /**
-   * Scan content with YARA rules (native) or regex fallback
+   * Scan content with YARA rules (native), regex fallback, or static rules
    */
   async scan(content, options = {}) {
     if (!this.initialized) {
@@ -138,6 +113,7 @@ export class YaraEngineService {
 
     const { serverName = null, sessionId = null, targetType = 'packet' } = options;
 
+    // Native YARA scan (if available and rules loaded)
     if (yaraState.available && this.scanner && this.loadedRules.size > 0) {
       try {
         const buffer = Buffer.isBuffer(content) ? content : Buffer.from(String(content));
@@ -153,18 +129,31 @@ export class YaraEngineService {
       }
     }
 
-    // Fallback: use regex-based pattern matching from loaded YARA rules
+    // Regex-based fallback using loaded YARA rules (if rules loaded)
+    if (this.loadedRules.size > 0) {
+      const contentStr = Buffer.isBuffer(content) ? content.toString('utf8') : String(content);
+      const yaraFindings = fallbackScan(contentStr, this.loadedRules, {
+        serverName,
+        sessionId,
+        targetType,
+      });
+
+      return {
+        native: false,
+        matches: [],
+        findings: yaraFindings,
+      };
+    }
+
+    // Static rules fallback (no YARA rules loaded)
     const contentStr = Buffer.isBuffer(content) ? content.toString('utf8') : String(content);
-    const yaraFindings = fallbackScan(contentStr, this.loadedRules, {
-      serverName,
-      sessionId,
-      targetType,
-    });
+    const packet = { frameNumber: options.frameNumber || 0, body: contentStr };
+    const findings = this.staticRulesService.analyzePacket(packet, sessionId);
 
     return {
       native: false,
       matches: [],
-      findings: yaraFindings,
+      findings: findings.map((f) => ({ ...f, server_name: serverName || f.server_name })),
     };
   }
 

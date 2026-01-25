@@ -36,15 +36,15 @@ export class RulesManagerService {
    */
   seedPredefinedRules() {
     const predefinedRules = getPredefinedRules();
-    let seeded = 0;
-
-    for (const rule of predefinedRules) {
+    const seededRules = predefinedRules.filter((rule) => {
       const existing = this.rulesRepository.getRuleById(rule.rule_id);
       if (!existing) {
         this.rulesRepository.upsertRule(rule);
-        seeded++;
+        return true;
       }
-    }
+      return false;
+    });
+    const seeded = seededRules.length;
 
     if (seeded > 0) {
       this.logger?.info({ seeded, total: predefinedRules.length }, 'Seeded predefined YARA rules');
@@ -61,18 +61,16 @@ export class RulesManagerService {
     const ruleIds = predefinedRules.map((r) => r.rule_id);
 
     // Delete existing predefined rules
-    let deleted = 0;
-    for (const ruleId of ruleIds) {
+    const deletedRules = ruleIds.filter((ruleId) => {
       const result = this.rulesRepository.deleteRule(ruleId);
-      if (result.changes > 0) {
-        deleted++;
-      }
-    }
+      return result.changes > 0;
+    });
+    const deleted = deletedRules.length;
 
     // Re-seed all predefined rules
-    for (const rule of predefinedRules) {
+    predefinedRules.forEach((rule) => {
       this.rulesRepository.upsertRule(rule);
-    }
+    });
 
     this.logger?.info({ deleted, reseeded: predefinedRules.length }, 'Reset predefined YARA rules');
 

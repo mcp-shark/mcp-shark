@@ -24,7 +24,9 @@ function extractMeta(ruleContent) {
  * Extract regex patterns from YARA rule content
  */
 export function extractPatterns(ruleContent) {
-  if (!ruleContent) return [];
+  if (!ruleContent) {
+    return [];
+  }
 
   const patterns = [];
   const meta = extractMeta(ruleContent);

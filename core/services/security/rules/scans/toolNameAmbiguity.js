@@ -32,9 +32,8 @@ export function scanToolNameAmbiguity(mcpData = {}, threshold = DEFAULT_THRESHOL
 
   const issuesPerTool = new Map();
 
-  for (let i = 0; i < tools.length; i++) {
-    const a = tools[i];
-    for (const b of tools.slice(i + 1)) {
+  tools.forEach((a, i) => {
+    tools.slice(i + 1).forEach((b) => {
       const score = hybridSimilarityScore(a.name, b.name);
       if (score >= threshold) {
         const severity = a.server && b.server && a.server !== b.server ? 'high' : 'medium';
@@ -51,8 +50,8 @@ export function scanToolNameAmbiguity(mcpData = {}, threshold = DEFAULT_THRESHOL
         }
         issuesPerTool.get(b.name).push({ severity, reason: reasonB });
       }
-    }
-  }
+    });
+  });
 
   issuesPerTool.forEach((entries, name) => {
     const highestSeverity = entries.some((entry) => entry.severity === 'high') ? 'high' : 'medium';
