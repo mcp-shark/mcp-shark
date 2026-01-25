@@ -1,3 +1,24 @@
+# 🦈 MCP Shark v1.5.12 - Improved Empty State Messaging
+
+## 🎉 What's New in v1.5.12
+
+### 🎨 UI Improvements
+
+- **Clear Scan Results Feedback** — Local Analysis now shows distinct messages based on scan state:
+  - **"No Security Issues Found"** — Displayed with green shield icon when scan completes with no vulnerabilities
+  - **"No Findings"** — Shown before any scan has been run, prompting user to click Analyse
+  - **"No MCP Servers Running"** — Displayed when no servers are connected via proxy
+
+- **Success State Visual** — Green `IconShieldCheck` icon indicates successful security scan with no issues detected
+
+### 🔧 Technical Changes
+
+- Added `scanComplete` state to track analysis completion
+- Refactored `ScannerEmptyState` component for better code organization
+- State properly resets when clearing findings or starting new scan
+
+---
+
 # 🦈 MCP Shark v1.5.11 - Local Static Analysis
 
 ## 🎉 What's New in v1.5.11
