@@ -32,6 +32,9 @@ function Security() {
     syncAllSources,
     syncSource,
     setRuleEnabled,
+    // Custom YARA rules
+    saveCustomRule,
+    deleteCustomRule,
   } = useSecurity();
 
   return (
@@ -101,6 +104,8 @@ function Security() {
           onSyncAll={syncAllSources}
           onSyncSource={syncSource}
           onToggleRule={setRuleEnabled}
+          onSaveRule={saveCustomRule}
+          onDeleteRule={deleteCustomRule}
         />
       )}
     </div>

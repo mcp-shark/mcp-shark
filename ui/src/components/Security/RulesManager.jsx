@@ -3,6 +3,7 @@ import { colors, fonts } from '../../theme';
 import EngineStatus from './EngineStatus.jsx';
 import RulesTable from './RulesTable.jsx';
 import SourceCard from './SourceCard.jsx';
+import { YaraEditor } from './YaraEditor.jsx';
 
 function RulesSummary({ rulesSummary }) {
   if (!rulesSummary) {
@@ -158,6 +159,8 @@ export function RulesManager({
   onSyncAll,
   onSyncSource,
   onToggleRule,
+  onSaveRule,
+  onDeleteRule,
 }) {
   const hasRules = communityRules && communityRules.length > 0;
   const hasSources = ruleSources && ruleSources.length > 0;
@@ -186,6 +189,13 @@ export function RulesManager({
       <RulesSummary rulesSummary={rulesSummary} />
 
       {hasRules && <RulesTable communityRules={communityRules} onToggleRule={onToggleRule} />}
+
+      <YaraEditor
+        rules={communityRules}
+        onSave={onSaveRule}
+        onDelete={onDeleteRule}
+        onToggle={onToggleRule}
+      />
     </div>
   );
 }

@@ -1,4 +1,20 @@
 import { useCallback, useEffect, useState } from 'react';
+import {
+  deleteRule,
+  fetchCommunityRules,
+  fetchEngineStatus,
+  fetchFindings,
+  fetchRuleSources,
+  fetchRules,
+  fetchSummary,
+  patchRuleEnabled,
+  postClearFindings,
+  postCustomRule,
+  postDiscoverAndScan,
+  postInitializeSources,
+  postSyncAllSources,
+  postSyncSource,
+} from './securityApi.js';
 
 export function useSecurity() {
   const [rules, setRules] = useState([]);
@@ -19,8 +35,7 @@ export function useSecurity() {
 
   const loadRules = useCallback(async () => {
     try {
-      const response = await fetch('/api/security/rules');
-      const data = await response.json();
+      const data = await fetchRules();
       if (data.success) {
         setRules(data.rules);
       }
@@ -31,23 +46,7 @@ export function useSecurity() {
 
   const loadFindings = useCallback(async () => {
     try {
-      const params = new URLSearchParams();
-      if (filters.severity) {
-        params.append('severity', filters.severity);
-      }
-      if (filters.owasp_id) {
-        params.append('owasp_id', filters.owasp_id);
-      }
-      if (filters.server_name) {
-        params.append('server_name', filters.server_name);
-      }
-      if (filters.finding_type) {
-        params.append('finding_type', filters.finding_type);
-      }
-      params.append('limit', '100');
-
-      const response = await fetch(`/api/security/findings?${params.toString()}`);
-      const data = await response.json();
+      const data = await fetchFindings(filters);
       if (data.success) {
         setFindings(data.findings);
       }
@@ -58,8 +57,7 @@ export function useSecurity() {
 
   const loadSummary = useCallback(async () => {
     try {
-      const response = await fetch('/api/security/summary');
-      const data = await response.json();
+      const data = await fetchSummary();
       if (data.success) {
         setSummary(data.summary);
       }
@@ -72,15 +70,10 @@ export function useSecurity() {
     setScanning(true);
     setError(null);
     try {
-      const response = await fetch('/api/security/scan/discover', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const data = await response.json();
+      const data = await postDiscoverAndScan();
       if (!data.success) {
         setError(data.error || 'Scan failed');
       } else {
-        // Reload findings and summary after scan
         await loadFindings();
         await loadSummary();
       }
@@ -94,15 +87,11 @@ export function useSecurity() {
   const clearFindings = useCallback(async () => {
     setClearing(true);
     try {
-      const response = await fetch('/api/security/findings/clear', {
-        method: 'POST',
-      });
-      const data = await response.json();
+      const data = await postClearFindings();
       if (data.success) {
         setFindings([]);
         setSummary(null);
         setSelectedFinding(null);
-        // Reload to confirm deletion
         await loadFindings();
         await loadSummary();
       }
@@ -113,11 +102,9 @@ export function useSecurity() {
     }
   }, [loadFindings, loadSummary]);
 
-  // Community rules functions
   const loadCommunityRules = useCallback(async () => {
     try {
-      const response = await fetch('/api/security/community-rules');
-      const data = await response.json();
+      const data = await fetchCommunityRules();
       if (data.success) {
         setCommunityRules(data.rules);
         setRulesSummary(data.summary);
@@ -129,8 +116,7 @@ export function useSecurity() {
 
   const loadRuleSources = useCallback(async () => {
     try {
-      const response = await fetch('/api/security/sources');
-      const data = await response.json();
+      const data = await fetchRuleSources();
       if (data.success) {
         setRuleSources(data.sources);
       }
@@ -141,8 +127,7 @@ export function useSecurity() {
 
   const loadEngineStatus = useCallback(async () => {
     try {
-      const response = await fetch('/api/security/engine/status');
-      const data = await response.json();
+      const data = await fetchEngineStatus();
       if (data.success) {
         setEngineStatus(data);
       }
@@ -153,10 +138,7 @@ export function useSecurity() {
 
   const initializeSources = useCallback(async () => {
     try {
-      const response = await fetch('/api/security/sources/initialize', {
-        method: 'POST',
-      });
-      const data = await response.json();
+      const data = await postInitializeSources();
       if (data.success) {
         await loadRuleSources();
       }
@@ -170,10 +152,7 @@ export function useSecurity() {
   const syncAllSources = useCallback(async () => {
     setSyncing(true);
     try {
-      const response = await fetch('/api/security/sources/sync', {
-        method: 'POST',
-      });
-      const data = await response.json();
+      const data = await postSyncAllSources();
       if (data.success) {
         await loadCommunityRules();
         await loadRuleSources();
@@ -191,13 +170,7 @@ export function useSecurity() {
     async (sourceName) => {
       setSyncing(true);
       try {
-        const response = await fetch(
-          `/api/security/sources/${encodeURIComponent(sourceName)}/sync`,
-          {
-            method: 'POST',
-          }
-        );
-        const data = await response.json();
+        const data = await postSyncSource(sourceName);
         if (data.success) {
           await loadCommunityRules();
           await loadRuleSources();
@@ -216,15 +189,7 @@ export function useSecurity() {
   const setRuleEnabled = useCallback(
     async (ruleId, enabled) => {
       try {
-        const response = await fetch(
-          `/api/security/community-rules/${encodeURIComponent(ruleId)}/enabled`,
-          {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ enabled }),
-          }
-        );
-        const data = await response.json();
+        const data = await patchRuleEnabled(ruleId, enabled);
         if (data.success) {
           await loadCommunityRules();
         }
@@ -237,7 +202,38 @@ export function useSecurity() {
     [loadCommunityRules]
   );
 
-  // Load initial data
+  const saveCustomRule = useCallback(
+    async (ruleData) => {
+      try {
+        const data = await postCustomRule(ruleData);
+        if (data.success) {
+          await loadCommunityRules();
+        }
+        return data;
+      } catch (err) {
+        console.error('Failed to save custom rule:', err);
+        return { success: false, error: err.message };
+      }
+    },
+    [loadCommunityRules]
+  );
+
+  const deleteCustomRule = useCallback(
+    async (ruleId) => {
+      try {
+        const data = await deleteRule(ruleId);
+        if (data.success) {
+          await loadCommunityRules();
+        }
+        return data;
+      } catch (err) {
+        console.error('Failed to delete custom rule:', err);
+        return { success: false, error: err.message };
+      }
+    },
+    [loadCommunityRules]
+  );
+
   useEffect(() => {
     loadRules();
     loadFindings();
@@ -246,20 +242,15 @@ export function useSecurity() {
     loadEngineStatus();
   }, [loadRules, loadFindings, loadSummary, loadRuleSources, loadEngineStatus]);
 
-  // Poll for new findings every 3 seconds (real-time traffic detection)
   useEffect(() => {
     const interval = setInterval(() => {
       loadFindings();
       loadSummary();
     }, 3000);
-
     return () => clearInterval(interval);
   }, [loadFindings, loadSummary]);
 
-  // Note: loadFindings already depends on filters via useCallback
-
   return {
-    // Static rules and findings
     rules,
     findings,
     summary,
@@ -274,8 +265,6 @@ export function useSecurity() {
     setFilters,
     selectedFinding,
     setSelectedFinding,
-
-    // Community rules
     communityRules,
     ruleSources,
     rulesSummary,
@@ -287,5 +276,7 @@ export function useSecurity() {
     syncAllSources,
     syncSource,
     setRuleEnabled,
+    saveCustomRule,
+    deleteCustomRule,
   };
 }

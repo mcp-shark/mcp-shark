@@ -46,7 +46,7 @@ export default function SecurityViewTabs({ activeTab, setActiveTab }) {
           transition: 'all 0.2s',
         }}
       >
-        Custom Rules
+        YARA Detection
       </button>
     </div>
   );
