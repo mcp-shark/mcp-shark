@@ -30,7 +30,7 @@ export function PacketDetails({ packet }) {
           <div style={{ fontSize: '10px', fontFamily: fonts.mono }}>
             {Object.entries(headers).map(([key, value]) => (
               <div key={key} style={{ marginBottom: '2px' }}>
-                <span style={{ color: colors.accentBlue }}>{key}:</span>{' '}
+                <span style={{ color: '#0d9488' }}>{key}:</span>{' '}
                 <span style={{ color: colors.textPrimary }}>{String(value)}</span>
               </div>
             ))}

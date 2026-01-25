@@ -7,21 +7,21 @@ export const CATEGORIES = {
     name: 'OWASP MCP Top 10',
     description: 'Model Context Protocol vulnerabilities',
     icon: IconShieldLock,
-    color: colors.accentPurple,
+    color: '#0d9488', // Teal
   },
   'agentic-security': {
     id: 'agentic-security',
     name: 'Agentic Security',
     description: 'AI agent behavioral issues',
     icon: IconRobot,
-    color: colors.accentBlue,
+    color: '#374151', // Dark gray
   },
   yara: {
     id: 'yara',
     name: 'YARA Detection',
     description: 'Pattern-based security detection',
     icon: IconCode,
-    color: colors.accentOrange || '#f59e0b',
+    color: '#57534e', // Stone brown
   },
   'general-security': {
     id: 'general-security',
@@ -86,7 +86,7 @@ export const SEVERITY_COLORS = {
   critical: colors.error,
   high: '#ea580c',
   medium: '#b45309',
-  low: colors.accentBlue,
+  low: '#0d9488', // Teal
   info: colors.textTertiary,
 };
 

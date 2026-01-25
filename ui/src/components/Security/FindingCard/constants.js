@@ -13,7 +13,7 @@ export const SEVERITY_CONFIG = {
   critical: { color: colors.error, icon: IconAlertCircle, label: 'Critical' },
   high: { color: '#ea580c', icon: IconAlertTriangle, label: 'High' },
   medium: { color: '#b45309', icon: IconAlertTriangle, label: 'Medium' },
-  low: { color: colors.accentBlue, icon: IconInfoCircle, label: 'Low' },
+  low: { color: '#0d9488', icon: IconInfoCircle, label: 'Low' }, // Teal
   info: { color: colors.textTertiary, icon: IconInfoCircle, label: 'Info' },
 };
 

@@ -7,9 +7,11 @@ const SEVERITY_FILTERS = [
   { id: 'critical', label: 'Critical', color: colors.error },
   { id: 'high', label: 'High', color: '#ea580c' },
   { id: 'medium', label: 'Medium', color: '#b45309' },
-  { id: 'low', label: 'Low', color: colors.accentBlue },
+  { id: 'low', label: 'Low', color: '#0d9488' }, // Teal
   { id: 'info', label: 'Info', color: colors.textTertiary },
 ];
+
+const ACCENT_COLOR = '#0d9488'; // Teal for active states
 
 function FilterButton({ filter, isActive, count, onClick }) {
   return (
@@ -21,9 +23,9 @@ function FilterButton({ filter, isActive, count, onClick }) {
         alignItems: 'center',
         gap: '4px',
         padding: '4px 10px',
-        background: isActive ? `${colors.accentBlue}15` : colors.bgCard,
-        color: isActive ? colors.accentBlue : colors.textSecondary,
-        border: `1px solid ${isActive ? colors.accentBlue : colors.borderLight}`,
+        background: isActive ? `${ACCENT_COLOR}15` : colors.bgCard,
+        color: isActive ? ACCENT_COLOR : colors.textSecondary,
+        border: `1px solid ${isActive ? ACCENT_COLOR : colors.borderLight}`,
         borderRadius: '6px',
         fontSize: '11px',
         fontWeight: isActive ? '600' : '400',
@@ -57,7 +59,7 @@ function FilterButton({ filter, isActive, count, onClick }) {
         <span
           style={{
             padding: '1px 5px',
-            background: isActive ? colors.accentBlue : colors.bgTertiary,
+            background: isActive ? ACCENT_COLOR : colors.bgTertiary,
             color: isActive ? colors.textInverse : colors.textSecondary,
             borderRadius: '8px',
             fontSize: '9px',

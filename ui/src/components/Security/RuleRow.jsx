@@ -65,7 +65,7 @@ function RuleRow({ rule, onToggle }) {
       <td
         style={{
           padding: '10px 12px',
-          color: colors.accentBlue,
+          color: '#0d9488', // Teal
           fontFamily: fonts.mono,
           fontSize: '11px',
         }}

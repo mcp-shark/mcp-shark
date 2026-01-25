@@ -4,13 +4,14 @@ export const SEVERITY_COLORS = {
   critical: colors.error,
   high: '#ea580c',
   medium: '#b45309',
-  low: colors.accentBlue,
+  low: '#0d9488', // Teal
   info: colors.textTertiary,
 };
 
 export const CATEGORY_COLORS = {
-  'owasp-mcp': colors.accentPurple,
-  'agentic-security': colors.accentBlue,
+  'owasp-mcp': '#0d9488', // Teal
+  'agentic-security': '#374151', // Dark gray
+  yara: '#57534e', // Stone brown
   'general-security': colors.accentGreen,
 };
 

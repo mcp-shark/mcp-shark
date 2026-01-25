@@ -28,7 +28,7 @@ function SourceCard({ source, onSync, syncing }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <IconServer size={16} color={colors.accentBlue} />
+            <IconServer size={16} color="#0d9488" />
             <span style={{ fontWeight: 600, color: colors.textPrimary, fontFamily: fonts.body }}>
               {source.name}
             </span>

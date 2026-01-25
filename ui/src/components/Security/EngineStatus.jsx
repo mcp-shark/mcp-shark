@@ -50,13 +50,13 @@ function EngineStatus({ engineStatus, rules = [] }) {
         </span>
         <span style={{ color: colors.textSecondary }}>
           Loaded Rules:{' '}
-          <span style={{ color: colors.accentBlue, fontWeight: 500 }}>
+          <span style={{ color: '#0d9488', fontWeight: 500 }}>
             {engineStatus?.loadedRulesCount || 0}
           </span>
         </span>
         <span style={{ color: colors.textSecondary }}>
           Compiled:{' '}
-          <span style={{ color: colors.accentBlue, fontWeight: 500 }}>
+          <span style={{ color: '#0d9488', fontWeight: 500 }}>
             {engineStatus?.compiledRulesCount || 0}
           </span>
         </span>
@@ -114,8 +114,7 @@ function EngineStatus({ engineStatus, rules = [] }) {
                       width: '6px',
                       height: '6px',
                       borderRadius: '50%',
-                      background:
-                        rule.source === 'predefined' ? colors.accentBlue : colors.accentPurple,
+                      background: rule.source === 'predefined' ? '#0d9488' : '#57534e',
                     }}
                   />
                   {rule.name}

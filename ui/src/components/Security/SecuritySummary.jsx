@@ -5,7 +5,7 @@ const SEVERITY_CONFIG = {
   critical: { color: colors.error, label: 'Critical' },
   high: { color: '#ea580c', label: 'High' },
   medium: { color: '#b45309', label: 'Medium' },
-  low: { color: colors.accentBlue, label: 'Low' },
+  low: { color: '#0d9488', label: 'Low' }, // Teal
 };
 
 function StatCard({ count, label, color }) {

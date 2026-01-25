@@ -7,7 +7,7 @@ export const colors = {
   bgCard: '#ffffff', // Pure white for cards
   bgHover: '#f1f3f4', // Gmail hover color
   bgSelected: '#e8f0fe', // Gmail selected blue tint
-  bgUnpaired: '#fef7e0', // Very light orange/yellow for unpaired requests/responses
+  bgUnpaired: '#f5f5f4', // Light stone gray for unpaired requests/responses
   surface: '#f8f9fa', // Alias for bgSecondary
 
   // Text - Gmail style
@@ -23,25 +23,25 @@ export const colors = {
   borderMedium: '#bdc1c6', // Gmail medium border
   borderDark: '#9aa0a6', // Gmail dark border
 
-  // Accents - Gmail/Google Material colors
-  accent: '#1a73e8', // Alias for accentBlue
-  accentBlue: '#1a73e8', // Gmail primary blue
-  accentBlueHover: '#1557b0', // Darker blue on hover
-  accentGreen: '#34a853', // Google green
-  accentOrange: '#ea8600', // Google orange
-  accentPink: '#d44638', // Gmail red (Jasper)
-  accentPurple: '#9334e6', // Google purple
+  // Accents - Clean, professional colors
+  accent: '#4a5568', // Neutral gray-blue
+  accentBlue: '#2d3748', // Dark slate (professional, not bright)
+  accentBlueHover: '#1a202c', // Darker slate on hover
+  accentGreen: '#38a169', // Balanced green
+  accentOrange: '#78716c', // Warm stone gray (replaces orange)
+  accentPink: '#c53030', // Deep red
+  accentPurple: '#4a5568', // Replaced with slate gray
 
-  // Status colors - Gmail style
-  success: '#34a853', // Google green
-  warning: '#fbbc04', // Google yellow
-  error: '#ea4335', // Google red
+  // Status colors - Clean palette
+  success: '#38a169', // Balanced green
+  warning: '#d69e2e', // Warm yellow
+  error: '#c53030', // Deep red
   errorBg: '#fef2f2', // Light red background for error messages
-  info: '#1a73e8', // Gmail blue
+  info: '#4a5568', // Neutral slate
 
-  // Interactive - Gmail style (lighter, less sharp)
-  buttonPrimary: '#4285f4', // Lighter Google blue
-  buttonPrimaryHover: '#3367d6',
+  // Interactive - Professional, subtle
+  buttonPrimary: '#2d3748', // Dark slate
+  buttonPrimaryHover: '#1a202c',
   buttonSecondary: '#f1f3f4', // Light gray
   buttonSecondaryHover: '#e8eaed',
   buttonDanger: '#ea4335', // Google red (lighter)
