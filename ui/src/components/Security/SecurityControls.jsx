@@ -1,7 +1,15 @@
-import { IconLoader2, IconRefresh, IconSearch, IconTrash } from '@tabler/icons-react';
+import { IconHistory, IconLoader2, IconSearch, IconTrash } from '@tabler/icons-react';
 import { colors, fonts } from '../../theme';
 
-function SecurityControls({ onScan, scanning, onClear, clearing, onRefresh }) {
+function SecurityControls({
+  onScan,
+  scanning,
+  onClear,
+  clearing,
+  onToggleHistory,
+  showHistory,
+  historyCount,
+}) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
       <button
@@ -43,15 +51,15 @@ function SecurityControls({ onScan, scanning, onClear, clearing, onRefresh }) {
 
       <button
         type="button"
-        onClick={onRefresh}
+        onClick={onToggleHistory}
         style={{
           display: 'flex',
           alignItems: 'center',
           gap: '6px',
           padding: '8px 14px',
-          background: colors.buttonSecondary,
-          color: colors.textSecondary,
-          border: `1px solid ${colors.borderLight}`,
+          background: showHistory ? colors.accentGreen : colors.buttonSecondary,
+          color: showHistory ? '#fff' : colors.textSecondary,
+          border: `1px solid ${showHistory ? colors.accentGreen : colors.borderLight}`,
           borderRadius: '8px',
           fontSize: '12px',
           fontFamily: fonts.body,
@@ -61,16 +69,35 @@ function SecurityControls({ onScan, scanning, onClear, clearing, onRefresh }) {
           whiteSpace: 'nowrap',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = colors.buttonSecondaryHover;
-          e.currentTarget.style.color = colors.textPrimary;
+          if (!showHistory) {
+            e.currentTarget.style.background = colors.buttonSecondaryHover;
+            e.currentTarget.style.color = colors.textPrimary;
+          }
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.background = colors.buttonSecondary;
-          e.currentTarget.style.color = colors.textSecondary;
+          if (!showHistory) {
+            e.currentTarget.style.background = colors.buttonSecondary;
+            e.currentTarget.style.color = colors.textSecondary;
+          }
         }}
       >
-        <IconRefresh size={14} stroke={1.5} />
-        Refresh
+        <IconHistory size={14} stroke={1.5} />
+        History
+        {historyCount > 0 && (
+          <span
+            style={{
+              background: showHistory ? 'rgba(255,255,255,0.2)' : colors.bgTertiary,
+              color: showHistory ? '#fff' : colors.textMuted,
+              padding: '1px 6px',
+              borderRadius: '10px',
+              fontSize: '10px',
+              fontWeight: 600,
+              fontFamily: fonts.mono,
+            }}
+          >
+            {historyCount}
+          </span>
+        )}
       </button>
 
       <button

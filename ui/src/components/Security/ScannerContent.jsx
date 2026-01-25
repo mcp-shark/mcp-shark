@@ -159,10 +159,11 @@ export default function ScannerContent({
   scanHistory,
   selectedScanId,
   onSelectScan,
+  showHistory,
 }) {
   const [viewMode, setViewMode] = useState('dashboard');
   const hasFindings = findings && findings.length > 0;
-  const showEmpty = !error && !scanning && !hasFindings;
+  const showEmpty = !error && !scanning && !hasFindings && !showHistory;
 
   return (
     <div
@@ -181,16 +182,20 @@ export default function ScannerContent({
         <StaticAnalysisBanner onNavigateToSmartScan={onNavigateToSmartScan} />
       )}
 
-      {!scanning && scanHistory && scanHistory.length > 0 && (
+      {/* History View */}
+      {showHistory && !scanning && (
         <ScanHistory
           history={scanHistory}
           onSelectScan={onSelectScan}
           selectedScanId={selectedScanId}
+          expanded={true}
         />
       )}
 
+      {/* Empty State - only when not showing history */}
       {showEmpty && <ScannerEmptyState onNavigateToSetup={onNavigateToSetup} />}
 
+      {/* Dashboard View - show when not in history mode OR when a historical scan is selected */}
       {hasFindings && !scanning && !error && (
         <>
           <div

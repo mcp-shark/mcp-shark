@@ -9,6 +9,7 @@ import { colors } from './theme';
 
 function Security({ onNavigateToSmartScan, onNavigateToSetup }) {
   const [activeTab, setActiveTab] = useState('scanner');
+  const [showHistory, setShowHistory] = useState(false);
   const {
     rules,
     findings,
@@ -18,7 +19,6 @@ function Security({ onNavigateToSmartScan, onNavigateToSetup }) {
     error,
     discoverAndScan,
     clearFindings,
-    loadFindings,
     loadSummary,
     selectedFinding,
     setSelectedFinding,
@@ -71,7 +71,9 @@ function Security({ onNavigateToSmartScan, onNavigateToSetup }) {
               scanning={scanning}
               onClear={clearFindings}
               clearing={clearing}
-              onRefresh={loadFindings}
+              onToggleHistory={() => setShowHistory((prev) => !prev)}
+              showHistory={showHistory}
+              historyCount={scanHistory.length}
             />
           )}
         </div>
@@ -93,6 +95,7 @@ function Security({ onNavigateToSmartScan, onNavigateToSetup }) {
           scanHistory={scanHistory}
           selectedScanId={selectedScanId}
           onSelectScan={selectHistoricalScan}
+          showHistory={showHistory}
         />
       )}
 
