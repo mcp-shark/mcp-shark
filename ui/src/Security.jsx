@@ -1,14 +1,14 @@
 import { useState } from 'react';
-import FindingsTable from './components/Security/FindingsTable';
 import { RulesManager } from './components/Security/RulesManager';
+import ScannerContent from './components/Security/ScannerContent';
 import SecurityControls from './components/Security/SecurityControls';
 import SecurityHeader from './components/Security/SecurityHeader';
-import SecuritySummary from './components/Security/SecuritySummary';
+import SecurityViewTabs from './components/Security/SecurityViewTabs';
 import { useSecurity } from './components/Security/useSecurity';
-import { colors, fonts } from './theme';
+import { colors } from './theme';
 
 function Security() {
-  const [activeTab, setActiveTab] = useState('scanner'); // 'scanner' or 'rules'
+  const [activeTab, setActiveTab] = useState('scanner');
   const {
     rules,
     findings,
@@ -20,8 +20,6 @@ function Security() {
     clearFindings,
     loadFindings,
     loadSummary,
-    filters,
-    setFilters,
     selectedFinding,
     setSelectedFinding,
     // Community rules
@@ -65,6 +63,7 @@ function Security() {
           }}
         >
           <SecurityHeader />
+          <SecurityViewTabs activeTab={activeTab} setActiveTab={setActiveTab} />
           {activeTab === 'scanner' && (
             <SecurityControls
               onScan={discoverAndScan}
@@ -74,112 +73,36 @@ function Security() {
               onRefresh={loadFindings}
             />
           )}
-
-          {/* Tab Switcher */}
-          <div
-            style={{
-              display: 'flex',
-              gap: '8px',
-              border: `1px solid ${colors.borderLight}`,
-              borderRadius: '8px',
-              padding: '4px',
-              background: colors.bgSecondary,
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => setActiveTab('scanner')}
-              style={{
-                padding: '6px 14px',
-                background: activeTab === 'scanner' ? colors.bgCard : 'transparent',
-                border: 'none',
-                color: activeTab === 'scanner' ? colors.textPrimary : colors.textSecondary,
-                borderRadius: '6px',
-                fontSize: '12px',
-                fontFamily: fonts.body,
-                fontWeight: activeTab === 'scanner' ? '600' : '400',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
-            >
-              Scanner
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('rules')}
-              style={{
-                padding: '6px 14px',
-                background: activeTab === 'rules' ? colors.bgCard : 'transparent',
-                border: 'none',
-                color: activeTab === 'rules' ? colors.textPrimary : colors.textSecondary,
-                borderRadius: '6px',
-                fontSize: '12px',
-                fontFamily: fonts.body,
-                fontWeight: activeTab === 'rules' ? '600' : '400',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
-            >
-              Community Rules
-            </button>
-          </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div
-        style={{
-          flex: 1,
-          overflow: 'auto',
-          padding: activeTab === 'scanner' ? '24px' : '0',
-        }}
-      >
-        {activeTab === 'scanner' && (
-          <>
-            {error && (
-              <div
-                style={{
-                  padding: '12px 16px',
-                  background: colors.errorBg,
-                  border: `1px solid ${colors.error}`,
-                  borderRadius: '8px',
-                  color: colors.error,
-                  marginBottom: '16px',
-                }}
-              >
-                {error}
-              </div>
-            )}
+      {activeTab === 'scanner' && (
+        <ScannerContent
+          error={error}
+          scanning={scanning}
+          findings={findings}
+          summary={summary}
+          selectedFinding={selectedFinding}
+          onSelectFinding={setSelectedFinding}
+          rules={rules}
+          loadSummary={loadSummary}
+        />
+      )}
 
-            {/* Summary Cards */}
-            <SecuritySummary summary={summary} onRefresh={loadSummary} />
-
-            {/* Findings Table */}
-            <FindingsTable
-              findings={findings}
-              filters={filters}
-              onFilterChange={setFilters}
-              selectedFinding={selectedFinding}
-              onSelectFinding={setSelectedFinding}
-              rules={rules}
-            />
-          </>
-        )}
-
-        {activeTab === 'rules' && (
-          <RulesManager
-            ruleSources={ruleSources}
-            communityRules={communityRules}
-            rulesSummary={rulesSummary}
-            syncing={syncing}
-            engineStatus={engineStatus}
-            onInitialize={initializeSources}
-            onSyncAll={syncAllSources}
-            onSyncSource={syncSource}
-            onToggleRule={setRuleEnabled}
-          />
-        )}
-      </div>
+      {activeTab === 'rules' && (
+        <RulesManager
+          ruleSources={ruleSources}
+          communityRules={communityRules}
+          rulesSummary={rulesSummary}
+          syncing={syncing}
+          engineStatus={engineStatus}
+          onInitialize={initializeSources}
+          onSyncAll={syncAllSources}
+          onSyncSource={syncSource}
+          onToggleRule={setRuleEnabled}
+        />
+      )}
     </div>
   );
 }
