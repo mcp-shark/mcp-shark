@@ -28,7 +28,7 @@ export default function SecurityViewTabs({ activeTab, setActiveTab }) {
           transition: 'all 0.2s',
         }}
       >
-        Scan Servers
+        OWASP Local Static Analysis
       </button>
       <button
         type="button"
