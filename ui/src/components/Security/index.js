@@ -3,6 +3,7 @@ export { default as ErrorDisplay } from './ErrorDisplay.jsx';
 export { default as FindingsTable } from './FindingsTable.jsx';
 export { RulesManager } from './RulesManager.jsx';
 export { default as SecurityCharts } from './SecurityCharts.jsx';
+export { default as TargetView } from './TargetView.jsx';
 export { default as ScannerContent } from './ScannerContent.jsx';
 export { default as ScannerEmptyState } from './ScannerEmptyState.jsx';
 export { default as ScanningProgress } from './ScanningProgress.jsx';

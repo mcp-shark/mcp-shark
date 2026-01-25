@@ -74,7 +74,7 @@ function FilterButton({ filter, isActive, count, onClick }) {
   );
 }
 
-function FindingsTable({ findings, selectedFinding, onSelectFinding }) {
+function FindingsTable({ findings, selectedFinding, onSelectFinding, showFilter = true }) {
   const [severityFilter, setSeverityFilter] = useState('all');
 
   if (!findings || findings.length === 0) {
@@ -120,61 +120,65 @@ function FindingsTable({ findings, selectedFinding, onSelectFinding }) {
 
   return (
     <div>
-      {/* Header with filters */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '16px',
-          flexWrap: 'wrap',
-          gap: '12px',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <IconFilter size={14} color={colors.textSecondary} />
-          <span
+      {/* Header with filters - only show when showFilter is true */}
+      {showFilter && (
+        <>
+          <div
             style={{
-              fontSize: '12px',
-              fontWeight: '600',
-              color: colors.textSecondary,
-              fontFamily: fonts.body,
-              textTransform: 'uppercase',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '16px',
+              flexWrap: 'wrap',
+              gap: '12px',
             }}
           >
-            Filter by Severity
-          </span>
-        </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <IconFilter size={14} color={colors.textSecondary} />
+              <span
+                style={{
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: colors.textSecondary,
+                  fontFamily: fonts.body,
+                  textTransform: 'uppercase',
+                }}
+              >
+                Filter by Severity
+              </span>
+            </div>
 
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {SEVERITY_FILTERS.map((filter) => (
-            <FilterButton
-              key={filter.id}
-              filter={filter}
-              isActive={severityFilter === filter.id}
-              count={filter.id === 'all' ? findings.length : severityCounts[filter.id] || 0}
-              onClick={() => setSeverityFilter(filter.id)}
-            />
-          ))}
-        </div>
-      </div>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {SEVERITY_FILTERS.map((filter) => (
+                <FilterButton
+                  key={filter.id}
+                  filter={filter}
+                  isActive={severityFilter === filter.id}
+                  count={filter.id === 'all' ? findings.length : severityCounts[filter.id] || 0}
+                  onClick={() => setSeverityFilter(filter.id)}
+                />
+              ))}
+            </div>
+          </div>
 
-      {/* Results count */}
-      <div
-        style={{
-          fontSize: '13px',
-          color: colors.textSecondary,
-          fontFamily: fonts.body,
-          marginBottom: '16px',
-        }}
-      >
-        Showing <strong style={{ color: colors.textPrimary }}>{sortedFindings.length}</strong>
-        {severityFilter !== 'all' && <span> {severityFilter} </span>}
-        {sortedFindings.length === 1 ? ' finding' : ' findings'}
-        {severityFilter !== 'all' && findings.length !== sortedFindings.length && (
-          <span style={{ color: colors.textTertiary }}> (of {findings.length} total)</span>
-        )}
-      </div>
+          {/* Results count */}
+          <div
+            style={{
+              fontSize: '13px',
+              color: colors.textSecondary,
+              fontFamily: fonts.body,
+              marginBottom: '16px',
+            }}
+          >
+            Showing <strong style={{ color: colors.textPrimary }}>{sortedFindings.length}</strong>
+            {severityFilter !== 'all' && <span> {severityFilter} </span>}
+            {sortedFindings.length === 1 ? ' finding' : ' findings'}
+            {severityFilter !== 'all' && findings.length !== sortedFindings.length && (
+              <span style={{ color: colors.textTertiary }}> (of {findings.length} total)</span>
+            )}
+          </div>
+        </>
+      )}
 
       {/* Findings list */}
       <div>

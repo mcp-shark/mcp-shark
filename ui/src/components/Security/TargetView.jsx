@@ -3,94 +3,14 @@ import {
   IconAlertTriangle,
   IconChevronDown,
   IconChevronRight,
+  IconCode,
   IconInfoCircle,
-  IconRobot,
-  IconShield,
-  IconShieldLock,
+  IconServer,
+  IconTool,
 } from '@tabler/icons-react';
 import { useState } from 'react';
 import { colors, fonts } from '../../theme';
 import FindingCard from './FindingCard.jsx';
-
-// Category definitions
-const CATEGORIES = {
-  'owasp-mcp': {
-    id: 'owasp-mcp',
-    name: 'OWASP MCP Top 10',
-    description: 'Model Context Protocol security vulnerabilities',
-    icon: IconShieldLock,
-    color: '#7c3aed',
-    prefix: 'MCP',
-  },
-  'agentic-security': {
-    id: 'agentic-security',
-    name: 'Agentic Security',
-    description: 'AI agent behavioral security issues',
-    icon: IconRobot,
-    color: '#0891b2',
-    prefix: 'ASI',
-  },
-  'general-security': {
-    id: 'general-security',
-    name: 'General Security',
-    description: 'Common security vulnerabilities',
-    icon: IconShield,
-    color: '#059669',
-    prefix: null,
-  },
-};
-
-// OWASP ID to category mapping
-const OWASP_CATEGORY_MAP = {
-  MCP01: 'owasp-mcp',
-  MCP02: 'owasp-mcp',
-  MCP03: 'owasp-mcp',
-  MCP04: 'owasp-mcp',
-  MCP05: 'owasp-mcp',
-  MCP06: 'owasp-mcp',
-  MCP07: 'owasp-mcp',
-  MCP08: 'owasp-mcp',
-  MCP09: 'owasp-mcp',
-  MCP10: 'owasp-mcp',
-  ASI01: 'agentic-security',
-  ASI02: 'agentic-security',
-  ASI03: 'agentic-security',
-  ASI04: 'agentic-security',
-  ASI05: 'agentic-security',
-  ASI06: 'agentic-security',
-  ASI07: 'agentic-security',
-  ASI08: 'agentic-security',
-  ASI09: 'agentic-security',
-  ASI10: 'agentic-security',
-};
-
-// OWASP ID descriptions
-const OWASP_DESCRIPTIONS = {
-  MCP01: 'Token Mismanagement',
-  MCP02: 'Scope Creep',
-  MCP03: 'Tool Poisoning',
-  MCP04: 'Supply Chain',
-  MCP05: 'Command Injection',
-  MCP06: 'Prompt Injection',
-  MCP07: 'Insufficient Auth',
-  MCP08: 'Lack of Audit',
-  MCP09: 'Shadow Servers',
-  MCP10: 'Context Injection',
-  ASI01: 'Goal Hijack',
-  ASI02: 'Tool Misuse',
-  ASI03: 'Identity Abuse',
-  ASI04: 'Supply Chain',
-  ASI05: 'Remote Code Execution',
-  ASI06: 'Memory Poisoning',
-  ASI07: 'Insecure Communication',
-  ASI08: 'Cascading Failures',
-  ASI09: 'Trust Exploitation',
-  ASI10: 'Rogue Agent',
-  SECRET: 'Hardcoded Secrets',
-  'CMD-INJ': 'Command Injection',
-  SHADOW: 'Cross-Server Shadowing',
-  AMBIG: 'Tool Name Ambiguity',
-};
 
 const SEVERITY_CONFIG = {
   critical: { color: '#dc2626', icon: IconAlertCircle },
@@ -100,13 +20,33 @@ const SEVERITY_CONFIG = {
   info: { color: '#6b7280', icon: IconInfoCircle },
 };
 
-function getCategory(finding) {
-  const owaspId = finding.owasp_id?.toUpperCase();
-  if (owaspId && OWASP_CATEGORY_MAP[owaspId]) {
-    return OWASP_CATEGORY_MAP[owaspId];
-  }
-  return 'general-security';
-}
+const TARGET_TYPE_CONFIG = {
+  tool: {
+    icon: IconTool,
+    color: '#8b5cf6',
+    label: 'Tools',
+  },
+  prompt: {
+    icon: IconCode,
+    color: '#06b6d4',
+    label: 'Prompts',
+  },
+  resource: {
+    icon: IconServer,
+    color: '#10b981',
+    label: 'Resources',
+  },
+  server: {
+    icon: IconServer,
+    color: '#f59e0b',
+    label: 'Servers',
+  },
+  packet: {
+    icon: IconServer,
+    color: '#ec4899',
+    label: 'Network Traffic',
+  },
+};
 
 function SeverityDot({ severity }) {
   const config = SEVERITY_CONFIG[severity] || SEVERITY_CONFIG.info;
@@ -123,9 +63,10 @@ function SeverityDot({ severity }) {
   );
 }
 
-function OwaspGroup({ owaspId, findings, selectedFinding, onSelectFinding }) {
+function TargetGroup({ targetName, targetType, findings, selectedFinding, onSelectFinding }) {
   const [isExpanded, setIsExpanded] = useState(true);
-  const description = OWASP_DESCRIPTIONS[owaspId] || owaspId;
+  const typeConfig = TARGET_TYPE_CONFIG[targetType] || TARGET_TYPE_CONFIG.tool;
+  const Icon = typeConfig.icon;
 
   // Count by severity
   const severityCounts = findings.reduce((acc, f) => {
@@ -151,7 +92,7 @@ function OwaspGroup({ owaspId, findings, selectedFinding, onSelectFinding }) {
         overflow: 'hidden',
       }}
     >
-      {/* OWASP Group Header */}
+      {/* Target Header */}
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -181,35 +122,45 @@ function OwaspGroup({ owaspId, findings, selectedFinding, onSelectFinding }) {
       >
         <ChevronIcon size={16} color={colors.textSecondary} />
 
-        {/* OWASP ID Badge */}
-        <span
+        {/* Target type icon */}
+        <div
           style={{
-            display: 'inline-flex',
+            display: 'flex',
             alignItems: 'center',
-            padding: '4px 8px',
-            background: `${severityConfig.color}15`,
-            color: severityConfig.color,
+            justifyContent: 'center',
+            width: '28px',
+            height: '28px',
             borderRadius: '6px',
-            fontSize: '12px',
-            fontWeight: '700',
-            fontFamily: fonts.mono,
+            background: `${typeConfig.color}15`,
+            flexShrink: 0,
           }}
         >
-          {owaspId}
-        </span>
+          <Icon size={14} color={typeConfig.color} />
+        </div>
 
-        {/* Description */}
-        <span
-          style={{
-            flex: 1,
-            fontSize: '13px',
-            fontWeight: '500',
-            color: colors.textPrimary,
-            fontFamily: fonts.body,
-          }}
-        >
-          {description}
-        </span>
+        {/* Target name */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <span
+            style={{
+              fontSize: '13px',
+              fontWeight: '600',
+              color: colors.textPrimary,
+              fontFamily: fonts.mono,
+            }}
+          >
+            {targetName}
+          </span>
+          <span
+            style={{
+              marginLeft: '8px',
+              fontSize: '11px',
+              color: colors.textTertiary,
+              fontFamily: fonts.body,
+            }}
+          >
+            {targetType}
+          </span>
+        </div>
 
         {/* Severity counts */}
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -256,7 +207,7 @@ function OwaspGroup({ owaspId, findings, selectedFinding, onSelectFinding }) {
         <div
           style={{
             padding: '12px 16px',
-            paddingLeft: '28px',
+            paddingLeft: '52px',
             background: colors.bgSecondary,
             borderTop: `1px solid ${colors.borderLight}`,
           }}
@@ -275,36 +226,19 @@ function OwaspGroup({ owaspId, findings, selectedFinding, onSelectFinding }) {
   );
 }
 
-function CategorySection({ category, findings, selectedFinding, onSelectFinding }) {
+function TargetTypeSection({ targetType, targets, selectedFinding, onSelectFinding }) {
   const [isExpanded, setIsExpanded] = useState(true);
-  const categoryInfo = CATEGORIES[category];
-  const Icon = categoryInfo.icon;
+  const typeConfig = TARGET_TYPE_CONFIG[targetType] || TARGET_TYPE_CONFIG.tool;
+  const Icon = typeConfig.icon;
 
-  // Group findings by OWASP ID
-  const byOwaspId = findings.reduce((acc, finding) => {
-    const owaspId = finding.owasp_id || 'OTHER';
-    if (!acc[owaspId]) acc[owaspId] = [];
-    acc[owaspId].push(finding);
-    return acc;
-  }, {});
-
-  // Sort OWASP IDs
-  const sortedOwaspIds = Object.keys(byOwaspId).sort((a, b) => {
-    // Sort by prefix first, then by number
-    const aNum = Number.parseInt(a.replace(/\D/g, ''), 10) || 999;
-    const bNum = Number.parseInt(b.replace(/\D/g, ''), 10) || 999;
-    return aNum - bNum;
-  });
+  const totalFindings = Object.values(targets).reduce((sum, arr) => sum + arr.length, 0);
+  const targetCount = Object.keys(targets).length;
 
   const ChevronIcon = isExpanded ? IconChevronDown : IconChevronRight;
 
   return (
-    <div
-      style={{
-        marginBottom: '24px',
-      }}
-    >
-      {/* Category Header */}
+    <div style={{ marginBottom: '24px' }}>
+      {/* Type Header */}
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -314,8 +248,8 @@ function CategorySection({ category, findings, selectedFinding, onSelectFinding 
           alignItems: 'center',
           gap: '12px',
           padding: '16px 20px',
-          background: `linear-gradient(135deg, ${categoryInfo.color}15, ${categoryInfo.color}08)`,
-          border: `1px solid ${categoryInfo.color}30`,
+          background: `linear-gradient(135deg, ${typeConfig.color}15, ${typeConfig.color}08)`,
+          border: `1px solid ${typeConfig.color}30`,
           borderRadius: '12px',
           cursor: 'pointer',
           marginBottom: isExpanded ? '12px' : 0,
@@ -324,10 +258,10 @@ function CategorySection({ category, findings, selectedFinding, onSelectFinding 
           textAlign: 'left',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = `${categoryInfo.color}50`;
+          e.currentTarget.style.borderColor = `${typeConfig.color}50`;
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = `${categoryInfo.color}30`;
+          e.currentTarget.style.borderColor = `${typeConfig.color}30`;
         }}
       >
         <div
@@ -338,11 +272,11 @@ function CategorySection({ category, findings, selectedFinding, onSelectFinding 
             width: '40px',
             height: '40px',
             borderRadius: '10px',
-            background: `${categoryInfo.color}20`,
+            background: `${typeConfig.color}20`,
             flexShrink: 0,
           }}
         >
-          <Icon size={20} color={categoryInfo.color} />
+          <Icon size={20} color={typeConfig.color} />
         </div>
 
         <div style={{ flex: 1 }}>
@@ -355,7 +289,7 @@ function CategorySection({ category, findings, selectedFinding, onSelectFinding 
               margin: 0,
             }}
           >
-            {categoryInfo.name}
+            {typeConfig.label}
           </h3>
           <p
             style={{
@@ -365,26 +299,21 @@ function CategorySection({ category, findings, selectedFinding, onSelectFinding 
               margin: 0,
             }}
           >
-            {categoryInfo.description}
+            {targetCount} {targetCount === 1 ? 'target' : 'targets'} with issues
           </p>
         </div>
 
-        {/* Issue type count */}
-        <div
-          style={{
-            textAlign: 'right',
-          }}
-        >
+        <div style={{ textAlign: 'right' }}>
           <div
             style={{
               fontSize: '20px',
               fontWeight: '700',
-              color: categoryInfo.color,
+              color: typeConfig.color,
               fontFamily: fonts.body,
               lineHeight: 1,
             }}
           >
-            {findings.length}
+            {totalFindings}
           </div>
           <div
             style={{
@@ -393,45 +322,56 @@ function CategorySection({ category, findings, selectedFinding, onSelectFinding 
               fontFamily: fonts.body,
             }}
           >
-            {findings.length === 1 ? 'finding' : 'findings'}
+            {totalFindings === 1 ? 'finding' : 'findings'}
           </div>
         </div>
 
         <ChevronIcon size={20} color={colors.textSecondary} />
       </button>
 
-      {/* OWASP Groups */}
+      {/* Target groups */}
       {isExpanded && (
         <div style={{ marginLeft: '16px' }}>
-          {sortedOwaspIds.map((owaspId) => (
-            <OwaspGroup
-              key={owaspId}
-              owaspId={owaspId}
-              findings={byOwaspId[owaspId]}
-              selectedFinding={selectedFinding}
-              onSelectFinding={onSelectFinding}
-            />
-          ))}
+          {Object.entries(targets)
+            .sort((a, b) => b[1].length - a[1].length)
+            .map(([targetName, findings]) => (
+              <TargetGroup
+                key={targetName}
+                targetName={targetName}
+                targetType={targetType}
+                findings={findings}
+                selectedFinding={selectedFinding}
+                onSelectFinding={onSelectFinding}
+              />
+            ))}
         </div>
       )}
     </div>
   );
 }
 
-function CategoryView({ findings, selectedFinding, onSelectFinding }) {
-  // Group findings by category
-  const byCategory = findings.reduce((acc, finding) => {
-    const cat = getCategory(finding);
-    if (!acc[cat]) acc[cat] = [];
-    acc[cat].push(finding);
-    return acc;
-  }, {});
+function TargetView({ findings, selectedFinding, onSelectFinding }) {
+  // Group findings by target type, then by target name
+  const byType = {};
 
-  // Determine category order (those with findings first, then by priority)
-  const categoryOrder = ['owasp-mcp', 'agentic-security', 'general-security'];
-  const sortedCategories = categoryOrder.filter((cat) => byCategory[cat]?.length > 0);
+  for (const f of findings) {
+    const targetType = f.target_type || 'tool';
+    const targetName = f.target_name || 'Unknown';
 
-  if (sortedCategories.length === 0) {
+    if (!byType[targetType]) {
+      byType[targetType] = {};
+    }
+    if (!byType[targetType][targetName]) {
+      byType[targetType][targetName] = [];
+    }
+    byType[targetType][targetName].push(f);
+  }
+
+  // Order: tools first, then prompts, resources, servers, packets
+  const typeOrder = ['tool', 'prompt', 'resource', 'server', 'packet'];
+  const sortedTypes = typeOrder.filter((t) => byType[t] && Object.keys(byType[t]).length > 0);
+
+  if (sortedTypes.length === 0) {
     return (
       <div
         style={{
@@ -457,11 +397,11 @@ function CategoryView({ findings, selectedFinding, onSelectFinding }) {
 
   return (
     <div>
-      {sortedCategories.map((cat) => (
-        <CategorySection
-          key={cat}
-          category={cat}
-          findings={byCategory[cat]}
+      {sortedTypes.map((targetType) => (
+        <TargetTypeSection
+          key={targetType}
+          targetType={targetType}
+          targets={byType[targetType]}
           selectedFinding={selectedFinding}
           onSelectFinding={onSelectFinding}
         />
@@ -470,4 +410,4 @@ function CategoryView({ findings, selectedFinding, onSelectFinding }) {
   );
 }
 
-export default CategoryView;
+export default TargetView;

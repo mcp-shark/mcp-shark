@@ -1,4 +1,4 @@
-import { IconCategory, IconChartBar, IconList } from '@tabler/icons-react';
+import { IconCategory, IconChartBar, IconList, IconTool } from '@tabler/icons-react';
 import { useState } from 'react';
 import { colors, fonts } from '../../theme';
 import CategoryView from './CategoryView.jsx';
@@ -8,11 +8,13 @@ import ScannerEmptyState from './ScannerEmptyState.jsx';
 import ScanningProgress from './ScanningProgress.jsx';
 import SecurityCharts from './SecurityCharts.jsx';
 import SecuritySummary from './SecuritySummary.jsx';
+import TargetView from './TargetView.jsx';
 
 const VIEW_MODES = [
   { id: 'dashboard', label: 'Dashboard', icon: IconChartBar },
   { id: 'severity', label: 'By Severity', icon: IconList },
   { id: 'category', label: 'By Category', icon: IconCategory },
+  { id: 'target', label: 'By Target', icon: IconTool },
 ];
 
 function ViewModeToggle({ viewMode, onViewModeChange }) {
@@ -128,6 +130,7 @@ export default function ScannerContent({
                 selectedFinding={selectedFinding}
                 onSelectFinding={onSelectFinding}
                 rules={rules}
+                showFilter={false}
               />
             </>
           )}
@@ -145,6 +148,15 @@ export default function ScannerContent({
           {/* Category grouped view */}
           {viewMode === 'category' && (
             <CategoryView
+              findings={findings}
+              selectedFinding={selectedFinding}
+              onSelectFinding={onSelectFinding}
+            />
+          )}
+
+          {/* Target grouped view */}
+          {viewMode === 'target' && (
+            <TargetView
               findings={findings}
               selectedFinding={selectedFinding}
               onSelectFinding={onSelectFinding}

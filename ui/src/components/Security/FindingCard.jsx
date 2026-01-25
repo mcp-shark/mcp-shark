@@ -55,6 +55,7 @@ const TARGET_ICONS = {
   prompt: IconCode,
   resource: IconServer,
   server: IconServer,
+  packet: IconServer,
 };
 
 function SeverityBadge({ severity }) {
