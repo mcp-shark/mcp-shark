@@ -28,6 +28,8 @@ function Security({ onNavigateToSmartScan, onNavigateToSetup }) {
     selectHistoricalScan,
     // Running servers
     runningServersCount,
+    // Scan complete state
+    scanComplete,
     // YARA rules
     communityRules,
     engineStatus,
@@ -100,6 +102,7 @@ function Security({ onNavigateToSmartScan, onNavigateToSetup }) {
           onSelectScan={selectHistoricalScan}
           showHistory={showHistory}
           serversAvailable={runningServersCount > 0}
+          scanComplete={scanComplete}
         />
       )}
 

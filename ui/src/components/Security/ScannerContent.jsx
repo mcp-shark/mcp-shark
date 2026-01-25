@@ -161,6 +161,7 @@ export default function ScannerContent({
   onSelectScan,
   showHistory,
   serversAvailable,
+  scanComplete,
 }) {
   const [viewMode, setViewMode] = useState('dashboard');
   const hasFindings = findings && findings.length > 0;
@@ -198,6 +199,7 @@ export default function ScannerContent({
         <ScannerEmptyState
           onNavigateToSetup={onNavigateToSetup}
           serversAvailable={serversAvailable}
+          scanComplete={scanComplete}
         />
       )}
 

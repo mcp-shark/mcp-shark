@@ -27,6 +27,9 @@ export function useSecurity() {
   // Running servers state
   const [runningServersCount, setRunningServersCount] = useState(0);
 
+  // Track whether a scan has been completed (to show appropriate empty state)
+  const [scanComplete, setScanComplete] = useState(false);
+
   // Use YARA rules hook
   const yaraRules = useYaraRules();
 
@@ -91,6 +94,7 @@ export function useSecurity() {
     setFindings([]); // Clear findings before scan
     setSummary(null);
     setSelectedScanId(null); // Clear history selection for new scan
+    setScanComplete(false);
     try {
       const data = await postAnalyseRunningServers();
       if (!data.success) {
@@ -104,6 +108,7 @@ export function useSecurity() {
         await loadFindings();
         await loadSummary();
         await loadScanHistory(); // Refresh history
+        setScanComplete(true); // Mark scan as complete
       }
     } catch (err) {
       console.error('Analysis error:', err);
@@ -123,6 +128,7 @@ export function useSecurity() {
         setSelectedFinding(null);
         setSelectedScanId(null);
         setError(null);
+        setScanComplete(false); // Reset scan complete state
         await loadScanHistory(); // Refresh history after clear
       }
     } catch (err) {
@@ -176,6 +182,7 @@ export function useSecurity() {
     selectHistoricalScan,
     runningServersCount,
     checkRunningServers,
+    scanComplete,
     // YARA rules (spread from useYaraRules)
     ...yaraRules,
   };

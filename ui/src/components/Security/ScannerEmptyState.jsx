@@ -1,12 +1,35 @@
-import { IconArrowRight, IconSettings } from '@tabler/icons-react';
+import { IconArrowRight, IconSettings, IconShieldCheck } from '@tabler/icons-react';
 import { colors, fonts } from '../../theme';
 
-export default function ScannerEmptyState({ onNavigateToSetup, serversAvailable }) {
-  // Different messaging based on whether servers are running
-  const title = serversAvailable ? 'No Findings' : 'No MCP Servers Running';
-  const description = serversAvailable
-    ? 'Click "Analyse" to run local static analysis on your connected MCP servers.'
-    : 'Start MCP servers via the Setup tab to enable analysis.';
+// Helper function to get empty state content based on state
+const getEmptyStateContent = (serversAvailable, scanComplete) => {
+  if (!serversAvailable) {
+    return {
+      title: 'No MCP Servers Running',
+      description: 'Start MCP servers via the Setup tab to enable analysis.',
+      showSuccessIcon: false,
+    };
+  }
+  if (scanComplete) {
+    return {
+      title: 'No Security Issues Found',
+      description:
+        'Your MCP servers passed all security checks. No vulnerabilities or suspicious patterns were detected.',
+      showSuccessIcon: true,
+    };
+  }
+  return {
+    title: 'No Findings',
+    description: 'Click "Analyse" to run local static analysis on your connected MCP servers.',
+    showSuccessIcon: false,
+  };
+};
+
+export default function ScannerEmptyState({ onNavigateToSetup, serversAvailable, scanComplete }) {
+  const { title, description, showSuccessIcon } = getEmptyStateContent(
+    serversAvailable,
+    scanComplete
+  );
 
   return (
     <div
@@ -20,24 +43,34 @@ export default function ScannerEmptyState({ onNavigateToSetup, serversAvailable 
         padding: '40px',
       }}
     >
-      <div style={{ marginBottom: '24px', opacity: 0.6 }}>
-        <svg
-          width={64}
-          height={64}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke={colors.textTertiary}
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          style={{ opacity: 0.5 }}
-          role="img"
-          aria-label="Security scan icon"
-        >
-          <title>Security scan icon</title>
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-          <path d="M9 12l2 2 4-4" />
-        </svg>
+      <div style={{ marginBottom: '24px', opacity: showSuccessIcon ? 1 : 0.6 }}>
+        {showSuccessIcon ? (
+          <IconShieldCheck
+            size={64}
+            stroke={1.5}
+            style={{ color: colors.accentGreen }}
+            role="img"
+            aria-label="Security check passed icon"
+          />
+        ) : (
+          <svg
+            width={64}
+            height={64}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={colors.textTertiary}
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ opacity: 0.5 }}
+            role="img"
+            aria-label="Security scan icon"
+          >
+            <title>Security scan icon</title>
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            <path d="M9 12l2 2 4-4" />
+          </svg>
+        )}
       </div>
       <h3
         style={{
