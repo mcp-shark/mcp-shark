@@ -9,6 +9,7 @@ import TabNavigation from './TabNavigation';
 import ActionMenu from './components/App/ActionMenu';
 import TrafficTab from './components/App/TrafficTab';
 import { useAppState } from './components/App/useAppState';
+import ExtensionOnlyUI from './components/ExtensionOnlyUI';
 import McpPlayground from './components/McpPlayground';
 import { tourSteps } from './config/tourSteps.jsx';
 import { colors } from './theme';
@@ -85,6 +86,7 @@ function App() {
       <div style={{ position: 'relative' }} data-tour="tabs">
         <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
+      <ExtensionOnlyUI />
       <ActionMenu
         onHelpClick={() => {
           if (showTour) {

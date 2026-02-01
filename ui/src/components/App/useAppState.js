@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { getEmbedQueryForHash, getHashPath } from '../../utils/embedInExtension';
 
 function appendFilterParams(queryParams, filters) {
   if (filters.search) {
@@ -28,13 +29,14 @@ const VALID_TABS = ['traffic', 'logs', 'setup', 'playground', 'smart-scan'];
 const DEFAULT_TAB = 'traffic';
 
 function getTabFromHash() {
-  const hash = window.location.hash.slice(1); // Remove '#'
-  const tab = hash.startsWith('/') ? hash.slice(1) : hash; // Remove leading '/'
+  const path = getHashPath(window.location.hash);
+  const tab = path.startsWith('/') ? path.slice(1) : path;
   return VALID_TABS.includes(tab) ? tab : DEFAULT_TAB;
 }
 
 function updateUrlHash(tab) {
-  const newHash = `#/${tab}`;
+  const embed = getEmbedQueryForHash(window.location.hash);
+  const newHash = embed ? `#/${tab}?${embed}` : `#/${tab}`;
   if (window.location.hash !== newHash) {
     window.history.replaceState(null, '', newHash);
   }
