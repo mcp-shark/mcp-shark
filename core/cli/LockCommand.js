@@ -3,12 +3,12 @@
  * Creates and verifies .mcp-shark.lock — SHA-256 hashes of tool definitions
  * Detects rug pull attacks (Catalog §1.5)
  */
-import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import figures from 'figures';
 import kleur from 'kleur';
 import { getAllServers, scanIdeConfigs } from './ConfigScanner.js';
+import { computeDiff, countParameters, hashToolDefinition, renderDiff } from './LockDiffEngine.js';
 
 const LOCKFILE_NAME = '.mcp-shark.lock';
 
@@ -91,25 +91,13 @@ function buildLockData(servers) {
   const serverEntries = {};
 
   for (const server of servers) {
-    const toolHashes = {};
-    const tools = Array.isArray(server.tools) ? server.tools : [];
-
-    for (const tool of tools) {
-      const toolObj = typeof tool === 'string' ? { name: tool } : tool;
-      const hash = hashToolDefinition(toolObj);
-      toolHashes[toolObj.name || 'unknown'] = {
-        hash: `sha256:${hash}`,
-        description_length: (toolObj.description || '').length,
-        parameter_count: countParameters(toolObj),
-        pinned_at: now,
-      };
-    }
+    const toolHashes = buildToolHashes(server, now);
 
     serverEntries[server.name] = {
       source: server.ide,
       config_path: server.configPath,
       tools: toolHashes,
-      tool_count: tools.length,
+      tool_count: (Array.isArray(server.tools) ? server.tools : []).length,
       locked_at: now,
     };
   }
@@ -124,24 +112,24 @@ function buildLockData(servers) {
 }
 
 /**
- * Hash a tool definition using SHA-256
+ * Build tool hash entries for a server
  */
-function hashToolDefinition(tool) {
-  const canonical = JSON.stringify({
-    name: tool.name,
-    description: tool.description,
-    inputSchema: tool.inputSchema || tool.parameters,
-  });
-  return createHash('sha256').update(canonical).digest('hex');
-}
+function buildToolHashes(server, now) {
+  const toolHashes = {};
+  const tools = Array.isArray(server.tools) ? server.tools : [];
 
-/**
- * Count parameters in a tool definition
- */
-function countParameters(tool) {
-  const schema = tool.inputSchema || tool.parameters || {};
-  const properties = schema.properties || {};
-  return Object.keys(properties).length;
+  for (const tool of tools) {
+    const toolObj = typeof tool === 'string' ? { name: tool } : tool;
+    const hash = hashToolDefinition(toolObj);
+    toolHashes[toolObj.name || 'unknown'] = {
+      hash: `sha256:${hash}`,
+      description_length: (toolObj.description || '').length,
+      parameter_count: countParameters(toolObj),
+      pinned_at: now,
+    };
+  }
+
+  return toolHashes;
 }
 
 /**
@@ -160,91 +148,6 @@ function verifyLockfile(lockData) {
   console.log(`  ${kleur.red(figures.cross)} ${changes.length} changes detected`);
   renderDiff(changes);
   return 1;
-}
-
-/**
- * Compute diff between lockfile and current state
- */
-function computeDiff(lockData, currentServers) {
-  const changes = [];
-
-  for (const server of currentServers) {
-    const locked = lockData.servers[server.name];
-    if (!locked) {
-      changes.push({ type: 'added_server', server: server.name, ide: server.ide });
-      continue;
-    }
-
-    const tools = Array.isArray(server.tools) ? server.tools : [];
-    for (const tool of tools) {
-      const toolObj = typeof tool === 'string' ? { name: tool } : tool;
-      const toolName = toolObj.name || 'unknown';
-      const lockedTool = locked.tools[toolName];
-
-      if (!lockedTool) {
-        changes.push({ type: 'added_tool', server: server.name, tool: toolName });
-        continue;
-      }
-
-      const currentHash = `sha256:${hashToolDefinition(toolObj)}`;
-      if (currentHash !== lockedTool.hash) {
-        changes.push({ type: 'changed_tool', server: server.name, tool: toolName });
-      }
-    }
-
-    for (const lockedToolName of Object.keys(locked.tools)) {
-      const stillExists = tools.some((t) => {
-        const name = typeof t === 'string' ? t : t.name;
-        return name === lockedToolName;
-      });
-      if (!stillExists) {
-        changes.push({ type: 'removed_tool', server: server.name, tool: lockedToolName });
-      }
-    }
-  }
-
-  for (const lockedServerName of Object.keys(lockData.servers)) {
-    const stillExists = currentServers.some((s) => s.name === lockedServerName);
-    if (!stillExists) {
-      changes.push({ type: 'removed_server', server: lockedServerName });
-    }
-  }
-
-  return changes;
-}
-
-/**
- * Render diff changes to terminal
- */
-function renderDiff(changes) {
-  if (changes.length === 0) {
-    console.log(`  ${kleur.green(figures.tick)} No changes detected`);
-    return;
-  }
-
-  console.log('');
-  for (const change of changes) {
-    if (change.type === 'added_server') {
-      console.log(
-        `  ${kleur.green('+')} Server added: ${kleur.bold(change.server)} (${change.ide})`
-      );
-    }
-    if (change.type === 'removed_server') {
-      console.log(`  ${kleur.red('-')} Server removed: ${kleur.bold(change.server)}`);
-    }
-    if (change.type === 'added_tool') {
-      console.log(`  ${kleur.green('+')} Tool added: ${change.server}/${kleur.bold(change.tool)}`);
-    }
-    if (change.type === 'removed_tool') {
-      console.log(`  ${kleur.red('-')} Tool removed: ${change.server}/${kleur.bold(change.tool)}`);
-    }
-    if (change.type === 'changed_tool') {
-      console.log(
-        `  ${kleur.yellow('~')} Tool changed: ${change.server}/${kleur.bold(change.tool)} ${kleur.yellow(figures.warning)}`
-      );
-    }
-  }
-  console.log('');
 }
 
 /**

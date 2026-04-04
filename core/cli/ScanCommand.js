@@ -2,6 +2,7 @@
  * Scan Command
  * Wires ScanService results to CLI output with flag support
  */
+import { confirm } from '@clack/prompts';
 import { applyFixes, renderFixResults } from './AutoFixEngine.js';
 import { runScan } from './ScanService.js';
 import { calculateSharkScore } from './SharkScoreCalculator.js';
@@ -29,8 +30,9 @@ import {
  * @param {string} [options.format] - Output format: 'json' | 'sarif' | 'terminal'
  * @param {boolean} [options.strict] - Count advisory findings in score
  * @param {string} [options.ide] - Filter to specific IDE
+ * @param {boolean} [options.yes] - Skip confirmation for --fix
  */
-export function executeScan(options = {}) {
+export async function executeScan(options = {}) {
   const format = (options.format || 'terminal').toLowerCase();
 
   const scanResult = runScan({
@@ -51,7 +53,10 @@ export function executeScan(options = {}) {
   renderTerminalOutput(scanResult, options);
 
   if (options.fix) {
-    executeAutoFix(scanResult);
+    await executeAutoFix(scanResult, {
+      undo: options.undo,
+      skipConfirm: options.yes || options.ci,
+    });
   }
 
   return exitWithCode(scanResult, options.ci);
@@ -131,11 +136,27 @@ function renderWalkthroughs(toxicFlows) {
 }
 
 /**
- * Execute auto-fix and show before/after score
+ * Execute auto-fix (or undo) with optional interactive confirmation
  */
-function executeAutoFix(scanResult) {
+async function executeAutoFix(scanResult, fixOptions = {}) {
+  const fixable = scanResult.findings.filter((f) => f.fixable);
+
+  if (fixable.length === 0 && !fixOptions.undo) {
+    return;
+  }
+
+  if (!fixOptions.skipConfirm && !fixOptions.undo) {
+    const shouldProceed = await confirm({
+      message: `Apply ${fixable.length} auto-fixes? (backups will be created)`,
+    });
+    if (!shouldProceed || typeof shouldProceed === 'symbol') {
+      console.log('  Fix cancelled.');
+      return;
+    }
+  }
+
   const scoreBefore = scanResult.scoreResult.score;
-  const fixResult = applyFixes(scanResult.findings);
+  const fixResult = applyFixes(scanResult.findings, { undo: fixOptions.undo });
 
   const remainingFindings = scanResult.findings.filter(
     (f) => !fixResult.fixed.some((fx) => fx.finding === f)

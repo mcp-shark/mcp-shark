@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 import open from 'open';
 import { executeDoctor } from '#core/cli/DoctorCommand.js';
+import { executeList } from '#core/cli/ListCommand.js';
 import { executeDiff, executeLock, executeLockVerify } from '#core/cli/LockCommand.js';
 import { executeScan } from '#core/cli/ScanCommand.js';
 import { displayServeBanner } from '#core/cli/output/Banner.js';
@@ -120,13 +121,15 @@ async function main() {
     .command('scan', { isDefault: true })
     .description('Scan MCP configurations for security issues (default)')
     .option('--fix', 'Auto-fix fixable issues')
+    .option('--undo', 'Undo previous --fix changes (use with --fix)')
+    .option('--yes', 'Skip confirmation prompt for --fix')
     .option('--walkthrough', 'Show full attack chain narratives')
     .option('--ci', 'CI mode: exit code 1 on critical/high findings')
     .option('--format <format>', 'Output format: terminal, json, sarif', 'terminal')
     .option('--strict', 'Count advisory findings in score')
     .option('--ide <name>', 'Scan specific IDE only')
-    .action((options) => {
-      const exitCode = executeScan(options);
+    .action(async (options) => {
+      const exitCode = await executeScan(options);
       if (exitCode !== 0) {
         process.exit(exitCode);
       }
@@ -158,6 +161,17 @@ async function main() {
     .description('Run environment health checks')
     .action(() => {
       const exitCode = executeDoctor();
+      if (exitCode !== 0) {
+        process.exit(exitCode);
+      }
+    });
+
+  program
+    .command('list')
+    .description('Show inventory of all detected MCP servers')
+    .option('--format <format>', 'Output format: terminal, json', 'terminal')
+    .action((options) => {
+      const exitCode = executeList(options);
       if (exitCode !== 0) {
         process.exit(exitCode);
       }
