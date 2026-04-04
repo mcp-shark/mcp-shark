@@ -1,0 +1,47 @@
+[
+  {
+    "source": "ingests_untrusted",
+    "target": "writes_code",
+    "risk": "HIGH",
+    "title": "Prompt injection \u2192 code modification",
+    "scenario": "A {source_ide} message with prompt injection processed by {source} could cause your agent to push malicious code via {target}.",
+    "catalog": "\u00a71.3, \u00a71.10, \u00a71.12",
+    "owasp": "MCP03 + MCP10"
+  },
+  {
+    "source": "ingests_untrusted",
+    "target": "sends_external",
+    "risk": "HIGH",
+    "title": "Prompt injection \u2192 data exfiltration",
+    "scenario": "Untrusted content ingested by {source} could instruct the agent to exfiltrate sensitive data through {target}.",
+    "catalog": "\u00a71.2",
+    "owasp": "MCP03 + MCP06"
+  },
+  {
+    "source": "reads_secrets",
+    "target": "sends_external",
+    "risk": "HIGH",
+    "title": "Secret theft via external channel",
+    "scenario": "Your agent can read sensitive files via {source} and exfiltrate them through {target}.",
+    "catalog": "\u00a71.1, \u00a71.14",
+    "owasp": "MCP01 + MCP10"
+  },
+  {
+    "source": "ingests_untrusted",
+    "target": "modifies_infra",
+    "risk": "HIGH",
+    "title": "Prompt injection \u2192 infrastructure takeover",
+    "scenario": "Attacker-controlled content from {source} could cause infrastructure changes via {target}.",
+    "catalog": "\u00a71.13",
+    "owasp": "MCP03 + MCP05"
+  },
+  {
+    "source": "reads_secrets",
+    "target": "ingests_untrusted",
+    "risk": "MEDIUM",
+    "title": "Sensitive data leakage to untrusted channel",
+    "scenario": "Sensitive data from {source} could leak into context shared with untrusted content from {target}.",
+    "catalog": "\u00a71.7",
+    "owasp": "MCP10"
+  }
+]

@@ -3,9 +3,9 @@
  * Orchestrates fix application and renders results.
  * Delegates actual fix logic to FixHandlers.
  */
-import figures from 'figures';
 import kleur from 'kleur';
 import { applyFix, createEnvExample, undoFixes } from './FixHandlers.js';
+import { S } from './symbols.js';
 
 /**
  * Apply fixes for all fixable findings
@@ -58,14 +58,14 @@ export function renderFixResults(fixResult, scoreBefore, scoreAfter) {
   console.log('');
 
   fixResult.fixed.forEach((fix, index) => {
-    console.log(`  ${kleur.green(figures.tick)} [${index + 1}/${total}] ${fix.message}`);
+    console.log(`  ${kleur.green(S.pass)} [${index + 1}/${total}] ${fix.message}`);
     if (fix.backupPath) {
       console.log(`          ${kleur.dim(`Backup: ${fix.backupPath}`)}`);
     }
   });
 
   for (const err of fixResult.errors) {
-    console.log(`  ${kleur.red(figures.cross)} ${err.finding?.title || 'Fix'}: ${err.error}`);
+    console.log(`  ${kleur.red(S.fail)} ${err.finding?.title || 'Fix'}: ${err.error}`);
   }
 
   const remaining = fixResult.skipped.length + fixResult.errors.length;

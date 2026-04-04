@@ -4,8 +4,8 @@
  * Used by both `lock --verify` and `diff` commands.
  */
 import { createHash } from 'node:crypto';
-import figures from 'figures';
 import kleur from 'kleur';
+import { S } from './symbols.js';
 
 /**
  * Hash a tool definition using SHA-256
@@ -101,7 +101,7 @@ function checkRemovedServers(lockData, currentServers, changes) {
  */
 export function renderDiff(changes) {
   if (changes.length === 0) {
-    console.log(`  ${kleur.green(figures.tick)} No changes detected`);
+    console.log(`  ${kleur.green(S.pass)} No changes detected`);
     return;
   }
 
@@ -123,7 +123,7 @@ export function renderDiff(changes) {
     }
     if (change.type === 'changed_tool') {
       console.log(
-        `  ${kleur.yellow('~')} Tool changed: ${change.server}/${kleur.bold(change.tool)} ${kleur.yellow(figures.warning)}`
+        `  ${kleur.yellow('~')} Tool changed: ${change.server}/${kleur.bold(change.tool)} ${kleur.yellow(S.warn)}`
       );
     }
   }

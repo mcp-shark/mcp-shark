@@ -6,9 +6,9 @@
 import { existsSync, statSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
-import figures from 'figures';
 import kleur from 'kleur';
 import { scanIdeConfigs } from './ConfigScanner.js';
+import { S } from './symbols.js';
 
 const LOCKFILE_NAME = '.mcp-shark.lock';
 
@@ -17,7 +17,7 @@ const LOCKFILE_NAME = '.mcp-shark.lock';
  */
 export function executeDoctor() {
   console.log('');
-  console.log(kleur.bold('  🦈 MCP Shark Doctor'));
+  console.log(kleur.bold('  mcp-shark doctor'));
   console.log('');
 
   const checks = {
@@ -35,7 +35,7 @@ export function executeDoctor() {
     kleur.green(`${checks.passed} passed`),
     kleur.yellow(`${checks.warnings} warnings`),
     kleur.red(`${checks.failures} failures`),
-  ].join(kleur.dim(' · '));
+  ].join(kleur.dim(` ${S.dot} `));
 
   console.log(`  ${summary}`);
   console.log('');
@@ -195,25 +195,22 @@ function checkDuplicateToolNames(foundIdes, checks) {
   }
 }
 
-/**
- * Print helpers
- */
 function printPass(label, detail) {
   const detailText = detail ? kleur.dim(` ${detail}`) : '';
-  console.log(`    ${kleur.green(figures.tick)} ${label}${detailText}`);
+  console.log(`    ${kleur.green(S.pass)} ${label}${detailText}`);
 }
 
 function printWarn(label, detail) {
   const detailText = detail ? kleur.dim(` (${detail})`) : '';
-  console.log(`    ${kleur.yellow(figures.warning)} ${label}${detailText}`);
+  console.log(`    ${kleur.yellow(S.warn)} ${label}${detailText}`);
 }
 
 function printFail(label, detail) {
   const detailText = detail ? kleur.dim(` (${detail})`) : '';
-  console.log(`    ${kleur.red(figures.cross)} ${label}${detailText}`);
+  console.log(`    ${kleur.red(S.fail)} ${label}${detailText}`);
 }
 
 function printInfo(label, detail) {
   const detailText = detail ? kleur.dim(` ${detail}`) : '';
-  console.log(`    ${kleur.gray(figures.line)} ${label}${detailText}`);
+  console.log(`    ${kleur.gray(S.info)} ${label}${detailText}`);
 }

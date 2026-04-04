@@ -2,7 +2,10 @@ import { StaticRulesService } from '#core/services/security/StaticRulesService.j
 /**
  * Scan Service
  * Orchestrates: config detection → rule analysis → toxic flows → shark score
- * Pure business logic, no HTTP knowledge, no CLI formatting
+ * Pure business logic, no HTTP knowledge, no CLI formatting.
+ *
+ * Server-level checks are registry-driven — add a new check by
+ * appending to SERVER_CONFIG_CHECKS, no other edits needed.
  */
 import { analyzeConfigPermissions } from '#core/services/security/rules/scans/configPermissions.js';
 import { analyzeAllServerToolNames } from '#core/services/security/rules/scans/duplicateToolNames.js';
@@ -15,6 +18,18 @@ import { detectHardcodedSecrets } from './SecretDetector.js';
 import { calculateSharkScore, countBySeverity } from './SharkScoreCalculator.js';
 import { analyzeToxicFlows } from './ToxicFlowAnalyzer.js';
 import { applyYamlRules, loadYamlRules } from './YamlRuleEngine.js';
+
+/**
+ * Registry of server-level config checks.
+ * Each entry takes (serverName, config) and returns Finding[].
+ * To add a new check: import it and append here.
+ */
+const SERVER_CONFIG_CHECKS = [
+  analyzeServerContainment,
+  analyzeServerShellRisk,
+  analyzeServerTransport,
+  analyzeServerDefaults,
+];
 
 /**
  * Run a full security scan on all detected MCP configurations
@@ -113,7 +128,7 @@ function analyzeIdePermissions(ideResults) {
 function analyzeServer(server, rulesService) {
   const findings = [];
 
-  const configFindings = analyzeServerConfig(server);
+  const configFindings = runServerConfigChecks(server);
   findings.push(...configFindings);
 
   if (Array.isArray(server.tools)) {
@@ -140,46 +155,22 @@ function analyzeServer(server, rulesService) {
 }
 
 /**
- * Analyze server-level config issues (containment + shell risks)
+ * Run all registered server-level config checks against a single server.
+ * Iterates SERVER_CONFIG_CHECKS registry — no manual calls needed.
  */
-function analyzeServerConfig(server) {
+function runServerConfigChecks(server) {
   const config = server.config || {};
   const findings = [];
 
-  const containmentFindings = analyzeServerContainment(server.name, config);
-  for (const f of containmentFindings) {
-    findings.push({
-      ...f,
-      ide: server.ide,
-      config_path: server.configPath,
-    });
-  }
-
-  const shellFindings = analyzeServerShellRisk(server.name, config);
-  for (const f of shellFindings) {
-    findings.push({
-      ...f,
-      ide: server.ide,
-      config_path: server.configPath,
-    });
-  }
-
-  const transportFindings = analyzeServerTransport(server.name, config);
-  for (const f of transportFindings) {
-    findings.push({
-      ...f,
-      ide: server.ide,
-      config_path: server.configPath,
-    });
-  }
-
-  const defaultFindings = analyzeServerDefaults(server.name, config);
-  for (const f of defaultFindings) {
-    findings.push({
-      ...f,
-      ide: server.ide,
-      config_path: server.configPath,
-    });
+  for (const check of SERVER_CONFIG_CHECKS) {
+    const checkFindings = check(server.name, config);
+    for (const f of checkFindings) {
+      findings.push({
+        ...f,
+        ide: server.ide,
+        config_path: server.configPath,
+      });
+    }
   }
 
   return findings;

@@ -4,71 +4,17 @@
  * tools by capability and identifying pairs that create attack paths
  * through the shared LLM context window.
  *
+ * Flow rules are loaded from data/toxic-flow-rules.json (built-in)
+ * and merged with user overrides from .mcp-shark/flows.yaml.
+ *
  * Catalog references: §1.1, §1.2, §1.3, §1.7, §1.10, §1.12, §1.13, §1.14
  */
+import { loadBuiltinJson, loadUserYamlList } from './DataLoader.js';
 import { TOOL_CLASSIFICATIONS } from './ToolClassifications.js';
 
-/**
- * Dangerous flow rules: source_capability → target_capability
- * Each produces a specific attack scenario
- */
-const TOXIC_FLOW_RULES = [
-  {
-    source: 'ingests_untrusted',
-    target: 'writes_code',
-    risk: 'HIGH',
-    title: 'Prompt injection → code modification',
-    scenario: (src, tgt) =>
-      `A ${src.ide} message with prompt injection processed by ${src.name} ` +
-      `could cause your agent to push malicious code via ${tgt.name}.`,
-    catalog: '§1.3, §1.10, §1.12',
-    owasp: 'MCP03 + MCP10',
-  },
-  {
-    source: 'ingests_untrusted',
-    target: 'sends_external',
-    risk: 'HIGH',
-    title: 'Prompt injection → data exfiltration',
-    scenario: (src, tgt) =>
-      `Untrusted content ingested by ${src.name} could instruct the agent ` +
-      `to exfiltrate sensitive data through ${tgt.name}.`,
-    catalog: '§1.2',
-    owasp: 'MCP03 + MCP06',
-  },
-  {
-    source: 'reads_secrets',
-    target: 'sends_external',
-    risk: 'HIGH',
-    title: 'Secret theft via external channel',
-    scenario: (src, tgt) =>
-      `Your agent can read sensitive files via ${src.name} ` +
-      `and exfiltrate them through ${tgt.name}.`,
-    catalog: '§1.1, §1.14',
-    owasp: 'MCP01 + MCP10',
-  },
-  {
-    source: 'ingests_untrusted',
-    target: 'modifies_infra',
-    risk: 'HIGH',
-    title: 'Prompt injection → infrastructure takeover',
-    scenario: (src, tgt) =>
-      `Attacker-controlled content from ${src.name} could cause ` +
-      `infrastructure changes via ${tgt.name}.`,
-    catalog: '§1.13',
-    owasp: 'MCP03 + MCP05',
-  },
-  {
-    source: 'reads_secrets',
-    target: 'ingests_untrusted',
-    risk: 'MEDIUM',
-    title: 'Sensitive data leakage to untrusted channel',
-    scenario: (src, tgt) =>
-      `Sensitive data from ${src.name} could leak into context shared with ` +
-      `untrusted content from ${tgt.name}.`,
-    catalog: '§1.7',
-    owasp: 'MCP10',
-  },
-];
+const BUILTIN_FLOWS = loadBuiltinJson('toxic-flow-rules.json');
+const USER_FLOWS = loadUserYamlList('flows.yaml');
+const TOXIC_FLOW_RULES = [...BUILTIN_FLOWS, ...USER_FLOWS];
 
 /**
  * Classify a tool's capability based on known classifications and heuristics
@@ -168,6 +114,18 @@ function extractToolNames(server) {
 }
 
 /**
+ * Interpolate a scenario template string with source/target context.
+ * Replaces {source}, {target}, {source_ide}, {target_ide} placeholders.
+ */
+function interpolateScenario(template, src, tgt) {
+  return template
+    .replace(/\{source_ide\}/g, src.ide || 'IDE')
+    .replace(/\{target_ide\}/g, tgt.ide || 'IDE')
+    .replace(/\{source\}/g, src.name)
+    .replace(/\{target\}/g, tgt.name);
+}
+
+/**
  * Analyze toxic flows across all servers
  * @param {Array} servers - Flat list of server objects with { name, ide, config, tools }
  * @returns {Array} Array of toxic flow results
@@ -197,7 +155,7 @@ export function analyzeToxicFlows(servers) {
           targetIde: tgt.ide,
           risk: rule.risk,
           title: rule.title,
-          scenario: rule.scenario(src, tgt),
+          scenario: interpolateScenario(rule.scenario, src, tgt),
           catalog: rule.catalog,
           owasp: rule.owasp,
           sourceCapability: rule.source,
@@ -216,7 +174,7 @@ export function analyzeToxicFlows(servers) {
 function deduplicateFlows(flows) {
   const seen = new Map();
   for (const flow of flows) {
-    const key = `${flow.source}→${flow.target}`;
+    const key = `${flow.source}\u2192${flow.target}`;
     const existing = seen.get(key);
     if (!existing || riskLevel(flow.risk) > riskLevel(existing.risk)) {
       seen.set(key, flow);

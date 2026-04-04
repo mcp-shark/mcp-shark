@@ -5,8 +5,8 @@
  */
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import figures from 'figures';
 import kleur from 'kleur';
+import { S } from './symbols.js';
 
 /**
  * Generate an HTML report from scan results
@@ -18,7 +18,7 @@ export function generateHtmlReport(scanResult, outputPath) {
   const reportPath = outputPath || join(process.cwd(), 'mcp-shark-report.html');
   const html = buildHtml(scanResult);
   writeFileSync(reportPath, html, 'utf-8');
-  console.log(`  ${kleur.green(figures.tick)} Report saved: ${reportPath}`);
+  console.log(`  ${kleur.green(S.pass)} Report saved: ${reportPath}`);
   return reportPath;
 }
 
@@ -43,7 +43,7 @@ ${getStyles()}
 <body>
 <div class="container">
   <header>
-    <h1>🦈 MCP Shark Security Report</h1>
+    <h1>MCP Shark Security Report</h1>
     <p class="timestamp">Generated: ${timestamp}</p>
   </header>
 

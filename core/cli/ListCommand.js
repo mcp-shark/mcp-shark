@@ -4,10 +4,10 @@
  * their transport type, tool count, and config source.
  */
 import Table from 'cli-table3';
-import figures from 'figures';
 import kleur from 'kleur';
 import { getAllServers, scanIdeConfigs } from './ConfigScanner.js';
 import { TOOL_CLASSIFICATIONS } from './ToolClassifications.js';
+import { S } from './symbols.js';
 
 const TRANSPORT_LABELS = {
   stdio: kleur.cyan('stdio'),
@@ -28,7 +28,7 @@ export function executeList(options = {}) {
   const servers = getAllServers(ideResults);
 
   if (servers.length === 0) {
-    console.log(`\n  ${kleur.yellow(figures.warning)} No MCP servers found\n`);
+    console.log(`\n  ${kleur.yellow(S.warn)} No MCP servers found\n`);
     console.log(kleur.dim('  Searched 15 IDEs. Install an MCP server to get started.'));
     console.log('');
     return 0;
@@ -48,7 +48,7 @@ function renderTerminalInventory(servers, ideResults) {
   const foundIdes = ideResults.filter((r) => r.found);
 
   console.log('');
-  console.log(kleur.bold(`  ${figures.pointer} MCP Server Inventory`));
+  console.log(kleur.bold('  MCP Server Inventory'));
   console.log(kleur.dim(`  Found ${servers.length} servers across ${foundIdes.length} IDEs`));
   console.log('');
 
@@ -105,7 +105,7 @@ function renderIdeSummary(ideResults) {
 
   console.log(kleur.bold('  IDE Detection'));
   for (const ide of found) {
-    console.log(`  ${kleur.green(figures.tick)} ${ide.name} (${ide.serverCount} servers)`);
+    console.log(`  ${kleur.green(S.pass)} ${ide.name} (${ide.serverCount} servers)`);
   }
   if (notFound.length > 0) {
     console.log(`  ${kleur.dim(`${notFound.length} IDEs not installed`)}`);

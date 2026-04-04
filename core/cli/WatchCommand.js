@@ -4,7 +4,6 @@
  * Uses fs.watch for zero-dependency file watching.
  */
 import { existsSync, watch } from 'node:fs';
-import figures from 'figures';
 import kleur from 'kleur';
 import { scanIdeConfigs } from './ConfigScanner.js';
 import { runScan } from './ScanService.js';
@@ -15,6 +14,7 @@ import {
   formatSummaryCounts,
   formatTiming,
 } from './output/index.js';
+import { S } from './symbols.js';
 
 const DEBOUNCE_MS = 1000;
 
@@ -29,16 +29,16 @@ export function executeWatch() {
     .map((r) => ({ path: r.configPath, ide: r.name }));
 
   if (configPaths.length === 0) {
-    console.log(`\n  ${kleur.yellow(figures.warning)} No MCP config files found to watch\n`);
+    console.log(`\n  ${kleur.yellow(S.warn)} No MCP config files found to watch\n`);
     return 1;
   }
 
   console.log('');
-  console.log(kleur.bold(`  ${figures.pointer} MCP Shark Watch Mode`));
+  console.log(kleur.bold('  mcp-shark watch'));
   console.log(kleur.dim('  Watching for config changes. Press Ctrl+C to stop.\n'));
 
   for (const { path, ide } of configPaths) {
-    console.log(`  ${kleur.green(figures.tick)} Watching: ${kleur.dim(path)} (${ide})`);
+    console.log(`  ${kleur.green(S.pass)} Watching: ${kleur.dim(path)} (${ide})`);
   }
   console.log('');
 
@@ -56,7 +56,7 @@ export function executeWatch() {
         clearTimeout(debounceState.timer);
       }
       debounceState.timer = setTimeout(() => {
-        console.log(`\n  ${kleur.cyan(figures.pointer)} Change detected in ${ide} config`);
+        console.log(`\n  ${kleur.cyan(S.pointer)} Change detected in ${ide} config`);
         console.log(kleur.dim(`  ${configPath}`));
         console.log('');
         runAndDisplay();
@@ -104,10 +104,10 @@ function runAndDisplay() {
  */
 function renderCompactFindings(scanResult) {
   const severityIcon = {
-    critical: kleur.red(figures.cross),
-    high: kleur.yellow(figures.warning),
-    medium: kleur.cyan(figures.info),
-    low: kleur.dim(figures.bullet),
+    critical: kleur.red(S.fail),
+    high: kleur.yellow(S.warn),
+    medium: kleur.cyan(S.info),
+    low: kleur.dim(S.dot),
   };
 
   for (const finding of scanResult.findings.slice(0, 10)) {

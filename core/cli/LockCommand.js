@@ -5,10 +5,10 @@
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import figures from 'figures';
 import kleur from 'kleur';
 import { getAllServers, scanIdeConfigs } from './ConfigScanner.js';
 import { computeDiff, countParameters, hashToolDefinition, renderDiff } from './LockDiffEngine.js';
+import { S } from './symbols.js';
 
 const LOCKFILE_NAME = '.mcp-shark.lock';
 
@@ -20,7 +20,7 @@ export function executeLock(options = {}) {
   const servers = getAllServers(ideResults);
 
   if (servers.length === 0) {
-    console.log(`  ${kleur.yellow(figures.warning)} No MCP servers found to lock`);
+    console.log(`  ${kleur.yellow(S.warn)} No MCP servers found to lock`);
     return 1;
   }
 
@@ -30,7 +30,7 @@ export function executeLock(options = {}) {
 
   writeFileSync(lockfilePath, content, 'utf-8');
   console.log('');
-  console.log(`  ${kleur.green(figures.tick)} Lockfile created: ${LOCKFILE_NAME}`);
+  console.log(`  ${kleur.green(S.pass)} Lockfile created: ${LOCKFILE_NAME}`);
   console.log(`  ${kleur.dim(`${Object.keys(lockData.servers).length} servers locked`)}`);
 
   if (options.verify) {
@@ -52,7 +52,7 @@ export function executeLockVerify() {
   const lockfilePath = join(process.cwd(), LOCKFILE_NAME);
 
   if (!existsSync(lockfilePath)) {
-    console.log(`  ${kleur.red(figures.cross)} No ${LOCKFILE_NAME} found`);
+    console.log(`  ${kleur.red(S.fail)} No ${LOCKFILE_NAME} found`);
     console.log(kleur.dim('  Run: npx mcp-shark lock'));
     return 1;
   }
@@ -68,7 +68,7 @@ export function executeDiff() {
   const lockfilePath = join(process.cwd(), LOCKFILE_NAME);
 
   if (!existsSync(lockfilePath)) {
-    console.log(`  ${kleur.yellow(figures.warning)} No ${LOCKFILE_NAME} found`);
+    console.log(`  ${kleur.yellow(S.warn)} No ${LOCKFILE_NAME} found`);
     console.log(kleur.dim('  Run: npx mcp-shark lock'));
     return 1;
   }
@@ -141,11 +141,11 @@ function verifyLockfile(lockData) {
   const changes = computeDiff(lockData, currentServers);
 
   if (changes.length === 0) {
-    console.log(`  ${kleur.green(figures.tick)} All definitions match lockfile`);
+    console.log(`  ${kleur.green(S.pass)} All definitions match lockfile`);
     return 0;
   }
 
-  console.log(`  ${kleur.red(figures.cross)} ${changes.length} changes detected`);
+  console.log(`  ${kleur.red(S.fail)} ${changes.length} changes detected`);
   renderDiff(changes);
   return 1;
 }
