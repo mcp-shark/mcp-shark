@@ -51,7 +51,7 @@
     "format": "biome format --write .",
     "check": "biome check .",
     "check:fix": "biome check --write .",
-    "prepare": "husky install || true",
+    "prepare": "husky || true",
     "prepublishOnly": "npm run check:fix && npm run build:ui",
     "pack:inspect": "npm run prepublishOnly && npm pack && tar -tzf mcp-shark-mcp-shark-*.tgz | head -50 && echo '...' && tar -tzf mcp-shark-mcp-shark-*.tgz | wc -l && echo 'files total'",
     "pack:list": "npm run prepublishOnly && npm pack && tar -tzf mcp-shark-mcp-shark-*.tgz",
