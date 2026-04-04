@@ -19,16 +19,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      # Use standalone Biome: npm lockfiles generated on macOS often only record
+      # @biomejs/cli-darwin-*, so npm ci on Linux leaves @biomejs/cli-linux-x64 missing
+      # and `npm run check` fails with MODULE_NOT_FOUND.
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
         with:
-          node-version: '22'
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
+          version: 1.9.4
 
       - name: Biome check (lint + format)
-        run: npm run check
+        run: biome check .
 
   test:
     name: Test
