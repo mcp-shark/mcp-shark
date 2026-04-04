@@ -9,7 +9,7 @@ export function ServersPanel({ servers, findings, selectedIndex }) {
     return h(
       Box,
       { padding: 1 },
-      h(Text, { color: 'yellow' }, '⚠ No MCP servers detected across 15 IDEs.')
+      h(Text, { color: 'yellow' }, '\u25B2 No MCP servers detected across 15 IDEs.')
     );
   }
 
@@ -39,18 +39,16 @@ export function ServersPanel({ servers, findings, selectedIndex }) {
     );
   });
 
-  const findingRows = selectedFindings
-    .slice(0, 5)
-    .map((f) =>
-      h(
-        Text,
-        {
-          key: `${f.rule_id}-${f.title}`,
-          color: (f.severity || '').toLowerCase() === 'critical' ? 'red' : 'yellow',
-        },
-        `  ${f.severity?.toUpperCase()} — ${f.title}`
-      )
-    );
+  const findingRows = selectedFindings.slice(0, 5).map((f) =>
+    h(
+      Text,
+      {
+        key: `${f.rule_id}-${f.title}`,
+        color: (f.severity || '').toLowerCase() === 'critical' ? 'red' : 'yellow',
+      },
+      `  ${f.severity?.toUpperCase()} — ${f.title}`
+    )
+  );
 
   const moreText =
     selectedFindings.length > 5

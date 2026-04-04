@@ -42,7 +42,7 @@ export function Header({
     h(
       Box,
       null,
-      h(Text, { bold: true, color: 'cyan' }, '🦈 MCP Shark'),
+      h(Text, { bold: true, color: 'cyan' }, 'mcp-shark'),
       h(Text, { color: 'gray' }, ' │ '),
       scoreDisplay
     ),

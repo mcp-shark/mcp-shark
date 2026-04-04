@@ -1,9 +1,9 @@
-import figures from 'figures';
 /**
  * Terminal output formatter for scan results
  * Renders findings, toxic flows, and summaries with colors
  */
 import kleur from 'kleur';
+import { S } from '../symbols.js';
 
 const SEVERITY_COLORS = {
   critical: (text) => kleur.bgRed().white().bold(` ${text} `),
@@ -61,7 +61,7 @@ export function formatCleanServers(cleanServerNames) {
     return '';
   }
   const names = cleanServerNames.join(', ');
-  return `  ${names} ${kleur.green(`— clean ${figures.tick}`)}\n`;
+  return `  ${names} ${kleur.green(`${S.bar} clean ${S.pass}`)}\n`;
 }
 
 /**
@@ -73,24 +73,22 @@ export function formatToxicFlows(flows) {
   }
 
   const lines = [];
-  const separator = kleur.dim('━'.repeat(65));
-  lines.push(`  ${separator}`);
+  lines.push(`  ${kleur.dim(S.bar.repeat(65))}`);
   lines.push(`  ${kleur.bold('Toxic Flows')}`);
-  lines.push(`  ${separator}`);
+  lines.push(`  ${kleur.dim(S.bar.repeat(65))}`);
   lines.push('');
 
   for (const flow of flows) {
     const riskColor = flow.risk === 'HIGH' ? kleur.red : kleur.yellow;
-    const arrow = kleur.dim('→');
     lines.push(
-      `  ${riskColor(`${figures.warning} ${flow.risk}`)}  ${kleur.bold(flow.source)} ${arrow} ${kleur.bold(flow.target)}`
+      `  ${riskColor(`${S.warn} ${flow.risk}`)}  ${kleur.bold(flow.source)} ${kleur.dim(S.arrow)} ${kleur.bold(flow.target)}`
     );
     lines.push(`    ${flow.scenario}`);
     lines.push(`    ${kleur.dim(`(Catalog ${flow.catalog})`)}`);
     lines.push('');
   }
 
-  lines.push(`  ${separator}`);
+  lines.push(`  ${kleur.dim(S.bar.repeat(65))}`);
   return lines.join('\n');
 }
 
@@ -134,10 +132,10 @@ export function formatSummaryCounts(counts, flowCount) {
   }
 
   if (parts.length === 0) {
-    return `  ${kleur.green(`${figures.tick} No issues found`)}`;
+    return `  ${kleur.green(`${S.pass} No issues found`)}`;
   }
 
-  return `  ${parts.join(kleur.dim(' · '))}`;
+  return `  ${parts.join(kleur.dim(` ${S.dot} `))}`;
 }
 
 /**
@@ -146,7 +144,7 @@ export function formatSummaryCounts(counts, flowCount) {
 export function formatTiming(elapsedMs, serverCount, ruleCount, toolCount) {
   const seconds = (elapsedMs / 1000).toFixed(1);
   return kleur.dim(
-    `  Completed in ${seconds}s · ${serverCount} servers · ${ruleCount} rules · ${toolCount} tools checked`
+    `  Completed in ${seconds}s ${S.dot} ${serverCount} servers ${S.dot} ${ruleCount} rules ${S.dot} ${toolCount} tools checked`
   );
 }
 
@@ -178,7 +176,7 @@ export function formatIdeDiscovery(ideResults) {
   const serverCount = found.reduce((sum, ide) => sum + ide.serverCount, 0);
 
   if (names.length === 0) {
-    return `  ${kleur.yellow(`${figures.warning} No MCP configurations found`)}`;
+    return `  ${kleur.yellow(`${S.warn} No MCP configurations found`)}`;
   }
 
   return kleur.dim(`  Scanning ${serverCount} servers across ${names.join(', ')}...`);
