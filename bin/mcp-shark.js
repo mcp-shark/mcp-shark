@@ -14,6 +14,7 @@ import { executeDoctor } from '#core/cli/DoctorCommand.js';
 import { executeList } from '#core/cli/ListCommand.js';
 import { executeDiff, executeLock, executeLockVerify } from '#core/cli/LockCommand.js';
 import { executeScan } from '#core/cli/ScanCommand.js';
+import { executeWatch } from '#core/cli/WatchCommand.js';
 import { displayServeBanner } from '#core/cli/output/Banner.js';
 import { bootstrapLogger as logger } from '#core/libraries/index.js';
 
@@ -125,9 +126,11 @@ async function main() {
     .option('--yes', 'Skip confirmation prompt for --fix')
     .option('--walkthrough', 'Show full attack chain narratives')
     .option('--ci', 'CI mode: exit code 1 on critical/high findings')
-    .option('--format <format>', 'Output format: terminal, json, sarif', 'terminal')
+    .option('--format <format>', 'Output format: terminal, json, sarif, html', 'terminal')
+    .option('--output <path>', 'Write report to file (for html format)')
     .option('--strict', 'Count advisory findings in score')
     .option('--ide <name>', 'Scan specific IDE only')
+    .option('--rules <path>', 'Load custom YAML rules from directory')
     .action(async (options) => {
       const exitCode = await executeScan(options);
       if (exitCode !== 0) {
@@ -161,6 +164,16 @@ async function main() {
     .description('Run environment health checks')
     .action(() => {
       const exitCode = executeDoctor();
+      if (exitCode !== 0) {
+        process.exit(exitCode);
+      }
+    });
+
+  program
+    .command('watch')
+    .description('Watch config files and re-scan on changes')
+    .action(() => {
+      const exitCode = executeWatch();
       if (exitCode !== 0) {
         process.exit(exitCode);
       }

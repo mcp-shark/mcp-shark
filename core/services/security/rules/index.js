@@ -41,6 +41,13 @@ import * as dupTools from './scans/duplicateToolNames.js';
 import * as containment from './scans/missingContainment.js';
 import * as shellEnv from './scans/shellEnvInjection.js';
 
+// Phase 4 Rules
+import * as excessivePerms from './scans/excessivePermissions.js';
+import * as insecureTransport from './scans/insecureTransport.js';
+import * as pathTraversal from './scans/pathTraversal.js';
+import * as sensitiveData from './scans/sensitiveDataExposure.js';
+import * as unsafeDefaults from './scans/unsafeDefaults.js';
+
 /**
  * All available static rules with their analysis functions
  */
@@ -82,6 +89,13 @@ export const staticRules = {
   'missing-containment': containment,
   'duplicate-tool-names': dupTools,
   'shell-env-injection': shellEnv,
+
+  // Phase 4 Rules
+  'excessive-permissions': excessivePerms,
+  'unsafe-defaults': unsafeDefaults,
+  'path-traversal': pathTraversal,
+  'sensitive-data-exposure': sensitiveData,
+  'insecure-transport': insecureTransport,
 };
 
 /**

@@ -1,0 +1,93 @@
+name: 'MCP Shark Security Scan'
+description: 'Scan MCP server configurations for security vulnerabilities'
+author: 'mcp-shark'
+
+branding:
+  icon: 'shield'
+  color: 'blue'
+
+inputs:
+  format:
+    description: 'Output format: terminal, json, sarif'
+    required: false
+    default: 'sarif'
+  fail-on:
+    description: 'Fail on severity level: critical, high, medium, low'
+    required: false
+    default: 'high'
+  config-path:
+    description: 'Path to MCP config file (auto-detected if not specified)'
+    required: false
+  rules-path:
+    description: 'Path to custom YAML rules directory'
+    required: false
+  strict:
+    description: 'Count advisory findings in score'
+    required: false
+    default: 'false'
+
+outputs:
+  score:
+    description: 'Shark Score (0-100)'
+  grade:
+    description: 'Security grade (A-F)'
+  findings-count:
+    description: 'Total number of findings'
+  critical-count:
+    description: 'Number of critical findings'
+  high-count:
+    description: 'Number of high findings'
+  sarif-file:
+    description: 'Path to SARIF output file'
+  exit-code:
+    description: 'Exit code (0 = pass, 1 = fail)'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Run MCP Shark Scan
+      id: scan
+      shell: bash
+      run: |
+        npx @mcp-shark/mcp-shark scan \
+          --ci \
+          --format ${{ inputs.format }} \
+          ${{ inputs.strict == 'true' && '--strict' || '' }} \
+          ${{ inputs.config-path && format('--ide {0}', inputs.config-path) || '' }} \
+          > mcp-shark-results.${{ inputs.format == 'sarif' && 'sarif' || inputs.format == 'json' && 'json' || 'txt' }} 2>&1 || true
+
+        # Parse results for outputs
+        if [ "${{ inputs.format }}" = "json" ] || [ "${{ inputs.format }}" = "sarif" ]; then
+          echo "sarif-file=mcp-shark-results.${{ inputs.format == 'sarif' && 'sarif' || 'json' }}" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Check Severity Threshold
+      shell: bash
+      run: |
+        FAIL_ON="${{ inputs.fail-on }}"
+        npx @mcp-shark/mcp-shark scan --ci --format json 2>/dev/null | node -e "
+          const data = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
+          const counts = data.summary?.severityCounts || {};
+          const score = data.score?.score || 0;
+          const grade = data.score?.grade || 'F';
+
+          console.log('score=' + score);
+          console.log('grade=' + grade);
+          console.log('findings-count=' + (data.findings?.length || 0));
+          console.log('critical-count=' + (counts.critical || 0));
+          console.log('high-count=' + (counts.high || 0));
+
+          const levels = ['critical','high','medium','low'];
+          const threshold = levels.indexOf('${FAIL_ON}');
+          let fail = false;
+          for (let i = 0; i <= threshold; i++) {
+            if ((counts[levels[i]] || 0) > 0) fail = true;
+          }
+          console.log('exit-code=' + (fail ? 1 : 0));
+          if (fail) process.exit(1);
+        " >> $GITHUB_OUTPUT

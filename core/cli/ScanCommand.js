@@ -4,6 +4,7 @@
  */
 import { confirm } from '@clack/prompts';
 import { applyFixes, renderFixResults } from './AutoFixEngine.js';
+import { generateHtmlReport } from './HtmlReportGenerator.js';
 import { runScan } from './ScanService.js';
 import { calculateSharkScore } from './SharkScoreCalculator.js';
 import { formatWalkthrough, generateWalkthroughs } from './WalkthroughGenerator.js';
@@ -31,6 +32,8 @@ import {
  * @param {boolean} [options.strict] - Count advisory findings in score
  * @param {string} [options.ide] - Filter to specific IDE
  * @param {boolean} [options.yes] - Skip confirmation for --fix
+ * @param {string} [options.output] - Output file path (for html format)
+ * @param {string} [options.rules] - Path to custom YAML rules directory
  */
 export async function executeScan(options = {}) {
   const format = (options.format || 'terminal').toLowerCase();
@@ -38,6 +41,7 @@ export async function executeScan(options = {}) {
   const scanResult = runScan({
     ide: options.ide,
     strict: options.strict,
+    rulesPath: options.rules,
   });
 
   if (format === 'json') {
@@ -47,6 +51,11 @@ export async function executeScan(options = {}) {
 
   if (format === 'sarif') {
     console.log(formatAsSarif(buildJsonOutput(scanResult)));
+    return exitWithCode(scanResult, options.ci);
+  }
+
+  if (format === 'html') {
+    generateHtmlReport(scanResult, options.output);
     return exitWithCode(scanResult, options.ci);
   }
 

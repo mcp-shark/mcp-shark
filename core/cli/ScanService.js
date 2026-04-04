@@ -6,17 +6,22 @@ import { StaticRulesService } from '#core/services/security/StaticRulesService.j
  */
 import { analyzeConfigPermissions } from '#core/services/security/rules/scans/configPermissions.js';
 import { analyzeAllServerToolNames } from '#core/services/security/rules/scans/duplicateToolNames.js';
+import { analyzeServerTransport } from '#core/services/security/rules/scans/insecureTransport.js';
 import { analyzeServerContainment } from '#core/services/security/rules/scans/missingContainment.js';
 import { analyzeServerShellRisk } from '#core/services/security/rules/scans/shellEnvInjection.js';
+import { analyzeServerDefaults } from '#core/services/security/rules/scans/unsafeDefaults.js';
 import { getAllServers, scanIdeConfigs } from './ConfigScanner.js';
+import { detectHardcodedSecrets } from './SecretDetector.js';
 import { calculateSharkScore, countBySeverity } from './SharkScoreCalculator.js';
 import { analyzeToxicFlows } from './ToxicFlowAnalyzer.js';
+import { applyYamlRules, loadYamlRules } from './YamlRuleEngine.js';
 
 /**
  * Run a full security scan on all detected MCP configurations
  * @param {object} options
  * @param {string} [options.ide] - Filter to specific IDE
  * @param {boolean} [options.strict] - Count advisory findings in score
+ * @param {string} [options.rulesPath] - Path to custom YAML rules
  * @returns {object} Complete scan result
  */
 export function runScan(options = {}) {
@@ -29,6 +34,13 @@ export function runScan(options = {}) {
   const ruleMetadata = rulesService.getRuleMetadata();
 
   const allFindings = analyzeAllServers(servers, rulesService, ideResults);
+
+  const yamlRules = loadYamlRules(options.rulesPath);
+  if (yamlRules.length > 0) {
+    const yamlFindings = applyYamlRules(yamlRules, servers);
+    allFindings.push(...yamlFindings);
+  }
+
   const toxicFlows = analyzeToxicFlows(servers);
 
   const scorableFindings = options.strict
@@ -128,67 +140,6 @@ function analyzeServer(server, rulesService) {
 }
 
 /**
- * Check for hardcoded secrets in server config environment variables
- */
-function detectHardcodedSecrets(envVars, server) {
-  const secretPatterns = [
-    { pattern: /^ghp_[a-zA-Z0-9]{36,}$/, name: 'GitHub PAT', severity: 'high' },
-    { pattern: /^gho_[a-zA-Z0-9]{36,}$/, name: 'GitHub OAuth', severity: 'high' },
-    { pattern: /^sk-[a-zA-Z0-9]{20,}$/, name: 'API Key (sk-)', severity: 'high' },
-    { pattern: /^xoxb-/, name: 'Slack Bot Token', severity: 'high' },
-    { pattern: /^xoxp-/, name: 'Slack User Token', severity: 'critical' },
-    { pattern: /^AKIA[A-Z0-9]{16}$/, name: 'AWS Access Key', severity: 'critical' },
-    { pattern: /^glpat-/, name: 'GitLab PAT', severity: 'high' },
-    { pattern: /^npm_[a-zA-Z0-9]{36,}$/, name: 'npm Token', severity: 'high' },
-    { pattern: /^[a-f0-9]{40}$/, name: 'Hex Token (40 chars)', severity: 'medium' },
-  ];
-
-  const findings = [];
-
-  for (const [key, value] of Object.entries(envVars)) {
-    if (typeof value !== 'string') {
-      continue;
-    }
-    if (value.startsWith('${') || value.startsWith('$')) {
-      continue;
-    }
-
-    for (const { pattern, name, severity } of secretPatterns) {
-      if (pattern.test(value)) {
-        const masked = maskSecret(value);
-        findings.push({
-          rule_id: 'hardcoded-secret',
-          category: 'MCP01',
-          severity,
-          confidence: 'definite',
-          title: `${name} hardcoded in config`,
-          description: `${key}=${masked} — use environment variable reference instead`,
-          server_name: server.name,
-          ide: server.ide,
-          config_path: server.configPath,
-          fixable: true,
-          fix_type: 'env_var_replacement',
-          fix_data: { key, original: value },
-        });
-        break;
-      }
-    }
-  }
-
-  return findings;
-}
-
-/**
- * Mask a secret value for display
- */
-function maskSecret(value) {
-  if (value.length <= 8) {
-    return '****';
-  }
-  return `${value.slice(0, 4)}****`;
-}
-
-/**
  * Analyze server-level config issues (containment + shell risks)
  */
 function analyzeServerConfig(server) {
@@ -206,6 +157,24 @@ function analyzeServerConfig(server) {
 
   const shellFindings = analyzeServerShellRisk(server.name, config);
   for (const f of shellFindings) {
+    findings.push({
+      ...f,
+      ide: server.ide,
+      config_path: server.configPath,
+    });
+  }
+
+  const transportFindings = analyzeServerTransport(server.name, config);
+  for (const f of transportFindings) {
+    findings.push({
+      ...f,
+      ide: server.ide,
+      config_path: server.configPath,
+    });
+  }
+
+  const defaultFindings = analyzeServerDefaults(server.name, config);
+  for (const f of defaultFindings) {
     findings.push({
       ...f,
       ide: server.ide,
