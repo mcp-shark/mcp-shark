@@ -1,0 +1,173 @@
+{
+  "schema_version": "1.0",
+  "pack_id": "general-security",
+  "pack_name": "General Security Rules",
+  "version": "1.0.0",
+  "updated": "2026-03-15",
+  "source_url": "https://github.com/mcp-shark/rule-packs",
+  "rules": [
+    {
+      "id": "hardcoded-secrets",
+      "name": "Hardcoded Secrets Detection",
+      "owasp_id": "SECRET",
+      "severity": "high",
+      "type": "general-security",
+      "description": "Detects hardcoded secrets and API tokens in metadata.",
+      "recommendation": "Move secrets or API tokens to secure storage; never embed them directly in tool or resource metadata.",
+      "scope": ["tool", "prompt", "resource", "packet"],
+      "match_mode": "first",
+      "severity_overrides": { "prompt": "medium" },
+      "patterns": [
+        { "regex": "sk-[A-Za-z0-9]{20}T3BlbkFJ[A-Za-z0-9]{20}", "label": "OpenAI", "flags": "" },
+        { "regex": "github_pat_[0-9A-Za-z_]{40,90}", "label": "GitHub PAT", "flags": "" },
+        { "regex": "(ghp|gho|ghs|ghu)_[A-Za-z0-9]{36}", "label": "GitHub Token", "flags": "" },
+        { "regex": "glpat-[0-9A-Za-z\\-_]{20}", "label": "GitLab Token", "flags": "" },
+        { "regex": "xox[baprs]-[A-Za-z0-9-]{10,120}", "label": "Slack Token", "flags": "" },
+        {
+          "regex": "https:\\/\\/hooks\\.slack\\.com\\/services\\/[A-Za-z0-9+/]{30,}",
+          "label": "Slack Webhook",
+          "flags": ""
+        },
+        {
+          "regex": "[A-Za-z0-9]{24}\\.[A-Za-z0-9]{6}\\.[A-Za-z0-9_-]{27}",
+          "label": "Discord Token",
+          "flags": ""
+        },
+        { "regex": "AKIA[0-9A-Z]{16}", "label": "AWS Access Key", "flags": "" },
+        {
+          "regex": "(?<![A-Za-z0-9])[A-Za-z0-9/+=]{40}(?![A-Za-z0-9])",
+          "label": "AWS Secret Key",
+          "flags": ""
+        },
+        { "regex": "AIza[0-9A-Za-z\\-_]{35}", "label": "Google API Key", "flags": "" },
+        { "regex": "sk_live_[0-9a-zA-Z]{24}", "label": "Stripe Secret", "flags": "" },
+        { "regex": "rk_live_[0-9a-zA-Z]{24}", "label": "Stripe Restricted", "flags": "" },
+        { "regex": "SK[0-9a-fA-F]{32}", "label": "Twilio API Key", "flags": "" },
+        {
+          "regex": "SG\\.[0-9A-Za-z\\-_]{22}\\.[0-9A-Za-z\\-_]{43}",
+          "label": "SendGrid",
+          "flags": ""
+        },
+        { "regex": "key-[0-9a-fA-F]{32}", "label": "Mailgun", "flags": "" },
+        { "regex": "[A-Z0-9]{32}-[A-Z0-9]{10}", "label": "Algolia", "flags": "" },
+        {
+          "regex": "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
+          "label": "Heroku",
+          "flags": ""
+        },
+        {
+          "regex": "pscale_(?:tkn|pw|oauth)_[A-Za-z0-9._=-]{30,60}",
+          "label": "PlanetScale",
+          "flags": ""
+        },
+        { "regex": "PMAK-[0-9a-f]{24}-[0-9a-f]{34}", "label": "Postman", "flags": "" },
+        { "regex": "AAAA[a-zA-Z0-9_-]{7}:[a-zA-Z0-9_-]{140}", "label": "Firebase", "flags": "" }
+      ]
+    },
+    {
+      "id": "ansi-escape-sequences",
+      "name": "ANSI Escape Sequence Detection",
+      "owasp_id": "MCP03",
+      "severity": "medium",
+      "type": "general-security",
+      "description": "Detects ANSI escape codes in tool descriptions that could hide malicious content.",
+      "recommendation": "Strip ANSI escape sequences from tool descriptions. Run: npx mcp-shark scan --fix",
+      "scope": ["tool"],
+      "match_mode": "first",
+      "text_field": "description",
+      "patterns": [
+        { "regex": "\u001b\\[[0-9;]*[a-zA-Z]", "label": "ANSI escape sequence", "flags": "" }
+      ],
+      "severity_escalation_patterns": [
+        { "regex": "\u001b\\[\\d*[ABCDHJ]", "label": "ANSI cursor movement", "severity": "high" }
+      ]
+    },
+    {
+      "id": "dns-rebinding",
+      "name": "DNS Rebinding Detection",
+      "owasp_id": "MCP07",
+      "severity": "high",
+      "type": "network-security",
+      "description": "Detects servers bound to 0.0.0.0 vulnerable to DNS rebinding attacks.",
+      "recommendation": "Bind MCP servers to 127.0.0.1 or localhost instead of 0.0.0.0. Use --host 127.0.0.1 flag.",
+      "scope": ["tool"],
+      "match_mode": "first",
+      "patterns": [
+        { "regex": "0\\.0\\.0\\.0", "flags": "" },
+        { "regex": "--host\\s+0\\.0\\.0\\.0", "flags": "i" },
+        { "regex": "HOST[=:]\\s*0\\.0\\.0\\.0", "flags": "" },
+        { "regex": "listen\\(['\"]0\\.0\\.0\\.0['\"]\\)", "flags": "" },
+        { "regex": "INADDR_ANY", "flags": "" }
+      ]
+    },
+    {
+      "id": "sensitive-data-exposure",
+      "name": "Sensitive Data Exposure",
+      "owasp_id": "MCP08",
+      "severity": "high",
+      "type": "general-security",
+      "description": "Detects tools that may expose PII, credentials, or secrets without redaction.",
+      "recommendation": "Tools that access sensitive data should redact PII, credentials, and secrets from responses. Apply output filtering.",
+      "scope": ["tool"],
+      "match_mode": "first",
+      "exclude_patterns": ["redact", "mask", "filter", "sanitize", "censor", "strip", "scrub"],
+      "patterns": [
+        { "regex": "password", "label": "password field" },
+        { "regex": "credit[_\\s]?card", "label": "credit card data" },
+        { "regex": "social[_\\s]?security", "label": "social security number" },
+        { "regex": "ssn\\b", "label": "SSN field" },
+        { "regex": "private[_\\s]?key", "label": "private key" },
+        { "regex": "secret[_\\s]?key", "label": "secret key" },
+        { "regex": "bearer[_\\s]?token", "label": "bearer token" },
+        { "regex": "access[_\\s]?token", "label": "access token" },
+        { "regex": "refresh[_\\s]?token", "label": "refresh token" },
+        { "regex": "database[_\\s]?url", "label": "database URL" },
+        { "regex": "connection[_\\s]?string", "label": "connection string" }
+      ]
+    },
+    {
+      "id": "excessive-permissions",
+      "name": "Excessive Permissions",
+      "owasp_id": "MCP02",
+      "severity": "high",
+      "type": "general-security",
+      "description": "Detects servers or tools with overly broad permission scopes.",
+      "recommendation": "Apply the principle of least privilege. Restrict server permissions to only what is needed for its function.",
+      "scope": ["tool"],
+      "match_mode": "first",
+      "patterns": [
+        { "regex": "\\*:\\*", "label": "wildcard scope (*:*)", "flags": "" },
+        { "regex": "admin[_:]?access", "label": "admin access" },
+        { "regex": "full[_-]?access", "label": "full access" },
+        { "regex": "root[_:]?access", "label": "root access" },
+        { "regex": "sudo\\s", "label": "sudo usage" },
+        { "regex": "--privileged", "label": "privileged flag" },
+        { "regex": "--no-sandbox", "label": "no-sandbox flag" },
+        { "regex": "chmod\\s+777", "label": "chmod 777" },
+        { "regex": "allowAll|allow_all", "label": "allow-all policy" },
+        { "regex": "unrestricted", "label": "unrestricted mode" }
+      ]
+    },
+    {
+      "id": "path-traversal",
+      "name": "Path Traversal Detection",
+      "owasp_id": "MCP05",
+      "severity": "high",
+      "type": "general-security",
+      "description": "Detects tools that accept file paths without sanitization, enabling directory traversal.",
+      "recommendation": "Validate and sanitize all file paths. Reject paths containing \"..\" or absolute paths outside allowed directories.",
+      "scope": ["tool"],
+      "match_mode": "first",
+      "patterns": [
+        { "regex": "\\.\\.[\\/\\\\]", "label": "literal path traversal (../)", "flags": "" },
+        { "regex": "path[_\\s]*traversal", "label": "path traversal mention" },
+        { "regex": "any\\s+file\\s+path", "label": "unrestricted file path" },
+        { "regex": "arbitrary\\s+(file|path)", "label": "arbitrary file access" },
+        { "regex": "absolute[_\\s]*path", "label": "absolute path accepted" }
+      ],
+      "param_patterns": [
+        { "regex": "^(file_?path|filepath|path|filename|file)$", "label": "file path parameter" }
+      ]
+    }
+  ]
+}

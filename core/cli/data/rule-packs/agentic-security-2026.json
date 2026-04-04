@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0",
+  "pack_id": "agentic-security-2026",
+  "pack_name": "Agentic Security Initiative (2026)",
+  "version": "1.0.0",
+  "updated": "2026-03-15",
+  "source_url": "https://owasp.org/www-project-agentic-security/",
+  "rules": [
+    {
+      "id": "asi01-goal-hijack",
+      "name": "Agent Goal Hijack Detection",
+      "owasp_id": "ASI01",
+      "severity": "high",
+      "type": "agentic-security",
+      "description": "Detects attempts to hijack or modify agent goals.",
+      "recommendation": "Implement goal validation and verification. Monitor for unauthorized goal changes. Use goal isolation and protection mechanisms.",
+      "scope": ["tool", "prompt", "resource", "packet"],
+      "match_mode": "all_matches",
+      "severity_overrides": { "prompt": "critical" },
+      "patterns": [
+        "(?:hijack|override|replace|change|modify)\\s+(?:goal|objective|purpose|mission|task)",
+        "(?:ignore|forget|disregard)\\s+(?:original|initial|intended|primary)\\s+(?:goal|objective|purpose)",
+        "(?:new|different|alternative|malicious)\\s+(?:goal|objective|purpose|mission)",
+        "(?:steer|redirect|manipulate)\\s+(?:agent|system)\\s+(?:toward|to|into)",
+        "(?:unauthorized|malicious|harmful)\\s+(?:goal|objective|purpose|action)"
+      ]
+    },
+    {
+      "id": "asi02-tool-misuse",
+      "name": "Tool Misuse Detection",
+      "owasp_id": "ASI02",
+      "severity": "high",
+      "type": "agentic-security",
+      "description": "Detects tool misuse and exploitation patterns.",
+      "recommendation": "Implement tool usage monitoring and restrictions. Enforce scope boundaries for tool usage. Monitor for unauthorized tool combinations.",
+      "scope": ["tool", "prompt", "resource", "packet"],
+      "match_mode": "all_matches",
+      "severity_overrides": { "resource": "medium" },
+      "patterns": [
+        "(?:misuse|abuse|exploit|manipulate)\\s+(?:tool|function|capability|feature)",
+        "(?:use|utilize|invoke)\\s+(?:tool|function)\\s+(?:outside|beyond|outside\\s+of)\\s+(?:intended|authorized|allowed)\\s+(?:scope|purpose|context)",
+        "(?:unauthorized|illegitimate|improper)\\s+(?:tool|function)\\s+(?:usage|use|invocation)",
+        "(?:combine|chain|sequence)\\s+(?:tools|functions)\\s+(?:to|for)\\s+(?:achieve|perform|execute)\\s+(?:unauthorized|malicious)"
+      ]
+    },
+    {
+      "id": "asi03-identity-abuse",
+      "name": "Identity Abuse Detection",
+      "owasp_id": "ASI03",
+      "severity": "high",
+      "type": "agentic-security",
+      "description": "Detects identity and privilege abuse patterns.",
+      "recommendation": "Implement strict identity and privilege management. Monitor for privilege escalation. Enforce least privilege principles.",
+      "scope": ["tool", "prompt", "resource", "packet"],
+      "match_mode": "all_matches",
+      "severity_overrides": { "prompt": "medium" },
+      "patterns": [
+        "(?:abuse|misuse|exploit|impersonate|spoof)\\s+(?:identity|privilege|permission|access|role)",
+        "(?:escalate|elevate|raise|upgrade)\\s+(?:privilege|permission|access|authority)",
+        "(?:assume|take|steal|hijack)\\s+(?:identity|role|privilege|permission)",
+        "(?:unauthorized|illegitimate|improper)\\s+(?:privilege|permission|access|authority)\\s+(?:use|usage|exercise)",
+        "(?:bypass|circumvent|override)\\s+(?:identity|authentication|authorization|access\\s+control)"
+      ]
+    },
+    {
+      "id": "asi04-supply-chain",
+      "name": "Agentic Supply Chain Detection",
+      "owasp_id": "ASI04",
+      "severity": "high",
+      "type": "agentic-security",
+      "description": "Detects agentic supply chain vulnerabilities.",
+      "recommendation": "Verify agent framework and model integrity. Use signed and verified dependencies. Monitor for supply chain attacks.",
+      "scope": ["tool", "prompt", "resource", "packet"],
+      "match_mode": "all_matches",
+      "severity_overrides": { "prompt": "medium" },
+      "patterns": [
+        "(?:compromised|vulnerable|malicious)\\s+(?:agent|framework|model|dependency|package)",
+        "(?:supply\\s+chain|dependency)\\s+(?:attack|vulnerability|compromise|tampering)",
+        "(?:unsigned|unverified|untrusted)\\s+(?:agent|framework|model|dependency)",
+        "(?:tampered|modified|altered)\\s+(?:agent|framework|model|dependency)",
+        "(?:typosquatting|brandjacking|namespace)\\s+(?:agent|framework|model|package)"
+      ]
+    },
+    {
+      "id": "asi06-memory-poisoning",
+      "name": "Memory Poisoning Detection",
+      "owasp_id": "ASI06",
+      "severity": "high",
+      "type": "agentic-security",
+      "description": "Detects memory and context poisoning patterns.",
+      "recommendation": "Implement memory and context validation. Monitor for data poisoning. Use memory isolation and sanitization.",
+      "scope": ["tool", "prompt", "resource", "packet"],
+      "match_mode": "all_matches",
+      "severity_overrides": { "prompt": "critical" },
+      "patterns": [
+        "(?:poison|corrupt|taint|contaminate|manipulate)\\s+(?:memory|context|data|information)",
+        "(?:inject|insert)\\s+(?:malicious|harmful|poisoned|corrupted)\\s+(?:data|information|memory|context)",
+        "(?:memory|context|data)\\s+(?:poisoning|corruption|manipulation|tampering)",
+        "(?:compromise|compromised)\\s+(?:memory|context|data|information)",
+        "(?:tainted|poisoned|corrupted)\\s+(?:memory|context|data|information)"
+      ]
+    },
+    {
+      "id": "asi07-insecure-communication",
+      "name": "Insecure Communication Detection",
+      "owasp_id": "ASI07",
+      "severity": "high",
+      "type": "agentic-security",
+      "description": "Detects insecure inter-agent communication patterns.",
+      "recommendation": "Implement encrypted communication channels. Use TLS/SSL for all inter-agent communications. Authenticate all agent interactions.",
+      "scope": ["tool", "prompt", "resource", "packet"],
+      "match_mode": "all_matches",
+      "severity_overrides": { "prompt": "medium" },
+      "patterns": [
+        "(?:unencrypted|plaintext|cleartext|unsecured)\\s+(?:communication|channel|connection|transmission)",
+        "(?:http:\\/\\/|ftp:\\/\\/|ws:\\/\\/)\\s+(?:instead\\s+of|without|missing)",
+        "(?:no|missing|lack|without)\\s+(?:encryption|tls|ssl|https|authentication|auth)",
+        "(?:insecure|vulnerable|weak)\\s+(?:communication|channel|protocol|connection)",
+        "(?:intercept|eavesdrop|man-in-the-middle|mitm)\\s+(?:communication|channel|message)"
+      ]
+    },
+    {
+      "id": "asi08-cascading-failures",
+      "name": "Cascading Failures Detection",
+      "owasp_id": "ASI08",
+      "severity": "medium",
+      "type": "agentic-security",
+      "description": "Detects cascading failure vulnerabilities.",
+      "recommendation": "Implement failure isolation and containment. Use circuit breakers and failover mechanisms. Design for graceful degradation.",
+      "scope": ["tool", "prompt", "resource", "packet"],
+      "match_mode": "all_matches",
+      "severity_overrides": { "prompt": "low" },
+      "patterns": [
+        "(?:cascade|cascading|chain|domino)\\s+(?:failure|error|exception|outage|breakdown)",
+        "(?:propagate|spread|ripple|amplify)\\s+(?:failure|error|exception|outage)",
+        "(?:single\\s+point\\s+of\\s+failure|spof)",
+        "(?:no|missing|lack|without)\\s+(?:isolation|containment|circuit\\s+breaker|failover|redundancy)",
+        "(?:unhandled|uncaught|unrecoverable)\\s+(?:failure|error|exception)"
+      ]
+    },
+    {
+      "id": "asi09-trust-exploitation",
+      "name": "Trust Exploitation Detection",
+      "owasp_id": "ASI09",
+      "severity": "high",
+      "type": "agentic-security",
+      "description": "Detects human-agent trust exploitation patterns.",
+      "recommendation": "Implement trust verification mechanisms. Educate users about agent limitations. Monitor for trust exploitation patterns.",
+      "scope": ["tool", "prompt", "resource", "packet"],
+      "match_mode": "all_matches",
+      "severity_overrides": { "prompt": "critical" },
+      "patterns": [
+        "(?:exploit|abuse|manipulate|misuse)\\s+(?:trust|confidence|reliance|relationship)",
+        "(?:social\\s+engineering|phishing|deception|manipulation)\\s+(?:to|for|in\\s+order\\s+to)",
+        "(?:impersonate|spoof|pretend|masquerade)\\s+(?:as|to\\s+be)",
+        "(?:exploit|abuse)\\s+(?:human|user|operator)\\s+(?:trust|confidence|reliance)",
+        "(?:mislead|deceive|trick|fool)\\s+(?:human|user|operator|agent)"
+      ]
+    },
+    {
+      "id": "asi10-rogue-agent",
+      "name": "Rogue Agent Detection",
+      "owasp_id": "ASI10",
+      "severity": "critical",
+      "type": "agentic-security",
+      "description": "Detects rogue agent vulnerabilities.",
+      "recommendation": "Implement agent registration and approval processes. Monitor for unauthorized agent creation. Enforce agent lifecycle management.",
+      "scope": ["tool", "prompt", "resource", "packet"],
+      "match_mode": "all_matches",
+      "severity_overrides": { "prompt": "high" },
+      "patterns": [
+        "(?:rogue|unauthorized|unapproved|malicious|harmful)\\s+(?:agent|bot|automation|system)",
+        "(?:unauthorized|unapproved|unmanaged)\\s+(?:agent|bot)\\s+(?:creation|deployment|execution|activation)",
+        "(?:bypass|circumvent|avoid)\\s+(?:approval|authorization|review|governance)\\s+(?:for|to\\s+create|to\\s+deploy)",
+        "(?:hidden|concealed|undocumented|unregistered)\\s+(?:agent|bot|automation)",
+        "(?:self-replicating|self-propagating|autonomous)\\s+(?:agent|bot)\\s+(?:without|lacking)"
+      ]
+    }
+  ]
+}

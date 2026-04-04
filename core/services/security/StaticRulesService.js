@@ -1,8 +1,64 @@
 /**
  * Static Rules Service
- * Executes pattern-based security rules against MCP server definitions and traffic
+ * Executes pattern-based security rules against MCP server definitions and traffic.
+ *
+ * Combines two rule sources:
+ *   1. JS plugin rules (structural/scored — from rules/index.js)
+ *   2. Declarative JSON rule packs (pattern-based — from DeclarativeRuleEngine)
  */
+import { loadDeclarativeRules } from '#core/cli/DeclarativeRuleEngine.js';
 import { getAllRuleMetadata, getEnabledRules } from './rules/index.js';
+
+let cachedCombinedRules = null;
+
+/**
+ * Load and cache the combined set of JS plugin + declarative rules.
+ */
+function getCombinedRules() {
+  if (cachedCombinedRules) {
+    return cachedCombinedRules;
+  }
+
+  const jsRules = getEnabledRules();
+  const declarativeRules = loadDeclarativeRules().map((rule) => ({
+    id: rule.ruleMetadata.id,
+    ...rule.ruleMetadata,
+    analyzeTool: rule.analyzeTool,
+    analyzePrompt: rule.analyzePrompt,
+    analyzeResource: rule.analyzeResource,
+    analyzePacket: rule.analyzePacket,
+  }));
+
+  const ruleMap = new Map();
+  for (const rule of jsRules) {
+    ruleMap.set(rule.id, rule);
+  }
+  for (const rule of declarativeRules) {
+    ruleMap.set(rule.id, rule);
+  }
+
+  cachedCombinedRules = [...ruleMap.values()];
+  return cachedCombinedRules;
+}
+
+/**
+ * Get combined metadata from JS plugins + declarative packs.
+ */
+function getCombinedMetadata() {
+  const jsMetadata = getAllRuleMetadata();
+  const declarativeRules = loadDeclarativeRules();
+  const declarativeMetadata = declarativeRules.map((r) => r.ruleMetadata);
+
+  const metaMap = new Map();
+  for (const m of jsMetadata) {
+    metaMap.set(m.id, m);
+  }
+  for (const m of declarativeMetadata) {
+    metaMap.set(m.id, m);
+  }
+
+  return [...metaMap.values()];
+}
 
 export class StaticRulesService {
   constructor(logger) {
@@ -13,7 +69,7 @@ export class StaticRulesService {
    * Get all available rule metadata
    */
   getRuleMetadata() {
-    return getAllRuleMetadata();
+    return getCombinedMetadata();
   }
 
   /**
@@ -21,7 +77,7 @@ export class StaticRulesService {
    */
   analyzeTool(tool, serverName = null) {
     const findings = [];
-    const rules = getEnabledRules();
+    const rules = getCombinedRules();
 
     for (const rule of rules) {
       try {
@@ -49,7 +105,7 @@ export class StaticRulesService {
    */
   analyzePrompt(prompt, serverName = null) {
     const findings = [];
-    const rules = getEnabledRules();
+    const rules = getCombinedRules();
 
     for (const rule of rules) {
       try {
@@ -77,7 +133,7 @@ export class StaticRulesService {
    */
   analyzeResource(resource, serverName = null) {
     const findings = [];
-    const rules = getEnabledRules();
+    const rules = getCombinedRules();
 
     for (const rule of rules) {
       try {
@@ -105,7 +161,7 @@ export class StaticRulesService {
    */
   analyzePacket(packet, sessionId = null) {
     const findings = [];
-    const rules = getEnabledRules();
+    const rules = getCombinedRules();
 
     for (const rule of rules) {
       try {
@@ -136,21 +192,18 @@ export class StaticRulesService {
     const serverName = serverConfig.name || 'unknown';
     const findings = [];
 
-    // Analyze tools
     if (serverConfig.tools && Array.isArray(serverConfig.tools)) {
       for (const tool of serverConfig.tools) {
         findings.push(...this.analyzeTool(tool, serverName));
       }
     }
 
-    // Analyze prompts
     if (serverConfig.prompts && Array.isArray(serverConfig.prompts)) {
       for (const prompt of serverConfig.prompts) {
         findings.push(...this.analyzePrompt(prompt, serverName));
       }
     }
 
-    // Analyze resources
     if (serverConfig.resources && Array.isArray(serverConfig.resources)) {
       for (const resource of serverConfig.resources) {
         findings.push(...this.analyzeResource(resource, serverName));
@@ -196,22 +249,18 @@ export class StaticRulesService {
     };
 
     for (const finding of findings) {
-      // By severity
       if (summary.bySeverity[finding.severity] !== undefined) {
         summary.bySeverity[finding.severity]++;
       }
 
-      // By OWASP ID
       if (finding.owasp_id) {
         summary.byOwasp[finding.owasp_id] = (summary.byOwasp[finding.owasp_id] || 0) + 1;
       }
 
-      // By server
       if (finding.server_name) {
         summary.byServer[finding.server_name] = (summary.byServer[finding.server_name] || 0) + 1;
       }
 
-      // By type
       if (summary.byType[finding.finding_type] !== undefined) {
         summary.byType[finding.finding_type]++;
       }

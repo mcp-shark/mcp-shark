@@ -14,6 +14,7 @@ import { executeDoctor } from '#core/cli/DoctorCommand.js';
 import { executeList } from '#core/cli/ListCommand.js';
 import { executeDiff, executeLock, executeLockVerify } from '#core/cli/LockCommand.js';
 import { executeScan } from '#core/cli/ScanCommand.js';
+import { executeUpdateRules } from '#core/cli/UpdateCommand.js';
 import { executeWatch } from '#core/cli/WatchCommand.js';
 import { displayServeBanner } from '#core/cli/output/Banner.js';
 import { bootstrapLogger as logger } from '#core/libraries/index.js';
@@ -196,6 +197,14 @@ async function main() {
       if (exitCode !== 0) {
         process.exit(exitCode);
       }
+    });
+
+  program
+    .command('update-rules')
+    .description('Download latest rule packs from remote registry')
+    .option('--source <url>', 'Custom manifest URL (enterprise registries)')
+    .action(async (options) => {
+      await executeUpdateRules(options);
     });
 
   program
