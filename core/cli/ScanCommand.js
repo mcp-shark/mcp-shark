@@ -2,7 +2,9 @@
  * Scan Command
  * Wires ScanService results to CLI output with flag support
  */
+import { applyFixes, renderFixResults } from './AutoFixEngine.js';
 import { runScan } from './ScanService.js';
+import { calculateSharkScore } from './SharkScoreCalculator.js';
 import { formatWalkthrough, generateWalkthroughs } from './WalkthroughGenerator.js';
 import {
   displayScanBanner,
@@ -47,6 +49,11 @@ export function executeScan(options = {}) {
   }
 
   renderTerminalOutput(scanResult, options);
+
+  if (options.fix) {
+    executeAutoFix(scanResult);
+  }
+
   return exitWithCode(scanResult, options.ci);
 }
 
@@ -121,6 +128,22 @@ function renderWalkthroughs(toxicFlows) {
   for (const walkthrough of walkthroughs) {
     console.log(formatWalkthrough(walkthrough));
   }
+}
+
+/**
+ * Execute auto-fix and show before/after score
+ */
+function executeAutoFix(scanResult) {
+  const scoreBefore = scanResult.scoreResult.score;
+  const fixResult = applyFixes(scanResult.findings);
+
+  const remainingFindings = scanResult.findings.filter(
+    (f) => !fixResult.fixed.some((fx) => fx.finding === f)
+  );
+  const scoreAfterResult = calculateSharkScore(remainingFindings, scanResult.toxicFlows);
+  const scoreAfter = scoreAfterResult.score;
+
+  renderFixResults(fixResult, scoreBefore, scoreAfter);
 }
 
 /**

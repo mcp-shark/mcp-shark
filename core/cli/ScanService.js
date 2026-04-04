@@ -1,9 +1,13 @@
+import { StaticRulesService } from '#core/services/security/StaticRulesService.js';
 /**
  * Scan Service
  * Orchestrates: config detection → rule analysis → toxic flows → shark score
  * Pure business logic, no HTTP knowledge, no CLI formatting
  */
-import { StaticRulesService } from '#core/services/security/StaticRulesService.js';
+import { analyzeConfigPermissions } from '#core/services/security/rules/scans/configPermissions.js';
+import { analyzeAllServerToolNames } from '#core/services/security/rules/scans/duplicateToolNames.js';
+import { analyzeServerContainment } from '#core/services/security/rules/scans/missingContainment.js';
+import { analyzeServerShellRisk } from '#core/services/security/rules/scans/shellEnvInjection.js';
 import { getAllServers, scanIdeConfigs } from './ConfigScanner.js';
 import { calculateSharkScore, countBySeverity } from './SharkScoreCalculator.js';
 import { analyzeToxicFlows } from './ToxicFlowAnalyzer.js';
@@ -24,7 +28,7 @@ export function runScan(options = {}) {
   const rulesService = new StaticRulesService(null);
   const ruleMetadata = rulesService.getRuleMetadata();
 
-  const allFindings = analyzeAllServers(servers, rulesService);
+  const allFindings = analyzeAllServers(servers, rulesService, ideResults);
   const toxicFlows = analyzeToxicFlows(servers);
 
   const scorableFindings = options.strict
@@ -57,9 +61,9 @@ export function runScan(options = {}) {
 }
 
 /**
- * Analyze all servers with the static rules engine
+ * Analyze all servers with the static rules engine + config-level checks
  */
-function analyzeAllServers(servers, rulesService) {
+function analyzeAllServers(servers, rulesService, ideResults) {
   const findings = [];
 
   for (const server of servers) {
@@ -67,6 +71,27 @@ function analyzeAllServers(servers, rulesService) {
     findings.push(...serverFindings);
   }
 
+  const dupFindings = analyzeAllServerToolNames(servers);
+  findings.push(...dupFindings);
+
+  const permFindings = analyzeIdePermissions(ideResults);
+  findings.push(...permFindings);
+
+  return findings;
+}
+
+/**
+ * Check permissions on all found IDE config files
+ */
+function analyzeIdePermissions(ideResults) {
+  const findings = [];
+  for (const ide of ideResults) {
+    if (!ide.found || !ide.permissions) {
+      continue;
+    }
+    const permFindings = analyzeConfigPermissions(ide.configPath, ide.permissions);
+    findings.push(...permFindings);
+  }
   return findings;
 }
 
@@ -76,10 +101,8 @@ function analyzeAllServers(servers, rulesService) {
 function analyzeServer(server, rulesService) {
   const findings = [];
 
-  const configFinding = analyzeServerConfig(server);
-  if (configFinding) {
-    findings.push(configFinding);
-  }
+  const configFindings = analyzeServerConfig(server);
+  findings.push(...configFindings);
 
   if (Array.isArray(server.tools)) {
     for (const tool of server.tools) {
@@ -166,14 +189,31 @@ function maskSecret(value) {
 }
 
 /**
- * Analyze server-level config issues
+ * Analyze server-level config issues (containment + shell risks)
  */
 function analyzeServerConfig(server) {
   const config = server.config || {};
-  if (config.command && /\$\{?[A-Z_]+\}?/.test(config.command)) {
-    return null;
+  const findings = [];
+
+  const containmentFindings = analyzeServerContainment(server.name, config);
+  for (const f of containmentFindings) {
+    findings.push({
+      ...f,
+      ide: server.ide,
+      config_path: server.configPath,
+    });
   }
-  return null;
+
+  const shellFindings = analyzeServerShellRisk(server.name, config);
+  for (const f of shellFindings) {
+    findings.push({
+      ...f,
+      ide: server.ide,
+      config_path: server.configPath,
+    });
+  }
+
+  return findings;
 }
 
 /**

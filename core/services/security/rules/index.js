@@ -33,6 +33,14 @@ import * as crossServer from './scans/crossServerShadowing.js';
 import * as secrets from './scans/hardcodedSecrets.js';
 import * as nameAmbig from './scans/toolNameAmbiguity.js';
 
+import * as ansiEscape from './scans/ansiEscapeSequences.js';
+import * as configPerms from './scans/configPermissions.js';
+// CLI-Added Rules (Phase 2)
+import * as dnsRebind from './scans/dnsRebinding.js';
+import * as dupTools from './scans/duplicateToolNames.js';
+import * as containment from './scans/missingContainment.js';
+import * as shellEnv from './scans/shellEnvInjection.js';
+
 /**
  * All available static rules with their analysis functions
  */
@@ -66,6 +74,14 @@ export const staticRules = {
   'cross-server-shadowing': crossServer,
   'hardcoded-secrets': secrets,
   'tool-name-ambiguity': nameAmbig,
+
+  // CLI-Added Rules (Phase 2)
+  'dns-rebinding': dnsRebind,
+  'ansi-escape-sequences': ansiEscape,
+  'config-permissions': configPerms,
+  'missing-containment': containment,
+  'duplicate-tool-names': dupTools,
+  'shell-env-injection': shellEnv,
 };
 
 /**
