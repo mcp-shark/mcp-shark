@@ -2,7 +2,6 @@
 
 /**
  * MCP Shark CLI Entry Point
- * Default command: scan (the 10K-star command)
  */
 import { spawn } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
