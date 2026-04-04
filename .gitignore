@@ -126,3 +126,7 @@ vite.config.ts.timestamp-*
 **/.ui.log
 **/.server.log
 .cursor/features/
+
+# MCP Shark generated lockfile (machine-specific)
+.mcp-shark.lock
+.mcp-shark/
