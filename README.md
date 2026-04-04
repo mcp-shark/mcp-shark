@@ -5,7 +5,7 @@
   <h1>mcp-shark</h1>
 
   <p><strong>Security scanner for AI agent tools</strong></p>
-  <p>Find vulnerabilities in your MCP server setup in under 3 seconds. 100% local, zero API calls.</p>
+  <p>Find vulnerabilities in your MCP server setup in under 3 seconds. 100% local scans, zero telemetry.</p>
 
   [![npm version](https://img.shields.io/npm/v/@mcp-shark/mcp-shark.svg)](https://www.npmjs.com/package/@mcp-shark/mcp-shark)
   [![License: Non-Commercial](https://img.shields.io/badge/License-Non--Commercial-red.svg)](LICENSE)
@@ -20,34 +20,6 @@ npx @mcp-shark/mcp-shark
 
 ![mcp-shark demo](docs/assets/demo.gif)
 
-```
-  🦈  MCP Shark Security Scanner
-
-  IDE Detection
-  ✔ Cursor (3 servers)
-  ✔ Claude Desktop (1 servers)
-  ✔ VS Code (2 servers)
-
-  ⚠ CRITICAL  GitHub PAT hardcoded in config
-    GITHUB_TOKEN=ghp_****  — use environment variable reference instead
-    Fixable: npx mcp-shark scan --fix
-
-  ⚠ HIGH  Toxic Flow: Slack → GitHub
-    A Slack message with prompt injection could cause your agent to
-    push malicious code to your repository. (Catalog §1.2, §1.3)
-
-  Shark Score: 38/100 (D)
-  ██████████░░░░░░░░░░░░░░░░░░░░
-
-  5 critical · 3 high · 2 medium · 1 low
-  Scanned 6 servers · 30 rules · 14 tools in 1ms
-
-  Next steps:
-    npx mcp-shark scan --fix          Auto-fix 3 issues
-    npx mcp-shark scan --walkthrough  See full attack chains
-    npx mcp-shark lock                Pin tool definitions
-```
-
 ## Why mcp-shark?
 
 **82% of MCP server setups have at least one vulnerability.** Most developers don't know.
@@ -59,11 +31,11 @@ mcp-shark finds them in seconds — no cloud, no API keys, no telemetry. Just `n
 No other tool does this. mcp-shark analyzes how your MCP servers **interact with each other** to find cross-server attack paths:
 
 ```
-  ⚠ HIGH  Slack → GitHub
+  ▲ HIGH  Slack → GitHub
     A Slack message with prompt injection could cause your agent to
     push malicious code to your repository.
 
-  ⚠ MEDIUM  Browser → FileSystem
+  ▲ MEDIUM  Browser → FileSystem
     Untrusted web content could be used to overwrite local files
     through agent tool chaining.
 ```
@@ -74,22 +46,24 @@ These aren't theoretical — they're the [#1 and #3 most exploited MCP vulnerabi
 
 | Feature | Description |
 |---------|-------------|
-| **30 security rules** | OWASP MCP Top 10 + Agentic Security Initiative + general checks |
+| **35 security rules** | OWASP MCP Top 10 + Agentic Security Initiative + general checks |
 | **Toxic flow analysis** | Cross-server attack path detection (exclusive) |
 | **Attack walkthroughs** | Personalized multi-step exploit narratives |
 | **Shark Score** | Transparent security posture score (0-100, A-F) |
 | **Auto-fix** | `--fix` replaces hardcoded secrets, fixes permissions, with backup/undo |
 | **Tool pinning** | Git-committable `.mcp-shark.lock` with SHA-256 hashes |
-| **15 IDE detection** | Cursor, Claude Desktop, VS Code, Windsurf, Codex, and 10 more |
-| **3 output formats** | Terminal (beautiful), JSON, SARIF v2.1.0 |
+| **15 IDE detection** | Cursor, Claude Desktop, VS Code, Windsurf, Codex, Amp, Kiro, and more |
+| **4 output formats** | Terminal, JSON, SARIF v2.1.0, HTML |
 | **Health checks** | `doctor` command for environment validation |
 | **Server inventory** | `list` command shows all servers in a table |
 | **Watch mode** | Live re-scan on config changes |
 | **HTML reports** | Self-contained offline security reports |
-| **YAML rules** | Community-contributed rules via `.mcp-shark/rules/` |
+| **Downloadable rule packs** | `update-rules` fetches latest OWASP/Agentic catalogs — zero code changes |
+| **YAML rules** | Per-project custom rules via `.mcp-shark/rules/` |
 | **GitHub Action** | CI/CD integration with SARIF upload |
+| **Interactive TUI** | lazygit-style terminal UI for scan, fix, and server browsing |
 | **Web UI** | Wireshark-like monitoring interface |
-| **100% local** | Zero network calls, zero telemetry, always offline |
+| **100% local** | Scans are fully offline; rule updates are opt-in via `update-rules` |
 
 ## Quick Start
 
@@ -112,8 +86,14 @@ npx @mcp-shark/mcp-shark doctor
 # Show all detected servers
 npx @mcp-shark/mcp-shark list
 
+# Download latest rule packs (OWASP, Agentic Security)
+npx @mcp-shark/mcp-shark update-rules
+
 # Watch for config changes
 npx @mcp-shark/mcp-shark watch
+
+# Interactive terminal UI
+npx @mcp-shark/mcp-shark tui
 
 # Generate HTML report
 npx @mcp-shark/mcp-shark scan --format html --output report.html
@@ -126,16 +106,18 @@ npx @mcp-shark/mcp-shark scan --ci --format sarif
 
 | Command | Description |
 |---------|-------------|
-| `scan` (default) | Run security scan with 30+ rules |
+| `scan` (default) | Run security scan with 35 rules |
 | `lock` | Create `.mcp-shark.lock` file |
 | `lock --verify` | Verify current state matches lockfile |
 | `diff` | Show tool definition changes since last lock |
 | `doctor` | Run environment health checks |
-| `list` | Show inventory of all detected servers |
+| `list` | Show inventory of all detected servers (`--format json` supported) |
+| `update-rules` | Download latest rule packs from remote registry |
 | `watch` | Watch config files and re-scan on changes |
+| `tui` | Interactive terminal UI (lazygit-style) |
 | `serve` | Start the web monitoring UI |
 
-## Scan Flags
+## CLI Flags
 
 | Flag | Description |
 |------|-------------|
@@ -149,6 +131,7 @@ npx @mcp-shark/mcp-shark scan --ci --format sarif
 | `--strict` | Count advisory findings in score |
 | `--ide <name>` | Scan specific IDE only |
 | `--rules <path>` | Load custom YAML rules |
+| `--source <url>` | Custom rule registry URL (for `update-rules`) |
 
 ## Comparison
 
@@ -156,13 +139,13 @@ npx @mcp-shark/mcp-shark scan --ci --format sarif
 |------------|----------|-----------------------|---------|---------------|
 | Runtime | Python (`uvx`) | Python (`pip`) | Go (binary) | **Node.js (`npx`)** |
 | First result | ~10s | N/A (proxy) | ~5s | **<3s** |
-| Security rules | 15 | 0 (proxy only) | SAST | **30+ rules** |
+| Security rules | 15 | 0 (proxy only) | SAST | **35 rules** |
 | **Toxic flow analysis** | — | — | — | **Yes** |
 | **Attack walkthroughs** | — | — | — | **Yes** |
 | **Auto-fix** | — | — | — | **Yes** |
 | Tool pinning | Hash-based | TOFU | — | **Git-committable lockfile** |
 | TOFU proxy | — | Yes | — | Yes (web UI) |
-| YARA engine | — | — | — | **Yes** |
+| Custom rule engine | — | — | — | **YAML + JSON packs** |
 | Web UI | — | — | — | **Yes** |
 | Confidence levels | — | — | Scores | **confirmed/advisory** |
 | IDE detection | ~16 | ~5 | N/A | **15** |
@@ -170,13 +153,58 @@ npx @mcp-shark/mcp-shark scan --ci --format sarif
 | Health check | — | — | — | **Yes** |
 | GitHub Action | — | — | — | **Yes** |
 | Watch mode | — | — | — | **Yes** |
-| **100% offline** | `--local-only` | Yes | Yes | **Always** |
+| **Downloadable rule packs** | — | — | — | **Yes** |
+| **100% offline** | `--local-only` | Yes | Yes | **Always (scans)** |
 
 **Bold = features no competitor has.**
 
-## Custom YAML Rules
+## Rule Extensibility
 
-Create `.mcp-shark/rules/` in your project to add custom security rules:
+### Downloadable Rule Packs (JSON)
+
+mcp-shark ships with 24 declarative rules as JSON packs (OWASP MCP, Agentic Security Initiative, General Security). New vulnerability catalogs can be added as `.json` files — no JavaScript, no code changes.
+
+```bash
+# Fetch latest rule packs from the registry
+npx @mcp-shark/mcp-shark update-rules
+
+# Use a custom/enterprise registry
+npx @mcp-shark/mcp-shark update-rules --source https://internal.corp/rules/manifest.json
+```
+
+Downloaded packs are cached in `.mcp-shark/rule-packs/` and merged with built-in rules on every scan.
+
+<details>
+<summary>Rule pack JSON schema</summary>
+
+```json
+{
+  "id": "owasp-mcp-2027",
+  "name": "OWASP MCP Top 10 (2027)",
+  "version": "1.0.0",
+  "rules": [
+    {
+      "id": "MCP01-token-mismanagement",
+      "name": "Token Mismanagement",
+      "severity": "critical",
+      "framework": "OWASP-MCP",
+      "description": "Detects hardcoded tokens in MCP configs",
+      "patterns": [
+        { "regex": "(api[_-]?key|token)\\s*[:=]", "flags": "i", "label": "API key pattern" }
+      ],
+      "scope": ["tool", "prompt", "resource", "packet"],
+      "exclude_patterns": [{ "regex": "\\$\\{|process\\.env" }],
+      "match_mode": "any"
+    }
+  ]
+}
+```
+
+</details>
+
+### Custom YAML Rules (per-project)
+
+Create `.mcp-shark/rules/` in your project to add lightweight custom rules:
 
 ```yaml
 # .mcp-shark/rules/no-production-keys.yaml
@@ -190,7 +218,21 @@ match:
 message: "Production key detected in {key} — use staging keys for development"
 ```
 
-Rules are loaded automatically on scan. Share them with your team by committing the folder.
+Both YAML rules and JSON packs are loaded automatically on scan. Share them with your team by committing the folder.
+
+### User-Overridable Data (`.mcp-shark/`)
+
+Every built-in data source can be extended or overridden through YAML files in your project root:
+
+| File | Overrides | Format |
+|------|-----------|--------|
+| `.mcp-shark/secrets.yaml` | Secret detection patterns | List of `{ name, regex }` |
+| `.mcp-shark/classifications.yaml` | Server/tool capability tags | Nested map `server: { capability: true }` |
+| `.mcp-shark/flows.yaml` | Toxic flow rules | List of `{ source_cap, target_cap, risk, ... }` |
+| `.mcp-shark/rules/*.yaml` | Custom per-project rules | See YAML Rules above |
+| `.mcp-shark/rule-packs/*.json` | Override or add declarative packs | See JSON Packs above |
+
+User data is merged with built-in data at scan time. No rebuild required.
 
 ## GitHub Action
 
@@ -219,21 +261,21 @@ jobs:
 |-----|-------------|--------|
 | Cursor | `~/.cursor/mcp.json` | ✅ |
 | Claude Desktop | `~/Library/.../claude_desktop_config.json` | ✅ |
-| VS Code | `~/.vscode/mcp.json` | ✅ |
-| Windsurf | `~/.windsurf/mcp.json` | ✅ |
 | Claude Code | `~/.claude.json` | ✅ |
+| VS Code | `~/.vscode/mcp.json` | ✅ |
+| Windsurf | `~/.codeium/windsurf/mcp_config.json` | ✅ |
 | Codex | `~/.codex/config.toml` | ✅ |
-| Continue | `~/.continue/config.json` | ✅ |
-| Zed | `~/.config/zed/settings.json` | ✅ |
-| Cline | `~/.cline/mcp_settings.json` | ✅ |
-| Roo Code | `~/.roo-code/mcp.json` | ✅ |
-| Amazon Q | `~/.aws/q/mcp.json` | ✅ |
 | Gemini CLI | `~/.gemini/settings.json` | ✅ |
-| Kilo Code | `~/.kilo-code/mcp.json` | ✅ |
+| Continue | `~/.continue/config.json` | ✅ |
+| Cline | `~/.../saoudrizwan.claude-dev/.../cline_mcp_settings.json` | ✅ |
+| Amp | `~/.amp/mcp.json` | ✅ |
+| Kiro | `~/.kiro/mcp.json` | ✅ |
+| Zed | `~/.config/zed/settings.json` | ✅ |
 | Augment | `~/.augment/mcp.json` | ✅ |
-| Trae | `~/.trae/mcp.json` | ✅ |
+| Roo Code | `~/.roo-code/mcp.json` | ✅ |
+| Project (local) | `./mcp.json`, `./.mcp.json`, `./.mcp/config.json` | ✅ |
 
-## Security Rules (30+)
+## Security Rules (35)
 
 <details>
 <summary>Full rule list</summary>
@@ -298,8 +340,39 @@ npx @mcp-shark/mcp-shark serve --open
 The web UI provides:
 - Multi-server aggregation and real-time monitoring
 - Interactive playground for testing tools, prompts, and resources
-- Local security analysis with YARA detection
+- Local security analysis with pattern-based detection
 - API documentation with interactive testing
+
+## Architecture
+
+```
+┌────────────────────────────────────────────────────┐
+│  CLI (Commander.js)                                │
+│  scan · lock · diff · doctor · list · watch · tui  │
+│  update-rules · serve                              │
+├──────────────┬──────────────┬──────────────────────┤
+│  ConfigScanner│  ScanService  │  StaticRulesService  │
+│  15 IDEs      │  orchestrator │  35 rules            │
+├──────────────┴──────────────┴──────────────────────┤
+│  Data layer (all JSON, all overridable)            │
+│  ┌────────────┬──────────────┬───────────────────┐ │
+│  │ rule-packs │ secret-      │ tool-             │ │
+│  │ (24 rules) │ patterns.json│ classifications   │ │
+│  ├────────────┼──────────────┼───────────────────┤ │
+│  │ toxic-flow │ rule-        │ .mcp-shark/*.yaml │ │
+│  │ rules.json │ sources.json │ (user overrides)  │ │
+│  └────────────┴──────────────┴───────────────────┘ │
+├────────────────────────────────────────────────────┤
+│  JS plugins (11 rules needing algorithmic logic)   │
+│  + DeclarativeRuleEngine (24 pattern-based rules)  │
+└────────────────────────────────────────────────────┘
+```
+
+**Design principles:**
+- **Data-driven** — Security rules, secret patterns, tool classifications, and toxic flow rules are all JSON files. No source changes needed to add or update rules.
+- **User-overridable** — Every built-in data file has a corresponding `.mcp-shark/*.yaml` override path.
+- **Hybrid rule engine** — Pattern-matching rules (24) live as declarative JSON packs. Algorithmic rules (11) that need code logic remain as JS plugins. Both are loaded and merged transparently.
+- **Zero-config scanning** — `npx` and go. Auto-detects all 15 IDEs and project-local configs.
 
 ## Documentation
 
