@@ -18,8 +18,8 @@
 npx @mcp-shark/mcp-shark
 ```
 
-<!-- TODO: Replace with terminal recording GIF -->
-<!-- ![mcp-shark scan demo](docs/assets/demo.gif) -->
+<!-- Record with: vhs docs/assets/quick-demo.tape -->
+<!-- ![mcp-shark scan demo](docs/assets/quick-demo.gif) -->
 
 ```
   🦈  MCP Shark Security Scanner

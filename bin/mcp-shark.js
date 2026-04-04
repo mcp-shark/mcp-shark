@@ -17,6 +17,7 @@ import { executeScan } from '#core/cli/ScanCommand.js';
 import { executeWatch } from '#core/cli/WatchCommand.js';
 import { displayServeBanner } from '#core/cli/output/Banner.js';
 import { bootstrapLogger as logger } from '#core/libraries/index.js';
+import { launchTui } from '#core/tui/render.js';
 
 const SERVER_URL = 'http://localhost:9853';
 const BROWSER_OPEN_DELAY = 1000;
@@ -167,6 +168,13 @@ async function main() {
       if (exitCode !== 0) {
         process.exit(exitCode);
       }
+    });
+
+  program
+    .command('tui')
+    .description('Launch interactive terminal UI (lazygit-style)')
+    .action(async () => {
+      await launchTui();
     });
 
   program
