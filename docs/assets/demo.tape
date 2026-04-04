@@ -1,53 +1,48 @@
-# MCP Shark Demo — Terminal GIF
-# Record with: vhs docs/assets/demo.tape
-# Requires: https://github.com/charmbracelet/vhs
+# MCP Shark Full Demo
+# Record with: cd mcp-shark && vhs docs/assets/demo.tape
 
 Output docs/assets/demo.gif
 
-Require npx
-
 Set Shell "bash"
-Set FontSize 16
+Set FontSize 15
 Set Width 1200
 Set Height 700
-Set Padding 20
-Set FontFamily "JetBrains Mono"
+Set Padding 16
+Set FontFamily "Menlo"
 Set Theme "Catppuccin Mocha"
-Set TypingSpeed 40ms
+Set TypingSpeed 50ms
 Set CursorBlink false
 
-# Show the scan command
-Type "npx @mcp-shark/mcp-shark"
-Sleep 500ms
+Sleep 300ms
+
+# 1. Run the scan
+Type "node bin/mcp-shark.js"
+Sleep 300ms
 Enter
 Sleep 3s
 
-# Let the scan output render fully
-Sleep 2s
+Sleep 1500ms
 
-# Show the list command
-Type "npx @mcp-shark/mcp-shark list"
-Sleep 500ms
+# 2. Show server inventory
+Type "node bin/mcp-shark.js list"
+Sleep 300ms
 Enter
 Sleep 3s
 
-# Show doctor
-Type "npx @mcp-shark/mcp-shark doctor"
-Sleep 500ms
+Sleep 1000ms
+
+# 3. Doctor command
+Type "node bin/mcp-shark.js doctor"
+Sleep 300ms
 Enter
 Sleep 3s
 
-# Show walkthrough flag
-Type "npx @mcp-shark/mcp-shark scan --walkthrough"
-Sleep 500ms
-Enter
-Sleep 4s
+Sleep 1000ms
 
-# Show fix command
-Type "npx @mcp-shark/mcp-shark scan --fix --yes"
-Sleep 500ms
+# 4. Show help
+Type "node bin/mcp-shark.js --help"
+Sleep 300ms
 Enter
 Sleep 3s
 
-# Final pause
-Sleep 2s
+Sleep 1500ms

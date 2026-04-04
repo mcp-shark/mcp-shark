@@ -18,8 +18,7 @@
 npx @mcp-shark/mcp-shark
 ```
 
-<!-- Record with: vhs docs/assets/quick-demo.tape -->
-<!-- ![mcp-shark scan demo](docs/assets/quick-demo.gif) -->
+![mcp-shark demo](docs/assets/demo.gif)
 
 ```
   🦈  MCP Shark Security Scanner
