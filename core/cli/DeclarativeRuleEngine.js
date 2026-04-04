@@ -9,6 +9,8 @@
  *
  * This allows OWASP 2027+ and new vulnerability catalogs to be added
  * without writing any JavaScript.
+ *
+ * Options: pass `{ builtinOnly: true }` to load only shipped packs (tests avoid cwd overrides).
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
@@ -27,10 +29,11 @@ const USER_PACKS_DIR = join(process.cwd(), '.mcp-shark', 'rule-packs');
  * Returns an array of rule objects with the same shape as JS rule plugins:
  *   { ruleMetadata, analyzeTool, analyzePrompt, analyzeResource, analyzePacket }
  *
+ * @param {{ builtinOnly?: boolean }} [options]
  * @returns {Array<object>}
  */
-export function loadDeclarativeRules() {
-  const packs = loadAllPacks();
+export function loadDeclarativeRules(options = {}) {
+  const packs = options.builtinOnly ? loadPacksFromDir(BUILTIN_PACKS_DIR) : loadAllPacks();
   const rules = [];
 
   for (const pack of packs) {

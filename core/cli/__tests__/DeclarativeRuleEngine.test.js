@@ -3,7 +3,7 @@ import { describe, it } from 'node:test';
 import { loadDeclarativeRules } from '../DeclarativeRuleEngine.js';
 
 describe('DeclarativeRuleEngine', () => {
-  const rules = loadDeclarativeRules();
+  const rules = loadDeclarativeRules({ builtinOnly: true });
 
   it('loads exactly 24 declarative rules from built-in packs', () => {
     assert.strictEqual(rules.length, 24, `Expected 24 rules, got ${rules.length}`);

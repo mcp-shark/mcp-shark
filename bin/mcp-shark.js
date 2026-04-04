@@ -113,7 +113,29 @@ function validateDirectories() {
   }
 }
 
+/**
+ * Legacy: `npx mcp-shark --open` / `-o` → `serve --open` (before Commander parses argv).
+ * Skipped when the first argument is a subcommand (e.g. `serve`, `scan`).
+ */
+function applyLegacyOpenAlias() {
+  const argv = process.argv.slice(2);
+  if (argv.length === 0) {
+    return;
+  }
+  const first = argv[0];
+  if (!first.startsWith('-')) {
+    return;
+  }
+  if (!argv.includes('--open') && !argv.includes('-o')) {
+    return;
+  }
+  const filtered = argv.filter((x) => x !== '--open' && x !== '-o');
+  process.argv = [process.argv[0], process.argv[1], 'serve', '--open', ...filtered];
+}
+
 async function main() {
+  applyLegacyOpenAlias();
+
   const version = getVersion();
 
   const program = new Command();

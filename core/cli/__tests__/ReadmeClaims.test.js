@@ -23,7 +23,7 @@ const RULE_PACKS_DIR = join(import.meta.dirname, '..', 'data', 'rule-packs');
 
 describe('README Claims Verification', () => {
   it('README says "35 security rules" — verify 24 declarative + 11 JS = 35', () => {
-    const declarativeRules = loadDeclarativeRules();
+    const declarativeRules = loadDeclarativeRules({ builtinOnly: true });
     const jsFiles = readdirSync(JS_RULES_DIR).filter((f) => f.endsWith('.js'));
     const total = declarativeRules.length + jsFiles.length;
     assert.strictEqual(

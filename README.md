@@ -5,7 +5,7 @@
   <h1>mcp-shark</h1>
 
   <p><strong>Security scanner for AI agent tools</strong></p>
-  <p>Find vulnerabilities in your MCP server setup in under 3 seconds. 100% local scans, zero telemetry.</p>
+  <p>Scan MCP configs locally. No cloud or telemetry for static scans; rule updates are opt-in.</p>
 
   [![npm version](https://img.shields.io/npm/v/@mcp-shark/mcp-shark.svg)](https://www.npmjs.com/package/@mcp-shark/mcp-shark)
   [![License: Non-Commercial](https://img.shields.io/badge/License-Non--Commercial-red.svg)](LICENSE)
@@ -22,33 +22,32 @@ npx @mcp-shark/mcp-shark
 
 ## Why mcp-shark?
 
-**82% of MCP server setups have at least one vulnerability.** Most developers don't know.
+MCP setups commonly mix secrets, broad tool access, and multiple servers in one agent context; issues are easy to miss without checking configs. See the [OWASP MCP Top 10](https://owasp.org/www-project-mcp-top-10/) for a structured view of what can go wrong.
 
-mcp-shark finds them in seconds — no cloud, no API keys, no telemetry. Just `npx` and the truth about your AI tool security.
+mcp-shark runs on your machine — no API keys or hosted scan backend. Install with `npx` and review findings locally.
 
-### The killer feature: Toxic Flow Analysis
+### Toxic flow analysis
 
-No other tool does this. mcp-shark analyzes how your MCP servers **interact with each other** to find cross-server attack paths:
+The scanner models how MCP servers **compose in the agent context** and flags risky capability pairings (for example, secret access combined with external egress):
 
 ```
-  ▲ HIGH  Slack → GitHub
-    A Slack message with prompt injection could cause your agent to
-    push malicious code to your repository.
+  ▲ HIGH  notify-server → repo-server
+    Untrusted content in one tool’s channel could lead the agent to
+    take a destructive action in another (e.g. push code).
 
-  ▲ MEDIUM  Browser → FileSystem
-    Untrusted web content could be used to overwrite local files
-    through agent tool chaining.
+  ▲ MEDIUM  browser-server → filesystem-server
+    Web-sourced context could be chained into local file operations.
 ```
 
-These aren't theoretical — they're the [#1 and #3 most exploited MCP vulnerabilities](https://equixly.com/blog/2025/03/29/mcp-security-risks/) in production.
+Use mcp-shark findings as input to your own threat model, not as a complete audit.
 
 ## Features
 
 | Feature | Description |
 |---------|-------------|
 | **35 security rules** | OWASP MCP Top 10 + Agentic Security Initiative + general checks |
-| **Toxic flow analysis** | Cross-server attack path detection (exclusive) |
-| **Attack walkthroughs** | Personalized multi-step exploit narratives |
+| **Toxic flow analysis** | Cross-server attack path detection from tool capability heuristics |
+| **Attack walkthroughs** | Step-by-step exploit narratives from findings |
 | **Shark Score** | Transparent security posture score (0-100, A-F) |
 | **Auto-fix** | `--fix` replaces hardcoded secrets, fixes permissions, with backup/undo |
 | **Tool pinning** | Git-committable `.mcp-shark.lock` with SHA-256 hashes |
@@ -63,7 +62,7 @@ These aren't theoretical — they're the [#1 and #3 most exploited MCP vulnerabi
 | **GitHub Action** | CI/CD integration with SARIF upload |
 | **Interactive TUI** | lazygit-style terminal UI for scan, fix, and server browsing |
 | **Web UI** | Wireshark-like monitoring interface |
-| **100% local** | Scans are fully offline; rule updates are opt-in via `update-rules` |
+| **Local static scans** | No hosted scan backend; `update-rules` is opt-in HTTPS to the registry |
 
 ## Quick Start
 
@@ -77,7 +76,7 @@ npx @mcp-shark/mcp-shark scan --fix
 # See full attack chain narratives
 npx @mcp-shark/mcp-shark scan --walkthrough
 
-# Pin tool definitions to detect rug pulls
+# Pin tool definitions (lockfile) to spot unexpected changes
 npx @mcp-shark/mcp-shark lock
 
 # Check environment health
@@ -117,7 +116,9 @@ npx @mcp-shark/mcp-shark scan --ci --format sarif
 | `tui` | Interactive terminal UI (lazygit-style) |
 | `serve` | Start the web monitoring UI |
 
-## CLI Flags
+## CLI flags
+
+### `scan` (default command)
 
 | Flag | Description |
 |------|-------------|
@@ -130,33 +131,50 @@ npx @mcp-shark/mcp-shark scan --ci --format sarif
 | `--output <path>` | Write report to file (for `html` format) |
 | `--strict` | Count advisory findings in score |
 | `--ide <name>` | Scan specific IDE only |
-| `--rules <path>` | Load custom YAML rules |
-| `--source <url>` | Custom rule registry URL (for `update-rules`) |
+| `--rules <path>` | Load custom YAML rules from directory |
+| `--refresh-rules` | Fetch rule packs from registry before scan (HTTPS; see rule registry config) |
+
+### Other commands
+
+| Command | Flags / notes |
+|---------|----------------|
+| `list` | `--format terminal` or `--format json` |
+| `update-rules` | `--source <url>` for a custom pack manifest |
+| `serve` | `--open` / `-o` to open the browser |
+| `lock` | `--verify` to check lockfile match |
+
+## How `scan` works
+
+The CLI **`scan`** command is **static**: it reads MCP entries from your IDE config files (see [Supported IDEs](#supported-ides) and optional project `./mcp.json`) and analyzes **what is written there**. It does **not** connect to running MCP servers or call `tools/list`.
+
+- **Always scanned:** each server block’s `command`, `args`, `env`, `url`, and related fields (secrets in `env`, unsafe spawn patterns, HTTP URLs, etc.).
+- **Tool-level rules** (declarative packs, command-injection heuristics, toxic-flow classification from tool **names**, etc.) run only when that server entry includes an embedded **`tools`** array (name, description, schemas). If `tools` is omitted—typical for `command`/`stdio`-only configs—the scan may report **0 tools checked** even though Cursor is running the server fine.
+
+To exercise full rule coverage in CI or test repos, either embed tool metadata in the same JSON your scanner reads, or use a project-local `mcp.json` harness (see `--ide Project`).
 
 ## Comparison
 
-| Capability | mcp-scan | mcp-context-protector | Oxvault | **mcp-shark** |
-|------------|----------|-----------------------|---------|---------------|
-| Runtime | Python (`uvx`) | Python (`pip`) | Go (binary) | **Node.js (`npx`)** |
-| First result | ~10s | N/A (proxy) | ~5s | **<3s** |
-| Security rules | 15 | 0 (proxy only) | SAST | **35 rules** |
-| **Toxic flow analysis** | — | — | — | **Yes** |
-| **Attack walkthroughs** | — | — | — | **Yes** |
-| **Auto-fix** | — | — | — | **Yes** |
-| Tool pinning | Hash-based | TOFU | — | **Git-committable lockfile** |
-| TOFU proxy | — | Yes | — | Yes (web UI) |
-| Custom rule engine | — | — | — | **YAML + JSON packs** |
-| Web UI | — | — | — | **Yes** |
-| Confidence levels | — | — | Scores | **confirmed/advisory** |
-| IDE detection | ~16 | ~5 | N/A | **15** |
-| Output formats | JSON | — | JSON | **Terminal + JSON + SARIF + HTML** |
-| Health check | — | — | — | **Yes** |
-| GitHub Action | — | — | — | **Yes** |
-| Watch mode | — | — | — | **Yes** |
-| **Downloadable rule packs** | — | — | — | **Yes** |
-| **100% offline** | `--local-only` | Yes | Yes | **Always (scans)** |
+Rough feature matrix (other products change often — verify on their docs before you rely on this):
 
-**Bold = features no competitor has.**
+| Capability | mcp-scan | mcp-context-protector | Oxvault | mcp-shark |
+|------------|----------|-----------------------|---------|-----------|
+| Runtime | Python (`uvx`) | Python (`pip`) | Go (binary) | Node.js (`npx`) |
+| Security rules | Pattern-based set | 0 (proxy-first) | SAST-style | 35 (24 declarative + 11 JS) |
+| Toxic flow analysis | — | — | — | Yes (heuristic, config/tool metadata) |
+| Attack walkthroughs | — | — | — | Yes |
+| Auto-fix | — | — | — | Yes (limited fix types) |
+| Tool pinning | Hash-based | TOFU | — | `.mcp-shark.lock` (SHA-256) |
+| TOFU / traffic proxy | — | Yes | — | Yes (web UI) |
+| Custom rules | — | — | — | YAML + JSON packs |
+| Web UI | — | — | — | Yes |
+| Confidence / scoring | — | — | Varies | confirmed / advisory + Shark Score |
+| IDE config discovery | Varies | Varies | N/A | 15 IDEs + project-local paths (see below) |
+| Output formats | JSON | — | JSON | Terminal, JSON, SARIF, HTML |
+| Health check | — | — | — | Yes (`doctor`) |
+| GitHub Action | — | — | — | Yes |
+| Watch mode | — | — | — | Yes |
+| Downloadable rule packs | — | — | — | Yes (`update-rules`) |
+| Offline static scan | Optional flag | Yes | Yes | Yes (registry fetch is opt-in) |
 
 ## Rule Extensibility
 
@@ -337,6 +355,12 @@ MCP Shark also includes a Wireshark-like web interface for real-time MCP traffic
 npx @mcp-shark/mcp-shark serve --open
 ```
 
+Same as the older shortcut (no `serve` subcommand):
+
+```bash
+npx @mcp-shark/mcp-shark --open
+```
+
 The web UI provides:
 - Multi-server aggregation and real-time monitoring
 - Interactive playground for testing tools, prompts, and resources
@@ -369,10 +393,10 @@ The web UI provides:
 ```
 
 **Design principles:**
-- **Data-driven** — Security rules, secret patterns, tool classifications, and toxic flow rules are all JSON files. No source changes needed to add or update rules.
-- **User-overridable** — Every built-in data file has a corresponding `.mcp-shark/*.yaml` override path.
-- **Hybrid rule engine** — Pattern-matching rules (24) live as declarative JSON packs. Algorithmic rules (11) that need code logic remain as JS plugins. Both are loaded and merged transparently.
-- **Zero-config scanning** — `npx` and go. Auto-detects all 15 IDEs and project-local configs.
+- **Data-first** — Declarative rules, secret patterns, tool classifications, and toxic-flow defaults ship as JSON; **24** of **35** rules are pattern packs you can extend or override without forking those definitions.
+- **User-overridable** — Built-in data can be extended via `.mcp-shark/*.yaml` (and JSON pack drops) as documented above.
+- **Hybrid rule engine** — The other **11** rules are JS plugins where heuristics need code. Both sources are merged at scan time.
+- **Zero-config scanning** — `npx` and go. Auto-detects the IDE paths below plus project-local `mcp.json` variants.
 
 ## Documentation
 
@@ -405,5 +429,5 @@ See [LICENSE](LICENSE) for full terms.
 ---
 
 <div align="center">
-  <strong>Your AI tools are talking to each other. mcp-shark shows you when that's dangerous.</strong>
+  <strong>MCP servers can chain through the agent — mcp-shark surfaces risky combinations in config and traffic.</strong>
 </div>
