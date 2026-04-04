@@ -31,6 +31,10 @@ describe('DataLoader', () => {
       const sources = loadBuiltinJson('rule-sources.json');
       assert.ok(sources.registry_url);
       assert.ok(sources.cache_dir);
+      assert.ok(
+        typeof sources.default_auto_update_max_age_hours === 'number' ||
+          typeof sources.default_auto_update_max_age_hours === 'undefined'
+      );
     });
 
     it('throws for nonexistent file', () => {

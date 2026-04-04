@@ -5,8 +5,10 @@
 import { confirm } from '@clack/prompts';
 import { applyFixes, renderFixResults } from './AutoFixEngine.js';
 import { generateHtmlReport } from './HtmlReportGenerator.js';
+import { isRuleCacheStale, resolveRuleRegistryConfig } from './RuleRegistryConfig.js';
 import { runScan } from './ScanService.js';
 import { calculateSharkScore } from './SharkScoreCalculator.js';
+import { executeUpdateRules } from './UpdateCommand.js';
 import { formatWalkthrough, generateWalkthroughs } from './WalkthroughGenerator.js';
 import {
   displayScanBanner,
@@ -34,8 +36,11 @@ import {
  * @param {boolean} [options.yes] - Skip confirmation for --fix
  * @param {string} [options.output] - Output file path (for html format)
  * @param {string} [options.rules] - Path to custom YAML rules directory
+ * @param {boolean} [options.refreshRules] - Fetch registry packs before scan
  */
 export async function executeScan(options = {}) {
+  await maybeRefreshRulesBeforeScan(options);
+
   const format = (options.format || 'terminal').toLowerCase();
 
   const scanResult = runScan({
@@ -69,6 +74,21 @@ export async function executeScan(options = {}) {
   }
 
   return exitWithCode(scanResult, options.ci);
+}
+
+/**
+ * Optional network: only when --refresh-rules or auto_update + stale cache.
+ * Fail-open: errors are logged quietly; scan uses built-in + existing cache.
+ */
+async function maybeRefreshRulesBeforeScan(options) {
+  const config = resolveRuleRegistryConfig({});
+  if (options.refreshRules) {
+    await executeUpdateRules({ quiet: true });
+    return;
+  }
+  if (config.autoUpdate && isRuleCacheStale(config.cacheDir, config.autoUpdateMaxAgeHours)) {
+    await executeUpdateRules({ quiet: true });
+  }
 }
 
 /**

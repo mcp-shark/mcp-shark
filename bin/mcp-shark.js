@@ -132,6 +132,10 @@ async function main() {
     .option('--strict', 'Count advisory findings in score')
     .option('--ide <name>', 'Scan specific IDE only')
     .option('--rules <path>', 'Load custom YAML rules from directory')
+    .option(
+      '--refresh-rules',
+      'Download rule packs from registry before scan (HTTPS; configure via env or .mcp-shark/rule-registry.json)'
+    )
     .action(async (options) => {
       const exitCode = await executeScan(options);
       if (exitCode !== 0) {
