@@ -8,6 +8,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import kleur from 'kleur';
+import { resetStaticRulesCache } from '#core/services/security/StaticRulesService.js';
 import { resolveRuleRegistryConfig } from './RuleRegistryConfig.js';
 import {
   assertAllowedRegistryUrl,
@@ -26,6 +27,7 @@ const PACK_MAX_BYTES = 25 * 1024 * 1024;
  * @param {object} options
  * @param {string} [options.source] - Custom manifest URL (CLI override)
  * @param {boolean} [options.quiet] - Minimal output (e.g. before scan)
+ * @returns {Promise<number>} Exit code (0 success, 1 failure — for CI)
  */
 export async function executeUpdateRules(options = {}) {
   const { registryUrl, cacheDir } = resolveRuleRegistryConfig({
@@ -55,7 +57,7 @@ export async function executeUpdateRules(options = {}) {
       console.log(`  ${S.info} Rule packs are unchanged. Built-in packs still active.`);
       console.log('');
     }
-    return;
+    return 1;
   }
 
   if (!manifest.packs || !Array.isArray(manifest.packs)) {
@@ -63,13 +65,14 @@ export async function executeUpdateRules(options = {}) {
       console.log(`  ${S.fail} Invalid manifest format (missing "packs" array)`);
       console.log('');
     }
-    return;
+    return 1;
   }
 
   ensureDir(cacheDir);
 
   let updated = 0;
   let skipped = 0;
+  let hadPackFailure = false;
 
   for (const packRef of manifest.packs) {
     if (!packRef || typeof packRef.id !== 'string' || typeof packRef.url !== 'string') {
@@ -104,14 +107,21 @@ export async function executeUpdateRules(options = {}) {
       const packText = await fetchUtf8Secure(packRef.url, PACK_MAX_BYTES);
       assertSha256(packRef.sha256, packText);
       const packData = JSON.parse(packText);
-      if (!packData.schema_version || !packData.rules) {
+      if (!packData.schema_version || !Array.isArray(packData.rules)) {
         if (!quiet) {
           console.log(`  ${S.warn} ${packRef.id}: invalid pack format, skipped`);
         }
+        hadPackFailure = true;
         continue;
       }
 
-      writeFileSync(localPath, JSON.stringify(packData, null, 2), 'utf-8');
+      const packToWrite = { ...packData };
+      if (packRef.version && packToWrite.version == null) {
+        packToWrite.version = packRef.version;
+      }
+
+      writeFileSync(localPath, JSON.stringify(packToWrite, null, 2), 'utf-8');
+      resetStaticRulesCache();
       const verb = localVersion ? 'updated' : 'downloaded';
       const ruleCount = packData.rules.length;
       if (!quiet) {
@@ -124,6 +134,7 @@ export async function executeUpdateRules(options = {}) {
       if (!quiet) {
         console.log(`  ${S.fail} ${packRef.id}: ${err.message}`);
       }
+      hadPackFailure = true;
     }
   }
 
@@ -137,6 +148,8 @@ export async function executeUpdateRules(options = {}) {
     console.log(`  ${S.info} Cache: ${kleur.dim(cacheDir)}`);
     console.log('');
   }
+
+  return hadPackFailure ? 1 : 0;
 }
 
 function readLocalVersion(filePath) {

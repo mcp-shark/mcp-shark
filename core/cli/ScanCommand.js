@@ -39,7 +39,10 @@ import {
  * @param {boolean} [options.refreshRules] - Fetch registry packs before scan
  */
 export async function executeScan(options = {}) {
-  await maybeRefreshRulesBeforeScan(options);
+  const refreshExit = await maybeRefreshRulesBeforeScan(options);
+  if (refreshExit !== 0) {
+    return refreshExit;
+  }
 
   const format = (options.format || 'terminal').toLowerCase();
 
@@ -78,17 +81,17 @@ export async function executeScan(options = {}) {
 
 /**
  * Optional network: only when --refresh-rules or auto_update + stale cache.
- * Fail-open: errors are logged quietly; scan uses built-in + existing cache.
+ * --refresh-rules: failure exits non-zero. Background auto-update: fail-open (scan continues).
  */
 async function maybeRefreshRulesBeforeScan(options) {
   const config = resolveRuleRegistryConfig({});
   if (options.refreshRules) {
-    await executeUpdateRules({ quiet: true });
-    return;
+    return executeUpdateRules({ quiet: true });
   }
   if (config.autoUpdate && isRuleCacheStale(config.cacheDir, config.autoUpdateMaxAgeHours)) {
     await executeUpdateRules({ quiet: true });
   }
+  return 0;
 }
 
 /**

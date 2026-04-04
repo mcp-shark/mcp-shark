@@ -41,12 +41,18 @@ function compilePatterns(rawPatterns) {
  */
 export function detectHardcodedSecrets(envVars, server) {
   const findings = [];
+  if (!envVars || typeof envVars !== 'object') {
+    return findings;
+  }
 
   for (const [key, value] of Object.entries(envVars)) {
     if (typeof value !== 'string') {
       continue;
     }
-    if (value.startsWith('${') || value.startsWith('$')) {
+    if (value.startsWith('${')) {
+      continue;
+    }
+    if (/^\$[A-Za-z_][A-Za-z0-9_]*$/.test(value)) {
       continue;
     }
 

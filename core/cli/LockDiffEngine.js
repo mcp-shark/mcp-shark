@@ -29,6 +29,27 @@ export function countParameters(tool) {
 }
 
 /**
+ * Normalize server.tools (array or name→definition map) to an array of tool objects
+ */
+export function normalizeToolsList(tools) {
+  if (!tools) {
+    return [];
+  }
+  if (Array.isArray(tools)) {
+    return tools;
+  }
+  if (typeof tools === 'object') {
+    return Object.entries(tools).map(([name, def]) => {
+      if (def && typeof def === 'object' && !Array.isArray(def)) {
+        return { ...def, name: def.name || name };
+      }
+      return typeof def === 'string' ? { name, description: def } : { name };
+    });
+  }
+  return [];
+}
+
+/**
  * Compute diff between lockfile and current state
  * @param {object} lockData - Parsed lockfile data
  * @param {Array} currentServers - Current servers from ConfigScanner
@@ -44,7 +65,7 @@ export function computeDiff(lockData, currentServers) {
       continue;
     }
 
-    const tools = Array.isArray(server.tools) ? server.tools : [];
+    const tools = normalizeToolsList(server.tools);
     for (const tool of tools) {
       const toolObj = typeof tool === 'string' ? { name: tool } : tool;
       const toolName = toolObj.name || 'unknown';

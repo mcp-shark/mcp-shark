@@ -15,8 +15,8 @@ inputs:
     description: 'Fail on severity level: critical, high, medium, low'
     required: false
     default: 'high'
-  config-path:
-    description: 'Path to MCP config file (auto-detected if not specified)'
+  ide:
+    description: 'IDE name to limit the scan (e.g. cursor, vscode). Omit to auto-detect all configs.'
     required: false
   rules-path:
     description: 'Path to custom YAML rules directory'
@@ -58,7 +58,7 @@ runs:
           --ci \
           --format ${{ inputs.format }} \
           ${{ inputs.strict == 'true' && '--strict' || '' }} \
-          ${{ inputs.config-path && format('--ide {0}', inputs.config-path) || '' }} \
+          ${{ inputs.ide != '' && format('--ide {0}', inputs.ide) || '' }} \
           > mcp-shark-results.${{ inputs.format == 'sarif' && 'sarif' || inputs.format == 'json' && 'json' || 'txt' }} 2>&1 || true
 
         # Parse results for outputs

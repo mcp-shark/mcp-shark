@@ -65,6 +65,29 @@ describe('DeclarativeRuleEngine', () => {
     assert.strictEqual(findings.length, 0);
   });
 
+  it('hardcoded-secrets Heroku pattern matches only with heroku context', () => {
+    const secretRule = rules.find((r) => r.ruleMetadata.id === 'hardcoded-secrets');
+    assert.ok(secretRule);
+    const uuid = '550e8400-e29b-41d4-a716-446655440000';
+    const bareUuid = secretRule.analyzeTool({
+      name: 't',
+      description: `Correlation id ${uuid} in logs`,
+    });
+    const hasHerokuBare = bareUuid.some(
+      (f) => f.title?.includes('Heroku') || f.description?.includes('Heroku')
+    );
+    assert.strictEqual(hasHerokuBare, false, 'Bare UUID should not match Heroku rule');
+
+    const contextual = secretRule.analyzeTool({
+      name: 't',
+      description: `HEROKU_API_KEY=${uuid}`,
+    });
+    assert.ok(
+      contextual.some((f) => f.title?.includes('Heroku') || f.description?.includes('Heroku')),
+      'Expected Heroku API token finding when heroku prefix is present'
+    );
+  });
+
   it('respects exclude patterns', () => {
     const tokenRule = rules.find((r) => r.ruleMetadata.id === 'mcp01-token-mismanagement');
     assert.ok(tokenRule);

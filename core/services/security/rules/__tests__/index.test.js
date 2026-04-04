@@ -6,18 +6,17 @@ describe('rules/index', () => {
   describe('staticRules', () => {
     it('exports all rules', () => {
       assert.ok(typeof staticRules === 'object');
-      // MCP OWASP Top 10
-      assert.ok('mcp01-token-mismanagement' in staticRules);
-      assert.ok('mcp03-tool-poisoning' in staticRules);
-      assert.ok('mcp05-command-injection' in staticRules);
-      assert.ok('mcp06-prompt-injection' in staticRules);
-      assert.ok('mcp10-context-injection' in staticRules);
-      // Agentic Security
-      assert.ok('asi01-goal-hijack' in staticRules);
-      assert.ok('asi05-rce' in staticRules);
-      // General Security
-      assert.ok('hardcoded-secrets' in staticRules);
       assert.ok('command-injection' in staticRules);
+      assert.ok('mcp05-command-injection' in staticRules);
+      assert.ok('insecure-transport' in staticRules);
+      assert.ok('missing-containment' in staticRules);
+      assert.ok('cross-server-shadowing' in staticRules);
+      assert.ok('asi05-rce' in staticRules);
+      assert.ok('config-permissions' in staticRules);
+      assert.ok('duplicate-tool-names' in staticRules);
+      assert.ok('shell-env-injection' in staticRules);
+      assert.ok('tool-name-ambiguity' in staticRules);
+      assert.ok('unsafe-defaults' in staticRules);
     });
   });
 
@@ -41,7 +40,7 @@ describe('rules/index', () => {
 
   describe('getRule', () => {
     it('returns rule for valid id', () => {
-      const rule = getRule('mcp01-token-mismanagement');
+      const rule = getRule('command-injection');
       assert.ok(rule, 'Should return rule');
       assert.ok(typeof rule.analyzeTool === 'function');
       assert.ok(typeof rule.analyzePrompt === 'function');
@@ -59,7 +58,6 @@ describe('rules/index', () => {
     it('returns array of enabled rules', () => {
       const enabled = getEnabledRules();
       assert.ok(Array.isArray(enabled));
-      // All rules should be enabled by default
       assert.ok(enabled.length >= 5);
     });
 

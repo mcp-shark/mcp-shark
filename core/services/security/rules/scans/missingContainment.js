@@ -22,7 +22,6 @@ const FS_SERVER_PATTERNS = [
 const CONTAINMENT_INDICATORS = [
   /--allow/i,
   /--root/i,
-  /--dir/i,
   /--sandbox/i,
   /allowedDirectories/i,
   /rootPath/i,

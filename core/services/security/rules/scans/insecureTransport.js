@@ -12,8 +12,41 @@ const OWASP_ID = 'MCP07';
 const RECOMMENDATION =
   'Use HTTPS/WSS for all remote MCP server connections. localhost HTTP is acceptable for local-only servers.';
 
-const HTTP_URL_PATTERN = /http:\/\/(?!localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])/i;
-const WS_URL_PATTERN = /ws:\/\/(?!localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])/i;
+const HTTP_URL_IN_TEXT = /http:\/\/[^\s'"<>]+/gi;
+const WS_URL_IN_TEXT = /ws:\/\/[^\s'"<>]+/gi;
+
+/**
+ * True when URL host is loopback / local bind only (exact host match, not localhost.evil.com).
+ */
+function isLocalhostUrl(urlString) {
+  try {
+    const u = new URL(urlString);
+    const h = u.hostname.toLowerCase();
+    return (
+      h === 'localhost' || h === '127.0.0.1' || h === '0.0.0.0' || h === '[::1]' || h === '::1'
+    );
+  } catch {
+    return false;
+  }
+}
+
+function textHasNonLocalHttp(text) {
+  for (const m of text.matchAll(HTTP_URL_IN_TEXT)) {
+    if (!isLocalhostUrl(m[0])) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function textHasNonLocalWs(text) {
+  for (const m of text.matchAll(WS_URL_IN_TEXT)) {
+    if (!isLocalhostUrl(m[0])) {
+      return true;
+    }
+  }
+  return false;
+}
 
 export function scanInsecureTransport(mcpData = {}) {
   const results = {
@@ -27,7 +60,7 @@ export function scanInsecureTransport(mcpData = {}) {
   for (const tool of mcpData.tools || []) {
     const text = toolToText(tool);
 
-    if (HTTP_URL_PATTERN.test(text)) {
+    if (textHasNonLocalHttp(text)) {
       results.toolFindings.push({
         issueType: 'Insecure Transport (HTTP)',
         name: tool?.name || 'tool',
@@ -40,7 +73,7 @@ export function scanInsecureTransport(mcpData = {}) {
       });
     }
 
-    if (WS_URL_PATTERN.test(text)) {
+    if (textHasNonLocalWs(text)) {
       results.toolFindings.push({
         issueType: 'Insecure Transport (WebSocket)',
         name: tool?.name || 'tool',
@@ -67,8 +100,9 @@ export function analyzeServerTransport(serverName, config) {
   }
 
   const findings = [];
+  const urlStr = config.url;
 
-  if (HTTP_URL_PATTERN.test(config.url)) {
+  if (urlStr.startsWith('http://') && !isLocalhostUrl(urlStr)) {
     findings.push({
       rule_id: RULE_ID,
       severity: 'high',
@@ -81,7 +115,7 @@ export function analyzeServerTransport(serverName, config) {
     });
   }
 
-  if (WS_URL_PATTERN.test(config.url)) {
+  if (urlStr.startsWith('ws://') && !isLocalhostUrl(urlStr)) {
     findings.push({
       rule_id: RULE_ID,
       severity: 'high',

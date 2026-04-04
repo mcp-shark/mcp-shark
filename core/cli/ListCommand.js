@@ -127,7 +127,7 @@ function renderJsonInventory(servers, ideResults) {
       transport: detectTransport(s.config),
       tool_count: getToolCount(s),
       command: s.config?.command || null,
-      args: s.config?.args || null,
+      args_present: hasArgsPresent(s.config),
     })),
   };
   console.log(JSON.stringify(output, null, 2));
@@ -170,28 +170,53 @@ function getToolCount(server) {
 }
 
 /**
- * Get known capabilities from the classification database
+ * Whether server config includes non-empty args (boolean only for JSON output — avoids leaking secrets).
  */
-function getServerCapabilities(serverName) {
+export function hasArgsPresent(config) {
+  const args = config?.args;
+  if (args == null) {
+    return false;
+  }
+  if (Array.isArray(args)) {
+    return args.length > 0;
+  }
+  if (typeof args === 'object') {
+    return Object.keys(args).length > 0;
+  }
+  return String(args).length > 0;
+}
+
+/**
+ * Get known capabilities from the classification database
+ * (values are per-tool capability strings, not flat boolean flags)
+ */
+export function getServerCapabilities(serverName) {
   const classification = TOOL_CLASSIFICATIONS[serverName];
-  if (!classification) {
+  if (!classification || typeof classification !== 'object') {
     return null;
   }
 
+  const capSet = new Set();
+  for (const cap of Object.values(classification)) {
+    if (typeof cap === 'string' && cap) {
+      capSet.add(cap);
+    }
+  }
+
   const caps = [];
-  if (classification.reads_secrets) {
+  if (capSet.has('reads_secrets')) {
     caps.push(kleur.red('secrets'));
   }
-  if (classification.writes_code) {
+  if (capSet.has('writes_code')) {
     caps.push(kleur.yellow('code'));
   }
-  if (classification.sends_external) {
+  if (capSet.has('sends_external')) {
     caps.push(kleur.magenta('network'));
   }
-  if (classification.modifies_infra) {
+  if (capSet.has('modifies_infra')) {
     caps.push(kleur.red('infra'));
   }
-  if (classification.ingests_untrusted) {
+  if (capSet.has('ingests_untrusted')) {
     caps.push(kleur.cyan('untrusted'));
   }
 

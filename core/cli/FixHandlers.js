@@ -73,12 +73,14 @@ function fixPermissions(finding) {
   }
 
   try {
+    backupFile(configPath);
     const oldPerms = finding.fix_data?.oldPerms || '644';
     chmodSync(configPath, 0o600);
     return {
       success: true,
       finding,
       message: `Set permissions: ${configPath} ${oldPerms} → 600`,
+      backupPath: `${configPath}${BACKUP_SUFFIX}`,
     };
   } catch (err) {
     return { success: false, finding, error: err.message };

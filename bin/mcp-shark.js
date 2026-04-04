@@ -207,7 +207,10 @@ async function main() {
     .description('Download latest rule packs from remote registry')
     .option('--source <url>', 'Custom manifest URL (enterprise registries)')
     .action(async (options) => {
-      await executeUpdateRules(options);
+      const code = await executeUpdateRules(options);
+      if (code !== 0) {
+        process.exit(code);
+      }
     });
 
   program

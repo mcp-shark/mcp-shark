@@ -34,7 +34,8 @@ export function loadDeclarativeRules() {
   const rules = [];
 
   for (const pack of packs) {
-    for (const ruleDef of pack.rules || []) {
+    const packRules = Array.isArray(pack.rules) ? pack.rules : [];
+    for (const ruleDef of packRules) {
       const compiled = compileRule(ruleDef);
       if (compiled) {
         rules.push(compiled);
@@ -79,7 +80,7 @@ function loadPacksFromDir(dirPath) {
     try {
       const content = readFileSync(join(dirPath, file), 'utf-8');
       const pack = JSON.parse(content);
-      if (pack.schema_version && pack.rules) {
+      if (pack.schema_version && Array.isArray(pack.rules)) {
         packs.push(pack);
       }
     } catch (_err) {

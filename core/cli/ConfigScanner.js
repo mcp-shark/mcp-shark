@@ -69,6 +69,9 @@ function getFilePermissions(filePath) {
  * Extract tool definitions from a server config entry
  */
 function extractToolsFromServer(serverConfig) {
+  if (!serverConfig || typeof serverConfig !== 'object') {
+    return [];
+  }
   if (serverConfig.tools) {
     return serverConfig.tools;
   }

@@ -35,6 +35,22 @@ describe('ToxicFlowAnalyzer', () => {
     assert.strictEqual(flows.length, 0);
   });
 
+  it('keeps separate flows when the same servers appear in different IDEs', () => {
+    const servers = [
+      { name: 'slack-server', ide: 'Cursor', tools: [{ name: 'list_messages' }] },
+      { name: 'github-server', ide: 'Cursor', tools: [{ name: 'push_files' }] },
+      { name: 'slack-server', ide: 'VS Code', tools: [{ name: 'list_messages' }] },
+      { name: 'github-server', ide: 'VS Code', tools: [{ name: 'push_files' }] },
+    ];
+    const flows = analyzeToxicFlows(servers);
+    const cursorFlows = flows.filter((f) => f.sourceIde === 'Cursor' && f.targetIde === 'Cursor');
+    const vscodeFlows = flows.filter((f) => f.sourceIde === 'VS Code' && f.targetIde === 'VS Code');
+    assert.ok(
+      cursorFlows.length >= 1 && vscodeFlows.length >= 1,
+      'Expected distinct flows per IDE context'
+    );
+  });
+
   it('deduplicates flows by source→target keeping highest risk', () => {
     const servers = [
       {

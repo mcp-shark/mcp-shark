@@ -1,6 +1,11 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
-import { computeDiff, countParameters, hashToolDefinition } from '../LockDiffEngine.js';
+import {
+  computeDiff,
+  countParameters,
+  hashToolDefinition,
+  normalizeToolsList,
+} from '../LockDiffEngine.js';
 
 describe('LockDiffEngine', () => {
   describe('hashToolDefinition', () => {
@@ -100,6 +105,29 @@ describe('LockDiffEngine', () => {
       const current = [{ name: 'srv', tools: [{ name: 'my-tool', description: 'same' }] }];
       const changes = computeDiff(lockData, current);
       assert.strictEqual(changes.length, 0);
+    });
+
+    it('handles tools as an object map like array form', () => {
+      const tool = { name: 'mapped-tool', description: 'x' };
+      const hash = `sha256:${hashToolDefinition(tool)}`;
+      const lockData = { servers: { srv: { tools: { 'mapped-tool': { hash } } } } };
+      const current = [
+        {
+          name: 'srv',
+          tools: { 'mapped-tool': { description: 'x' } },
+        },
+      ];
+      const changes = computeDiff(lockData, current);
+      assert.strictEqual(changes.length, 0);
+    });
+  });
+
+  describe('normalizeToolsList', () => {
+    it('maps object entries to tool objects with names', () => {
+      const list = normalizeToolsList({ a: { description: 'd' } });
+      assert.strictEqual(list.length, 1);
+      assert.strictEqual(list[0].name, 'a');
+      assert.strictEqual(list[0].description, 'd');
     });
   });
 });

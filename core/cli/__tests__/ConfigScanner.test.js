@@ -42,6 +42,20 @@ describe('ConfigScanner', () => {
       assert.ok(Array.isArray(servers[0].tools));
     });
 
+    it('treats null server config as having no tools', () => {
+      const ideResults = [
+        {
+          name: 'Cursor',
+          found: true,
+          configPath: '/path/mcp.json',
+          servers: { broken: null },
+        },
+      ];
+      const servers = getAllServers(ideResults);
+      assert.strictEqual(servers.length, 1);
+      assert.deepStrictEqual(servers[0].tools, []);
+    });
+
     it('handles multiple servers from multiple IDEs', () => {
       const ideResults = [
         {

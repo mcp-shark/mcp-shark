@@ -5,6 +5,7 @@
  */
 import { existsSync, watch } from 'node:fs';
 import kleur from 'kleur';
+import { resetStaticRulesCache } from '#core/services/security/StaticRulesService.js';
 import { scanIdeConfigs } from './ConfigScanner.js';
 import { runScan } from './ScanService.js';
 import {
@@ -71,32 +72,37 @@ export function executeWatch() {
  * Run scan and display compact results
  */
 function runAndDisplay() {
-  const scanResult = runScan({});
+  try {
+    resetStaticRulesCache();
+    const scanResult = runScan({});
 
-  displayScanBanner();
-  console.log(formatIdeDiscovery(scanResult.ideResults));
-  console.log('');
+    displayScanBanner();
+    console.log(formatIdeDiscovery(scanResult.ideResults));
+    console.log('');
 
-  const findingCount = scanResult.findings.length;
-  const flowCount = scanResult.toxicFlows.length;
+    const findingCount = scanResult.findings.length;
+    const flowCount = scanResult.toxicFlows.length;
 
-  if (findingCount > 0) {
-    renderCompactFindings(scanResult);
+    if (findingCount > 0) {
+      renderCompactFindings(scanResult);
+    }
+
+    console.log('');
+    console.log(formatSharkScore(scanResult.scoreResult));
+    console.log(formatSummaryCounts(scanResult.severityCounts, flowCount));
+    console.log(
+      formatTiming(
+        scanResult.elapsedMs,
+        scanResult.serverCount,
+        scanResult.ruleCount,
+        scanResult.totalToolCount
+      )
+    );
+    console.log('');
+    console.log(kleur.dim(`  Watching for changes... (${new Date().toLocaleTimeString()})`));
+  } catch (err) {
+    console.log(`\n  ${kleur.red(S.fail)} Scan failed: ${err.message}\n`);
   }
-
-  console.log('');
-  console.log(formatSharkScore(scanResult.scoreResult));
-  console.log(formatSummaryCounts(scanResult.severityCounts, flowCount));
-  console.log(
-    formatTiming(
-      scanResult.elapsedMs,
-      scanResult.serverCount,
-      scanResult.ruleCount,
-      scanResult.totalToolCount
-    )
-  );
-  console.log('');
-  console.log(kleur.dim(`  Watching for changes... (${new Date().toLocaleTimeString()})`));
 }
 
 /**

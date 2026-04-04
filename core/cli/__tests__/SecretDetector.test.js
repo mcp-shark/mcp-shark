@@ -25,7 +25,7 @@ describe('SecretDetector', () => {
     assert.ok(findings.length > 0, 'Should detect GitHub PAT');
   });
 
-  it('skips environment variable references ($)', () => {
+  it('skips environment variable references ($VAR)', () => {
     const env = { API_KEY: '$API_KEY' };
     const findings = detectHardcodedSecrets(env, SERVER);
     assert.strictEqual(findings.length, 0, 'Should skip $-prefixed values');
@@ -92,5 +92,10 @@ describe('SecretDetector', () => {
   it('handles empty env vars object', () => {
     const findings = detectHardcodedSecrets({}, SERVER);
     assert.strictEqual(findings.length, 0);
+  });
+
+  it('returns empty when env vars is null or not an object', () => {
+    assert.strictEqual(detectHardcodedSecrets(null, SERVER).length, 0);
+    assert.strictEqual(detectHardcodedSecrets(undefined, SERVER).length, 0);
   });
 });

@@ -14,8 +14,15 @@ export function FixPanel({ findings, onRescan }) {
   useInput((input) => {
     if (confirming) {
       if (input === 'y') {
-        const result = applyFixes(findings);
-        setFixResult(result);
+        try {
+          setFixResult(applyFixes(findings));
+        } catch (err) {
+          setFixResult({
+            fixed: [],
+            skipped: [],
+            errors: [{ success: false, error: err.message, finding: { title: 'Apply fixes' } }],
+          });
+        }
         setConfirming(false);
       }
       if (input === 'n') {
@@ -28,8 +35,15 @@ export function FixPanel({ findings, onRescan }) {
       setConfirming(true);
     }
     if (input === 'u') {
-      const result = applyFixes(findings, { undo: true });
-      setFixResult(result);
+      try {
+        setFixResult(applyFixes(findings, { undo: true }));
+      } catch (err) {
+        setFixResult({
+          fixed: [],
+          skipped: [],
+          errors: [{ success: false, error: err.message, finding: { title: 'Undo fixes' } }],
+        });
+      }
     }
     if (input === 'r') {
       setFixResult(null);

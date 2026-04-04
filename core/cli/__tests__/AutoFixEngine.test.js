@@ -1,5 +1,13 @@
 import assert from 'node:assert';
-import { existsSync, mkdirSync, readFileSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  unlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { join } from 'node:path';
 import { after, before, beforeEach, describe, it } from 'node:test';
 import { applyFixes, renderFixResults } from '../AutoFixEngine.js';
@@ -141,10 +149,59 @@ describe('AutoFixEngine + FixHandlers', () => {
   });
 
   describe('renderFixResults', () => {
-    it('does not throw', () => {
+    it('does not throw when nothing was attempted', () => {
       assert.doesNotThrow(() => {
         renderFixResults({ fixed: [], skipped: [], errors: [] }, null, null);
       });
+    });
+
+    it('renders when fixes failed with errors but none succeeded', () => {
+      assert.doesNotThrow(() => {
+        renderFixResults(
+          {
+            fixed: [],
+            skipped: [{ reason: 'skipped', finding: { title: 'x' } }],
+            errors: [{ error: 'disk full', finding: { title: 'y' } }],
+          },
+          null,
+          null
+        );
+      });
+    });
+
+    it('renders when there were successful fixes', () => {
+      assert.doesNotThrow(() => {
+        renderFixResults(
+          {
+            fixed: [{ success: true, message: 'ok', finding: {} }],
+            skipped: [],
+            errors: [],
+          },
+          null,
+          null
+        );
+      });
+    });
+  });
+
+  describe('applyFix - chmod', () => {
+    it('creates backup before changing permissions', { skip: process.platform === 'win32' }, () => {
+      writeFileSync(CONFIG_PATH, '{}', 'utf-8');
+      chmodSync(CONFIG_PATH, 0o644);
+      const backupPath = `${CONFIG_PATH}.shark-backup`;
+      if (existsSync(backupPath)) {
+        unlinkSync(backupPath);
+      }
+
+      const finding = {
+        fixable: true,
+        fix_type: 'chmod',
+        config_path: CONFIG_PATH,
+        fix_data: { oldPerms: '644' },
+      };
+      const result = applyFix(finding, []);
+      assert.ok(result.success, result.error || result.reason);
+      assert.ok(existsSync(backupPath));
     });
   });
 });

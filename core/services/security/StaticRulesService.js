@@ -12,6 +12,13 @@ import { getAllRuleMetadata, getEnabledRules } from './rules/index.js';
 let cachedCombinedRules = null;
 
 /**
+ * Clear cached combined rules (e.g. after downloading new declarative packs, or before watch re-scan).
+ */
+export function resetStaticRulesCache() {
+  cachedCombinedRules = null;
+}
+
+/**
  * Load and cache the combined set of JS plugin + declarative rules.
  */
 function getCombinedRules() {

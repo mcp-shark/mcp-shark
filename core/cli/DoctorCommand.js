@@ -119,9 +119,11 @@ function checkFilePermissions(ide, checks) {
 
   const perms = Number.parseInt(ide.permissions, 8);
   const worldReadable = (perms & 0o004) !== 0;
+  const groupReadable = (perms & 0o040) !== 0;
 
-  if (worldReadable) {
-    printWarn(`${ide.displayPath} permissions: ${ide.permissions}`, 'world-readable');
+  if (worldReadable || groupReadable) {
+    const reason = worldReadable ? 'world-readable' : 'group-readable';
+    printWarn(`${ide.displayPath} permissions: ${ide.permissions}`, reason);
     checks.warnings += 1;
   } else {
     printPass(`${ide.displayPath} permissions: ${ide.permissions}`, 'restricted');

@@ -3,7 +3,7 @@
  * Produces a self-contained, offline HTML security report.
  * No external CSS/JS dependencies — everything is inlined.
  */
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import kleur from 'kleur';
 import { S } from './symbols.js';

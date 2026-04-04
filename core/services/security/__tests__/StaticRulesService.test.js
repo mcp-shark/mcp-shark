@@ -1,12 +1,22 @@
 import assert from 'node:assert';
 import { before, describe, it } from 'node:test';
-import { StaticRulesService } from '../StaticRulesService.js';
+import { StaticRulesService, resetStaticRulesCache } from '../StaticRulesService.js';
 
 describe('StaticRulesService', () => {
   let service;
 
   before(() => {
+    resetStaticRulesCache();
     service = new StaticRulesService(null);
+  });
+
+  describe('resetStaticRulesCache', () => {
+    it('can be invoked repeatedly without throwing', () => {
+      assert.doesNotThrow(() => {
+        resetStaticRulesCache();
+        resetStaticRulesCache();
+      });
+    });
   });
 
   describe('getRuleMetadata', () => {

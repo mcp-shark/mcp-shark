@@ -169,12 +169,20 @@ export function analyzeToxicFlows(servers) {
 }
 
 /**
- * Remove duplicate flows (same source→target pair, keep highest risk)
+ * Remove duplicate flows (same source, target, IDE pair, capability pair, and title; keep highest risk)
  */
 function deduplicateFlows(flows) {
   const seen = new Map();
   for (const flow of flows) {
-    const key = `${flow.source}\u2192${flow.target}`;
+    const key = [
+      flow.source,
+      flow.sourceIde,
+      flow.target,
+      flow.targetIde,
+      flow.sourceCapability,
+      flow.targetCapability,
+      flow.title,
+    ].join('\u2192');
     const existing = seen.get(key);
     if (!existing || riskLevel(flow.risk) > riskLevel(existing.risk)) {
       seen.set(key, flow);

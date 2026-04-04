@@ -47,8 +47,9 @@ export function applyFixes(findings, options = {}) {
  */
 export function renderFixResults(fixResult, scoreBefore, scoreAfter) {
   const total = fixResult.fixed.length;
+  const attempted = fixResult.fixed.length + fixResult.skipped.length + fixResult.errors.length;
 
-  if (total === 0) {
+  if (attempted === 0) {
     console.log(`  ${kleur.dim('No auto-fixable issues found')}`);
     return;
   }
