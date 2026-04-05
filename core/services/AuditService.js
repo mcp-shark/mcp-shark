@@ -97,6 +97,7 @@ export class AuditService {
           frameNumber: result.frameNumber,
           body: options.body,
           sessionId: result.sessionId,
+          mcpServerName: options.remoteAddress || null,
         });
       } catch (error) {
         // Log but don't fail the request
@@ -172,6 +173,7 @@ export class AuditService {
           frameNumber: result.frameNumber,
           body: options.body,
           sessionId: result.sessionId,
+          mcpServerName: options.remoteAddress || null,
         });
       } catch (error) {
         // Log but don't fail the response

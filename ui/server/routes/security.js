@@ -13,10 +13,12 @@ export function createSecurityRoutes(container) {
   const yaraEngineService = container.getService('yaraEngine');
   const logger = container.getLibrary('logger');
 
+  const trafficToxicFlowService = container.getService('trafficToxicFlow');
   const findingsController = new SecurityFindingsController(
     securityDetectionService,
     serverManagementService,
-    logger
+    logger,
+    trafficToxicFlowService
   );
 
   const sourcesController = new RuleSourcesController(
@@ -40,6 +42,8 @@ export function createSecurityRoutes(container) {
   router.getScanHistory = findingsController.getScanHistory;
   router.clearFindings = findingsController.clearFindings;
   router.deleteScanFindings = findingsController.deleteScanFindings;
+  router.getTrafficToxicFlows = findingsController.getTrafficToxicFlows;
+  router.replayTrafficToxicFlows = findingsController.replayTrafficToxicFlows;
 
   // YARA engine (RuleSourcesController)
   router.getEngineStatus = sourcesController.getEngineStatus;

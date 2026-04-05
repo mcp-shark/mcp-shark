@@ -87,7 +87,7 @@ describe('README Claims Verification', () => {
   it('README says "Downloadable rule packs" — verify packs dir exists with JSON files', () => {
     assert.ok(existsSync(RULE_PACKS_DIR), 'rule-packs dir should exist');
     const packs = readdirSync(RULE_PACKS_DIR).filter((f) => f.endsWith('.json'));
-    assert.ok(packs.length >= 3, `Expected at least 3 pack files, got ${packs.length}`);
+    assert.ok(packs.length >= 4, `Expected at least 4 pack files, got ${packs.length}`);
   });
 
   it('README says "SARIF v2.1.0" — verify schema version', async () => {

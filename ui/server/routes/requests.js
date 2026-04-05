@@ -5,8 +5,15 @@ export function createRequestsRoutes(container) {
   const exportService = container.getService('export');
   const serializationLib = container.getLibrary('serialization');
   const logger = container.getLibrary('logger');
+  const trafficToxicFlowService = container.getService('trafficToxicFlow');
 
-  const controller = new RequestController(requestService, exportService, serializationLib, logger);
+  const controller = new RequestController(
+    requestService,
+    exportService,
+    serializationLib,
+    logger,
+    trafficToxicFlowService
+  );
 
   const router = {};
 

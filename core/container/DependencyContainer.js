@@ -33,6 +33,7 @@ import {
   StatisticsService,
   TokenService,
   TrafficAnalysisService,
+  TrafficToxicFlowService,
   YaraEngineService,
 } from '#core/services/index.js';
 import { ConfigParserFactory } from '#core/services/parsers/ConfigParserFactory.js';
@@ -160,10 +161,12 @@ export class DependencyContainer {
         this._services.yaraEngine,
         libs.logger
       );
+      this._services.trafficToxicFlow = new TrafficToxicFlowService(repos.packet, libs.logger);
       this._services.trafficAnalysis = new TrafficAnalysisService(
         this._services.staticRules,
         repos.securityFindings,
-        libs.logger
+        libs.logger,
+        this._services.trafficToxicFlow
       );
       this._services.rulesManager = new RulesManagerService(
         repos.securityRules,

@@ -5,8 +5,10 @@ import {
   fetchRunningServersCount,
   fetchScanHistory,
   fetchSummary,
+  fetchTrafficToxicFlows,
   postAnalyseRunningServers,
   postClearFindings,
+  postReplayTrafficToxicFlows,
 } from './securityApi.js';
 import { useYaraRules } from './useYaraRules.js';
 
@@ -29,6 +31,11 @@ export function useSecurity() {
 
   // Track whether a scan has been completed (to show appropriate empty state)
   const [scanComplete, setScanComplete] = useState(false);
+
+  // Traffic-derived toxic flows (tools/list via HTTP proxy)
+  const [trafficToxicSnapshot, setTrafficToxicSnapshot] = useState(null);
+  const [trafficToxicLoading, setTrafficToxicLoading] = useState(false);
+  const [trafficToxicError, setTrafficToxicError] = useState(null);
 
   // Use YARA rules hook
   const yaraRules = useYaraRules();
@@ -88,6 +95,48 @@ export function useSecurity() {
     }
   }, []);
 
+  const loadTrafficToxicFlows = useCallback(async () => {
+    setTrafficToxicLoading(true);
+    setTrafficToxicError(null);
+    try {
+      const data = await fetchTrafficToxicFlows();
+      if (data && data.success === false) {
+        setTrafficToxicError(data.error || 'Could not load traffic toxic flows');
+        setTrafficToxicSnapshot(null);
+      } else if (data?.error && !data.toxicFlows) {
+        setTrafficToxicError(data.error);
+        setTrafficToxicSnapshot(null);
+      } else {
+        setTrafficToxicSnapshot(data);
+      }
+    } catch (err) {
+      console.error('Traffic toxic flows:', err);
+      setTrafficToxicError(err.message || 'Request failed');
+      setTrafficToxicSnapshot(null);
+    } finally {
+      setTrafficToxicLoading(false);
+    }
+  }, []);
+
+  const replayTrafficToxicFlows = useCallback(async () => {
+    setTrafficToxicLoading(true);
+    setTrafficToxicError(null);
+    try {
+      const data = await postReplayTrafficToxicFlows();
+      if (data.success === false || data.error) {
+        setTrafficToxicError(data.error || 'Replay failed');
+        setTrafficToxicSnapshot(null);
+      } else {
+        setTrafficToxicSnapshot(data);
+      }
+    } catch (err) {
+      console.error('Traffic toxic replay:', err);
+      setTrafficToxicError(err.message || 'Request failed');
+    } finally {
+      setTrafficToxicLoading(false);
+    }
+  }, []);
+
   const discoverAndScan = useCallback(async () => {
     setScanning(true);
     setError(null);
@@ -109,6 +158,7 @@ export function useSecurity() {
         await loadSummary();
         await loadScanHistory(); // Refresh history
         setScanComplete(true); // Mark scan as complete
+        await loadTrafficToxicFlows();
       }
     } catch (err) {
       console.error('Analysis error:', err);
@@ -116,7 +166,7 @@ export function useSecurity() {
     } finally {
       setScanning(false);
     }
-  }, [loadFindings, loadSummary, loadScanHistory]);
+  }, [loadFindings, loadSummary, loadScanHistory, loadTrafficToxicFlows]);
 
   const clearFindings = useCallback(async () => {
     setClearing(true);
@@ -130,13 +180,14 @@ export function useSecurity() {
         setError(null);
         setScanComplete(false); // Reset scan complete state
         await loadScanHistory(); // Refresh history after clear
+        await loadTrafficToxicFlows(); // Server cleared in-memory toxic-flow registry
       }
     } catch (err) {
       console.error('Failed to clear findings:', err);
     } finally {
       setClearing(false);
     }
-  }, [loadScanHistory]);
+  }, [loadScanHistory, loadTrafficToxicFlows]);
 
   const selectHistoricalScan = useCallback(async (scanId) => {
     setSelectedScanId(scanId);
@@ -160,7 +211,8 @@ export function useSecurity() {
     loadRules();
     loadScanHistory();
     checkRunningServers();
-  }, [loadRules, loadScanHistory, checkRunningServers]);
+    loadTrafficToxicFlows();
+  }, [loadRules, loadScanHistory, checkRunningServers, loadTrafficToxicFlows]);
 
   return {
     rules,
@@ -183,6 +235,11 @@ export function useSecurity() {
     runningServersCount,
     checkRunningServers,
     scanComplete,
+    trafficToxicSnapshot,
+    trafficToxicLoading,
+    trafficToxicError,
+    loadTrafficToxicFlows,
+    replayTrafficToxicFlows,
     // YARA rules (spread from useYaraRules)
     ...yaraRules,
   };

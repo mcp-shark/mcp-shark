@@ -101,6 +101,29 @@ describe('TrafficAnalysisService', () => {
       assert.ok(Array.isArray(findings));
     });
 
+    it('forwards tools/list responses to traffic toxic flow service', () => {
+      const ingest = mock.fn(() => {});
+      const toxicSvc = { ingestFromTrafficResponse: ingest };
+      const withToxic = new TrafficAnalysisService(
+        staticRulesService,
+        mockRepository,
+        null,
+        toxicSvc
+      );
+      withToxic.analyzeResponse({
+        frameNumber: 3,
+        sessionId: 'sess',
+        mcpServerName: 'my-mcp',
+        body: {
+          jsonrpc: '2.0',
+          id: 9,
+          result: { tools: [{ name: 'list_files' }] },
+        },
+      });
+      assert.strictEqual(ingest.mock.calls.length, 1);
+      assert.strictEqual(ingest.mock.calls[0].arguments[0].mcpServerName, 'my-mcp');
+    });
+
     it('handles errors gracefully', () => {
       const errorService = new TrafficAnalysisService(
         {

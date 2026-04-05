@@ -11,6 +11,7 @@ import { helpPaths } from './paths/help.js';
 import { logsPaths } from './paths/logs.js';
 import { playgroundPaths } from './paths/playground.js';
 import { requestsPaths } from './paths/requests.js';
+import { securityTrafficFlowsPaths } from './paths/securityTrafficFlows.js';
 import { serverManagementPaths } from './paths/serverManagement.js';
 import { sessionsPaths } from './paths/sessions.js';
 import { settingsPaths } from './paths/settings.js';
@@ -22,6 +23,7 @@ import { statisticsPaths } from './paths/statistics.js';
  */
 export const paths = {
   ...requestsPaths,
+  ...securityTrafficFlowsPaths,
   ...sessionsPaths,
   ...conversationsPaths,
   ...statisticsPaths,

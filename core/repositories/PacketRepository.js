@@ -234,4 +234,20 @@ export class PacketRepository {
     const stmt = this.db.prepare('SELECT MAX(timestamp_ns) as max_ts FROM packets');
     return stmt.get();
   }
+
+  /**
+   * Response packets whose JSON-RPC result likely includes a tools array (tools/list success).
+   * Used to replay cross-server toxic-flow analysis from captured proxy traffic.
+   */
+  listResponsesWithToolsList() {
+    const stmt = this.db.prepare(`
+      SELECT frame_number, session_id, remote_address, jsonrpc_result, body_json, body_raw, timestamp_ns
+      FROM packets
+      WHERE direction = 'response'
+        AND jsonrpc_result IS NOT NULL
+        AND jsonrpc_result LIKE '%"tools"%'
+      ORDER BY timestamp_ns ASC
+    `);
+    return stmt.all();
+  }
 }
