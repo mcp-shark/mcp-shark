@@ -4,8 +4,8 @@
 
   <h1>mcp-shark</h1>
 
-  <p><strong>Security scanner for AI agent tools</strong></p>
-  <p>Scan MCP configs locally. No cloud or telemetry for static scans; rule updates are opt-in.</p>
+ <p><strong>Security scanner for AI agent tools</strong> — static analysis on MCP configs and tool metadata on your machine (findings, toxic-flow heuristics, CI-friendly outputs). Use the <strong>local HTTP proxy</strong> and <strong>monitoring UI</strong> to aggregate IDE traffic to multiple MCP servers and inspect requests and responses in one place.</p>
+  <p><strong>Privacy:</strong> static scans need no cloud and send no telemetry. Refreshing rule catalogs is opt-in HTTPS (<code>update-rules</code>).</p>
 
   [![npm version](https://img.shields.io/npm/v/@mcp-shark/mcp-shark.svg)](https://www.npmjs.com/package/@mcp-shark/mcp-shark)
   [![License: Non-Commercial](https://img.shields.io/badge/License-Non--Commercial-red.svg)](LICENSE)
