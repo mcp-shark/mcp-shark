@@ -27,8 +27,10 @@ cd mcp-shark
 2. **Install dependencies:**
 
 ```bash
-npm run install:all
+npm ci
 ```
+
+If tests fail with a **better-sqlite3** `NODE_MODULE_VERSION` / `ERR_DLOPEN_FAILED` error, your Node version does not match the native binary that was built. Use **Node 22** (same as CI), or run `npm rebuild better-sqlite3` after switching Node.
 
 3. **Set up git hooks:**
 
@@ -43,26 +45,20 @@ This sets up Husky for pre-commit and commit-msg validation.
 **Using npm:**
 
 ```bash
-# Install all dependencies
-npm run install:all
+# Install dependencies
+npm ci
 
-# Start UI (recommended - manage MCP server through UI)
-npm run start:ui
+# Run web UI (builds UI first via predev when using dev)
+npm start
+# or, with hot reload during UI work:
+npm run dev
 
-# Start MCP server directly (alternative - if not using UI)
-npm run start:server
+# Quality
+npm run check    # Biome lint + format check
+npm test         # Unit tests (use Node 22 + npm ci for sqlite native module)
 
-# UI development mode (with hot reload)
-npm run dev:ui
-
-# Build UI for production
+# Build UI only (also run by prepublishOnly)
 npm run build:ui
-
-# Lint MCP server
-npm run lint:server
-
-# Format MCP server
-npm run format:server
 ```
 
 **Using Makefile:**

@@ -4,7 +4,7 @@ import { formatAsJson, formatAsSarif } from '../JsonFormatter.js';
 
 describe('JsonFormatter', () => {
   const mockResult = {
-    version: '1.5.13',
+    version: '1.6.0',
     findings: [
       {
         rule_id: 'hardcoded-secret',
@@ -30,7 +30,7 @@ describe('JsonFormatter', () => {
     it('returns valid JSON', () => {
       const json = formatAsJson(mockResult);
       const parsed = JSON.parse(json);
-      assert.strictEqual(parsed.version, '1.5.13');
+      assert.strictEqual(parsed.version, '1.6.0');
       assert.strictEqual(parsed.findings.length, 2);
     });
 
@@ -56,7 +56,7 @@ describe('JsonFormatter', () => {
     it('driver is mcp-shark', () => {
       const sarif = JSON.parse(formatAsSarif(mockResult));
       assert.strictEqual(sarif.runs[0].tool.driver.name, 'mcp-shark');
-      assert.strictEqual(sarif.runs[0].tool.driver.version, '1.5.13');
+      assert.strictEqual(sarif.runs[0].tool.driver.version, '1.6.0');
     });
 
     it('maps critical/high to error, medium to warning, low to note', () => {

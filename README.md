@@ -378,7 +378,7 @@ The web UI provides:
 │  ConfigScanner│  ScanService  │  StaticRulesService  │
 │  15 IDEs      │  orchestrator │  35 rules            │
 ├──────────────┴──────────────┴──────────────────────┤
-│  Data layer (all JSON, all overridable)            │
+│  Data layer (JSON + user YAML/JSON overrides)      │
 │  ┌────────────┬──────────────┬───────────────────┐ │
 │  │ rule-packs │ secret-      │ tool-             │ │
 │  │ (24 rules) │ patterns.json│ classifications   │ │

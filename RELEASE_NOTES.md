@@ -1,3 +1,24 @@
+# 🦈 MCP Shark v1.6.0 - Documentation & CLI accuracy
+
+**Semver:** Minor bump (1.6.0) reflects documentation and CLI behavior clarity, README accuracy, and test isolation improvements—not a patch-only hotfix.
+
+## What's in v1.6.0
+
+### Documentation
+
+- **README** — Clarifies static `scan` (embedded `tools`, no live `tools/list`); OWASP MCP Top 10 link; humbled comparison table; accurate **24 + 11** rule split; CLI flags split by command (`scan` vs `update-rules` / `list` / `serve` / `lock`); design principles no longer imply all rules are JSON-only; generic toxic-flow example; `--refresh-rules` and legacy `npx mcp-shark --open` documented.
+- **DEVELOPERS.md** — Install via `npm ci`; note on **better-sqlite3** / Node ABI vs CI (Node 22).
+
+### CLI
+
+- **Legacy web UI** — `npx mcp-shark --open` / `-o` (no `serve` subcommand) aliases to `serve --open`.
+
+### Tests / engine
+
+- **Declarative rules** — `loadDeclarativeRules({ builtinOnly: true })` for tests to avoid cwd user-pack overrides.
+
+---
+
 # 🦈 MCP Shark v1.5.12 - Improved Empty State Messaging
 
 ## 🎉 What's New in v1.5.12
