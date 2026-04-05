@@ -28,7 +28,15 @@ Before running Local Analysis:
 |--------|-------------|
 | **Analyse** | Run static analysis on connected proxy servers (disabled when no servers running) |
 | **History** | Toggle scan history view to see past results |
-| **Clear** | Remove all findings and scan history |
+| **Clear** | Remove all findings and scan history. Also clears the in-memory **toxic flows (proxy traffic)** model (same registry reset as clearing captured traffic). |
+
+### Toxic flows (proxy traffic)
+
+The **Toxic flows (proxy traffic)** panel on Local Analysis shows cross-server pairings inferred from **tools/list** responses observed on the HTTP proxy. That model lives **in memory** on the UI server.
+
+- **Clear** (Local Analysis) or **Clear all captured traffic** (Traffic tab) resets this model so stale pairs do not linger after you wipe findings or packets.
+- Use **Refresh** to read the current registry, or **Replay from DB** to rebuild it from stored response packets (after traffic was captured).
+- While Local Analysis is open, the panel refetches periodically so it stays aligned if you clear traffic on another tab.
 
 ## View Modes
 
@@ -228,6 +236,28 @@ POST /api/security/findings/clear
 ```
 
 Removes all findings and scan history.
+
+## Cross-server flows from proxy traffic (toxic flows)
+
+When MCP traffic passes through the **HTTP proxy**, successful **`tools/list`** responses update an in-memory model per upstream server (the same capability pairing logic as CLI `scan`, not runtime taint tracking).
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/security/traffic-toxic-flows` | GET | Latest recomputed flows and which servers have observed tool lists |
+| `/api/security/traffic-toxic-flows/replay` | POST | Rebuild the model from stored `packets` rows (responses whose JSON-RPC result includes `tools`) |
+
+In the **Local Analysis** tab, the **Toxic flows (proxy traffic)** panel calls these endpoints (Refresh / Replay from DB).
+
+Requirements:
+
+- At least **two distinct server keys** (proxy `remote_address` / MCP server name, or fallback `session:<id>`).
+- **tools/list** (or equivalent) must have been captured in traffic or in the database.
+
+This does **not** apply to stdio-only paths that never hit the audit logger.
+
+### Future work: call-sequence / causal flows
+
+A separate enhancement would correlate **ordered tool calls across servers** in one agent session (true temporal chaining). That is **not** implemented; the current traffic feature only mirrors static **capability pairing** after observing tool metadata.
 
 ## Troubleshooting
 

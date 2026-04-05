@@ -5,10 +5,16 @@ import { handleError, handleValidationError } from '../utils/errorHandler.js';
  * Controller for Security Detection and Findings HTTP endpoints
  */
 export class SecurityFindingsController {
-  constructor(securityDetectionService, serverManagementService, logger) {
+  constructor(
+    securityDetectionService,
+    serverManagementService,
+    logger,
+    trafficToxicFlowService = null
+  ) {
     this.securityService = securityDetectionService;
     this.serverManagementService = serverManagementService;
     this.logger = logger;
+    this.trafficToxicFlowService = trafficToxicFlowService;
   }
 
   /**
@@ -198,6 +204,7 @@ export class SecurityFindingsController {
   clearFindings = (_req, res) => {
     try {
       const deletedCount = this.securityService.clearAllFindings();
+      this.trafficToxicFlowService?.clear();
       return res.json({
         success: true,
         message: `Cleared ${deletedCount} finding${deletedCount !== 1 ? 's' : ''}`,
@@ -227,6 +234,44 @@ export class SecurityFindingsController {
       });
     } catch (error) {
       handleError(error, res, this.logger, 'Error deleting scan findings');
+    }
+  };
+
+  /**
+   * Cross-server toxic flows from observed tools/list traffic (live registry + last recompute).
+   */
+  getTrafficToxicFlows = (_req, res) => {
+    try {
+      if (!this.trafficToxicFlowService) {
+        return res.status(StatusCodes.SERVICE_UNAVAILABLE).json({
+          success: false,
+          error: 'Traffic toxic flow service is not available',
+        });
+      }
+      return res.json(this.trafficToxicFlowService.getSnapshot());
+    } catch (error) {
+      handleError(error, res, this.logger, 'Error getting traffic toxic flows');
+    }
+  };
+
+  /**
+   * Rebuild toxic-flow model from stored response packets (batch replay).
+   */
+  replayTrafficToxicFlows = (_req, res) => {
+    try {
+      if (!this.trafficToxicFlowService) {
+        return res.status(StatusCodes.SERVICE_UNAVAILABLE).json({
+          success: false,
+          error: 'Traffic toxic flow service is not available',
+        });
+      }
+      const stats = this.trafficToxicFlowService.rebuildFromDatabase();
+      return res.json({
+        ...this.trafficToxicFlowService.getSnapshot(),
+        replay: stats,
+      });
+    } catch (error) {
+      handleError(error, res, this.logger, 'Error replaying traffic toxic flows');
     }
   };
 }

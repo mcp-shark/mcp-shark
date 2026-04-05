@@ -4,10 +4,16 @@
  * Hooks into the audit logging pipeline
  */
 export class TrafficAnalysisService {
-  constructor(staticRulesService, securityFindingsRepository, logger) {
+  constructor(
+    staticRulesService,
+    securityFindingsRepository,
+    logger,
+    trafficToxicFlowService = null
+  ) {
     this.staticRulesService = staticRulesService;
     this.findingsRepository = securityFindingsRepository;
     this.logger = logger;
+    this.trafficToxicFlowService = trafficToxicFlowService;
     this.enabled = true;
   }
 
@@ -94,6 +100,18 @@ export class TrafficAnalysisService {
           { frameNumber: packetData.frameNumber, count: findings.length },
           'Security findings detected in response'
         );
+      }
+
+      if (this.trafficToxicFlowService) {
+        try {
+          this.trafficToxicFlowService.ingestFromTrafficResponse({
+            mcpServerName: packetData.mcpServerName ?? null,
+            sessionId: packetData.sessionId ?? null,
+            body: packetData.body,
+          });
+        } catch (err) {
+          this.logger?.error({ error: err.message }, 'Traffic toxic flow ingest failed');
+        }
       }
 
       return findings;

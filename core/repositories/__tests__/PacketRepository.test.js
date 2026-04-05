@@ -205,4 +205,33 @@ describe('PacketRepository', () => {
       assert.strictEqual(result.max_ts, null);
     });
   });
+
+  describe('listResponsesWithToolsList', () => {
+    test('returns empty when no matching responses', () => {
+      ctx.auditRepo.logResponsePacket({ statusCode: 200, headers: {}, body: '{}' });
+      const rows = ctx.repo.listResponsesWithToolsList();
+      assert.strictEqual(rows.length, 0);
+    });
+
+    test('returns responses whose jsonrpc_result contains tools array', () => {
+      const toolsListBody = JSON.stringify({
+        jsonrpc: '2.0',
+        id: 3,
+        result: {
+          tools: [{ name: 'tool_a', description: 'd' }],
+        },
+      });
+      ctx.auditRepo.logResponsePacket({
+        statusCode: 200,
+        headers: {},
+        body: toolsListBody,
+        remoteAddress: 'my-upstream',
+      });
+
+      const rows = ctx.repo.listResponsesWithToolsList();
+      assert.strictEqual(rows.length, 1);
+      assert.strictEqual(rows[0].remote_address, 'my-upstream');
+      assert.ok(rows[0].jsonrpc_result.includes('tool_a'));
+    });
+  });
 });

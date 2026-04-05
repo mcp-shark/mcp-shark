@@ -66,6 +66,21 @@ export async function postClearFindings() {
   return response.json();
 }
 
+/** Cross-server toxic flows from observed tools/list proxy traffic */
+export async function fetchTrafficToxicFlows() {
+  const response = await fetch('/api/security/traffic-toxic-flows');
+  return response.json();
+}
+
+/** Rebuild toxic-flow model from stored response packets */
+export async function postReplayTrafficToxicFlows() {
+  const response = await fetch('/api/security/traffic-toxic-flows/replay', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  return response.json();
+}
+
 export async function fetchCommunityRules() {
   const response = await fetch('/api/security/community-rules');
   return response.json();

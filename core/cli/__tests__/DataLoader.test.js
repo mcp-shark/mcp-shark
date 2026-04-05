@@ -1,6 +1,12 @@
 import assert from 'node:assert';
+import { join } from 'node:path';
 import { describe, it } from 'node:test';
-import { loadBuiltinJson, loadUserYamlList, loadUserYamlMap } from '../DataLoader.js';
+import {
+  loadBuiltinJson,
+  loadToxicFlowRulesFromPacksDir,
+  loadUserYamlList,
+  loadUserYamlMap,
+} from '../DataLoader.js';
 
 describe('DataLoader', () => {
   describe('loadBuiltinJson', () => {
@@ -53,6 +59,21 @@ describe('DataLoader', () => {
     it('returns empty object when file does not exist', () => {
       const result = loadUserYamlMap('definitely-not-a-file.yaml');
       assert.deepStrictEqual(result, {});
+    });
+  });
+
+  describe('loadToxicFlowRulesFromPacksDir', () => {
+    it('collects toxic_flow_rules from shipped rule-packs', () => {
+      const dir = join(import.meta.dirname, '..', 'data', 'rule-packs');
+      const rules = loadToxicFlowRulesFromPacksDir(dir);
+      assert.ok(
+        rules.some((r) => r.source === 'writes_code' && r.target === 'sends_external'),
+        'Expected toxic-flow-heuristics pack rule'
+      );
+    });
+
+    it('returns empty array for missing directory', () => {
+      assert.deepStrictEqual(loadToxicFlowRulesFromPacksDir('/nonexistent/packs-dir'), []);
     });
   });
 });

@@ -147,6 +147,8 @@ export function createUIServer() {
   app.get('/api/security/history', securityRoutes.getScanHistory);
   app.post('/api/security/findings/clear', securityRoutes.clearFindings);
   app.delete('/api/security/scan/:scanId', securityRoutes.deleteScanFindings);
+  app.get('/api/security/traffic-toxic-flows', securityRoutes.getTrafficToxicFlows);
+  app.post('/api/security/traffic-toxic-flows/replay', securityRoutes.replayTrafficToxicFlows);
 
   // Security routes - YARA engine
   app.get('/api/security/engine/status', securityRoutes.getEngineStatus);

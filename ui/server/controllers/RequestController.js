@@ -8,11 +8,18 @@ import { RequestFilters } from '#core/models/RequestFilters.js';
  */
 
 export class RequestController {
-  constructor(requestService, exportService, serializationLib, logger) {
+  constructor(
+    requestService,
+    exportService,
+    serializationLib,
+    logger,
+    trafficToxicFlowService = null
+  ) {
     this.requestService = requestService;
     this.exportService = exportService;
     this.serializationLib = serializationLib;
     this.logger = logger;
+    this.trafficToxicFlowService = trafficToxicFlowService;
   }
 
   /**
@@ -90,6 +97,7 @@ export class RequestController {
   clearRequests(_req, res) {
     try {
       const result = this.requestService.clearRequests();
+      this.trafficToxicFlowService?.clear();
       res.json({
         success: true,
         message: `Cleared ${result.clearedTables.length} table(s): ${result.clearedTables.join(', ')}. All captured traffic has been cleared.`,

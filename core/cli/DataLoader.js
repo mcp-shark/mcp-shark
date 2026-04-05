@@ -3,7 +3,7 @@
  * Loads built-in JSON data files and merges with user YAML overrides
  * from .mcp-shark/ directory. Keeps hardcoded values in config, not code.
  */
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 const DATA_DIR = join(import.meta.dirname, 'data');
@@ -49,6 +49,37 @@ export function loadUserYamlList(filename) {
     return [];
   }
   return parseYamlList(content);
+}
+
+/**
+ * Collect `toxic_flow_rules` arrays from rule-pack JSON files in a directory
+ * (built-in `core/cli/data/rule-packs` and/or `.mcp-shark/rule-packs`).
+ * @param {string} dirPath absolute or cwd-relative directory
+ * @returns {Array<object>}
+ */
+export function loadToxicFlowRulesFromPacksDir(dirPath) {
+  if (!existsSync(dirPath)) {
+    return [];
+  }
+  const out = [];
+  for (const file of readdirSync(dirPath)) {
+    if (!file.endsWith('.json')) {
+      continue;
+    }
+    try {
+      const pack = JSON.parse(readFileSync(join(dirPath, file), 'utf-8'));
+      if (!pack?.schema_version || !Array.isArray(pack.rules)) {
+        continue;
+      }
+      const extra = pack.toxic_flow_rules;
+      if (Array.isArray(extra)) {
+        out.push(...extra);
+      }
+    } catch {
+      // skip malformed pack files
+    }
+  }
+  return out;
 }
 
 /**

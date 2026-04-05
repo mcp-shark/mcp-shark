@@ -4,6 +4,13 @@
 
 ## What's in v1.6.0
 
+### Web UI — proxy toxic flows
+
+- **Local Analysis** — **Toxic flows (proxy traffic)** panel: heuristics from **tools/list** responses seen on the HTTP proxy; **Refresh** and **Replay from DB**; light background polling while the scanner view is open.
+- **Clear alignment** — Clearing findings or all captured traffic resets the in-memory toxic-flow registry on the server; the UI refetches after clear and on the poll interval.
+- **OpenAPI** — `GET /api/security/traffic-toxic-flows` and `POST /api/security/traffic-toxic-flows/replay` documented under the **Security** tag in `/api-docs`.
+- **Tests** — Node integration test for the two routes; Vitest coverage for `TrafficToxicFlowsPanel`.
+
 ### Documentation
 
 - **README** — Clarifies static `scan` (embedded `tools`, no live `tools/list`); OWASP MCP Top 10 link; humbled comparison table; accurate **24 + 11** rule split; CLI flags split by command (`scan` vs `update-rules` / `list` / `serve` / `lock`); design principles no longer imply all rules are JSON-only; generic toxic-flow example; `--refresh-rules` and legacy `npx mcp-shark --open` documented.

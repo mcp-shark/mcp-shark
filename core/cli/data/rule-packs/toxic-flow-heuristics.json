@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "pack_id": "toxic-flow-heuristics",
+  "pack_name": "Toxic flow capability-pair heuristics",
+  "version": "1.0.0",
+  "updated": "2026-04-05",
+  "source_url": "https://github.com/mcp-shark/rule-packs",
+  "description": "Cross-server toxic flow rules consumed by analyzeToxicFlows (CLI, HTML report, proxy traffic panel). Declarative rules[] is empty; heuristics live in toxic_flow_rules.",
+  "rules": [],
+  "toxic_flow_rules": [
+    {
+      "source": "writes_code",
+      "target": "sends_external",
+      "risk": "HIGH",
+      "title": "Code change \u2192 external disclosure",
+      "scenario": "The agent could alter code or repos via {source} and leak implementation details, tokens, or other sensitive context through {target}.",
+      "catalog": "\u00a71.2, \u00a71.10",
+      "owasp": "MCP03 + MCP06"
+    }
+  ]
+}

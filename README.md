@@ -57,11 +57,12 @@ Use mcp-shark findings as input to your own threat model, not as a complete audi
 | **Server inventory** | `list` command shows all servers in a table |
 | **Watch mode** | Live re-scan on config changes |
 | **HTML reports** | Self-contained offline security reports |
-| **Downloadable rule packs** | `update-rules` fetches latest OWASP/Agentic catalogs — zero code changes |
+| **Downloadable rule packs** | [Rule pack registry](https://github.com/mcp-shark/rule-packs) (manifest + JSON); `update-rules` syncs declarative packs and toxic-flow heuristics — zero code changes |
 | **YAML rules** | Per-project custom rules via `.mcp-shark/rules/` |
 | **GitHub Action** | CI/CD integration with SARIF upload |
 | **Interactive TUI** | lazygit-style terminal UI for scan, fix, and server browsing |
 | **Web UI** | Wireshark-like monitoring interface |
+| **Proxy toxic flows** | Local Analysis panel + `GET/POST /api/security/traffic-toxic-flows*` infer cross-server pairs from captured **tools/list** traffic (see [docs/local-analysis.md](docs/local-analysis.md)) |
 | **Local static scans** | No hosted scan backend; `update-rules` is opt-in HTTPS to the registry |
 
 ## Quick Start
@@ -178,7 +179,9 @@ mcp-shark is aimed at **config and metadata you already have on disk** (plus opt
 
 ### Downloadable Rule Packs (JSON)
 
-mcp-shark ships with 24 declarative rules as JSON packs (OWASP MCP, Agentic Security Initiative, General Security). New vulnerability catalogs can be added as `.json` files — no JavaScript, no code changes.
+The canonical **registry** (manifest, pack files, validation CI, and schema notes) lives in **[mcp-shark/rule-packs](https://github.com/mcp-shark/rule-packs)**. The npm package embeds copies; `update-rules` pulls the same artifacts into `.mcp-shark/rule-packs/`.
+
+mcp-shark ships with 24 declarative rules as JSON packs (OWASP MCP, Agentic Security Initiative, General Security), plus a **`toxic-flow-heuristics`** pack (`toxic_flow_rules` for cross-server composition). New vulnerability catalogs can be added as `.json` files — no JavaScript, no code changes.
 
 ```bash
 # Fetch latest rule packs from the registry
@@ -398,6 +401,7 @@ The web UI provides:
 
 ## Documentation
 
+- **[Rule pack registry](https://github.com/mcp-shark/rule-packs)** — Official `manifest.json` and JSON packs consumed by `update-rules`
 - **[Getting Started](docs/getting-started.md)** — Installation & setup
 - **[Features](docs/features.md)** — Detailed feature documentation
 - **[User Guide](docs/user-guide.md)** — Complete usage guide

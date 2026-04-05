@@ -4,7 +4,7 @@ export const swaggerSpec = {
   openapi: '3.0.0',
   info: {
     title: 'MCP Shark API',
-    version: '1.5.4',
+    version: '1.6.0',
     description:
       'API documentation for MCP Shark - A powerful monitoring and debugging tool for Model Context Protocol (MCP) servers. Provides deep visibility into every request and response.',
     contact: {
@@ -31,6 +31,10 @@ export const swaggerSpec = {
     { name: 'Playground', description: 'MCP playground for testing tools and resources' },
     { name: 'Smart Scan', description: 'AI-powered security analysis for MCP servers' },
     { name: 'Settings', description: 'Application settings' },
+    {
+      name: 'Security',
+      description: 'Local static analysis findings and traffic-derived toxic flows (HTTP proxy)',
+    },
   ],
   paths,
   components,

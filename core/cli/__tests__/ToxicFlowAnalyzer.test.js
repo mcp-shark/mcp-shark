@@ -3,6 +3,22 @@ import { describe, it } from 'node:test';
 import { analyzeToxicFlows } from '../ToxicFlowAnalyzer.js';
 
 describe('ToxicFlowAnalyzer', () => {
+  it('detects writes_code to sends_external flow (rule-pack heuristic)', () => {
+    const servers = [
+      { name: 'git-server', ide: 'Cursor', tools: [{ name: 'push_files' }] },
+      { name: 'slack-server', ide: 'Cursor', tools: [{ name: 'post_message' }] },
+    ];
+    const flows = analyzeToxicFlows(servers);
+    const hit = flows.find(
+      (f) =>
+        f.source === 'git-server' &&
+        f.target === 'slack-server' &&
+        f.sourceCapability === 'writes_code' &&
+        f.targetCapability === 'sends_external'
+    );
+    assert.ok(hit, 'Expected code→external toxic flow');
+  });
+
   it('detects flow between ingests_untrusted and writes_code servers', () => {
     const servers = [
       { name: 'slack-server', ide: 'Cursor', tools: [{ name: 'list_messages' }] },

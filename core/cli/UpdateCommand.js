@@ -107,9 +107,17 @@ export async function executeUpdateRules(options = {}) {
       const packText = await fetchUtf8Secure(packRef.url, PACK_MAX_BYTES);
       assertSha256(packRef.sha256, packText);
       const packData = JSON.parse(packText);
+      const toxicExtra = Array.isArray(packData.toxic_flow_rules) ? packData.toxic_flow_rules : [];
       if (!packData.schema_version || !Array.isArray(packData.rules)) {
         if (!quiet) {
           console.log(`  ${S.warn} ${packRef.id}: invalid pack format, skipped`);
+        }
+        hadPackFailure = true;
+        continue;
+      }
+      if (packData.rules.length === 0 && toxicExtra.length === 0) {
+        if (!quiet) {
+          console.log(`  ${S.warn} ${packRef.id}: empty rules and toxic_flow_rules, skipped`);
         }
         hadPackFailure = true;
         continue;
@@ -124,9 +132,17 @@ export async function executeUpdateRules(options = {}) {
       resetStaticRulesCache();
       const verb = localVersion ? 'updated' : 'downloaded';
       const ruleCount = packData.rules.length;
+      const toxicCount = toxicExtra.length;
       if (!quiet) {
+        const parts = [];
+        if (ruleCount > 0) {
+          parts.push(`${ruleCount} rules`);
+        }
+        if (toxicCount > 0) {
+          parts.push(`${toxicCount} toxic-flow rule${toxicCount !== 1 ? 's' : ''}`);
+        }
         console.log(
-          `  ${S.pass} ${packRef.id} v${packRef.version} ${kleur.green(verb)} (${ruleCount} rules)`
+          `  ${S.pass} ${packRef.id} v${packRef.version} ${kleur.green(verb)} (${parts.join(', ')})`
         );
       }
       updated++;

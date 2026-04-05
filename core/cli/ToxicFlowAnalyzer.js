@@ -4,17 +4,29 @@
  * tools by capability and identifying pairs that create attack paths
  * through the shared LLM context window.
  *
- * Flow rules are loaded from data/toxic-flow-rules.json (built-in)
- * and merged with user overrides from .mcp-shark/flows.yaml.
+ * Flow rules are loaded from data/toxic-flow-rules.json (built-in),
+ * optional toxic_flow_rules inside rule-pack JSON under data/rule-packs/ and
+ * .mcp-shark/rule-packs/, and user overrides from .mcp-shark/flows.yaml.
  *
  * Catalog references: §1.1, §1.2, §1.3, §1.7, §1.10, §1.12, §1.13, §1.14
  */
-import { loadBuiltinJson, loadUserYamlList } from './DataLoader.js';
+import { join } from 'node:path';
+import { loadBuiltinJson, loadToxicFlowRulesFromPacksDir, loadUserYamlList } from './DataLoader.js';
 import { TOOL_CLASSIFICATIONS } from './ToolClassifications.js';
 
+const BUILTIN_PACKS_DIR = join(import.meta.dirname, 'data', 'rule-packs');
+const USER_PACKS_DIR = join(process.cwd(), '.mcp-shark', 'rule-packs');
+
 const BUILTIN_FLOWS = loadBuiltinJson('toxic-flow-rules.json');
+const PACK_FLOWS_BUILTIN = loadToxicFlowRulesFromPacksDir(BUILTIN_PACKS_DIR);
+const PACK_FLOWS_USER = loadToxicFlowRulesFromPacksDir(USER_PACKS_DIR);
 const USER_FLOWS = loadUserYamlList('flows.yaml');
-const TOXIC_FLOW_RULES = [...BUILTIN_FLOWS, ...USER_FLOWS];
+const TOXIC_FLOW_RULES = [
+  ...BUILTIN_FLOWS,
+  ...PACK_FLOWS_BUILTIN,
+  ...PACK_FLOWS_USER,
+  ...USER_FLOWS,
+];
 
 /**
  * Classify a tool's capability based on known classifications and heuristics

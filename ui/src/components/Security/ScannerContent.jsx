@@ -7,7 +7,7 @@ import {
   IconSparkles,
   IconTool,
 } from '@tabler/icons-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { colors, fonts } from '../../theme';
 import CategoryView from './CategoryView/index.js';
 import ErrorDisplay from './ErrorDisplay.jsx';
@@ -18,6 +18,10 @@ import ScanningProgress from './ScanningProgress.jsx';
 import SecurityCharts from './SecurityCharts/index.js';
 import SecuritySummary from './SecuritySummary.jsx';
 import TargetView from './TargetView/index.js';
+import TrafficToxicFlowsPanel from './TrafficToxicFlowsPanel.jsx';
+
+/** Keep proxy toxic-flow snapshot aligned when traffic/findings are cleared on other tabs. */
+const TRAFFIC_TOXIC_POLL_MS = 20_000;
 
 const VIEW_MODES = [
   { id: 'dashboard', label: 'Dashboard', icon: IconChartBar },
@@ -162,10 +166,25 @@ export default function ScannerContent({
   showHistory,
   serversAvailable,
   scanComplete,
+  trafficToxicSnapshot,
+  trafficToxicLoading,
+  trafficToxicError,
+  loadTrafficToxicFlows,
+  replayTrafficToxicFlows,
 }) {
   const [viewMode, setViewMode] = useState('dashboard');
   const hasFindings = findings && findings.length > 0;
   const showEmpty = !error && !scanning && !hasFindings && !showHistory;
+
+  useEffect(() => {
+    if (error || scanning) {
+      return undefined;
+    }
+    const id = setInterval(() => {
+      loadTrafficToxicFlows();
+    }, TRAFFIC_TOXIC_POLL_MS);
+    return () => clearInterval(id);
+  }, [error, scanning, loadTrafficToxicFlows]);
 
   return (
     <div
@@ -182,6 +201,16 @@ export default function ScannerContent({
 
       {!error && !scanning && (
         <StaticAnalysisBanner onNavigateToSmartScan={onNavigateToSmartScan} />
+      )}
+
+      {!error && !scanning && (
+        <TrafficToxicFlowsPanel
+          snapshot={trafficToxicSnapshot}
+          loading={trafficToxicLoading}
+          error={trafficToxicError}
+          onRefresh={loadTrafficToxicFlows}
+          onReplay={replayTrafficToxicFlows}
+        />
       )}
 
       {/* History View */}

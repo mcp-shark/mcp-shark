@@ -30,6 +30,11 @@ function Security({ onNavigateToSmartScan, onNavigateToSetup }) {
     runningServersCount,
     // Scan complete state
     scanComplete,
+    trafficToxicSnapshot,
+    trafficToxicLoading,
+    trafficToxicError,
+    loadTrafficToxicFlows,
+    replayTrafficToxicFlows,
     // YARA rules
     communityRules,
     engineStatus,
@@ -103,6 +108,11 @@ function Security({ onNavigateToSmartScan, onNavigateToSetup }) {
           showHistory={showHistory}
           serversAvailable={runningServersCount > 0}
           scanComplete={scanComplete}
+          trafficToxicSnapshot={trafficToxicSnapshot}
+          trafficToxicLoading={trafficToxicLoading}
+          trafficToxicError={trafficToxicError}
+          loadTrafficToxicFlows={loadTrafficToxicFlows}
+          replayTrafficToxicFlows={replayTrafficToxicFlows}
         />
       )}
 

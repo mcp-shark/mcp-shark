@@ -72,5 +72,60 @@ export const components = {
         results: { type: 'object' },
       },
     },
+    TrafficToxicFlowItem: {
+      type: 'object',
+      properties: {
+        risk: { type: 'string', example: 'HIGH' },
+        title: { type: 'string' },
+        source: { type: 'string' },
+        target: { type: 'string' },
+        scenario: { type: 'string' },
+        sourceIde: { type: 'string' },
+        targetIde: { type: 'string' },
+      },
+    },
+    TrafficToxicFlowServerMeta: {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        toolCount: { type: 'integer' },
+        updatedAt: { type: 'integer' },
+      },
+    },
+    TrafficToxicFlowSnapshot: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        toxicFlows: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/TrafficToxicFlowItem' },
+        },
+        servers: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/TrafficToxicFlowServerMeta' },
+        },
+        computedAt: { type: 'integer', nullable: true },
+        lastReplayPacketCount: { type: 'integer' },
+        note: { type: 'string' },
+      },
+    },
+    TrafficToxicFlowReplayResponse: {
+      allOf: [
+        { $ref: '#/components/schemas/TrafficToxicFlowSnapshot' },
+        {
+          type: 'object',
+          properties: {
+            replay: {
+              type: 'object',
+              properties: {
+                packetRows: { type: 'integer' },
+                serverCount: { type: 'integer' },
+                flowCount: { type: 'integer' },
+              },
+            },
+          },
+        },
+      ],
+    },
   },
 };

@@ -165,4 +165,42 @@ describe('AuditService', () => {
       assert.strictEqual(conversations[0].status, 'error');
     });
   });
+
+  describe('traffic analyzer wiring', () => {
+    test('passes remoteAddress as mcpServerName to analyzer for request and response', () => {
+      const calls = [];
+      const mockAnalyzer = {
+        analyzeRequest: (p) => {
+          calls.push(['req', p]);
+          return [];
+        },
+        analyzeResponse: (p) => {
+          calls.push(['res', p]);
+          return [];
+        },
+      };
+      ctx.service.setTrafficAnalyzer(mockAnalyzer);
+
+      ctx.service.logRequestPacket({
+        method: 'POST',
+        url: '/mcp',
+        headers: {},
+        body: JSON.stringify({ jsonrpc: '2.0', method: 'ping', id: 1 }),
+        remoteAddress: 'upstream-mcp-name',
+      });
+
+      ctx.service.logResponsePacket({
+        statusCode: 200,
+        headers: {},
+        body: JSON.stringify({ jsonrpc: '2.0', result: {}, id: 1 }),
+        remoteAddress: 'upstream-mcp-name',
+      });
+
+      assert.strictEqual(calls.length, 2);
+      assert.strictEqual(calls[0][0], 'req');
+      assert.strictEqual(calls[0][1].mcpServerName, 'upstream-mcp-name');
+      assert.strictEqual(calls[1][0], 'res');
+      assert.strictEqual(calls[1][1].mcpServerName, 'upstream-mcp-name');
+    });
+  });
 });
