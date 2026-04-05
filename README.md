@@ -152,29 +152,27 @@ The CLI **`scan`** command is **static**: it reads MCP entries from your IDE con
 
 To exercise full rule coverage in CI or test repos, either embed tool metadata in the same JSON your scanner reads, or use a project-local `mcp.json` harness (see `--ide Project`).
 
-## Comparison
+## What it covers
 
-Rough feature matrix (other products change often — verify on their docs before you rely on this):
+mcp-shark is aimed at **config and metadata you already have on disk** (plus optional local monitoring). It helps catch common misconfigurations and risky combinations; treat output as input to your own review, not a guarantee nothing is wrong.
 
-| Capability | mcp-scan | mcp-context-protector | Oxvault | mcp-shark |
-|------------|----------|-----------------------|---------|-----------|
-| Runtime | Python (`uvx`) | Python (`pip`) | Go (binary) | Node.js (`npx`) |
-| Security rules | Pattern-based set | 0 (proxy-first) | SAST-style | 35 (24 declarative + 11 JS) |
-| Toxic flow analysis | — | — | — | Yes (heuristic, config/tool metadata) |
-| Attack walkthroughs | — | — | — | Yes |
-| Auto-fix | — | — | — | Yes (limited fix types) |
-| Tool pinning | Hash-based | TOFU | — | `.mcp-shark.lock` (SHA-256) |
-| TOFU / traffic proxy | — | Yes | — | Yes (web UI) |
-| Custom rules | — | — | — | YAML + JSON packs |
-| Web UI | — | — | — | Yes |
-| Confidence / scoring | — | — | Varies | confirmed / advisory + Shark Score |
-| IDE config discovery | Varies | Varies | N/A | 15 IDEs + project-local paths (see below) |
-| Output formats | JSON | — | JSON | Terminal, JSON, SARIF, HTML |
-| Health check | — | — | — | Yes (`doctor`) |
-| GitHub Action | — | — | — | Yes |
-| Watch mode | — | — | — | Yes |
-| Downloadable rule packs | — | — | — | Yes (`update-rules`) |
-| Offline static scan | Optional flag | Yes | Yes | Yes (registry fetch is opt-in) |
+| Area | Notes |
+|------|--------|
+| Install / run | Node.js 20+; `npx @mcp-shark/mcp-shark` |
+| Security rules | 35 checks — 24 declarative JSON packs, 11 JS where heuristics need code |
+| Toxic flow analysis | Heuristic cross-server paths; quality depends on embedded `tools` / classifications |
+| Attack walkthroughs | Narratives derived from findings |
+| Auto-fix | Supported for a subset of issues; confirm changes in your repo |
+| Tool pinning | `.mcp-shark.lock` with SHA-256 hashes |
+| Live traffic | Web UI (`serve`) for monitoring; separate from static `scan` |
+| Custom rules | YAML under `.mcp-shark/rules/` and JSON rule packs |
+| Findings & score | confirmed / advisory tiers plus Shark Score (0–100, A–F) |
+| IDE configs | 15 built-in paths + project-local `mcp.json` variants — see [Supported IDEs](#supported-ides) |
+| Output | Terminal, JSON, SARIF v2.1.0, HTML |
+| Health | `doctor` for environment checks |
+| CI | `scan --ci` and optional [GitHub Action](#github-action) |
+| Watch | Re-scan when config files change |
+| Rule updates | `update-rules` (optional HTTPS fetch; static scan works without it) |
 
 ## Rule Extensibility
 
