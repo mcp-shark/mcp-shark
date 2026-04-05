@@ -1,0 +1,5 @@
+{
+  "registry_url": "https://raw.githubusercontent.com/mcp-shark/rule-packs/main/manifest.json",
+  "cache_dir": ".mcp-shark/rule-packs",
+  "default_auto_update_max_age_hours": 168
+}

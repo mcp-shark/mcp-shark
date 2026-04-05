@@ -1,0 +1,244 @@
+/**
+ * Scan Command
+ * Wires ScanService results to CLI output with flag support
+ */
+import { confirm } from '@clack/prompts';
+import { applyFixes, renderFixResults } from './AutoFixEngine.js';
+import { generateHtmlReport } from './HtmlReportGenerator.js';
+import { isRuleCacheStale, resolveRuleRegistryConfig } from './RuleRegistryConfig.js';
+import { runScan } from './ScanService.js';
+import { calculateSharkScore } from './SharkScoreCalculator.js';
+import { executeUpdateRules } from './UpdateCommand.js';
+import { formatWalkthrough, generateWalkthroughs } from './WalkthroughGenerator.js';
+import {
+  displayScanBanner,
+  formatAsJson,
+  formatAsSarif,
+  formatCleanServers,
+  formatIdeDiscovery,
+  formatNextSteps,
+  formatServerFindings,
+  formatSharkScore,
+  formatSummaryCounts,
+  formatTiming,
+  formatToxicFlows,
+} from './output/index.js';
+
+/**
+ * Execute the scan command
+ * @param {object} options - CLI options from commander
+ * @param {boolean} [options.fix] - Auto-fix fixable issues
+ * @param {boolean} [options.walkthrough] - Show attack chain narratives
+ * @param {boolean} [options.ci] - CI mode (exit code 1 on critical/high)
+ * @param {string} [options.format] - Output format: 'json' | 'sarif' | 'terminal'
+ * @param {boolean} [options.strict] - Count advisory findings in score
+ * @param {string} [options.ide] - Filter to specific IDE
+ * @param {boolean} [options.yes] - Skip confirmation for --fix
+ * @param {string} [options.output] - Output file path (for html format)
+ * @param {string} [options.rules] - Path to custom YAML rules directory
+ * @param {boolean} [options.refreshRules] - Fetch registry packs before scan
+ */
+export async function executeScan(options = {}) {
+  const refreshExit = await maybeRefreshRulesBeforeScan(options);
+  if (refreshExit !== 0) {
+    return refreshExit;
+  }
+
+  const format = (options.format || 'terminal').toLowerCase();
+
+  const scanResult = runScan({
+    ide: options.ide,
+    strict: options.strict,
+    rulesPath: options.rules,
+  });
+
+  if (format === 'json') {
+    console.log(formatAsJson(buildJsonOutput(scanResult)));
+    return exitWithCode(scanResult, options.ci);
+  }
+
+  if (format === 'sarif') {
+    console.log(formatAsSarif(buildJsonOutput(scanResult)));
+    return exitWithCode(scanResult, options.ci);
+  }
+
+  if (format === 'html') {
+    generateHtmlReport(scanResult, options.output);
+    return exitWithCode(scanResult, options.ci);
+  }
+
+  renderTerminalOutput(scanResult, options);
+
+  if (options.fix) {
+    await executeAutoFix(scanResult, {
+      undo: options.undo,
+      skipConfirm: options.yes || options.ci,
+    });
+  }
+
+  return exitWithCode(scanResult, options.ci);
+}
+
+/**
+ * Optional network: only when --refresh-rules or auto_update + stale cache.
+ * --refresh-rules: failure exits non-zero. Background auto-update: fail-open (scan continues).
+ */
+async function maybeRefreshRulesBeforeScan(options) {
+  const config = resolveRuleRegistryConfig({});
+  if (options.refreshRules) {
+    return executeUpdateRules({ quiet: true });
+  }
+  if (config.autoUpdate && isRuleCacheStale(config.cacheDir, config.autoUpdateMaxAgeHours)) {
+    await executeUpdateRules({ quiet: true });
+  }
+  return 0;
+}
+
+/**
+ * Render the full terminal output
+ */
+function renderTerminalOutput(scanResult, options) {
+  displayScanBanner();
+  console.log(formatIdeDiscovery(scanResult.ideResults));
+  console.log('');
+
+  renderFindings(scanResult);
+  renderToxicFlows(scanResult);
+  renderScore(scanResult);
+
+  if (options.walkthrough && scanResult.toxicFlows.length > 0) {
+    renderWalkthroughs(scanResult.toxicFlows);
+  }
+
+  const hasFixable = scanResult.findings.some((f) => f.fixable);
+  const hasFlows = scanResult.toxicFlows.length > 0;
+  console.log(formatNextSteps(hasFixable, hasFlows));
+  console.log('');
+}
+
+/**
+ * Render findings grouped by server
+ */
+function renderFindings(scanResult) {
+  for (const [serverName, findings] of Object.entries(scanResult.findingsByServer)) {
+    const server = scanResult.servers.find((s) => s.name === serverName);
+    const ideName = server ? server.ide : 'unknown';
+    console.log(formatServerFindings(serverName, ideName, findings));
+  }
+
+  if (scanResult.cleanServers.length > 0) {
+    console.log(formatCleanServers(scanResult.cleanServers));
+  }
+}
+
+/**
+ * Render toxic flows section
+ */
+function renderToxicFlows(scanResult) {
+  if (scanResult.toxicFlows.length > 0) {
+    console.log(formatToxicFlows(scanResult.toxicFlows));
+  }
+}
+
+/**
+ * Render score and summary
+ */
+function renderScore(scanResult) {
+  console.log('');
+  console.log(formatSharkScore(scanResult.scoreResult));
+  console.log(formatSummaryCounts(scanResult.severityCounts, scanResult.toxicFlows.length));
+  console.log(
+    formatTiming(
+      scanResult.elapsedMs,
+      scanResult.serverCount,
+      scanResult.ruleCount,
+      scanResult.totalToolCount
+    )
+  );
+}
+
+/**
+ * Render attack walkthroughs
+ */
+function renderWalkthroughs(toxicFlows) {
+  const walkthroughs = generateWalkthroughs(toxicFlows);
+  for (const walkthrough of walkthroughs) {
+    console.log(formatWalkthrough(walkthrough));
+  }
+}
+
+/**
+ * Execute auto-fix (or undo) with optional interactive confirmation
+ */
+async function executeAutoFix(scanResult, fixOptions = {}) {
+  const fixable = scanResult.findings.filter((f) => f.fixable);
+
+  if (fixable.length === 0 && !fixOptions.undo) {
+    return;
+  }
+
+  if (!fixOptions.skipConfirm && !fixOptions.undo) {
+    const shouldProceed = await confirm({
+      message: `Apply ${fixable.length} auto-fixes? (backups will be created)`,
+    });
+    if (!shouldProceed || typeof shouldProceed === 'symbol') {
+      console.log('  Fix cancelled.');
+      return;
+    }
+  }
+
+  const scoreBefore = scanResult.scoreResult.score;
+  const fixResult = applyFixes(scanResult.findings, { undo: fixOptions.undo });
+
+  const remainingFindings = scanResult.findings.filter(
+    (f) => !fixResult.fixed.some((fx) => fx.finding === f)
+  );
+  const scoreAfterResult = calculateSharkScore(remainingFindings, scanResult.toxicFlows);
+  const scoreAfter = scoreAfterResult.score;
+
+  renderFixResults(fixResult, scoreBefore, scoreAfter);
+}
+
+/**
+ * Build structured JSON output
+ */
+function buildJsonOutput(scanResult) {
+  return {
+    version: '1.0.0',
+    timestamp: new Date().toISOString(),
+    score: scanResult.scoreResult,
+    findings: scanResult.findings,
+    toxicFlows: scanResult.toxicFlows,
+    servers: scanResult.servers.map((s) => ({
+      name: s.name,
+      ide: s.ide,
+      configPath: s.configPath,
+    })),
+    summary: {
+      serverCount: scanResult.serverCount,
+      ruleCount: scanResult.ruleCount,
+      toolCount: scanResult.totalToolCount,
+      elapsedMs: scanResult.elapsedMs,
+      severityCounts: scanResult.severityCounts,
+    },
+  };
+}
+
+/**
+ * Exit with appropriate code for CI mode
+ */
+function exitWithCode(scanResult, ciMode) {
+  if (!ciMode) {
+    return 0;
+  }
+
+  const hasCriticalOrHigh = scanResult.findings.some((f) => {
+    const severity = (f.severity || f.risk_level || '').toLowerCase();
+    return severity === 'critical' || severity === 'high';
+  });
+
+  if (hasCriticalOrHigh) {
+    return 1;
+  }
+  return 0;
+}

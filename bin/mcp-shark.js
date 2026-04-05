@@ -1,12 +1,23 @@
 #!/usr/bin/env node
 
+/**
+ * MCP Shark CLI Entry Point
+ */
 import { spawn } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 import open from 'open';
+import { executeDoctor } from '#core/cli/DoctorCommand.js';
+import { executeList } from '#core/cli/ListCommand.js';
+import { executeDiff, executeLock, executeLockVerify } from '#core/cli/LockCommand.js';
+import { executeScan } from '#core/cli/ScanCommand.js';
+import { executeUpdateRules } from '#core/cli/UpdateCommand.js';
+import { executeWatch } from '#core/cli/WatchCommand.js';
+import { displayServeBanner } from '#core/cli/output/Banner.js';
 import { bootstrapLogger as logger } from '#core/libraries/index.js';
+import { launchTui } from '#core/tui/render.js';
 
 const SERVER_URL = 'http://localhost:9853';
 const BROWSER_OPEN_DELAY = 1000;
@@ -15,35 +26,19 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const rootDir = resolve(__dirname, '..');
 
-/**
- * Display welcome banner
- */
-function displayWelcomeBanner() {
-  const pkgPath = join(rootDir, 'package.json');
-  const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
-  const version = pkg.version;
-
-  const banner = `
-   ███╗   ███╗ ██████╗ ██████╗      ███████╗██╗  ██╗ █████╗ ██████╗ ██╗  ██╗
-   ████╗ ████║██╔════╝██╔══██╗     ██╔════╝██║  ██║██╔══██╗██╔══██╗██║ ██╔╝
-   ██╔████╔██║██║     ██████╔╝     ███████╗███████║███████║██████╔╝█████╔╝ 
-   ██║╚██╔╝██║██║     ██╔═══╝      ╚════██║██╔══██║██╔══██║██╔══██╗██╔═██╗ 
-   ██║ ╚═╝ ██║╚██████╗██║          ███████║██║  ██║██║  ██║██║  ██║██║  ██╗
-   ╚═╝     ╚═╝ ╚═════╝╚═╝          ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
-   
-   Aggregate multiple MCP servers into a unified interface
-   Version: ${version} | Homepage: https://mcpshark.sh
-`;
-
-  logger.log(banner);
+function getVersion() {
+  try {
+    const pkgPath = join(rootDir, 'package.json');
+    const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+    return pkg.version;
+  } catch (_err) {
+    return '0.0.0';
+  }
 }
 
 const uiDir = join(rootDir, 'ui');
 const distDir = join(uiDir, 'dist');
 
-/**
- * Validate that UI dist directory exists
- */
 function validateUIBuilt() {
   if (!existsSync(distDir)) {
     logger.error(
@@ -54,17 +49,11 @@ function validateUIBuilt() {
   }
 }
 
-/**
- * Open the browser after a short delay
- */
 async function openBrowser() {
-  await new Promise((resolve) => setTimeout(resolve, BROWSER_OPEN_DELAY));
+  await new Promise((r) => setTimeout(r, BROWSER_OPEN_DELAY));
   open(SERVER_URL);
 }
 
-/**
- * Start the UI server
- */
 async function startServer(shouldOpenBrowser = false) {
   logger.info('Starting MCP Shark UI server...');
   logger.info(`Open ${SERVER_URL} in your browser`);
@@ -93,19 +82,14 @@ async function startServer(shouldOpenBrowser = false) {
     }
   });
 
-  // Handle process termination
   const shutdown = async (signal) => {
     if (shutdownState.isShuttingDown) {
       return;
     }
     shutdownState.isShuttingDown = true;
-
     logger.info('Shutting down...');
-
-    // Send signal to child process
     serverProcess.kill(signal);
 
-    // Wait for child process to exit, with timeout
     const timeout = setTimeout(() => {
       logger.info('Forcefully terminating server process...');
       serverProcess.kill('SIGKILL');
@@ -122,37 +106,147 @@ async function startServer(shouldOpenBrowser = false) {
   process.on('SIGTERM', () => shutdown('SIGTERM'));
 }
 
-/**
- * Validate that required directories exist
- */
 function validateDirectories() {
   if (!existsSync(uiDir)) {
-    logger.error('Error: UI directory not found. Please ensure you are in the correct directory.');
+    logger.error('Error: UI directory not found.');
     process.exit(1);
   }
 }
 
 /**
- * Main execution function
+ * Legacy: `npx mcp-shark --open` / `-o` → `serve --open` (before Commander parses argv).
+ * Skipped when the first argument is a subcommand (e.g. `serve`, `scan`).
  */
+function applyLegacyOpenAlias() {
+  const argv = process.argv.slice(2);
+  if (argv.length === 0) {
+    return;
+  }
+  const first = argv[0];
+  if (!first.startsWith('-')) {
+    return;
+  }
+  if (!argv.includes('--open') && !argv.includes('-o')) {
+    return;
+  }
+  const filtered = argv.filter((x) => x !== '--open' && x !== '-o');
+  process.argv = [process.argv[0], process.argv[1], 'serve', '--open', ...filtered];
+}
+
 async function main() {
-  // Display welcome banner
-  displayWelcomeBanner();
+  applyLegacyOpenAlias();
 
-  // Parse command line options
+  const version = getVersion();
+
   const program = new Command();
-  program.option('-o, --open', 'Open the browser', false).parse(process.argv);
+  program.name('mcp-shark').description('Security scanner for AI agent tools').version(version);
 
-  const options = program.opts();
+  program
+    .command('scan', { isDefault: true })
+    .description('Scan MCP configurations for security issues (default)')
+    .option('--fix', 'Auto-fix fixable issues')
+    .option('--undo', 'Undo previous --fix changes (use with --fix)')
+    .option('--yes', 'Skip confirmation prompt for --fix')
+    .option('--walkthrough', 'Show full attack chain narratives')
+    .option('--ci', 'CI mode: exit code 1 on critical/high findings')
+    .option('--format <format>', 'Output format: terminal, json, sarif, html', 'terminal')
+    .option('--output <path>', 'Write report to file (for html format)')
+    .option('--strict', 'Count advisory findings in score')
+    .option('--ide <name>', 'Scan specific IDE only')
+    .option('--rules <path>', 'Load custom YAML rules from directory')
+    .option(
+      '--refresh-rules',
+      'Download rule packs from registry before scan (HTTPS; configure via env or .mcp-shark/rule-registry.json)'
+    )
+    .action(async (options) => {
+      const exitCode = await executeScan(options);
+      if (exitCode !== 0) {
+        process.exit(exitCode);
+      }
+    });
 
-  // Validate environment
-  validateDirectories();
+  program
+    .command('lock')
+    .description('Create or update .mcp-shark.lock (pin tool definitions)')
+    .option('--verify', 'Verify current state matches lockfile')
+    .action((options) => {
+      const exitCode = options.verify ? executeLockVerify() : executeLock(options);
+      if (exitCode !== 0) {
+        process.exit(exitCode);
+      }
+    });
 
-  // Validate UI is built (pre-built files should be included in package)
-  validateUIBuilt();
+  program
+    .command('diff')
+    .description('Show tool definition changes since last lock')
+    .action(() => {
+      const exitCode = executeDiff();
+      if (exitCode !== 0) {
+        process.exit(exitCode);
+      }
+    });
 
-  // Start the server
-  await startServer(options.open);
+  program
+    .command('doctor')
+    .description('Run environment health checks')
+    .action(() => {
+      const exitCode = executeDoctor();
+      if (exitCode !== 0) {
+        process.exit(exitCode);
+      }
+    });
+
+  program
+    .command('tui')
+    .description('Launch interactive terminal UI (lazygit-style)')
+    .action(async () => {
+      await launchTui();
+    });
+
+  program
+    .command('watch')
+    .description('Watch config files and re-scan on changes')
+    .action(() => {
+      const exitCode = executeWatch();
+      if (exitCode !== 0) {
+        process.exit(exitCode);
+      }
+    });
+
+  program
+    .command('list')
+    .description('Show inventory of all detected MCP servers')
+    .option('--format <format>', 'Output format: terminal, json', 'terminal')
+    .action((options) => {
+      const exitCode = executeList(options);
+      if (exitCode !== 0) {
+        process.exit(exitCode);
+      }
+    });
+
+  program
+    .command('update-rules')
+    .description('Download latest rule packs from remote registry')
+    .option('--source <url>', 'Custom manifest URL (enterprise registries)')
+    .action(async (options) => {
+      const code = await executeUpdateRules(options);
+      if (code !== 0) {
+        process.exit(code);
+      }
+    });
+
+  program
+    .command('serve')
+    .description('Start the web UI on localhost:9853')
+    .option('-o, --open', 'Open the browser', false)
+    .action(async (options) => {
+      displayServeBanner();
+      validateDirectories();
+      validateUIBuilt();
+      await startServer(options.open);
+    });
+
+  await program.parseAsync(process.argv);
 }
 
 main().catch((error) => {

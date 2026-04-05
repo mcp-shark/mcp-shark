@@ -1,0 +1,244 @@
+{
+  "schema_version": "1.0",
+  "pack_id": "owasp-mcp-2026",
+  "pack_name": "OWASP MCP Top 10 (2026)",
+  "version": "1.0.0",
+  "updated": "2026-03-15",
+  "source_url": "https://owasp.org/www-project-mcp-top-10/",
+  "rules": [
+    {
+      "id": "mcp01-token-mismanagement",
+      "name": "Token Mismanagement & Secret Exposure",
+      "owasp_id": "MCP01",
+      "severity": "high",
+      "type": "owasp-mcp",
+      "description": "Detects hard-coded credentials, API keys, and secrets that could be exposed through prompt injection or compromised context.",
+      "recommendation": "Move all tokens and secrets to secure storage (environment variables, secret managers). Never embed credentials in MCP server configurations.",
+      "scope": ["tool", "prompt", "resource", "packet"],
+      "match_mode": "all_matches",
+      "severity_overrides": { "prompt": "medium" },
+      "patterns": [
+        { "regex": "sk-[A-Za-z0-9]{20}T3BlbkFJ[A-Za-z0-9]{20}", "label": "OpenAI", "flags": "" },
+        { "regex": "github_pat_[0-9A-Za-z_]{40,90}", "label": "GitHub PAT", "flags": "" },
+        { "regex": "(ghp|gho|ghs|ghu)_[A-Za-z0-9]{36}", "label": "GitHub Token", "flags": "" },
+        { "regex": "glpat-[0-9A-Za-z\\-_]{20}", "label": "GitLab Token", "flags": "" },
+        { "regex": "xox[baprs]-[A-Za-z0-9-]{10,120}", "label": "Slack Token", "flags": "" },
+        {
+          "regex": "https:\\/\\/hooks\\.slack\\.com\\/services\\/[A-Za-z0-9+/]{30,}",
+          "label": "Slack Webhook",
+          "flags": ""
+        },
+        {
+          "regex": "[A-Za-z0-9]{24}\\.[A-Za-z0-9]{6}\\.[A-Za-z0-9_-]{27}",
+          "label": "Discord Token",
+          "flags": ""
+        },
+        { "regex": "AKIA[0-9A-Z]{16}", "label": "AWS Access Key", "flags": "" },
+        {
+          "regex": "(?<![A-Za-z0-9])[A-Za-z0-9/+=]{40}(?![A-Za-z0-9])",
+          "label": "AWS Secret Key",
+          "flags": ""
+        },
+        { "regex": "AIza[0-9A-Za-z\\-_]{35}", "label": "Google API Key", "flags": "" },
+        { "regex": "sk_live_[0-9a-zA-Z]{24}", "label": "Stripe Secret", "flags": "" },
+        { "regex": "rk_live_[0-9a-zA-Z]{24}", "label": "Stripe Restricted", "flags": "" },
+        { "regex": "SK[0-9a-fA-F]{32}", "label": "Twilio API Key", "flags": "" },
+        {
+          "regex": "SG\\.[0-9A-Za-z\\-_]{22}\\.[0-9A-Za-z\\-_]{43}",
+          "label": "SendGrid",
+          "flags": ""
+        },
+        { "regex": "key-[0-9a-fA-F]{32}", "label": "Mailgun", "flags": "" },
+        { "regex": "[A-Z0-9]{32}-[A-Z0-9]{10}", "label": "Algolia", "flags": "" },
+        {
+          "regex": "heroku[_a-z]*[:=]\\s*['\\\"]?[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
+          "label": "Heroku API token",
+          "flags": "i"
+        },
+        {
+          "regex": "pscale_(?:tkn|pw|oauth)_[A-Za-z0-9._=-]{30,60}",
+          "label": "PlanetScale",
+          "flags": ""
+        },
+        { "regex": "PMAK-[0-9a-f]{24}-[0-9a-f]{34}", "label": "Postman", "flags": "" },
+        { "regex": "AAAA[a-zA-Z0-9_-]{7}:[a-zA-Z0-9_-]{140}", "label": "Firebase", "flags": "" }
+      ]
+    },
+    {
+      "id": "mcp02-scope-creep",
+      "name": "Scope Creep Detection",
+      "owasp_id": "MCP02",
+      "severity": "medium",
+      "type": "owasp-mcp",
+      "description": "Detects potential privilege escalation via scope creep in tool definitions.",
+      "recommendation": "Implement strict scope boundaries for tools. Monitor for unauthorized scope expansion and enforce least privilege principles.",
+      "scope": ["tool", "prompt", "resource", "packet"],
+      "match_mode": "all_matches",
+      "severity_overrides": { "prompt": "low" },
+      "patterns": [
+        "(?:expand|extend|increase|broaden|widen)\\s+(?:scope|permission|access|capability|authority)",
+        "(?:additional|extra|more|further)\\s+(?:privilege|permission|access|right)",
+        "(?:escalate|elevate|raise|upgrade)\\s+(?:privilege|permission|access|level)",
+        "(?:unrestricted|unlimited|full|complete|total)\\s+(?:access|permission|privilege|control)",
+        "(?:bypass|override|circumvent)\\s+(?:restriction|limit|constraint|control)"
+      ]
+    },
+    {
+      "id": "mcp03-tool-poisoning",
+      "name": "Tool Poisoning Detection",
+      "owasp_id": "MCP03",
+      "severity": "high",
+      "type": "owasp-mcp",
+      "description": "Detects malicious patterns that could indicate tool poisoning attacks.",
+      "recommendation": "Verify tool authenticity and integrity. Implement tool signing and verification mechanisms. Monitor for suspicious tool behavior.",
+      "scope": ["tool", "prompt", "resource", "packet"],
+      "match_mode": "all_matches",
+      "severity_overrides": { "prompt": "medium" },
+      "patterns": [
+        "(?:malicious|harmful|dangerous|exploit|attack|backdoor|trojan|virus)",
+        "(?:unauthorized|illegitimate|fake|spoofed|forged|tampered)",
+        "(?:steal|exfiltrate|leak|extract)\\s+(?:data|information|credentials|secrets)",
+        "(?:delete|remove|destroy|wipe|erase)\\s+(?:file|data|information)",
+        "(?:override|bypass|disable)\\s+(?:security|protection|safeguard|control)",
+        "(?:hidden|concealed|obfuscated|encoded)\\s+(?:functionality|behavior|action)"
+      ]
+    },
+    {
+      "id": "mcp04-supply-chain",
+      "name": "Supply Chain Vulnerability Detection",
+      "owasp_id": "MCP04",
+      "severity": "high",
+      "type": "owasp-mcp",
+      "description": "Detects potential supply chain vulnerabilities in MCP configurations.",
+      "recommendation": "Pin all dependencies to specific versions. Verify package integrity and signatures. Use trusted repositories and registries.",
+      "scope": ["tool", "prompt", "resource", "packet"],
+      "match_mode": "all_matches",
+      "severity_overrides": { "prompt": "medium" },
+      "patterns": [
+        "(?:unsigned|unverified|untrusted|unauthenticated)\\s+(?:package|dependency|module|library)",
+        "(?:tampered|modified|altered|compromised)\\s+(?:package|dependency|module|library)",
+        "(?:dependency|package|module)\\s+(?:confusion|substitution|hijacking)",
+        "(?:typosquatting|brandjacking|namespace)\\s+(?:package|dependency|module)",
+        "(?:unpinned|floating|wildcard)\\s+(?:version|dependency|package)",
+        "(?:from|source)\\s+(?:unknown|unverified|suspicious|untrusted)\\s+(?:source|repository|registry)"
+      ]
+    },
+    {
+      "id": "mcp06-prompt-injection",
+      "name": "Prompt Injection Detection",
+      "owasp_id": "MCP06",
+      "severity": "high",
+      "type": "owasp-mcp",
+      "description": "Detects prompt injection attempts via contextual payloads and suspicious tool names.",
+      "recommendation": "Implement prompt injection defenses. Validate and sanitize all user inputs. Use prompt isolation and output filtering.",
+      "scope": ["tool", "prompt", "resource", "packet"],
+      "match_mode": "all_matches",
+      "severity_overrides": { "prompt": "critical" },
+      "patterns": [
+        "(?:ignore|forget|disregard)\\s+(?:\\w+\\s+)*(?:previous|prior|earlier|above|instructions|prompts|system)",
+        "(?:new|different|override|replace)\\s+(?:instructions|prompt|system|rules)",
+        "(?:you\\s+are|act\\s+as|pretend\\s+to\\s+be|roleplay\\s+as)",
+        "(?:system|admin|root|sudo)\\s+(?:access|privilege|permission|command)",
+        "(?:extract|reveal|show|display|output)\\s+(?:system|prompt|instruction|secret|password|token)",
+        "(?:execute|run|perform)\\s+(?:arbitrary|any|unrestricted|unlimited)\\s+(?:command|action|code)"
+      ],
+      "tool_name_patterns": [
+        {
+          "regex": "instruction_?override",
+          "label": "Instruction Override Tool",
+          "severity": "critical"
+        },
+        {
+          "regex": "system_?prompt|systemprompt",
+          "label": "System Prompt Access Tool",
+          "severity": "critical"
+        },
+        {
+          "regex": "ignore_?instruction",
+          "label": "Ignore Instruction Tool",
+          "severity": "critical"
+        },
+        { "regex": "bypass_?security", "label": "Security Bypass Tool", "severity": "critical" },
+        { "regex": "admin_?override", "label": "Admin Override Tool", "severity": "critical" },
+        { "regex": "privilege_?escalat", "label": "Privilege Escalation Tool", "severity": "high" },
+        { "regex": "sudo|root_?access", "label": "Elevated Privilege Tool", "severity": "high" },
+        { "regex": "hidden_?command", "label": "Hidden Command Tool", "severity": "high" },
+        { "regex": "secret_?access", "label": "Secret Access Tool", "severity": "high" }
+      ]
+    },
+    {
+      "id": "mcp07-insufficient-auth",
+      "name": "Insufficient Authentication Detection",
+      "owasp_id": "MCP07",
+      "severity": "high",
+      "type": "owasp-mcp",
+      "description": "Detects potential authentication and authorization weaknesses.",
+      "recommendation": "Implement proper authentication and authorization mechanisms. Enforce access controls for all tools and resources.",
+      "scope": ["tool", "prompt", "resource", "packet"],
+      "match_mode": "all_matches",
+      "severity_overrides": { "prompt": "medium" },
+      "patterns": [
+        "(?:no|missing|lack|absent|without)\\s+(?:authentication|auth|authorization|authz|access\\s+control)",
+        "(?:public|open|unrestricted|unprotected|unsecured)\\s+(?:access|endpoint|api|tool|resource)",
+        "(?:anonymous|guest|unauthenticated)\\s+(?:user|access|request)",
+        "(?:skip|bypass|ignore|disable)\\s+(?:authentication|auth|authorization|check|validation)",
+        "(?:weak|insecure|poor|insufficient)\\s+(?:authentication|auth|authorization|security)"
+      ]
+    },
+    {
+      "id": "mcp08-lack-audit",
+      "name": "Lack of Audit Detection",
+      "owasp_id": "MCP08",
+      "severity": "medium",
+      "type": "owasp-mcp",
+      "description": "Detects potential lack of audit trails and telemetry.",
+      "recommendation": "Implement comprehensive logging, audit trails, and telemetry. Monitor all tool usage and resource access.",
+      "scope": ["tool", "prompt", "resource", "packet"],
+      "match_mode": "all_matches",
+      "severity_overrides": { "prompt": "low" },
+      "patterns": [
+        "(?:no|missing|lack|absent|without)\\s+(?:logging|log|audit|telemetry|monitoring|tracking)",
+        "(?:disable|turn\\s+off|remove)\\s+(?:logging|log|audit|telemetry|monitoring)",
+        "(?:silent|quiet|no\\s+output)\\s+(?:mode|operation|execution)",
+        "(?:unlogged|unmonitored|untracked)\\s+(?:action|operation|event|access)"
+      ]
+    },
+    {
+      "id": "mcp09-shadow-servers",
+      "name": "Shadow Server Detection",
+      "owasp_id": "MCP09",
+      "severity": "high",
+      "type": "owasp-mcp",
+      "description": "Detects potential unauthorized or shadow MCP server deployments.",
+      "recommendation": "Maintain an inventory of all MCP servers. Implement server registration and approval processes. Monitor for unauthorized deployments.",
+      "scope": ["tool", "prompt", "resource", "packet"],
+      "match_mode": "all_matches",
+      "severity_overrides": { "prompt": "medium" },
+      "patterns": [
+        "(?:unauthorized|unmanaged|unapproved|unofficial)\\s+(?:server|service|instance|deployment)",
+        "(?:shadow|rogue|hidden|concealed|undocumented)\\s+(?:server|service|instance|deployment)",
+        "(?:bypass|circumvent|avoid)\\s+(?:approval|review|governance|management|control)",
+        "(?:unregistered|unlisted|unmonitored)\\s+(?:server|service|instance|deployment)"
+      ]
+    },
+    {
+      "id": "mcp10-context-injection",
+      "name": "Context Injection Detection",
+      "owasp_id": "MCP10",
+      "severity": "medium",
+      "type": "owasp-mcp",
+      "description": "Detects context injection and over-sharing vulnerabilities.",
+      "recommendation": "Implement context isolation and filtering. Limit context sharing between tools and servers. Validate all context data.",
+      "scope": ["tool", "prompt", "resource", "packet"],
+      "match_mode": "all_matches",
+      "severity_overrides": { "prompt": "high" },
+      "patterns": [
+        "(?:over-share|overshare|excessive|too\\s+much)\\s+(?:context|information|data|details)",
+        "(?:share|expose|reveal|leak)\\s+(?:all|entire|full|complete|everything)\\s+(?:context|information|data)",
+        "(?:inject|insert)\\s+(?:context|information|data|payload)\\s+(?:into|to|in)",
+        "(?:context|information|data)\\s+(?:injection|manipulation|tampering|poisoning)",
+        "(?:unrestricted|unlimited|unfiltered)\\s+(?:context|information|data)\\s+(?:sharing|access|transfer)"
+      ]
+    }
+  ]
+}

@@ -126,3 +126,11 @@ vite.config.ts.timestamp-*
 **/.ui.log
 **/.server.log
 .cursor/features/
+
+# Local-only notes (audits, scratch); not for git
+.local/
+
+# MCP Shark generated lockfile (machine-specific)
+.mcp-shark.lock
+.mcp-shark/
+.env.example
