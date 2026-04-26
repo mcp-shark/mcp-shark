@@ -63,6 +63,7 @@ Use mcp-shark findings as input to your own threat model, not as a complete audi
 | **Interactive TUI** | lazygit-style terminal UI for scan, fix, and server browsing |
 | **Web UI** | Wireshark-like monitoring interface |
 | **Proxy toxic flows** | Local Analysis panel + `GET/POST /api/security/traffic-toxic-flows*` infer cross-server pairs from captured **tools/list** traffic (see [docs/local-analysis.md](docs/local-analysis.md)) |
+| **YARA-style traffic rules** | In **Local Analysis → YARA Detection**, enable or edit built-in pattern rules, add custom rules, and inspect engine status (native YARA when available, regex fallback otherwise) |
 | **Local static scans** | No hosted scan backend; `update-rules` is opt-in HTTPS to the registry |
 
 ## See it in action
@@ -86,6 +87,12 @@ Force-directed knowledge graph of every Agent / Mission / Resource / Signing alg
 Offline rule-based scanner over captured traffic. The **AAuth Posture** card summarizes signed / aauth-aware / bearer / no-auth distribution; the **Toxic flows (proxy traffic)** panel infers cross-server pairings from observed `tools/list` responses. With packets already in the database, use **Replay from DB** (when no live MCP is attached) and then **Analyse** to populate findings — the view below is after that run.
 
 ![Local Analysis](docs/assets/local-analysis.png)
+
+### YARA Detection
+
+Same **Local Analysis** tab: switch to **YARA Detection** for the traffic rule engine — engine status, eight predefined rules (toggle, edit, delete), and **New Rule** for your own patterns. When the native `yara` module is not installed, scans still run using the built-in regex fallback (see [docs/local-analysis.md](docs/local-analysis.md)).
+
+![YARA Detection](docs/assets/yara-detection.png)
 
 ### Server setup
 
