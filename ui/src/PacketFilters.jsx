@@ -3,6 +3,7 @@ import anime from 'animejs';
 import { useEffect, useRef, useState } from 'react';
 import AlertModal from './components/AlertModal';
 import ConfirmationModal from './components/ConfirmationModal';
+import AAuthPostureFilter from './components/PacketFilters/AAuthPostureFilter';
 import ExportControls from './components/PacketFilters/ExportControls';
 import FilterInput from './components/PacketFilters/FilterInput';
 import { colors, fonts } from './theme';
@@ -43,6 +44,15 @@ function RequestFilters({ filters, onFilterChange, stats, onClear }) {
       }
       if (filters.jsonrpcId) {
         queryParams.append('jsonrpcId', filters.jsonrpcId);
+      }
+      if (filters.aauthPosture) {
+        queryParams.append('aauthPosture', filters.aauthPosture);
+      }
+      if (filters.aauthAgent) {
+        queryParams.append('aauthAgent', filters.aauthAgent);
+      }
+      if (filters.aauthMission) {
+        queryParams.append('aauthMission', filters.aauthMission);
       }
       queryParams.append('format', format);
 
@@ -157,6 +167,27 @@ function RequestFilters({ filters, onFilterChange, stats, onClear }) {
         value={filters.jsonrpcId || ''}
         onChange={(e) => onFilterChange({ ...filters, jsonrpcId: e.target.value || null })}
         style={{ width: '150px' }}
+      />
+
+      <AAuthPostureFilter
+        value={filters.aauthPosture || null}
+        onChange={(posture) => onFilterChange({ ...filters, aauthPosture: posture })}
+      />
+
+      <FilterInput
+        type="text"
+        placeholder="AAuth Agent (aauth:..)"
+        value={filters.aauthAgent || ''}
+        onChange={(e) => onFilterChange({ ...filters, aauthAgent: e.target.value || null })}
+        style={{ width: '200px' }}
+      />
+
+      <FilterInput
+        type="text"
+        placeholder="AAuth Mission..."
+        value={filters.aauthMission || ''}
+        onChange={(e) => onFilterChange({ ...filters, aauthMission: e.target.value || null })}
+        style={{ width: '180px' }}
       />
 
       <ExportControls stats={stats} onExport={handleExport} />

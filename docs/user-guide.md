@@ -4,7 +4,15 @@ Complete guide to using MCP Shark's features and capabilities.
 
 ## UI Tabs Overview
 
-MCP Shark's interface is organized into six main tabs, each providing different functionality.
+MCP Shark's interface is organized into the following main tabs:
+
+- **Traffic Capture** — Wireshark-style live capture
+- **AAuth Explorer** — Force-directed graph of AAuth identities, missions, and resources
+- **MCP Playground** — Interactive tool / prompt / resource console
+- **Local Analysis** — Offline rule-based scanner with toxic-flow inference
+- **Smart Scan** — Optional cloud-backed deep scan
+- **MCP Shark Logs** — Server console output
+- **MCP Server Setup** — Config detection, server start/stop, backups
 
 ### Traffic Capture
 
@@ -50,6 +58,26 @@ Click any packet to see:
 - Unique session tracking
 - Server activity metrics
 - Protocol distribution
+
+**AAuth filters (RFC 9421 traffic):**
+- **Posture** — `signed`, `aauth-aware`, `bearer`, `bearer-coexist`, `none`
+- **Agent** — filter by `aauth:<local>@<domain>` identity
+- **Mission** — filter by AAuth mission id
+
+### AAuth Explorer
+
+Force-directed knowledge graph of every Agent / Mission / Resource / Signing
+algorithm / Access mode observed across captured traffic. Each node is grounded
+in real packet evidence — click to drill into the underlying frames.
+
+- **Posture summary chip** at the top of each detail card
+- **Side panel** with the related packets, headers, and rule findings
+- Source data comes from the same parser used elsewhere
+  (`core/services/security/aauthParser.js`); no signature verification is
+  performed.
+
+> **See Also**: [AAuth Visibility](aauth-visibility.md) for the full feature
+> contract and API endpoints.
 
 ### MCP Playground
 
@@ -188,7 +216,11 @@ Configuration and server management.
 - Automatically detects config files from:
   - Cursor: `~/.cursor/mcp.json`
   - Windsurf: `~/.codeium/windsurf/mcp_config.json`
+  - Codex: `~/.codex/config.toml` (or `$CODEX_HOME/config.toml`)
 - Shows detected paths and file status
+
+> The CLI scanner (`mcp-shark scan`) recognises a wider set of IDE config paths
+> for read-only scanning. See the [README's IDE table](../README.md#supported-ide-configurations).
 
 **File Upload:**
 - Upload your own MCP configuration file

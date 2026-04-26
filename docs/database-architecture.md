@@ -55,6 +55,8 @@ All data access queries are in repositories:
 - **`ConversationRepository`**: Conversation tracking
 - **`AuditRepository`**: Audit logging
 - **`StatisticsRepository`**: Statistics and analytics
+- **`SecurityFindingsRepository`**: Static / traffic-time security findings
+- **`SecurityRulesRepository`**: Synced rules and their sources
 
 All repositories:
 - Receive database via constructor: `constructor(db)`
@@ -108,11 +110,19 @@ All repositories:
 
 The database includes the following tables:
 
-- **`packets`**: All request/response packets with full metadata
-- **`conversations`**: Correlated request/response pairs
-- **`sessions`**: Session tracking and management
+| Table | Purpose | Key columns |
+|-------|---------|-------------|
+| `packets` | Per-frame HTTP capture (request and response) | `frame_number`, `direction`, `session_id`, `headers_json`, `body_raw`, `jsonrpc_method`, `jsonrpc_id`, `timestamp_ns` |
+| `conversations` | Correlated request/response pairs with timing | `conversation_id`, `request_frame_number`, `response_frame_number`, `duration_ms`, `status` |
+| `sessions` | Session tracking and management | `session_id`, `first_seen_ns`, `last_seen_ns`, `packet_count`, `user_agent` |
+| `security_findings` | Findings from static and traffic-time analysis | `rule_id`, `finding_type` (`config` / `traffic`), `target_type` (`tool`/`prompt`/`resource`/`packet`), `severity`, `owasp_id`, `frame_number`, `scan_id` |
+| `security_rules` | Synced rules from packs / community sources | `rule_id` (unique), `source`, `source_url`, `content`, `owasp_id`, `severity`, `enabled`, `version` |
+| `rule_sources` | Tracking metadata for sync sources | `name` (unique), `url`, `type` (`github`/`url`/`local`), `last_sync`, `last_sync_status`, `rule_count` |
 
-All schema creation is handled by `SchemaRepository.createSchema()`. See [Database Architecture Rules](../rules/DB_ARCHITECTURE.md) for detailed schema information.
+Indexes cover the high-cardinality lookups: timestamp, session, JSON-RPC id/method,
+HTTP method/status, severity, OWASP id, scan id, source, and rule id. All schema
+creation is handled by `SchemaRepository.createSchema()`. See [Database
+Architecture Rules](../rules/DB_ARCHITECTURE.md) for the rule set this enforces.
 
 ## Usage Example
 

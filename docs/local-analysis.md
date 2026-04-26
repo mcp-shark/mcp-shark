@@ -4,7 +4,23 @@ Local Analysis provides rule-based static security analysis for MCP servers conn
 
 ## Overview
 
-Local Analysis scans MCP server configurations and tool definitions using YARA-based pattern matching to detect potential security vulnerabilities. Unlike Smart Scan (which uses AI-powered analysis), Local Analysis runs entirely locally and provides fast, deterministic results.
+Local Analysis scans MCP server configurations and tool definitions to detect
+potential security vulnerabilities. Unlike Smart Scan (which uses AI-powered
+analysis), Local Analysis runs entirely locally and provides fast, deterministic
+results.
+
+The engine has two layers:
+
+- **Declarative rule packs** (`core/cli/data/rule-packs/*.json`) — pattern-based
+  detections expressed as JSON. Currently **30** rules (OWASP MCP Top 10, ASI,
+  General Security, AAuth Visibility).
+- **JS plugins** (`core/services/security/rules/`) — **11** rules that need
+  algorithmic logic (cross-server shadowing, tool-name ambiguity, RCE / command
+  injection heuristics, etc.).
+
+Pattern matching runs through a regex-first engine. If you have a YARA-compatible
+binding installed it is used as a hint, but mcp-shark does not require it — the
+fallback regex scanner produces the same findings without YARA.
 
 ## Prerequisites
 
@@ -75,12 +91,16 @@ Based on OWASP MCP security guidelines:
 | MCP-02 | Scope Creep |
 | MCP-03 | Tool Poisoning |
 | MCP-04 | Supply Chain |
-| MCP-05 | Command Injection |
+| MCP-05 | Command Injection (JS plugin) |
 | MCP-06 | Prompt Injection Context |
 | MCP-07 | Insufficient Auth |
 | MCP-08 | Lack of Audit |
 | MCP-09 | Shadow Servers |
 | MCP-10 | Context Injection |
+
+> MCP-05 and ASI-05 (Remote Code Execution) are implemented as JS plugins rather
+> than declarative patterns because the underlying detection needs heuristics that
+> a regex pack cannot express (command resolution, argv inspection, etc.).
 
 ### Agentic Top 10
 
@@ -92,12 +112,19 @@ Agentic security risk categories:
 | AGENTIC-02 | Tool Misuse |
 | AGENTIC-03 | Identity Abuse |
 | AGENTIC-04 | Supply Chain |
-| AGENTIC-05 | RCE |
+| AGENTIC-05 | RCE (JS plugin) |
 | AGENTIC-06 | Memory Poisoning |
 | AGENTIC-07 | Insecure Communication |
 | AGENTIC-08 | Cascading Failures |
 | AGENTIC-09 | Trust Exploitation |
 | AGENTIC-10 | Rogue Agent |
+
+### AAuth Visibility
+
+The `aauth-visibility` pack adds informational findings for RFC 9421 traffic —
+agent identities, mission contexts, AAuth-Requirement challenges, and the
+worst-of-both-worlds case where Bearer tokens coexist with AAuth signatures. See
+[AAuth Visibility](aauth-visibility.md).
 
 ## Scan History
 
@@ -110,7 +137,7 @@ View and compare past analysis results:
 
 Click on a historical scan to view its findings in the dashboard.
 
-## YARA Detection Rules
+## YARA / Pattern Detection Rules
 
 ### Managing Rules
 
@@ -118,22 +145,28 @@ Switch to the **YARA Detection** tab to manage detection rules:
 
 1. **View Rules**: See all predefined and custom rules
 2. **Enable/Disable**: Toggle individual rules on/off
-3. **Create Custom**: Write your own YARA rules
+3. **Create Custom**: Write your own pattern rules
 4. **Reset Defaults**: Restore predefined rules to defaults
 
 ### Predefined Rules
 
-MCP Shark includes predefined YARA rules for:
+MCP Shark includes predefined rules for:
 
 - Command injection patterns
 - Hardcoded secrets detection
 - Cross-server shadowing
 - Tool name ambiguity
-- And more based on MCP/Agentic Top 10
+- AAuth posture (RFC 9421)
+- And more based on MCP / Agentic Top 10
+
+> The detection runtime is regex-first; YARA-compatible rule syntax is accepted
+> for portability but YARA itself is **not** a hard dependency. Native YARA is
+> probed at boot and used when present, otherwise a built-in pattern matcher
+> evaluates the same rules and produces equivalent findings.
 
 ### Custom Rules
 
-Create custom YARA rules for specific patterns:
+Create custom pattern rules:
 
 ```yara
 rule custom_sensitive_data {

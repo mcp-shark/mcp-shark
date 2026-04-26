@@ -50,6 +50,9 @@ export class RequestController {
       endTime: reqQuery.endTime || null,
       limit: reqQuery.limit,
       offset: reqQuery.offset,
+      aauthPosture: reqQuery.aauthPosture ? String(reqQuery.aauthPosture).trim() : null,
+      aauthAgent: reqQuery.aauthAgent ? String(reqQuery.aauthAgent).trim() : null,
+      aauthMission: reqQuery.aauthMission ? String(reqQuery.aauthMission).trim() : null,
     });
   }
 

@@ -1,3 +1,29 @@
+// mcp-shark must never appear as an upstream of itself. The UI reads the
+// user's editor MCP config (e.g. ~/.cursor/mcp.json) — which legitimately
+// contains an `mcp-shark` entry pointing at the proxy port so the editor
+// routes calls through us — and copies it into ~/.mcp-shark/mcps.json as
+// the proxy's upstream list. Without this filter the proxy ends up with a
+// recursive self-reference that crashes startup.
+const RESERVED_PROXY_NAMES = new Set(['mcp-shark']);
+function isProxySelfReference(name, cfg) {
+  if (RESERVED_PROXY_NAMES.has(name)) return true;
+  if (!cfg || typeof cfg.url !== 'string') return false;
+  let parsed;
+  try {
+    parsed = new URL(cfg.url);
+  } catch {
+    return false;
+  }
+  const localHosts = new Set(['127.0.0.1', 'localhost', '0.0.0.0', '::1']);
+  if (!localHosts.has(parsed.hostname)) return false;
+  const port = Number.parseInt(parsed.port || (parsed.protocol === 'https:' ? '443' : '80'), 10);
+  // We don't have access to the runtime port here; the proxy default is
+  // 9851 and the UI always starts it on that port unless overridden via
+  // env. If the user runs on a different port they can still safely include
+  // a custom-named entry; the runtime config.js layer will catch true loops.
+  return port === 9851;
+}
+
 /**
  * Service for configuration transformations
  * Handles converting, filtering, and updating config structures
@@ -9,7 +35,9 @@ export class ConfigTransformService {
 
   /**
    * Convert MCP servers format to servers format
-   * Normalizes config first, then converts mcpServers to servers
+   * Normalizes config first, then converts mcpServers to servers.
+   * Self-referencing entries (mcp-shark itself) are dropped — they would
+   * create an infinite proxy loop if written to ~/.mcp-shark/mcps.json.
    */
   convertMcpServersToServers(config) {
     // Normalize config to ensure consistent format
@@ -22,12 +50,16 @@ export class ConfigTransformService {
 
     // Handle normalized servers (legacy format)
     if (normalized.servers) {
-      converted.servers = { ...normalized.servers };
+      for (const [name, cfg] of Object.entries(normalized.servers)) {
+        if (isProxySelfReference(name, cfg)) continue;
+        converted.servers[name] = cfg;
+      }
     }
 
     // Convert mcpServers to servers format
     if (normalized.mcpServers) {
       for (const [name, cfg] of Object.entries(normalized.mcpServers)) {
+        if (isProxySelfReference(name, cfg)) continue;
         const type = cfg.type || (cfg.url ? 'http' : cfg.command ? 'stdio' : 'stdio');
         converted.servers[name] = { type, ...cfg };
       }

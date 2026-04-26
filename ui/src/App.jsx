@@ -6,6 +6,7 @@ import Security from './Security';
 import ShutdownPage from './ShutdownPage';
 import SmartScan from './SmartScan';
 import TabNavigation from './TabNavigation';
+import AauthExplorerView from './components/AauthExplorer/AauthExplorerView';
 import ActionMenu from './components/App/ActionMenu';
 import TrafficTab from './components/App/TrafficTab';
 import { useAppState } from './components/App/useAppState';
@@ -163,6 +164,28 @@ function App() {
           <Security
             onNavigateToSmartScan={() => setActiveTab('smart-scan')}
             onNavigateToSetup={() => setActiveTab('setup')}
+          />
+        </div>
+      )}
+
+      {activeTab === 'aauth-explorer' && (
+        <div
+          data-tab-content
+          style={{ flex: 1, overflow: 'hidden', width: '100%', height: '100%' }}
+        >
+          <AauthExplorerView
+            onOpenPacket={(frameNumber) => {
+              if (frameNumber == null) {
+                return;
+              }
+              const target = requests?.find?.((r) => r.frame_number === frameNumber);
+              if (target) {
+                setSelected(target);
+              } else {
+                setSelected({ frame_number: frameNumber });
+              }
+              setActiveTab('traffic');
+            }}
           />
         </div>
       )}

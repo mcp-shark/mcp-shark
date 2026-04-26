@@ -5,8 +5,8 @@ import { loadDeclarativeRules } from '../DeclarativeRuleEngine.js';
 describe('DeclarativeRuleEngine', () => {
   const rules = loadDeclarativeRules({ builtinOnly: true });
 
-  it('loads exactly 24 declarative rules from built-in packs', () => {
-    assert.strictEqual(rules.length, 24, `Expected 24 rules, got ${rules.length}`);
+  it('loads exactly 30 declarative rules from built-in packs', () => {
+    assert.strictEqual(rules.length, 30, `Expected 30 rules, got ${rules.length}`);
   });
 
   it('every rule has required metadata fields', () => {
@@ -98,7 +98,7 @@ describe('DeclarativeRuleEngine', () => {
     assert.strictEqual(findings.length, 0, 'Should exclude env var references');
   });
 
-  it('has rules from all three packs', () => {
+  it('has rules from all four packs (mcp / asi / general / aauth)', () => {
     const ids = rules.map((r) => r.ruleMetadata.id);
     const hasMcp = ids.some((id) => id.startsWith('mcp'));
     const hasAsi = ids.some((id) => id.startsWith('asi'));
@@ -107,9 +107,11 @@ describe('DeclarativeRuleEngine', () => {
         id
       )
     );
+    const hasAauth = ids.some((id) => id.startsWith('aauth-'));
     assert.ok(hasMcp, 'Should have OWASP MCP rules');
     assert.ok(hasAsi, 'Should have Agentic Security rules');
     assert.ok(hasGeneral, 'Should have General Security rules');
+    assert.ok(hasAauth, 'Should have AAuth Visibility rules');
   });
 
   it('rule IDs are unique', () => {

@@ -22,6 +22,15 @@ function appendFilterParams(queryParams, filters) {
   if (filters.jsonrpcId) {
     queryParams.append('jsonrpcId', filters.jsonrpcId);
   }
+  if (filters.aauthPosture) {
+    queryParams.append('aauthPosture', filters.aauthPosture);
+  }
+  if (filters.aauthAgent) {
+    queryParams.append('aauthAgent', filters.aauthAgent);
+  }
+  if (filters.aauthMission) {
+    queryParams.append('aauthMission', filters.aauthMission);
+  }
 }
 
 const VALID_TABS = ['traffic', 'logs', 'setup', 'playground', 'smart-scan'];

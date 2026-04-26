@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "pack_id": "aauth-visibility",
+  "pack_name": "AAuth Visibility",
+  "version": "1.0.0",
+  "updated": "2026-04-26",
+  "source_url": "https://github.com/dickhardt/AAuth",
+  "rules": [
+    {
+      "id": "aauth-agent-identity-observed",
+      "name": "AAuth Agent Identity Observed",
+      "owasp_id": "INFO",
+      "severity": "low",
+      "type": "aauth-visibility",
+      "description": "An AAuth agent identifier (aauth:local@domain) was observed in metadata. This is informational only — mcp-shark does not verify cryptographic identity.",
+      "recommendation": "Confirm the agent identifier is expected for this server. See https://www.aauth.dev for background on AAuth agent identities.",
+      "scope": ["tool", "prompt", "resource", "packet"],
+      "match_mode": "first",
+      "patterns": [
+        {
+          "regex": "aauth:[A-Za-z0-9._-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}",
+          "label": "AAuth agent ID",
+          "flags": ""
+        }
+      ]
+    },
+    {
+      "id": "aauth-jwks-discovery-url",
+      "name": "AAuth JWKS or Well-Known URL Observed",
+      "owasp_id": "INFO",
+      "severity": "low",
+      "type": "aauth-visibility",
+      "description": "A JWKS or .well-known/aauth URL was observed. This typically indicates the resource is AAuth-aware.",
+      "recommendation": "If this URL is unexpected, investigate which agent or resource is publishing it.",
+      "scope": ["tool", "prompt", "resource", "packet"],
+      "match_mode": "first",
+      "patterns": [
+        { "regex": "/\\.well-known/aauth", "label": ".well-known/aauth path", "flags": "i" },
+        { "regex": "https?://[^\\s\"']+/jwks(?:\\.json)?", "label": "JWKS URL", "flags": "i" }
+      ]
+    },
+    {
+      "id": "aauth-http-message-signature-observed",
+      "name": "HTTP Message Signature Observed",
+      "owasp_id": "INFO",
+      "severity": "low",
+      "type": "aauth-visibility",
+      "description": "An RFC 9421 HTTP Message Signature appears in captured traffic. mcp-shark records this as observed only — it does not verify the signature.",
+      "recommendation": "Use an AAuth-capable verifier to confirm signature validity. mcp-shark's role here is observability.",
+      "scope": ["packet"],
+      "match_mode": "first",
+      "patterns": [
+        {
+          "regex": "\"signature-input\"\\s*:\\s*\"[^\"]+\"",
+          "label": "Signature-Input header",
+          "flags": "i"
+        },
+        {
+          "regex": "\"signature\"\\s*:\\s*\"[^\"]*=:[A-Za-z0-9+/=]+:\"",
+          "label": "Signature header (sf-binary)",
+          "flags": "i"
+        }
+      ]
+    },
+    {
+      "id": "aauth-mission-context-observed",
+      "name": "AAuth Mission Context Observed",
+      "owasp_id": "INFO",
+      "severity": "low",
+      "type": "aauth-visibility",
+      "description": "An AAuth-Mission header was observed in captured traffic. Missions group calls under a single user-consented scope.",
+      "recommendation": "Use the mission timeline view in the UI to inspect related calls under the same mission.",
+      "scope": ["packet"],
+      "match_mode": "first",
+      "patterns": [
+        { "regex": "\"aauth-mission\"\\s*:", "label": "AAuth-Mission header", "flags": "i" }
+      ]
+    },
+    {
+      "id": "aauth-requirement-challenge-observed",
+      "name": "AAuth Requirement Challenge Observed",
+      "owasp_id": "INFO",
+      "severity": "low",
+      "type": "aauth-visibility",
+      "description": "An AAuth-Requirement response header was observed. The resource is asking the client to upgrade to AAuth.",
+      "recommendation": "If you control the calling agent, consider upgrading to AAuth — see https://www.aauth.dev.",
+      "scope": ["packet"],
+      "match_mode": "first",
+      "patterns": [
+        { "regex": "\"aauth-requirement\"\\s*:", "label": "AAuth-Requirement header", "flags": "i" }
+      ]
+    },
+    {
+      "id": "aauth-bearer-token-coexists-with-aauth",
+      "name": "Bearer Token Coexists With AAuth Headers",
+      "owasp_id": "MCP01",
+      "severity": "medium",
+      "type": "aauth-visibility",
+      "description": "A request carries both a Bearer token and AAuth identity headers. AAuth replaces bearer credentials — coexisting both is the worst-of-both-worlds pattern called out by the AAuth project.",
+      "recommendation": "Migrate the calling agent fully to AAuth; remove the long-lived bearer token once signed identity is in place.",
+      "scope": ["packet"],
+      "match_mode": "all_matches",
+      "patterns": [
+        {
+          "regex": "\"authorization\"\\s*:\\s*\"Bearer\\s+[^\"]+\"[\\s\\S]*\"signature-input\"",
+          "label": "Bearer + Signature-Input",
+          "flags": "i"
+        },
+        {
+          "regex": "\"signature-input\"[\\s\\S]*\"authorization\"\\s*:\\s*\"Bearer",
+          "label": "Signature-Input + Bearer",
+          "flags": "i"
+        }
+      ]
+    }
+  ]
+}

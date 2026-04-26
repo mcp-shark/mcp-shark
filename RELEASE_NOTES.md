@@ -1,3 +1,88 @@
+# 🦈 MCP Shark v1.7.0 - AAuth Visibility + Documentation Parity
+
+**Semver:** Minor bump (1.7.0). New feature surface (AAuth observability,
+AAuth Explorer UI, `aauth-visibility` rule pack), plus a comprehensive doc
+parity audit and two latent env-var bugs fixed. No breaking changes.
+
+## What's in v1.7.0
+
+### AAuth Visibility (RFC 9421 / [aauth.dev](https://www.aauth.dev))
+
+- **AAuth posture chip** on every captured packet — `signed`, `aauth-aware`,
+  `bearer`, `bearer-coexist`, or `none` — derived from headers via
+  `core/services/security/aauthParser.js`. mcp-shark records signals as
+  observed only; signatures are **not** verified.
+- **AAuth Explorer tab** — force-directed graph of every Agent / Mission /
+  Resource / Signing algorithm / Access mode observed across captured traffic.
+  Click any node to drill into the supporting packets.
+- **Traffic filters** — `aauthPosture`, `aauthAgent`, `aauthMission` query
+  parameters on `/api/requests` and matching UI filters.
+- **`aauth-visibility` rule pack** — six new informational findings
+  (agent identity, JWKS / `.well-known/aauth` discovery, `Signature-Input`
+  observation, `AAuth-Mission` context, `AAuth-Requirement` challenge,
+  `Bearer + AAuth` coexistence anti-pattern).
+- **Synthetic preview data** — `POST /api/aauth/self-test` and the legacy
+  `aauth-traffic-generator.js` shim populate the views with realistic AAuth
+  packet shapes for demos and CI.
+- New API: `GET /api/aauth/posture`, `/missions`, `/graph`, `/upstreams`,
+  `/node/:category/:id`; `POST /api/aauth/self-test`.
+- New docs: [`docs/aauth-visibility.md`](docs/aauth-visibility.md).
+
+### README & docs — full parity audit
+
+- **Rule counts** unified at **41** total (**30 declarative + 11 JS plugins**)
+  — corrects every `35` / `24` reference in the README and architecture box.
+- New **"See it in action"** section with six in-product screenshots
+  (`docs/assets/`) demonstrating Traffic Capture, AAuth Explorer, Local
+  Analysis, MCP Playground, Smart Scan, and Server Setup.
+- **Documentation index** in the README now links Configuration, AAuth
+  Visibility, and Database Architecture (previously hidden).
+- **`docs/configuration.md`** — environment variable table now reflects the
+  code: `UI_PORT`, `MCP_SHARK_PORT` (alias), `MCP_SHARK_SERVER_PORT`,
+  `MCP_SHARK_HOME`, `CODEX_HOME`. Backup paths corrected to the actual
+  `~/.cursor/.mcp.json-mcpshark.<datetime>.json` convention. UI auto-detect
+  vs CLI scan IDE distinction made explicit.
+- **`docs/architecture.md`** — port overrides documented, database schema
+  expanded to all six real tables (`packets`, `conversations`, `sessions`,
+  `security_findings`, `security_rules`, `rule_sources`).
+- **`docs/database-architecture.md`** — column-level reference for every
+  table; security/rule repositories listed.
+- **`docs/local-analysis.md`** — YARA is now correctly described as a
+  pattern-engine *hint*, not a hard dependency; MCP-05 / ASI-05 explicitly
+  noted as JS plugins; AAuth visibility section added.
+- **`docs/features.md`** — removed the false "automatic load balancing and
+  failover" claim (mcp-shark is a transparent aggregator); CLI vs UI IDE
+  scope clarified; new AAuth Visibility feature section.
+- **`docs/user-guide.md`** — AAuth Explorer tab documented; AAuth filters
+  on Traffic Capture documented; Codex added to detected configs.
+- **`docs/api-reference.md`** — AAuth (6 endpoints) and Security
+  (16 endpoints, including engine + rule sources + community rules) sections
+  added; backup payload examples corrected; `aauthPosture` / `aauthAgent`
+  / `aauthMission` filters documented on `/api/requests`.
+- **`docs/getting-started.md`** — "Node 18+" typo fixed (it has been
+  Node 20+ since v1.5.x); hardcoded version dropped (defer to
+  `package.json`).
+- **`docs/aauth-visibility.md`** — example URLs corrected from `:9001`
+  to `:9853` (the actual UI port).
+
+### Environment variables — bug fixes
+
+Two documented variables were not actually wired up. Both now work:
+
+- `MCP_SHARK_PORT` is now read by `Environment.getUiPort()` as a
+  documented alias for `UI_PORT`. The "port already in use" error
+  message points users at both names.
+- `MCP_SHARK_HOME` now controls the working directory used for the
+  database, MCP config, help-state, and Smart Scan token. Previously
+  `getWorkingDirectory()` ignored it entirely.
+
+### `package.json`
+
+- Description updated to reflect 41 rules + AAuth visibility.
+- Version bumped to **1.7.0**.
+
+---
+
 # 🦈 MCP Shark v1.6.0 - Documentation & CLI accuracy
 
 **Semver:** Minor bump (1.6.0) reflects documentation and CLI behavior clarity, README accuracy, and test isolation improvements—not a patch-only hotfix.

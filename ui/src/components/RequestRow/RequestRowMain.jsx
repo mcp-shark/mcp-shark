@@ -6,6 +6,7 @@ import {
   getEndpoint,
   getSourceDest,
 } from '../../utils/requestUtils.js';
+import AAuthBadge from '../AAuthBadge';
 
 const ChevronDown = ({ size = 12, rotated = false }) => (
   <IconChevronDown
@@ -182,7 +183,12 @@ export default function RequestRowMain({
             fontWeight: '500',
           }}
         >
-          {dest}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <span>{dest}</span>
+            {request.aauth && request.aauth.posture !== 'none' && (
+              <AAuthBadge aauth={request.aauth} size="sm" showLabel={false} />
+            )}
+          </div>
         </td>
         <td
           style={{

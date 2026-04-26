@@ -1,4 +1,4 @@
-import { CompositeError, getErrors } from '#core/libraries/ErrorLibrary.js';
+import { CompositeError, getErrors, isError } from '#core/libraries/ErrorLibrary.js';
 import { normalizeConfig } from './config.js';
 import { buildKv } from './kv.js';
 import { runExternalServer } from './single/run.js';
@@ -10,8 +10,15 @@ export class RunAllExternalServersError extends CompositeError {
   }
 }
 
-export async function runAllExternalServers(logger, parsedConfig) {
-  const configs = normalizeConfig(parsedConfig);
+export async function runAllExternalServers(logger, parsedConfig, options = {}) {
+  const configs = normalizeConfig(parsedConfig, { ...options, logger });
+  if (isError(configs)) {
+    return new RunAllExternalServersError(
+      `Failed to normalize upstream config: ${configs.message}`,
+      configs,
+      [configs]
+    );
+  }
   const results = await Promise.all(
     Object.entries(configs).map(([name, config]) => runExternalServer({ logger, name, config }))
   );

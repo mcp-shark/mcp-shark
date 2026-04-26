@@ -19,6 +19,9 @@ export class RequestFilters {
     this.limit = data.limit !== undefined ? Number.parseInt(data.limit) : Defaults.DEFAULT_LIMIT;
     this.offset =
       data.offset !== undefined ? Number.parseInt(data.offset) : Defaults.DEFAULT_OFFSET;
+    this.aauthPosture = data.aauthPosture || null;
+    this.aauthAgent = data.aauthAgent || null;
+    this.aauthMission = data.aauthMission || null;
   }
 
   /**

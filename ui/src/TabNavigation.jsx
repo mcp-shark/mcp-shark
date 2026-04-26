@@ -3,6 +3,7 @@ import { SharkLogo } from './components/SharkLogo';
 import DesktopTabs from './components/TabNavigation/DesktopTabs';
 import MobileDropdown from './components/TabNavigation/MobileDropdown';
 import {
+  AauthIcon,
   LogsIcon,
   NetworkIcon,
   PlaygroundIcon,
@@ -43,6 +44,13 @@ function TabNavigation({ activeTab, onTabChange }) {
       label: 'Local Analysis',
       icon: SecurityIcon,
       description: 'Local static analysis of captured MCP traffic',
+    },
+    {
+      id: 'aauth-explorer',
+      label: 'AAuth Explorer',
+      icon: AauthIcon,
+      description:
+        'Live knowledge graph of AAuth signals (agents, missions, resources, signing, access) observed in captured traffic',
     },
     {
       id: 'smart-scan',

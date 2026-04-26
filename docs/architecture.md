@@ -48,8 +48,8 @@ MCP Shark follows a clean architecture pattern with strict separation of concern
 
 ### Main Components
 
-1. **MCP Shark Server** (Port 9851): Aggregation layer that connects to multiple MCP servers
-2. **MCP Shark UI** (Port 9853): Web interface for monitoring and management
+1. **MCP Shark Server** (Port 9851, override `MCP_SHARK_SERVER_PORT`): Aggregation layer that connects to multiple MCP servers
+2. **MCP Shark UI** (Port 9853, override `UI_PORT` or `MCP_SHARK_PORT`): Web interface for monitoring and management
 3. **SQLite Database**: Stores all traffic for audit logging and analysis
 
 ## Architecture Principles
@@ -316,13 +316,20 @@ When calling tools, prefix with the server name:
 
 ## Database Schema
 
-The database includes:
+All tables are created by `core/repositories/SchemaRepository.js`:
 
-- **`mcp_communications`**: All request/response communications
-- **`mcp_request_response_pairs`**: Correlated request/response pairs
-- **Sessions**: Automatic session tracking
+| Table | Purpose |
+|-------|---------|
+| `packets` | Per-frame HTTP capture (request and response) with headers, body, JSON-RPC metadata |
+| `conversations` | Correlated request/response pairs with round-trip duration |
+| `sessions` | Per-session metadata (first/last seen, packet count, user-agent) |
+| `security_findings` | Findings produced by static and traffic-time security analysis |
+| `security_rules` | Community / fetched YARA + declarative rules synced via `update-rules` |
+| `rule_sources` | Tracking metadata for rule sources (GitHub repos, URL feeds, local paths) |
 
-The database can be accessed directly for advanced analysis or exported through the UI in JSON, CSV, or TXT formats.
+See [Database Architecture](database-architecture.md) for the full column list and
+indexes. The database can be accessed directly for advanced analysis or exported
+through the UI in JSON, CSV, or TXT formats.
 
 ## Technology Stack
 

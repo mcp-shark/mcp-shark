@@ -10,8 +10,12 @@ Connect to multiple MCP servers simultaneously and access them through a unified
 - Support for both HTTP and stdio-based MCP servers
 - Unified API for tools, prompts, and resources from all servers
 - Service selection — choose which servers to activate
-- Automatic load balancing and failover
 - Server prefixing for tool calls (e.g., `server:tool_name`)
+- Per-server failure isolation — a single broken upstream does not take down the proxy
+
+> mcp-shark is a *transparent aggregator*, not a load balancer. Each request is
+> dispatched to the upstream that owns the requested tool/prompt/resource. There
+> is no automatic load balancing or replica failover.
 
 ## Real-Time Monitoring & Analysis
 
@@ -104,19 +108,55 @@ AI-powered security analysis for MCP servers.
 | Feature | Local Analysis | Smart Scan |
 |---------|---------------|------------|
 | Analysis Type | Static (rule-based) | Dynamic (AI-powered) |
-| Detection | YARA patterns | Semantic analysis |
+| Detection | Pattern packs (YARA-syntax + regex fallback) + JS plugins | Semantic analysis |
 | Requires | Running proxy servers | Server configuration |
 | Speed | Fast | Varies by server count |
 | Use Case | Quick pattern checks | Deep security analysis |
+
+## AAuth Visibility
+
+Observability for [AAuth](https://www.aauth.dev) / RFC 9421 HTTP Message
+Signatures across captured MCP traffic.
+
+**Capabilities:**
+
+- **AAuth posture chip** on every captured frame — `signed`, `aauth-aware`,
+  `bearer`, `bearer-coexist`, or `none`.
+- **AAuth Explorer tab** — force-directed graph of every Agent / Mission /
+  Resource / Signing algorithm / Access mode observed across captured traffic.
+  Each node is grounded in real packet evidence.
+- **Filterable traffic** — filter requests by posture, agent, or mission via
+  query params (`aauthPosture`, `aauthAgent`, `aauthMission`).
+- **`aauth-visibility` rule pack** — informational findings for AAuth
+  identity, JWKS / `.well-known/aauth` discovery, mission context,
+  AAuth-Requirement challenges, and the `bearer + AAuth coexistence`
+  anti-pattern.
+- **Synthetic preview data** — `POST /api/aauth/self-test` and the legacy
+  `aauth-traffic-generator.js` script populate the views with realistic AAuth
+  packet shapes for demos and CI.
+
+**Deliberately out of scope:** mcp-shark never verifies signatures, fetches JWKS,
+handles private keys, or rewrites/blocks traffic based on AAuth posture.
+
+> **See Also**: [AAuth Visibility](aauth-visibility.md).
 
 ## IDE Integration
 
 Seamless integration with popular IDEs and editors.
 
-**Supported IDEs:**
-- **Cursor**: Automatically detects and uses `~/.cursor/mcp.json`
-- **Windsurf**: Automatically detects and uses `~/.codeium/windsurf/mcp_config.json`
+**Supported IDEs (UI auto-detect & patch):**
+- **Cursor**: Detects `~/.cursor/mcp.json`
+- **Windsurf**: Detects `~/.codeium/windsurf/mcp_config.json`
+- **Codex**: Detects `~/.codex/config.toml` (or `$CODEX_HOME/config.toml`)
 - **Custom Configurations**: Upload and use any MCP configuration file
+
+**Supported IDEs (CLI scan only):**
+
+The CLI (`scan`, `list`, `doctor`) recognises a much wider list of IDE
+configuration paths for **read-only** scanning, including Claude Desktop,
+VS Code, Trae, Zed, Roo, Cline, Continue, and other MCP-aware tools. See the
+[Supported IDE configurations](../README.md#supported-ide-configurations)
+table in the README for the full list.
 
 **Automatic Configuration:**
 - Detects your IDE's MCP configuration files
