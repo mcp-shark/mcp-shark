@@ -1,3 +1,9 @@
+# 🦈 MCP Shark v1.7.1 - README polish + npm publish
+
+**Semver:** Patch (1.7.1). README-only: scannable hero (short paragraphs + **Dashboard includes** list), **Dashboard at a glance** gallery moved under the hero, “web UI” wording replaced with **dashboard** / **in-browser dashboard** in the README, **CLI demo** cross-links **Quick Start**, and PR [#10](https://github.com/mcp-shark/mcp-shark/pull/10) (Wireshark references removed) is on `main`. **npm:** `v1.7.0` was tagged on GitHub but not published to the registry; **1.7.1** is the first npm release for this line and matches current `main`.
+
+---
+
 # 🦈 MCP Shark v1.7.0 - AAuth Visibility + Documentation Parity
 
 **Semver:** Minor bump (1.7.0). New feature surface (AAuth observability,
