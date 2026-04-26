@@ -8,15 +8,15 @@
     <p><strong>Security scanner for AI agent tools</strong> — built for security and platform engineers working with MCP in the IDE.</p>
     <p>Run a local static <code>scan</code> over MCP <strong>IDE configs</strong> and embedded tool metadata: <strong>41 rules</strong> (including <strong>AAuth visibility</strong>), toxic-flow heuristics, and <strong>SARIF</strong> / <strong>HTML</strong> / <strong>JSON</strong> reports. There is no hosted config-scan backend.</p>
     <p>Add an optional <strong>local HTTP proxy</strong> with an <strong>in-browser dashboard</strong> so live traffic, findings, AAuth signals, and playground checks stay in one place—without sending your configs to a vendor.</p>
-    <p><strong>Dashboard includes:</strong></p>
+    <p><strong>You can</strong></p>
     <ul style="margin: 0.35rem 0 0.75rem; padding-left: 1.25rem;">
-      <li><strong>Traffic</strong> — live JSON-RPC capture, filters, export, AAuth posture chips</li>
-      <li><strong>Local Analysis</strong> — OWASP-style findings over captured traffic</li>
-      <li><strong>YARA Detection</strong> — traffic pattern rules (native engine when installed, regex fallback otherwise)</li>
-      <li><strong>AAuth Explorer</strong> — graph of agents, missions, resources, signing / access signals</li>
-      <li><strong>MCP Playground</strong> — call tools, prompts, and resources through the proxy</li>
-      <li><strong>Smart Scan</strong> — optional AI-backed scan; uses <strong>your</strong> API token when you turn it on</li>
-      <li><strong>Server setup</strong> — detect configs, convert format, route the editor through the proxy</li>
+      <li>Use <strong>Traffic</strong> for live JSON-RPC capture, filters, export, and AAuth posture chips</li>
+      <li>Run <strong>Local Analysis</strong> for OWASP-style findings over captured traffic</li>
+      <li>Run <strong>YARA Detection</strong> for traffic pattern rules (native engine when installed, regex fallback otherwise)</li>
+      <li>Open <strong>AAuth Explorer</strong> for a graph of agents, missions, resources, and signing / access signals</li>
+      <li>Use <strong>MCP Playground</strong> to call tools, prompts, and resources through the proxy</li>
+      <li>Optionally run <strong>Smart Scan</strong> (AI-backed; uses <strong>your</strong> API token when enabled)</li>
+      <li>Use <strong>Server setup</strong> to detect configs, convert format, and route the editor through the proxy</li>
     </ul>
     <p><strong>Privacy:</strong> static scans need no cloud and send no telemetry. Refreshing rule catalogs is opt-in HTTPS (<code>update-rules</code>).</p>
   </div>
