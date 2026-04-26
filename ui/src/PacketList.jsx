@@ -38,11 +38,11 @@ function RequestList({ requests, selected, onSelect, firstRequestTime }) {
         if (requests.length > prevRequestsLengthRef.current) {
           const newRows = Array.from(rows).slice(prevRequestsLengthRef.current);
           if (newRows.length > 0) {
-            staggerIn(newRows, { delay: 30, duration: 300 });
+            staggerIn(newRows, { delay: 30, duration: 300, fade: false });
           }
         } else {
           // Animate all rows if the list was reset
-          staggerIn(rows, { delay: 20, duration: 300 });
+          staggerIn(rows, { delay: 20, duration: 300, fade: false });
         }
         prevRequestsLengthRef.current = requests.length;
       }

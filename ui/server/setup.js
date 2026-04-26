@@ -16,7 +16,6 @@ import { createBackupRoutes } from './routes/backups/index.js';
 import { createCompositeRoutes } from './routes/composite/index.js';
 import { createConfigRoutes } from './routes/config.js';
 import { createConversationsRoutes } from './routes/conversations.js';
-import { createHelpRoutes } from './routes/help.js';
 import { createLogsRoutes } from './routes/logs.js';
 import { createPlaygroundRoutes } from './routes/playground.js';
 import { createRequestsRoutes } from './routes/requests.js';
@@ -79,7 +78,6 @@ export function createUIServer() {
     (logEntry) => broadcastLogUpdate(clients, logEntry),
     cleanup
   );
-  const helpRoutes = createHelpRoutes();
   const playgroundRoutes = createPlaygroundRoutes(container);
   const smartScanRoutes = createSmartScanRoutes(container);
   const settingsRoutes = createSettingsRoutes(container);
@@ -128,10 +126,6 @@ export function createUIServer() {
   app.get('/api/server/connected', compositeRoutes.getConnectedServers);
   app.post('/api/composite/shutdown', compositeRoutes.shutdown);
   app.get('/api/composite/servers', compositeRoutes.getServers);
-
-  app.get('/api/help/state', helpRoutes.getState);
-  app.post('/api/help/dismiss', helpRoutes.dismiss);
-  app.post('/api/help/reset', helpRoutes.reset);
 
   app.post('/api/playground/proxy', playgroundRoutes.proxyRequest);
 

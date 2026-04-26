@@ -33,7 +33,16 @@ function appendFilterParams(queryParams, filters) {
   }
 }
 
-const VALID_TABS = ['traffic', 'logs', 'setup', 'playground', 'smart-scan'];
+const VALID_TABS = [
+  'traffic',
+  'logs',
+  'setup',
+  'playground',
+  'security',
+  'aauth-explorer',
+  'smart-scan',
+  'shutdown',
+];
 const DEFAULT_TAB = 'traffic';
 
 function getTabFromHash() {
@@ -56,8 +65,6 @@ export function useAppState() {
   const [filters, setFilters] = useState({});
   const [stats, setStats] = useState(null);
   const [firstRequestTime, setFirstRequestTime] = useState(null);
-  const [showTour, setShowTour] = useState(false);
-  const [tourDismissed, setTourDismissed] = useState(true);
   const wsRef = useRef(null);
   const prevTabRef = useRef(activeTab);
   const filtersRef = useRef(filters);
@@ -126,25 +133,6 @@ export function useAppState() {
   };
 
   useEffect(() => {
-    const checkTourState = async () => {
-      try {
-        const response = await fetch('/api/help/state');
-        const data = await response.json();
-        setTourDismissed(data.dismissed || data.tourCompleted);
-        if (!data.dismissed && !data.tourCompleted) {
-          setTimeout(() => {
-            setShowTour(true);
-          }, 500);
-        }
-      } catch (error) {
-        console.error('Failed to load tour state:', error);
-        setTimeout(() => {
-          setShowTour(true);
-        }, 500);
-        setTourDismissed(false);
-      }
-    };
-
     const initData = async () => {
       try {
         const queryParams = new URLSearchParams();
@@ -174,7 +162,6 @@ export function useAppState() {
       }
     };
 
-    checkTourState();
     initData();
 
     const wsUrl = import.meta.env.DEV
@@ -298,9 +285,6 @@ export function useAppState() {
     setFilters,
     stats,
     firstRequestTime,
-    showTour,
-    setShowTour,
-    tourDismissed,
     prevTabRef,
     wsRef,
     loadRequests,

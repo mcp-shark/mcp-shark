@@ -60,11 +60,7 @@ If you used the `--open` flag, your browser will open automatically.
 
 ## Initial Setup
 
-### 1. Interactive Tour
-
-On first launch, you'll see an interactive tour. Follow it to learn the basics of MCP Shark.
-
-### 2. Configure Servers
+### 1. Configure Servers
 
 Navigate to the **"MCP Server Setup"** tab to configure your MCP servers.
 
@@ -79,14 +75,14 @@ MCP Shark automatically detects configuration files from:
 
 You can also upload your own MCP configuration file.
 
-### 3. Select Servers
+### 2. Select Servers
 
 Choose which servers to enable. You can:
 - Enable all servers
 - Select specific servers
 - Disable servers you don't need
 
-### 4. Start Monitoring
+### 3. Start Monitoring
 
 Click **"Start MCP Shark"** to begin capturing traffic. The server will:
 - Create backups of your configuration files

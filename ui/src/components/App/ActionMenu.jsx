@@ -2,13 +2,12 @@ import { IconMenu2, IconX } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 import { colors, fonts } from '../../theme';
 import ApiDocsButton from './ApiDocsButton';
-import HelpButton from './HelpButton';
 import ShutdownButton from './ShutdownButton';
 
 /**
- * Expandable action menu grouping API, Help, and Shutdown buttons
+ * Expandable action menu grouping API docs and shutdown
  */
-export default function ActionMenu({ onHelpClick }) {
+export default function ActionMenu() {
   const [isExpanded, setIsExpanded] = useState(false);
   const menuRef = useRef(null);
 
@@ -75,7 +74,7 @@ export default function ActionMenu({ onHelpClick }) {
       <ApiDocsButton
         style={{
           ...menuItemStyle,
-          bottom: isExpanded ? '180px' : '0',
+          bottom: isExpanded ? '120px' : '0',
           position: 'absolute',
           left: 'auto', // Ensure no left positioning conflicts
         }}
@@ -94,33 +93,7 @@ export default function ActionMenu({ onHelpClick }) {
         }}
       />
 
-      {/* Help Button - Middle */}
-      <HelpButton
-        onClick={() => {
-          onHelpClick();
-          setIsExpanded(false);
-        }}
-        style={{
-          ...menuItemStyle,
-          bottom: isExpanded ? '120px' : '0',
-          position: 'absolute',
-          left: 'auto', // Ensure no left positioning conflicts
-        }}
-        onMouseEnter={(e) => {
-          if (isExpanded) {
-            e.currentTarget.style.transform = 'scale(1.1) translateY(0)';
-            e.currentTarget.style.boxShadow = `0 6px 16px ${colors.shadowLg}`;
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (isExpanded) {
-            e.currentTarget.style.transform = 'scale(1) translateY(0)';
-            e.currentTarget.style.boxShadow = `0 4px 12px ${colors.shadowMd}`;
-          }
-        }}
-      />
-
-      {/* Shutdown Button - Bottom (closest to main button) */}
+      {/* Shutdown Button — closest to main toggle */}
       <ShutdownButton
         style={{
           ...menuItemStyle,

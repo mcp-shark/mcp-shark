@@ -62,15 +62,11 @@ function DetectedPathsList({ detectedPaths, detecting, onDetect, onSelect, onVie
           )}
         </button>
       </div>
-      <div
-        data-tour="detected-editors"
-        style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}
-      >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
         {detectedPaths.map((item, idx) => (
           <button
             key={`${item.editor}-${item.path}-${idx}`}
             type="button"
-            data-tour={idx === 0 ? 'first-detected-editor' : undefined}
             onClick={() => onSelect(item.path)}
             onDoubleClick={() => {
               if (item.exists) {

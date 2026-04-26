@@ -265,9 +265,8 @@ The expandable action menu provides quick access to essential functions from any
 
 **Access:**
 1. Click the menu button (☰) in the bottom-right corner
-2. The menu expands to show three options:
+2. The menu expands to show two options:
    - **API Documentation** (📡): Opens Swagger/OpenAPI documentation in a new tab
-   - **Help Tour** (📚): Starts or restarts the interactive tour
    - **Shutdown** (⚡): Shuts down the MCP Shark server
 
 **Features:**
@@ -371,7 +370,6 @@ View performance data in the packet details panel.
 
 ## Tips
 
-- Use the interactive tour on first launch to learn the interface
 - Export filtered results for offline analysis
 - Use Smart Scan to identify security risks before deployment
 - Test tools in the Playground to understand their behavior

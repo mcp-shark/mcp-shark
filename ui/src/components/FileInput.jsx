@@ -13,7 +13,6 @@ function FileInput({
     <>
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
         <label
-          data-tour="select-file"
           style={{
             padding: '8px 16px',
             background: colors.buttonPrimary,

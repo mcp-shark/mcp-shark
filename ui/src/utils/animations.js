@@ -5,18 +5,35 @@ import anime from 'animejs';
  */
 
 /**
- * Stagger animation for list items
+ * Stagger animation for list items.
+ * @param {object} [options]
+ * @param {boolean} [options.fade=true] When false, rows stay at full opacity so
+ *   traffic tables are never invisible during the tween (fixes empty screenshots
+ *   and reduces flash for long lists).
  */
 export const staggerIn = (selector, options = {}) => {
-  return anime({
+  const {
+    fade = true,
+    duration = 400,
+    delay = 50,
+    easing = 'easeOutExpo',
+    translateY = [20, 0],
+    ...rest
+  } = options;
+  const cfg = {
     targets: selector,
-    opacity: [0, 1],
-    translateY: [20, 0],
-    duration: options.duration || 400,
-    delay: anime.stagger(options.delay || 50),
-    easing: options.easing || 'easeOutExpo',
-    ...options,
-  });
+    translateY,
+    duration,
+    delay: anime.stagger(delay),
+    easing,
+    ...rest,
+  };
+  if (fade) {
+    cfg.opacity = [0, 1];
+  } else {
+    cfg.opacity = 1;
+  }
+  return anime(cfg);
 };
 
 /**

@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import CompositeLogs from './CompositeLogs';
 import CompositeSetup from './CompositeSetup';
-import IntroTour from './IntroTour';
 import Security from './Security';
 import ShutdownPage from './ShutdownPage';
 import SmartScan from './SmartScan';
@@ -11,7 +10,6 @@ import ActionMenu from './components/App/ActionMenu';
 import TrafficTab from './components/App/TrafficTab';
 import { useAppState } from './components/App/useAppState';
 import McpPlayground from './components/McpPlayground';
-import { tourSteps } from './config/tourSteps.jsx';
 import { colors } from './theme';
 import { fadeIn } from './utils/animations';
 
@@ -26,12 +24,9 @@ function App() {
     setFilters,
     stats,
     firstRequestTime,
-    showTour,
-    setShowTour,
     prevTabRef,
     loadRequests,
   } = useAppState();
-  const [tourKey, setTourKey] = useState(0);
 
   useEffect(() => {
     if (prevTabRef.current !== activeTab) {
@@ -52,54 +47,10 @@ function App() {
         background: colors.bgPrimary,
       }}
     >
-      {showTour && (
-        <IntroTour
-          key={tourKey}
-          steps={tourSteps}
-          onComplete={() => setShowTour(false)}
-          onSkip={() => setShowTour(false)}
-          onStepChange={(stepIndex) => {
-            const step = tourSteps[stepIndex];
-            if (step) {
-              if (
-                step.target === '[data-tour="setup-tab"]' ||
-                step.target === '[data-tour="detected-editors"]' ||
-                step.target === '[data-tour="select-file"]' ||
-                step.target === '[data-tour="start-button"]'
-              ) {
-                if (activeTab !== 'setup') {
-                  setActiveTab('setup');
-                }
-              } else if (step.target === '[data-tour="traffic-tab"]') {
-                if (activeTab !== 'traffic') {
-                  setActiveTab('traffic');
-                }
-              } else if (step.target === '[data-tour="smart-scan-tab"]') {
-                if (activeTab !== 'smart-scan') {
-                  setActiveTab('smart-scan');
-                }
-              }
-            }
-          }}
-        />
-      )}
-      <div style={{ position: 'relative' }} data-tour="tabs">
+      <div style={{ position: 'relative' }}>
         <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
-      <ActionMenu
-        onHelpClick={() => {
-          if (showTour) {
-            setShowTour(false);
-            setTourKey((prev) => prev + 1);
-            setTimeout(() => {
-              setShowTour(true);
-            }, 100);
-          } else {
-            setTourKey((prev) => prev + 1);
-            setShowTour(true);
-          }
-        }}
-      />
+      <ActionMenu />
 
       {activeTab === 'traffic' && (
         <TrafficTab

@@ -4,7 +4,7 @@
 
   <h1>mcp-shark</h1>
 
- <p><strong>Security scanner for AI agent tools</strong> — static analysis on MCP configs and tool metadata on your machine (findings, toxic-flow heuristics, CI-friendly outputs). Use the <strong>local HTTP proxy</strong> and <strong>monitoring UI</strong> to aggregate IDE traffic to multiple MCP servers and inspect requests and responses in one place.</p>
+  <p><strong>Security scanner for AI agent tools</strong> — for security and platform engineers: static analysis on MCP configs and tool metadata on your machine (findings, toxic-flow heuristics, CI-friendly outputs). Optional <strong>local HTTP proxy</strong> and <strong>monitoring UI</strong> aggregate IDE traffic to multiple MCP servers so you can inspect JSON-RPC frames, run local analysis, and try tools in one place.</p>
   <p><strong>Privacy:</strong> static scans need no cloud and send no telemetry. Refreshing rule catalogs is opt-in HTTPS (<code>update-rules</code>).</p>
 
   [![npm version](https://img.shields.io/npm/v/@mcp-shark/mcp-shark.svg)](https://www.npmjs.com/package/@mcp-shark/mcp-shark)
@@ -63,11 +63,12 @@ Use mcp-shark findings as input to your own threat model, not as a complete audi
 | **Interactive TUI** | lazygit-style terminal UI for scan, fix, and server browsing |
 | **Web UI** | Wireshark-like monitoring interface |
 | **Proxy toxic flows** | Local Analysis panel + `GET/POST /api/security/traffic-toxic-flows*` infer cross-server pairs from captured **tools/list** traffic (see [docs/local-analysis.md](docs/local-analysis.md)) |
+| **YARA-style traffic rules** | In **Local Analysis → YARA Detection**, enable or edit built-in pattern rules, add custom rules, and inspect engine status (native YARA when available, regex fallback otherwise) |
 | **Local static scans** | No hosted scan backend; `update-rules` is opt-in HTTPS to the registry |
 
 ## See it in action
 
-Screenshots from the live web UI (`npx @mcp-shark/mcp-shark serve --open`):
+Screenshots from the live web UI with **real captured traffic** (dummy MCP or your own upstreams). Start with `npx @mcp-shark/mcp-shark serve --open`. **Smart Scan** is not shown below — it depends on an optional remote API token. **MCP Playground** appears once you have at least one MCP upstream configured (the Playground capture uses a demo server with tools loaded).
 
 ### Wireshark-style traffic capture
 
@@ -75,29 +76,33 @@ Every JSON-RPC frame between your IDE and each MCP upstream is captured with ful
 
 ![Traffic Capture](docs/assets/hero-traffic.png)
 
+### MCP Playground
+
+Pick an upstream, load **tools**, **prompts**, and **resources** from that server, then call tools or read resources through the proxy — useful for validating behavior before it hits your IDE. The view below shows the tools list for a configured demo MCP.
+
+![MCP Playground](docs/assets/playground.png)
+
 ### AAuth Explorer
 
-Force-directed knowledge graph of every Agent / Mission / Resource / Signing algorithm / Access mode observed across captured traffic. Every node is grounded in real packets — click to drill into the underlying frames.
+Force-directed knowledge graph of every Agent / Mission / Resource / Signing algorithm / Access mode observed across captured traffic. Use **Generate sample data** for a quick demo graph, or capture real AAuth-shaped traffic through the proxy.
 
 ![AAuth Explorer](docs/assets/aauth-explorer.png)
 
 ### Local Analysis
 
-Offline rule-based scanner over captured traffic. The **AAuth Posture** card summarizes signed / aauth-aware / bearer / no-auth distribution; the **Toxic flows (proxy traffic)** panel infers cross-server pairings from observed `tools/list` responses.
+Offline rule-based scanner over captured traffic. The **AAuth Posture** card summarizes signed / aauth-aware / bearer / no-auth distribution; the **Toxic flows (proxy traffic)** panel infers cross-server pairings from observed `tools/list` responses. With packets already in the database, use **Replay from DB** (when no live MCP is attached) and then **Analyse** to populate findings — the view below is after that run.
 
 ![Local Analysis](docs/assets/local-analysis.png)
 
-### MCP Playground
+### YARA Detection
 
-Browse and call every tool, prompt, and resource exposed by the connected upstreams. Useful for reproducing the dodgy-looking tool surface that scans are flagging.
+Same **Local Analysis** tab: switch to **YARA Detection** for the traffic rule engine — engine status, eight predefined rules (toggle, edit, delete), and **New Rule** for your own patterns. When the native `yara` module is not installed, scans still run using the built-in regex fallback (see [docs/local-analysis.md](docs/local-analysis.md)).
 
-![MCP Playground](docs/assets/playground.png)
+![YARA Detection](docs/assets/yara-detection.png)
 
-### Smart Scan
+**New Rule** opens the editor with a starter template (meta, `strings`, and `condition`). Edit the rule text, then **Save Rule** to add it as a custom pattern alongside the built-ins.
 
-Optional cloud-backed deep scan (`smart.mcpshark.sh`) for AI-powered semantic analysis of MCP servers. Token-gated and entirely opt-in — static `scan` works without it.
-
-![Smart Scan](docs/assets/smart-scan.png)
+![Adding a custom YARA rule](docs/assets/yara-new-rule.png)
 
 ### Server setup
 
@@ -413,10 +418,12 @@ npx @mcp-shark/mcp-shark --open
 ```
 
 The web UI provides:
-- Multi-server aggregation and real-time monitoring
-- Interactive playground for testing tools, prompts, and resources
-- Local security analysis with pattern-based detection
-- API documentation with interactive testing
+- Multi-server aggregation and real-time traffic capture (filters, export, AAuth posture chips)
+- **MCP Playground** — call tools, prompts, and resources through the proxy against a selected upstream
+- **Local Analysis** — OWASP-style static scan over captured traffic; **YARA Detection** for traffic pattern rules (native engine when installed, regex fallback otherwise)
+- **AAuth Explorer** — graph of Agent / Mission / Resource / signing / access signals observed in traffic
+- **Smart Scan** — optional AI-backed scan (requires a configured API token)
+- In-app API docs, server setup, logs, and graceful shutdown
 
 ### Zero-touch first boot
 
@@ -466,11 +473,14 @@ To re-trigger first-boot behavior on a machine, remove `~/.mcp-shark/` and resta
 - **[Features](docs/features.md)** — Detailed feature documentation
 - **[User Guide](docs/user-guide.md)** — Complete usage guide
 - **[Configuration](docs/configuration.md)** — Configuration files & environment variables
-- **[Local Analysis](docs/local-analysis.md)** — Static security analysis
+- **[Local Analysis](docs/local-analysis.md)** — Static security analysis & YARA traffic rules
 - **[AAuth Visibility](docs/aauth-visibility.md)** — RFC 9421 / AAuth observability
 - **[Architecture](docs/architecture.md)** — System design
 - **[Database Architecture](docs/database-architecture.md)** — SQLite schema reference
 - **[API Reference](docs/api-reference.md)** — API endpoints
+- **[Troubleshooting](docs/troubleshooting.md)** — Common issues & fixes
+- **[Development](docs/development.md)** — Contributing & project conventions
+- **[Package inspection](docs/package-inspection.md)** — npm package layout
 
 ## Requirements
 

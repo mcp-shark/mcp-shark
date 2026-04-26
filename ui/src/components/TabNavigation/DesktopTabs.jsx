@@ -28,17 +28,6 @@ export default function DesktopTabs({ tabs, activeTab, onTabChange, tabRefs, ind
               tabRefs.current[tab.id] = el;
             }
           }}
-          data-tour={
-            tab.id === 'traffic'
-              ? 'traffic-tab'
-              : tab.id === 'logs'
-                ? 'logs-tab'
-                : tab.id === 'setup'
-                  ? 'setup-tab'
-                  : tab.id === 'playground'
-                    ? 'playground-tab'
-                    : 'smart-scan-tab'
-          }
           onClick={() => onTabChange(tab.id)}
           style={{
             padding: '14px 24px',

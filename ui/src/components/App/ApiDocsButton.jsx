@@ -66,7 +66,6 @@ export default function ApiDocsButton({ style, onClick, onMouseEnter, onMouseLea
     <button
       type="button"
       onClick={handleClick}
-      data-tour="api-docs-button"
       style={defaultStyle}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
