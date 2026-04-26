@@ -118,7 +118,7 @@ If you encounter issues:
 - Check the [Troubleshooting Guide](troubleshooting.md)
 - Review logs in the "MCP Shark Logs" tab
 - Verify your configuration files are valid JSON
-- Ensure Node.js 18+ is installed
+- Ensure Node.js 20+ is installed
 
 ## System Requirements
 
@@ -130,8 +130,9 @@ If you encounter issues:
 
 - **Package Name**: `@mcp-shark/mcp-shark`
 - **npm Registry**: [https://www.npmjs.com/package/@mcp-shark/mcp-shark](https://www.npmjs.com/package/@mcp-shark/mcp-shark)
-- **Version**: 1.5.4
 - **License**: Source-Available Non-Commercial (see [LICENSE](../LICENSE) for details)
+
+> Refer to [`package.json`](../package.json) for the published version — this file no longer hardcodes it.
 
 ## Usage Options
 

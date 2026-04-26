@@ -45,7 +45,7 @@ Use mcp-shark findings as input to your own threat model, not as a complete audi
 
 | Feature | Description |
 |---------|-------------|
-| **35 security rules** | OWASP MCP Top 10 + Agentic Security Initiative + general checks |
+| **41 security rules** | OWASP MCP Top 10 + Agentic Security Initiative + AAuth visibility + general checks |
 | **Toxic flow analysis** | Cross-server attack path detection from tool capability heuristics |
 | **Attack walkthroughs** | Step-by-step exploit narratives from findings |
 | **Shark Score** | Transparent security posture score (0-100, A-F) |
@@ -64,6 +64,46 @@ Use mcp-shark findings as input to your own threat model, not as a complete audi
 | **Web UI** | Wireshark-like monitoring interface |
 | **Proxy toxic flows** | Local Analysis panel + `GET/POST /api/security/traffic-toxic-flows*` infer cross-server pairs from captured **tools/list** traffic (see [docs/local-analysis.md](docs/local-analysis.md)) |
 | **Local static scans** | No hosted scan backend; `update-rules` is opt-in HTTPS to the registry |
+
+## See it in action
+
+Screenshots from the live web UI (`npx @mcp-shark/mcp-shark serve --open`):
+
+### Wireshark-style traffic capture
+
+Every JSON-RPC frame between your IDE and each MCP upstream is captured with full headers, body, timing, and an AAuth posture chip. Filter by method, status, server, session, AAuth agent / mission / posture.
+
+![Traffic Capture](docs/assets/hero-traffic.png)
+
+### AAuth Explorer
+
+Force-directed knowledge graph of every Agent / Mission / Resource / Signing algorithm / Access mode observed across captured traffic. Every node is grounded in real packets — click to drill into the underlying frames.
+
+![AAuth Explorer](docs/assets/aauth-explorer.png)
+
+### Local Analysis
+
+Offline rule-based scanner over captured traffic. The **AAuth Posture** card summarizes signed / aauth-aware / bearer / no-auth distribution; the **Toxic flows (proxy traffic)** panel infers cross-server pairings from observed `tools/list` responses.
+
+![Local Analysis](docs/assets/local-analysis.png)
+
+### MCP Playground
+
+Browse and call every tool, prompt, and resource exposed by the connected upstreams. Useful for reproducing the dodgy-looking tool surface that scans are flagging.
+
+![MCP Playground](docs/assets/playground.png)
+
+### Smart Scan
+
+Optional cloud-backed deep scan (`smart.mcpshark.sh`) for AI-powered semantic analysis of MCP servers. Token-gated and entirely opt-in — static `scan` works without it.
+
+![Smart Scan](docs/assets/smart-scan.png)
+
+### Server setup
+
+Auto-detects Cursor / Codex / Windsurf configs, converts them to mcp-shark format, and patches the IDE to route through the proxy on start.
+
+![Server Setup](docs/assets/setup.png)
 
 ## Quick Start
 
@@ -106,7 +146,7 @@ npx @mcp-shark/mcp-shark scan --ci --format sarif
 
 | Command | Description |
 |---------|-------------|
-| `scan` (default) | Run security scan with 35 rules |
+| `scan` (default) | Run security scan with 41 rules |
 | `lock` | Create `.mcp-shark.lock` file |
 | `lock --verify` | Verify current state matches lockfile |
 | `diff` | Show tool definition changes since last lock |
@@ -160,7 +200,7 @@ mcp-shark is aimed at **config and metadata you already have on disk** (plus opt
 | Area | Notes |
 |------|--------|
 | Install / run | Node.js 20+; `npx @mcp-shark/mcp-shark` |
-| Security rules | 35 checks — 24 declarative JSON packs, 11 JS where heuristics need code |
+| Security rules | 41 checks — 30 declarative JSON packs, 11 JS where heuristics need code |
 | Toxic flow analysis | Heuristic cross-server paths; quality depends on embedded `tools` / classifications |
 | Attack walkthroughs | Narratives derived from findings |
 | Auto-fix | Supported for a subset of issues; confirm changes in your repo |
@@ -181,7 +221,7 @@ mcp-shark is aimed at **config and metadata you already have on disk** (plus opt
 
 The canonical **registry** (manifest, pack files, validation CI, and schema notes) lives in **[mcp-shark/rule-packs](https://github.com/mcp-shark/rule-packs)**. The npm package embeds copies; `update-rules` pulls the same artifacts into `.mcp-shark/rule-packs/`.
 
-mcp-shark ships with 24 declarative rules as JSON packs (OWASP MCP, Agentic Security Initiative, General Security), plus a **`toxic-flow-heuristics`** pack (`toxic_flow_rules` for cross-server composition). New vulnerability catalogs can be added as `.json` files — no JavaScript, no code changes.
+mcp-shark ships with 30 declarative rules as JSON packs (OWASP MCP, Agentic Security Initiative, General Security, AAuth Visibility), plus a **`toxic-flow-heuristics`** pack (`toxic_flow_rules` for cross-server composition). New vulnerability catalogs can be added as `.json` files — no JavaScript, no code changes.
 
 ```bash
 # Fetch latest rule packs from the registry
@@ -294,38 +334,48 @@ jobs:
 | Roo Code | `~/.roo-code/mcp.json` | ✅ |
 | Project (local) | `./mcp.json`, `./.mcp.json`, `./.mcp/config.json` | ✅ |
 
-## Security Rules (35)
+## Security Rules (41)
 
 <details>
 <summary>Full rule list</summary>
 
 ### OWASP MCP Top 10
-| ID | Rule | Severity |
-|----|------|----------|
-| MCP01 | Token Mismanagement | Critical |
-| MCP02 | Scope Creep | High |
-| MCP03 | Tool Poisoning | Critical |
-| MCP04 | Supply Chain | High |
-| MCP05 | Command Injection | Critical |
-| MCP06 | Prompt Injection | High |
-| MCP07 | Insufficient Auth | High |
-| MCP08 | Lack of Audit | Medium |
-| MCP09 | Shadow Servers | High |
-| MCP10 | Context Injection | High |
+| ID | Rule | Severity | Source |
+|----|------|----------|--------|
+| MCP01 | Token Mismanagement | Critical | declarative |
+| MCP02 | Scope Creep | High | declarative |
+| MCP03 | Tool Poisoning | Critical | declarative |
+| MCP04 | Supply Chain | High | declarative |
+| MCP05 | Command Injection | Critical | JS plugin |
+| MCP06 | Prompt Injection | High | declarative |
+| MCP07 | Insufficient Auth | High | declarative |
+| MCP08 | Lack of Audit | Medium | declarative |
+| MCP09 | Shadow Servers | High | declarative |
+| MCP10 | Context Injection | High | declarative |
 
 ### Agentic Security Initiative (ASI)
-| ID | Rule | Severity |
-|----|------|----------|
-| ASI01 | Goal Hijack | Critical |
-| ASI02 | Tool Misuse | High |
-| ASI03 | Identity Abuse | High |
-| ASI04 | Supply Chain | High |
-| ASI05 | Remote Code Execution | Critical |
-| ASI06 | Memory Poisoning | High |
-| ASI07 | Insecure Communication | Medium |
-| ASI08 | Cascading Failures | Medium |
-| ASI09 | Trust Exploitation | High |
-| ASI10 | Rogue Agent | Critical |
+| ID | Rule | Severity | Source |
+|----|------|----------|--------|
+| ASI01 | Goal Hijack | Critical | declarative |
+| ASI02 | Tool Misuse | High | declarative |
+| ASI03 | Identity Abuse | High | declarative |
+| ASI04 | Supply Chain | High | declarative |
+| ASI05 | Remote Code Execution | Critical | JS plugin |
+| ASI06 | Memory Poisoning | High | declarative |
+| ASI07 | Insecure Communication | Medium | declarative |
+| ASI08 | Cascading Failures | Medium | declarative |
+| ASI09 | Trust Exploitation | High | declarative |
+| ASI10 | Rogue Agent | Critical | declarative |
+
+### AAuth Visibility (informational)
+| ID | Description | Severity |
+|----|-------------|----------|
+| `aauth-agent-identity-observed` | `aauth:<local>@<domain>` agent identity in tool/prompt/resource/packet | Low |
+| `aauth-jwks-discovery-url` | URLs containing `/.well-known/aauth` or `/jwks` | Low |
+| `aauth-http-message-signature-observed` | RFC 9421 `Signature-Input` / `Signature` headers in captured traffic | Low |
+| `aauth-mission-context-observed` | `AAuth-Mission` headers in captured traffic | Low |
+| `aauth-requirement-challenge-observed` | `AAuth-Requirement` response headers (resource asking for AAuth) | Low |
+| `aauth-bearer-token-coexists-with-aauth` | Same packet has both Bearer token and AAuth signature | Medium |
 
 ### General Security
 | Rule | Severity |
@@ -368,6 +418,16 @@ The web UI provides:
 - Local security analysis with pattern-based detection
 - API documentation with interactive testing
 
+### Zero-touch first boot
+
+The web UI bootstraps itself the first time you launch it on a new machine — no Setup wizard click required:
+
+1. If `~/.mcp-shark/mcps.json` already declares upstreams (e.g. from a previous run, hand-edit, or `testbed:up`), the proxy starts directly with that config.
+2. Otherwise, on a brand-new install (no `~/.mcp-shark` at all), MCP Shark scans for a real editor MCP config (`~/.cursor/mcp.json`, `~/.codeium/windsurf/mcp_config.json`, `~/.codex/config.toml`). If one is found with actual upstreams, it auto-imports them, writes `~/.mcp-shark/mcps.json`, starts the proxy, and patches the editor config so the editor routes through the proxy.
+3. If neither path applies, the UI starts in monitoring-only mode and the Setup panel is still available for manual configuration.
+
+To re-trigger first-boot behavior on a machine, remove `~/.mcp-shark/` and restart the UI.
+
 ## Architecture
 
 ```
@@ -377,24 +437,24 @@ The web UI provides:
 │  update-rules · serve                              │
 ├──────────────┬──────────────┬──────────────────────┤
 │  ConfigScanner│  ScanService  │  StaticRulesService  │
-│  15 IDEs      │  orchestrator │  35 rules            │
+│  15 IDEs      │  orchestrator │  41 rules            │
 ├──────────────┴──────────────┴──────────────────────┤
 │  Data layer (JSON + user YAML/JSON overrides)      │
 │  ┌────────────┬──────────────┬───────────────────┐ │
 │  │ rule-packs │ secret-      │ tool-             │ │
-│  │ (24 rules) │ patterns.json│ classifications   │ │
+│  │ (30 rules) │ patterns.json│ classifications   │ │
 │  ├────────────┼──────────────┼───────────────────┤ │
 │  │ toxic-flow │ rule-        │ .mcp-shark/*.yaml │ │
 │  │ rules.json │ sources.json │ (user overrides)  │ │
 │  └────────────┴──────────────┴───────────────────┘ │
 ├────────────────────────────────────────────────────┤
 │  JS plugins (11 rules needing algorithmic logic)   │
-│  + DeclarativeRuleEngine (24 pattern-based rules)  │
+│  + DeclarativeRuleEngine (30 pattern-based rules)  │
 └────────────────────────────────────────────────────┘
 ```
 
 **Design principles:**
-- **Data-first** — Declarative rules, secret patterns, tool classifications, and toxic-flow defaults ship as JSON; **24** of **35** rules are pattern packs you can extend or override without forking those definitions.
+- **Data-first** — Declarative rules, secret patterns, tool classifications, and toxic-flow defaults ship as JSON; **30** of **41** rules are pattern packs you can extend or override without forking those definitions.
 - **User-overridable** — Built-in data can be extended via `.mcp-shark/*.yaml` (and JSON pack drops) as documented above.
 - **Hybrid rule engine** — The other **11** rules are JS plugins where heuristics need code. Both sources are merged at scan time.
 - **Zero-config scanning** — `npx` and go. Auto-detects the IDE paths below plus project-local `mcp.json` variants.
@@ -405,8 +465,11 @@ The web UI provides:
 - **[Getting Started](docs/getting-started.md)** — Installation & setup
 - **[Features](docs/features.md)** — Detailed feature documentation
 - **[User Guide](docs/user-guide.md)** — Complete usage guide
+- **[Configuration](docs/configuration.md)** — Configuration files & environment variables
 - **[Local Analysis](docs/local-analysis.md)** — Static security analysis
+- **[AAuth Visibility](docs/aauth-visibility.md)** — RFC 9421 / AAuth observability
 - **[Architecture](docs/architecture.md)** — System design
+- **[Database Architecture](docs/database-architecture.md)** — SQLite schema reference
 - **[API Reference](docs/api-reference.md)** — API endpoints
 
 ## Requirements

@@ -29,7 +29,7 @@ export async function runUIServer() {
         `Port ${port} is already in use. Please stop the existing server or use a different port.`
       );
       bootstrapLogger.error(
-        `\n❌ Port ${port} is already in use.\n   Please stop the existing server or set MCP_SHARK_PORT environment variable to use a different port.\n`
+        `\n❌ Port ${port} is already in use.\n   Please stop the existing server or set the UI_PORT (or MCP_SHARK_PORT) environment variable to use a different port.\n`
       );
     } else {
       logger?.error({ error: error.message, stack: error.stack }, 'Server error');

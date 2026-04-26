@@ -12,10 +12,12 @@ export const Environment = {
   },
   /**
    * Get UI server port
+   * Honours UI_PORT first, then the documented MCP_SHARK_PORT alias.
    * @returns {number} UI server port (default: 9853)
    */
   getUiPort() {
-    const port = Number.parseInt(process.env.UI_PORT, 10);
+    const raw = process.env.UI_PORT ?? process.env.MCP_SHARK_PORT;
+    const port = Number.parseInt(raw, 10);
     return Number.isNaN(port) ? Server.DEFAULT_UI_PORT : port;
   },
 

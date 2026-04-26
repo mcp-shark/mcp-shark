@@ -40,6 +40,9 @@ Retrieve communication requests/responses with optional filtering.
 - `jsonrpcId` (string): Filter by JSON-RPC request ID
 - `startTime` (string): Filter by start time (ISO format)
 - `endTime` (string): Filter by end time (ISO format)
+- `aauthPosture` (string): Filter by AAuth posture — `signed`, `aauth-aware`, `bearer`, `bearer-coexist`, or `none`
+- `aauthAgent` (string): Filter by AAuth agent identity (`aauth:<local>@<domain>`)
+- `aauthMission` (string): Filter by AAuth mission id
 
 **Response:**
 ```json
@@ -411,15 +414,22 @@ Extract services from config.
 
 ### GET /api/config/backups
 
-List all configuration backups.
+List all configuration backups. Backups are stored next to the original config
+file as a hidden file with a `-mcpshark.<datetime>.json` suffix (the legacy
+`.backup` form is also recognised). Only Cursor and Windsurf directories are
+scanned.
 
 **Response:**
 ```json
 [
   {
-    "backupPath": "~/.mcp-shark/backups/mcp.json.2024-01-01T00:00:00.000Z.backup",
+    "backupPath": "~/.cursor/.mcp.json-mcpshark.2024-01-01_12-00-00.json",
     "originalPath": "~/.cursor/mcp.json",
-    "createdAt": "2024-01-01T00:00:00.000Z"
+    "displayPath": "~/.cursor/mcp.json",
+    "backupFileName": ".mcp.json-mcpshark.2024-01-01_12-00-00.json",
+    "size": 1024,
+    "createdAt": "2024-01-01T12:00:00.000Z",
+    "modifiedAt": "2024-01-01T12:00:00.000Z"
   }
 ]
 ```
@@ -434,9 +444,13 @@ View the contents of a backup file.
 **Response:**
 ```json
 {
-  "backupPath": "~/.mcp-shark/backups/mcp.json.2024-01-01T00:00:00.000Z.backup",
-  "originalPath": "~/.cursor/mcp.json",
-  "content": { /* MCP configuration */ }
+  "backupPath": "~/.cursor/.mcp.json-mcpshark.2024-01-01_12-00-00.json",
+  "displayPath": "~/.cursor/.mcp.json-mcpshark.2024-01-01_12-00-00.json",
+  "content": "{ /* raw file content as string */ }",
+  "parsed": { /* parsed JSON if applicable */ },
+  "size": 1024,
+  "createdAt": "2024-01-01T12:00:00.000Z",
+  "modifiedAt": "2024-01-01T12:00:00.000Z"
 }
 ```
 
@@ -447,7 +461,7 @@ Restore a configuration file from a backup.
 **Request Body:**
 ```json
 {
-  "backupPath": "~/.mcp-shark/backups/mcp.json.2024-01-01T00:00:00.000Z.backup",
+  "backupPath": "~/.cursor/.mcp.json-mcpshark.2024-01-01_12-00-00.json",
   "originalPath": "~/.cursor/mcp.json"
 }
 ```
@@ -456,7 +470,6 @@ Restore a configuration file from a backup.
 ```json
 {
   "success": true,
-  "message": "Config file restored from backup",
   "originalPath": "~/.cursor/mcp.json",
   "wasPatched": false,
   "repatched": false
@@ -472,7 +485,7 @@ Delete a configuration backup.
 **Request Body:**
 ```json
 {
-  "backupPath": "~/.mcp-shark/backups/mcp.json.2024-01-01T00:00:00.000Z.backup"
+  "backupPath": "~/.cursor/.mcp.json-mcpshark.2024-01-01_12-00-00.json"
 }
 ```
 
@@ -777,6 +790,149 @@ Get all application settings and paths.
   }
 }
 ```
+
+## AAuth Visibility
+
+All AAuth endpoints are observability-only — mcp-shark never verifies signatures
+or fetches keys. See the [AAuth Visibility doc](aauth-visibility.md) for the
+underlying contract.
+
+### GET /api/aauth/posture
+
+Aggregate posture summary across captured traffic.
+
+**Response:**
+```json
+{
+  "observed": true,
+  "verified": false,
+  "total_packets": 124,
+  "counts": { "signed": 96, "aauth-aware": 4, "bearer": 16, "none": 8 },
+  "signed_ratio": 0.774,
+  "unique_agents": ["aauth:cursor-instance-7@hellocoop.dev"],
+  "unique_missions": ["m_2026-04-26_a"],
+  "note": "mcp-shark records AAuth signals as observed only; signatures are not verified."
+}
+```
+
+### GET /api/aauth/missions
+
+List observed AAuth missions and their members.
+
+### GET /api/aauth/graph
+
+Force-directed graph data for the AAuth Explorer view (nodes for agents,
+missions, resources, signing algorithms, access modes; edges grounded in
+captured packet evidence).
+
+### GET /api/aauth/upstreams
+
+Per-upstream AAuth posture rollup (which servers have signed traffic, which are
+bearer-only, etc.).
+
+### GET /api/aauth/node/:category/:id
+
+Packets associated with a specific graph node (e.g. all packets for one agent).
+
+**Path Parameters:**
+- `category` (string): One of `agent`, `mission`, `resource`, `algorithm`, `access`
+- `id` (string): Node identifier from the graph response
+
+### POST /api/aauth/self-test
+
+Inject synthetic AAuth-shaped packets so the UI / graph / posture endpoints have
+demo data even without a live AAuth-aware MCP. Used by CI and the
+`aauth-traffic-generator.js` legacy shim.
+
+**Request Body:**
+```json
+{ "rounds": 2 }
+```
+
+**Response:**
+```json
+{ "success": true, "inserted": 14 }
+```
+
+## Security
+
+### GET /api/security/rules
+
+List available rules (declarative + JS plugins).
+
+### POST /api/security/scan
+
+Scan a single MCP server config snapshot.
+
+### POST /api/security/scan/batch
+
+Scan multiple server configs in a single request.
+
+### POST /api/security/analyse
+
+Run static analysis against the MCP servers currently running through the proxy.
+
+**Response:**
+```json
+{
+  "success": true,
+  "serversScanned": 2,
+  "totalFindings": 5,
+  "results": [ /* per-server findings */ ]
+}
+```
+
+### GET /api/security/findings
+
+List stored findings. Supports `?severity=`, `?serverName=`, `?ruleId=`,
+`?scanId=`, `?finding_type=`, `?limit=`, `?offset=`.
+
+### GET /api/security/findings/:id
+
+Get a single finding by id.
+
+### GET /api/security/summary
+
+Aggregate counts by severity, OWASP id, and target type.
+
+### GET /api/security/history
+
+Historical scan summaries (`?limit=` supported).
+
+### POST /api/security/findings/clear
+
+Remove all findings, scan history, and reset the in-memory toxic-flow registry.
+
+### DELETE /api/security/scan/:scanId
+
+Delete findings produced by a single scan run.
+
+### GET /api/security/traffic-toxic-flows
+
+Latest cross-server pairings inferred from `tools/list` responses observed on
+the HTTP proxy.
+
+### POST /api/security/traffic-toxic-flows/replay
+
+Rebuild the toxic-flow model from stored `packets` rows (responses with
+`tools` in their JSON-RPC result).
+
+### Engine & rule sources
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/security/engine/status` | GET | Pattern engine status (regex / YARA hint) |
+| `/api/security/engine/load` | POST | Reload rules from disk into the engine |
+| `/api/security/sources` | GET | List configured rule sources (GitHub / URL / local) |
+| `/api/security/sources` | POST | Add a new rule source |
+| `/api/security/sources/:name` | DELETE | Remove a rule source |
+| `/api/security/sources/:name/sync` | POST | Sync a single rule source |
+| `/api/security/sources/sync` | POST | Sync all rule sources |
+| `/api/security/sources/initialize` | POST | Initialize the default rule sources |
+| `/api/security/community-rules` | GET | List community / synced rules |
+| `/api/security/community-rules` | POST | Add a custom user rule |
+| `/api/security/community-rules/:ruleId` | DELETE | Delete a custom rule |
+| `/api/security/yara/reset-defaults` | POST | Reset built-in rules to defaults |
 
 ## WebSocket
 

@@ -1,17 +1,16 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
+import { Environment } from './environment.js';
 
 export { Environment } from './environment.js';
 
-const WORKING_DIRECTORY_NAME = '.mcp-shark';
 const MCP_CONFIG_NAME = 'mcps.json';
 const APP_DB_DIR_NAME = 'db';
 const APP_DB_FILE_NAME = 'mcp-shark.sqlite';
 const HELP_STATE_NAME = 'help-state.json';
 
 export function getWorkingDirectory() {
-  return join(homedir(), WORKING_DIRECTORY_NAME);
+  return Environment.getMcpSharkHome();
 }
 
 export function getDatabasePath() {

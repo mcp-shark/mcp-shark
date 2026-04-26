@@ -4,13 +4,17 @@ Guide to configuring MCP Shark and MCP servers.
 
 ## Automatic Configuration
 
-MCP Shark automatically detects and converts configuration files from:
+The web UI's **MCP Server Setup** tab probes three IDEs for live configuration:
 
 - **Cursor** — `~/.cursor/mcp.json`
 - **Windsurf** — `~/.codeium/windsurf/mcp_config.json`
 - **Codex** — `~/.codex/config.toml` (or `$CODEX_HOME/config.toml`)
 
-The UI will show detected configuration files and allow you to select which one to use.
+The detected file is converted to MCP Shark's internal format and shown in the UI for review.
+
+> The CLI (`mcp-shark scan`, `list`, `doctor`) recognises a much wider set of IDE
+> config paths — see the table in the [README](../README.md#supported-ide-configurations)
+> for the full list of 15+ locations it scans automatically.
 
 ## Supported Formats
 
@@ -116,8 +120,17 @@ Only enabled servers will be available through MCP Shark.
 MCP Shark automatically creates backups before modifying configuration files.
 
 **Backup Locations:**
-- Cursor backups: `~/.cursor/.mcp.json-mcpshark.YYYY-MM-DD_HH-MM-SS.json`
-- Windsurf backups: `~/.codeium/windsurf/.mcp_config.json-mcpshark.YYYY-MM-DD_HH-MM-SS.json`
+
+Backups are written next to the original config file as a hidden file with a
+`-mcpshark.<datetime>.json` suffix (and the `.backup` legacy form is still recognised
+for restore). The UI's **MCP Server Setup → Backups** view discovers them in:
+
+- Cursor: `~/.cursor/.mcp.json-mcpshark.YYYY-MM-DD_HH-MM-SS.json`
+- Windsurf: `~/.codeium/windsurf/.mcp_config.json-mcpshark.YYYY-MM-DD_HH-MM-SS.json`
+
+> Codex `config.toml` patching is not yet covered by the backup discovery view —
+> if you want a snapshot of `~/.codex/config.toml` keep your own copy until that
+> support lands.
 
 **Backup Actions:**
 - View all backups in the **MCP Server Setup** tab
@@ -142,11 +155,20 @@ Returns:
 
 ## Environment Variables
 
-MCP Shark uses the following environment variables:
+MCP Shark reads the following environment variables at startup:
 
-- `MCP_SHARK_HOME`: Override the default working directory (default: `~/.mcp-shark`)
-- `MCP_SHARK_PORT`: Override the UI server port (default: 9853)
-- `MCP_SHARK_SERVER_PORT`: Override the MCP server port (default: 9851)
+| Variable | Purpose | Default |
+|----------|---------|---------|
+| `UI_PORT` | UI server port (the port your browser connects to) | `9853` |
+| `MCP_SHARK_PORT` | Alias for `UI_PORT`. Honoured if `UI_PORT` is unset. | `9853` |
+| `MCP_SHARK_SERVER_PORT` | Internal MCP aggregation server port | `9851` |
+| `MCP_SHARK_HOME` | Override the working directory used for the database, config, backups, and tokens | `~/.mcp-shark` |
+| `CODEX_HOME` | Override the Codex config root scanned by the CLI/UI | `~/.codex` |
+
+Both port variables are honoured by the standalone server (`npx @mcp-shark/mcp-shark serve`)
+and the legacy launcher (`npx mcp-shark --open`). `MCP_SHARK_HOME` controls every
+on-disk location that defaults to `~/.mcp-shark` — database, MCP config, help-state, and the
+Smart Scan token file.
 
 ## Smart Scan Configuration
 
@@ -179,7 +201,7 @@ Smart Scan requires an API token for security analysis.
 
 ## IDE Integration
 
-MCP Shark automatically integrates with supported IDEs:
+The web UI's **MCP Server Setup** flow integrates with three IDEs:
 
 **Cursor:**
 - Detects: `~/.cursor/mcp.json`
@@ -193,10 +215,18 @@ MCP Shark automatically integrates with supported IDEs:
 - Creates backup before modification
 - Restores original on stop
 
+**Codex:**
+- Detects: `~/.codex/config.toml` (or `$CODEX_HOME/config.toml`)
+- Parses `[mcp_servers]` and converts to internal format
+- Patching to route Codex through the proxy is best-effort
+
 **Custom Configuration:**
 - Upload any MCP configuration file
 - MCP Shark will convert and use it
-- Backup is created automatically
+
+> The CLI (`scan`, `list`, `doctor`) recognises a much wider set of IDE config
+> paths for read-only scanning — see the [README's Supported IDE configurations
+> table](../README.md#supported-ide-configurations) for the full list.
 
 ## Configuration Validation
 
