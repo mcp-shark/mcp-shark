@@ -4,7 +4,7 @@
 
   <h1>mcp-shark</h1>
 
- <p><strong>Security scanner for AI agent tools</strong> — static analysis on MCP configs and tool metadata on your machine (findings, toxic-flow heuristics, CI-friendly outputs). Use the <strong>local HTTP proxy</strong> and <strong>monitoring UI</strong> to aggregate IDE traffic to multiple MCP servers and inspect requests and responses in one place.</p>
+  <p><strong>Security scanner for AI agent tools</strong> — for security and platform engineers: static analysis on MCP configs and tool metadata on your machine (findings, toxic-flow heuristics, CI-friendly outputs). Optional <strong>local HTTP proxy</strong> and <strong>monitoring UI</strong> aggregate IDE traffic to multiple MCP servers so you can inspect JSON-RPC frames, run local analysis, and try tools in one place.</p>
   <p><strong>Privacy:</strong> static scans need no cloud and send no telemetry. Refreshing rule catalogs is opt-in HTTPS (<code>update-rules</code>).</p>
 
   [![npm version](https://img.shields.io/npm/v/@mcp-shark/mcp-shark.svg)](https://www.npmjs.com/package/@mcp-shark/mcp-shark)
@@ -418,10 +418,12 @@ npx @mcp-shark/mcp-shark --open
 ```
 
 The web UI provides:
-- Multi-server aggregation and real-time monitoring
-- Interactive playground for testing tools, prompts, and resources
-- Local security analysis with pattern-based detection
-- API documentation with interactive testing
+- Multi-server aggregation and real-time traffic capture (filters, export, AAuth posture chips)
+- **MCP Playground** — call tools, prompts, and resources through the proxy against a selected upstream
+- **Local Analysis** — OWASP-style static scan over captured traffic; **YARA Detection** for traffic pattern rules (native engine when installed, regex fallback otherwise)
+- **AAuth Explorer** — graph of Agent / Mission / Resource / signing / access signals observed in traffic
+- **Smart Scan** — optional AI-backed scan (requires a configured API token)
+- In-app API docs, server setup, logs, and graceful shutdown
 
 ### Zero-touch first boot
 
@@ -471,11 +473,14 @@ To re-trigger first-boot behavior on a machine, remove `~/.mcp-shark/` and resta
 - **[Features](docs/features.md)** — Detailed feature documentation
 - **[User Guide](docs/user-guide.md)** — Complete usage guide
 - **[Configuration](docs/configuration.md)** — Configuration files & environment variables
-- **[Local Analysis](docs/local-analysis.md)** — Static security analysis
+- **[Local Analysis](docs/local-analysis.md)** — Static security analysis & YARA traffic rules
 - **[AAuth Visibility](docs/aauth-visibility.md)** — RFC 9421 / AAuth observability
 - **[Architecture](docs/architecture.md)** — System design
 - **[Database Architecture](docs/database-architecture.md)** — SQLite schema reference
 - **[API Reference](docs/api-reference.md)** — API endpoints
+- **[Troubleshooting](docs/troubleshooting.md)** — Common issues & fixes
+- **[Development](docs/development.md)** — Contributing & project conventions
+- **[Package inspection](docs/package-inspection.md)** — npm package layout
 
 ## Requirements
 

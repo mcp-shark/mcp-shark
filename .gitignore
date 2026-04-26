@@ -134,3 +134,6 @@ vite.config.ts.timestamp-*
 .mcp-shark.lock
 .mcp-shark/
 .env.example
+
+# macOS folder metadata
+.DS_Store
