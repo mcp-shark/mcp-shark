@@ -12,14 +12,6 @@
 
 </div>
 
----
-
-```bash
-npx @mcp-shark/mcp-shark
-```
-
-![mcp-shark demo](docs/assets/demo.gif)
-
 ## Why mcp-shark?
 
 MCP setups commonly mix secrets, broad tool access, and multiple servers in one agent context; issues are easy to miss without checking configs. See the [OWASP MCP Top 10](https://owasp.org/www-project-mcp-top-10/) for a structured view of what can go wrong.
@@ -495,6 +487,16 @@ Source-Available Non-Commercial License
 - ❌ Sell, resell, or integrate into paid products/services without written permission
 
 See [LICENSE](LICENSE) for full terms.
+
+## CLI demo
+
+Terminal session from a local `scan` (output varies with your config):
+
+```bash
+npx @mcp-shark/mcp-shark
+```
+
+![mcp-shark demo](docs/assets/demo.gif)
 
 ## Support
 
