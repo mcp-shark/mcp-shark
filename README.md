@@ -68,13 +68,19 @@ Use mcp-shark findings as input to your own threat model, not as a complete audi
 
 ## See it in action
 
-Screenshots from the live web UI with **real captured traffic** (dummy MCP or your own upstreams). Start with `npx @mcp-shark/mcp-shark serve --open`. **MCP Playground** and **Smart Scan** are available in the app but are not shown here — they depend on live tool sessions or an optional API token.
+Screenshots from the live web UI with **real captured traffic** (dummy MCP or your own upstreams). Start with `npx @mcp-shark/mcp-shark serve --open`. **Smart Scan** is not shown below — it depends on an optional remote API token. **MCP Playground** appears once you have at least one MCP upstream configured (the Playground capture uses a demo server with tools loaded).
 
 ### Wireshark-style traffic capture
 
 Every JSON-RPC frame between your IDE and each MCP upstream is captured with full headers, body, timing, and an AAuth posture chip. Filter by method, status, server, session, AAuth agent / mission / posture.
 
 ![Traffic Capture](docs/assets/hero-traffic.png)
+
+### MCP Playground
+
+Pick an upstream, load **tools**, **prompts**, and **resources** from that server, then call tools or read resources through the proxy — useful for validating behavior before it hits your IDE. The view below shows the tools list for a configured demo MCP.
+
+![MCP Playground](docs/assets/playground.png)
 
 ### AAuth Explorer
 
