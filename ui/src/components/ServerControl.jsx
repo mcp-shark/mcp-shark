@@ -62,7 +62,6 @@ function ServerControl({ status, loading, onStart, onStop, canStart }) {
         ) : (
           <button
             type="button"
-            data-tour="start-button"
             onClick={onStart}
             disabled={loading || !canStart}
             style={{

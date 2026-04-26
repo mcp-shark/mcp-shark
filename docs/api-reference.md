@@ -529,42 +529,6 @@ Proxy MCP requests for testing.
 
 **Note:** The `sessionId` is optional and used for stateful requests. If not provided, a new session will be created.
 
-## Help
-
-### GET /api/help/state
-
-Get the current state of the help tour.
-
-**Response:**
-```json
-{
-  "dismissed": false,
-  "tourCompleted": false
-}
-```
-
-### POST /api/help/dismiss
-
-Mark the help tour as dismissed.
-
-**Response:**
-```json
-{
-  "success": true
-}
-```
-
-### POST /api/help/reset
-
-Reset the help tour state to show it again.
-
-**Response:**
-```json
-{
-  "success": true
-}
-```
-
 ## Smart Scan
 
 ### POST /api/smartscan/scans

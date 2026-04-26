@@ -90,7 +90,6 @@ export default function ShutdownButton({ style, onClick, onMouseEnter, onMouseLe
       <button
         type="button"
         onClick={handleClick}
-        data-tour="shutdown-button"
         style={defaultStyle}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}

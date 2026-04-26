@@ -77,7 +77,6 @@ function RequestFilters({ filters, onFilterChange, stats, onClear }) {
   return (
     <div
       ref={filtersRef}
-      data-tour="filters"
       style={{
         padding: '12px 16px',
         borderBottom: `1px solid ${colors.borderLight}`,

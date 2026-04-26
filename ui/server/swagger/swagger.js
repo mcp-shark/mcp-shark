@@ -27,7 +27,6 @@ export const swaggerSpec = {
     { name: 'Config', description: 'Configuration file management' },
     { name: 'Backups', description: 'Configuration backup management' },
     { name: 'Server Management', description: 'MCP Shark server lifecycle management' },
-    { name: 'Help', description: 'Help and tour management' },
     { name: 'Playground', description: 'MCP playground for testing tools and resources' },
     { name: 'Smart Scan', description: 'AI-powered security analysis for MCP servers' },
     { name: 'Settings', description: 'Application settings' },

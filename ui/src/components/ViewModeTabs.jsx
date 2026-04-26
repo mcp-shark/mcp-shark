@@ -4,7 +4,6 @@ import { colors, fonts } from '../theme';
 function ViewModeTabs({ viewMode, onViewModeChange }) {
   return (
     <div
-      data-tour="view-modes"
       style={{
         display: 'flex',
         borderBottom: `1px solid ${colors.borderLight}`,

@@ -167,7 +167,7 @@ MCP Shark reads the following environment variables at startup:
 
 Both port variables are honoured by the standalone server (`npx @mcp-shark/mcp-shark serve`)
 and the legacy launcher (`npx mcp-shark --open`). `MCP_SHARK_HOME` controls every
-on-disk location that defaults to `~/.mcp-shark` — database, MCP config, help-state, and the
+on-disk location that defaults to `~/.mcp-shark` — database, MCP config, and the
 Smart Scan token file.
 
 ## Smart Scan Configuration

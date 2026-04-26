@@ -220,8 +220,7 @@ Developer-friendly interface with modern design patterns.
 
 **Design Features:**
 - Dark theme optimized for developers
-- Interactive tour for first-time users
-- Expandable action menu for quick access to API docs, help, and shutdown
+- Expandable action menu for quick access to API docs and shutdown
 - Responsive design for different screen sizes
   - Adaptive navigation with dropdown menu for smaller windows (< 1200px)
   - Compact views for mobile and tablet devices
