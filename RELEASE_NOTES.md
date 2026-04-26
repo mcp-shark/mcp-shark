@@ -32,9 +32,11 @@ parity audit and two latent env-var bugs fixed. No breaking changes.
 
 - **Rule counts** unified at **41** total (**30 declarative + 11 JS plugins**)
   — corrects every `35` / `24` reference in the README and architecture box.
-- New **"See it in action"** section with six in-product screenshots
-  (`docs/assets/`) demonstrating Traffic Capture, AAuth Explorer, Local
-  Analysis, MCP Playground, Smart Scan, and Server Setup.
+- **"See it in action"** README section with four in-product screenshots
+  (`docs/assets/`) — Traffic Capture, AAuth Explorer, Local Analysis (after
+  **Replay from DB** + **Analyse** when using stored packets), and Server
+  Setup. Playground and Smart Scan are in-app only (session/token dependent),
+  so they are not duplicated as static images.
 - **Documentation index** in the README now links Configuration, AAuth
   Visibility, and Database Architecture (previously hidden).
 - **`docs/configuration.md`** — environment variable table now reflects the

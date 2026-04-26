@@ -67,7 +67,7 @@ Use mcp-shark findings as input to your own threat model, not as a complete audi
 
 ## See it in action
 
-Screenshots from the live web UI (`npx @mcp-shark/mcp-shark serve --open`):
+Screenshots from the live web UI with **real captured traffic** (dummy MCP or your own upstreams). Start with `npx @mcp-shark/mcp-shark serve --open`. **MCP Playground** and **Smart Scan** are available in the app but are not shown here — they depend on live tool sessions or an optional API token.
 
 ### Wireshark-style traffic capture
 
@@ -77,27 +77,15 @@ Every JSON-RPC frame between your IDE and each MCP upstream is captured with ful
 
 ### AAuth Explorer
 
-Force-directed knowledge graph of every Agent / Mission / Resource / Signing algorithm / Access mode observed across captured traffic. Every node is grounded in real packets — click to drill into the underlying frames.
+Force-directed knowledge graph of every Agent / Mission / Resource / Signing algorithm / Access mode observed across captured traffic. Use **Generate sample data** for a quick demo graph, or capture real AAuth-shaped traffic through the proxy.
 
 ![AAuth Explorer](docs/assets/aauth-explorer.png)
 
 ### Local Analysis
 
-Offline rule-based scanner over captured traffic. The **AAuth Posture** card summarizes signed / aauth-aware / bearer / no-auth distribution; the **Toxic flows (proxy traffic)** panel infers cross-server pairings from observed `tools/list` responses.
+Offline rule-based scanner over captured traffic. The **AAuth Posture** card summarizes signed / aauth-aware / bearer / no-auth distribution; the **Toxic flows (proxy traffic)** panel infers cross-server pairings from observed `tools/list` responses. With packets already in the database, use **Replay from DB** (when no live MCP is attached) and then **Analyse** to populate findings — the view below is after that run.
 
 ![Local Analysis](docs/assets/local-analysis.png)
-
-### MCP Playground
-
-Browse and call every tool, prompt, and resource exposed by the connected upstreams. Useful for reproducing the dodgy-looking tool surface that scans are flagging.
-
-![MCP Playground](docs/assets/playground.png)
-
-### Smart Scan
-
-Optional cloud-backed deep scan (`smart.mcpshark.sh`) for AI-powered semantic analysis of MCP servers. Token-gated and entirely opt-in — static `scan` works without it.
-
-![Smart Scan](docs/assets/smart-scan.png)
 
 ### Server setup
 

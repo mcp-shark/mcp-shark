@@ -33,7 +33,16 @@ function appendFilterParams(queryParams, filters) {
   }
 }
 
-const VALID_TABS = ['traffic', 'logs', 'setup', 'playground', 'smart-scan'];
+const VALID_TABS = [
+  'traffic',
+  'logs',
+  'setup',
+  'playground',
+  'security',
+  'aauth-explorer',
+  'smart-scan',
+  'shutdown',
+];
 const DEFAULT_TAB = 'traffic';
 
 function getTabFromHash() {
