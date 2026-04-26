@@ -100,6 +100,10 @@ Same **Local Analysis** tab: switch to **YARA Detection** for the traffic rule e
 
 ![YARA Detection](docs/assets/yara-detection.png)
 
+**New Rule** opens the editor with a starter template (meta, `strings`, and `condition`). Edit the rule text, then **Save Rule** to add it as a custom pattern alongside the built-ins.
+
+![Adding a custom YARA rule](docs/assets/yara-new-rule.png)
+
 ### Server setup
 
 Auto-detects Cursor / Codex / Windsurf configs, converts them to mcp-shark format, and patches the IDE to route through the proxy on start.
