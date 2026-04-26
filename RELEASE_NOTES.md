@@ -1,27 +1,3 @@
-# 🦈 MCP Shark v1.8.0 - README & marketing assets
-
-**Semver:** Minor bump (1.8.0). Documentation and in-product screenshot refresh
-for the main entry README — no breaking CLI or API changes.
-
-## What's in v1.8.0
-
-### README (front door)
-
-- **“See it in action”** now includes **MCP Playground** (with screenshot) and
-  clarifies that only **Smart Scan** is omitted from static images (token-dependent).
-- **YARA Detection** — second screenshot for **New Rule** / starter template editor
-  and **Save Rule** (`docs/assets/yara-new-rule.png`).
-- Refreshed gallery assets: traffic, local analysis, playground, YARA overview
-  (`docs/assets/*.png`) for consistent framing.
-- **Hero blurb** — explicit audience (security / platform engineers) and clearer
-  split between static scan and optional proxy + UI.
-- **Web UI** bullet list aligned with real tabs: traffic, Playground, Local
-  Analysis + YARA, AAuth Explorer, Smart Scan, setup, logs, API docs, shutdown.
-- **Documentation** index completes the set: Troubleshooting, Development, and
-  Package inspection.
-
----
-
 # 🦈 MCP Shark v1.7.0 - AAuth Visibility + Documentation Parity
 
 **Semver:** Minor bump (1.7.0). New feature surface (AAuth observability,
@@ -56,12 +32,14 @@ parity audit and two latent env-var bugs fixed. No breaking changes.
 
 - **Rule counts** unified at **41** total (**30 declarative + 11 JS plugins**)
   — corrects every `35` / `24` reference in the README and architecture box.
-- **"See it in action"** README section with five in-product screenshots
-  (`docs/assets/`) — Traffic Capture, AAuth Explorer, Local Analysis (after
-  **Replay from DB** + **Analyse** when using stored packets), **YARA
-  Detection** (rule manager under Local Analysis), and Server Setup. Smart Scan
-  stayed off the static gallery (token-dependent). **MCP Playground** and an
-  extra **YARA New Rule** editor shot were added in **v1.8.0** above.
+- **"See it in action"** README gallery (`docs/assets/`) — Traffic Capture,
+  **MCP Playground**, AAuth Explorer, Local Analysis (after **Replay from DB** +
+  **Analyse** when using stored packets), **YARA Detection** (rule manager) plus
+  **YARA New Rule** editor screenshot, and Server Setup. **Smart Scan** is not
+  shown as a static image (token-dependent). Gallery PNGs refreshed for
+  consistent framing; hero copy and Web UI bullets aligned with the product;
+  documentation index also links Troubleshooting, Development, and Package
+  inspection.
 - **Documentation index** in the README now links Configuration, AAuth
   Visibility, and Database Architecture (previously hidden).
 - **`docs/configuration.md`** — environment variable table now reflects the

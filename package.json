@@ -1,6 +1,6 @@
 {
   "name": "@mcp-shark/mcp-shark",
-  "version": "1.8.0",
+  "version": "1.7.0",
   "description": "Security scanner for AI agent tools. Scans MCP IDE configs locally (41 rules, toxic flow heuristics, AAuth visibility, auto-fix, tool pinning). Optional proxy + web UI for traffic, Local Analysis, YARA rules, and Playground. Rule registry fetch is opt-in.",
   "type": "module",
   "main": "./bin/mcp-shark.js",
