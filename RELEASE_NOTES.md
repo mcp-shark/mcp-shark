@@ -1,6 +1,6 @@
 # 🦈 MCP Shark v1.7.1 - README polish + npm publish
 
-**Semver:** Patch (1.7.1). README-only: scannable hero (short paragraphs + **Dashboard includes** list), **Dashboard at a glance** gallery moved under the hero, “web UI” wording replaced with **dashboard** / **in-browser dashboard** in the README, **CLI demo** cross-links **Quick Start**, and PR [#10](https://github.com/mcp-shark/mcp-shark/pull/10) (Wireshark references removed) is on `main`. **npm:** `v1.7.0` was tagged on GitHub but not published to the registry; **1.7.1** is the first npm release for this line and matches current `main`.
+**Semver:** Patch (1.7.1). README-only: scannable hero (short paragraphs + **Dashboard includes** list), **Dashboard at a glance** gallery moved under the hero, “web UI” wording replaced with **dashboard** / **in-browser dashboard** in the README, **CLI demo** cross-links **Quick Start**, and PR [#10](https://github.com/mcp-shark/mcp-shark/pull/10) (Wireshark references removed) is on `main`. **npm:** `package.json` is **1.7.1** on `main`; the public registry still shows **1.6.0** until a maintainer runs `npm publish --access public` from an npm-authenticated checkout of tag `v1.7.1` (or current `main`). The obsolete branch `docs/readme-description-feature-set` was removed from the remote—use **`main`** for the current README.
 
 ---
 
