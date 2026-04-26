@@ -4,7 +4,7 @@
 
   <h1>mcp-shark</h1>
 
-  <p><strong>Security scanner for AI agent tools</strong> — for security and platform engineers: static analysis on MCP configs and tool metadata on your machine (findings, toxic-flow heuristics, CI-friendly outputs). Optional <strong>local HTTP proxy</strong> and <strong>monitoring UI</strong> aggregate IDE traffic to multiple MCP servers so you can inspect JSON-RPC frames, run local analysis, and try tools in one place.</p>
+  <p><strong>Security scanner for AI agent tools</strong> — for security and platform engineers: local static <code>scan</code> over MCP IDE configs and embedded tool metadata (41 rules, toxic-flow heuristics, SARIF/HTML/JSON). An optional <strong>local HTTP proxy</strong> and <strong>web UI</strong> aggregate IDE traffic in one place: <strong>Traffic</strong> (live JSON-RPC capture, filters, export, AAuth posture chips), <strong>Local Analysis</strong> (OWASP-style findings over captured traffic plus <strong>YARA</strong> traffic rules), <strong>AAuth Explorer</strong> (graph of agents, missions, resources, and signing/access signals), <strong>MCP Playground</strong> (call tools, prompts, and resources through the proxy), optional <strong>Smart Scan</strong> (AI-backed, API token), and <strong>Server setup</strong> — all without a hosted config-scan backend.</p>
   <p><strong>Privacy:</strong> static scans need no cloud and send no telemetry. Refreshing rule catalogs is opt-in HTTPS (<code>update-rules</code>).</p>
 
   [![npm version](https://img.shields.io/npm/v/@mcp-shark/mcp-shark.svg)](https://www.npmjs.com/package/@mcp-shark/mcp-shark)
@@ -61,7 +61,7 @@ Use mcp-shark findings as input to your own threat model, not as a complete audi
 | **YAML rules** | Per-project custom rules via `.mcp-shark/rules/` |
 | **GitHub Action** | CI/CD integration with SARIF upload |
 | **Interactive TUI** | lazygit-style terminal UI for scan, fix, and server browsing |
-| **Web UI** | Wireshark-like monitoring interface |
+| **Web UI** | Browser dashboard: live traffic, Local Analysis, YARA rules, AAuth Explorer, Playground, setup, and logs |
 | **Proxy toxic flows** | Local Analysis panel + `GET/POST /api/security/traffic-toxic-flows*` infer cross-server pairs from captured **tools/list** traffic (see [docs/local-analysis.md](docs/local-analysis.md)) |
 | **YARA-style traffic rules** | In **Local Analysis → YARA Detection**, enable or edit built-in pattern rules, add custom rules, and inspect engine status (native YARA when available, regex fallback otherwise) |
 | **Local static scans** | No hosted scan backend; `update-rules` is opt-in HTTPS to the registry |
@@ -70,7 +70,7 @@ Use mcp-shark findings as input to your own threat model, not as a complete audi
 
 Screenshots from the live web UI with **real captured traffic** (dummy MCP or your own upstreams). Start with `npx @mcp-shark/mcp-shark serve --open`. **Smart Scan** is not shown below — it depends on an optional remote API token. **MCP Playground** appears once you have at least one MCP upstream configured (the Playground capture uses a demo server with tools loaded).
 
-### Wireshark-style traffic capture
+### Live traffic capture
 
 Every JSON-RPC frame between your IDE and each MCP upstream is captured with full headers, body, timing, and an AAuth posture chip. Filter by method, status, server, session, AAuth agent / mission / posture.
 
@@ -405,7 +405,7 @@ jobs:
 
 ## Web UI
 
-MCP Shark also includes a Wireshark-like web interface for real-time MCP traffic monitoring:
+MCP Shark ships a **browser-based web UI** on the local proxy for real-time MCP traffic, analysis, and exploration:
 
 ```bash
 npx @mcp-shark/mcp-shark serve --open
