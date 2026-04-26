@@ -38,10 +38,9 @@ parity audit and two latent env-var bugs fixed. No breaking changes.
   **YARA New Rule** editor screenshot, and Server Setup. **Smart Scan** is not
   shown as a static image (token-dependent). Gallery PNGs refreshed for
   consistent framing; hero copy and Web UI bullets aligned with the product;
-  documentation index also links Troubleshooting, Development, and Package
-  inspection.
-- **Documentation index** in the README now links Configuration, AAuth
-  Visibility, and Database Architecture (previously hidden).
+  documentation index also links Configuration, AAuth Visibility, Database
+  Architecture, Troubleshooting, Development, and Package inspection (some were
+  previously missing from the index).
 - **`docs/configuration.md`** — environment variable table now reflects the
   code: `UI_PORT`, `MCP_SHARK_PORT` (alias), `MCP_SHARK_SERVER_PORT`,
   `MCP_SHARK_HOME`, `CODEX_HOME`. Backup paths corrected to the actual
@@ -85,6 +84,12 @@ Two documented variables were not actually wired up. Both now work:
 
 - Description updated to reflect 41 rules + AAuth visibility.
 - Version bumped to **1.7.0**.
+
+### Web UI cleanup (same minor)
+
+- Removed the first-run **interactive tour** and in-app **Help** overlay (and
+  related API/Swagger routes). User-facing documentation stays in `docs/` and
+  the README.
 
 ---
 
