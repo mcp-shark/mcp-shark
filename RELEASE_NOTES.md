@@ -1,6 +1,6 @@
 # 🦈 MCP Shark v1.7.2 - README hero + npm
 
-**Semver:** Patch (1.7.2). README hero: valid HTML wrapper, **You can** verb-led dashboard bullets, **AAuth visibility** called out in the static `scan` line, outcome-focused dashboard copy, **Smart Scan** token clarity, aligned `package.json` description. Follows [#11](https://github.com/mcp-shark/mcp-shark/pull/11) and [#12](https://github.com/mcp-shark/mcp-shark/pull/12). **npm:** publish **1.7.2** with `npm publish --access public` from an authenticated checkout of tag `v1.7.2`.
+**Semver:** Patch (1.7.2). README hero: valid HTML wrapper, **You can** verb-led dashboard bullets, **AAuth visibility** called out in the static `scan` line, outcome-focused dashboard copy, **Smart Scan** token clarity, aligned `package.json` description. Follows [#11](https://github.com/mcp-shark/mcp-shark/pull/11) and [#12](https://github.com/mcp-shark/mcp-shark/pull/12). **npm:** run `npm login` then `npm publish --access public` at tag `v1.7.2` (or `main` @ this version) from a maintainer machine; CI here has no registry token.
 
 ---
 
