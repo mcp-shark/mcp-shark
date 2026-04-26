@@ -22,17 +22,17 @@ const JS_RULES_DIR = join(
 const RULE_PACKS_DIR = join(import.meta.dirname, '..', 'data', 'rule-packs');
 
 describe('README Claims Verification', () => {
-  it('README says "35 security rules" — verify 24 declarative + 11 JS = 35', () => {
+  it('README says "41 security rules" — verify 30 declarative + 11 JS = 41', () => {
     const declarativeRules = loadDeclarativeRules({ builtinOnly: true });
     const jsFiles = readdirSync(JS_RULES_DIR).filter((f) => f.endsWith('.js'));
     const total = declarativeRules.length + jsFiles.length;
     assert.strictEqual(
       declarativeRules.length,
-      24,
-      `Expected 24 declarative, got ${declarativeRules.length}`
+      30,
+      `Expected 30 declarative, got ${declarativeRules.length}`
     );
     assert.strictEqual(jsFiles.length, 11, `Expected 11 JS rules, got ${jsFiles.length}`);
-    assert.strictEqual(total, 35, `Expected 35 total rules, got ${total}`);
+    assert.strictEqual(total, 41, `Expected 41 total rules, got ${total}`);
   });
 
   it('README says "15 IDE detection" — verify 15 entries', () => {

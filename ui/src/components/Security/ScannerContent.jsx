@@ -9,6 +9,7 @@ import {
 } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { colors, fonts } from '../../theme';
+import AAuthPosturePanel from './AAuthPosturePanel.jsx';
 import CategoryView from './CategoryView/index.js';
 import ErrorDisplay from './ErrorDisplay.jsx';
 import FindingsTable from './FindingsTable.jsx';
@@ -202,6 +203,8 @@ export default function ScannerContent({
       {!error && !scanning && (
         <StaticAnalysisBanner onNavigateToSmartScan={onNavigateToSmartScan} />
       )}
+
+      {!error && !scanning && <AAuthPosturePanel />}
 
       {!error && !scanning && (
         <TrafficToxicFlowsPanel

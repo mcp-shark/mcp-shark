@@ -1,5 +1,16 @@
+import path from 'node:path';
+
 import { Defaults } from '#core/constants/Defaults.js';
 import { initAuditLogger, startMcpSharkServer } from '#core/mcp-server/index.js';
+
+function isSamePath(a, b) {
+  if (!a || !b) return false;
+  try {
+    return path.resolve(a) === path.resolve(b);
+  } catch {
+    return a === b;
+  }
+}
 
 /**
  * Service for managing MCP Shark server lifecycle
@@ -60,8 +71,34 @@ export class ServerManagementService {
     const { fileData, convertedConfig, updatedConfig } = setupResult;
     const mcpsJsonPath = this.configService.getMcpConfigPath();
 
-    // Write converted config to MCP Shark config path
-    this.configService.writeConfigAsJson(mcpsJsonPath, convertedConfig);
+    // The user can legitimately point the Setup panel at the proxy's own
+    // config file (~/.mcp-shark/mcps.json) when they just want to (re)start
+    // the proxy with whatever is already there — for example after
+    // `npm run testbed:up` has written upstreams directly. In that case the
+    // input *is* the output and the "patch the editor config" step at the
+    // end would rewrite every upstream URL into the proxy-local form
+    // (http://localhost:9851/mcp/<name>), turning mcps.json into a
+    // self-referential file that the next startup has to strip.
+    const sourceIsProxyConfig = isSamePath(fileData.resolvedFilePath, mcpsJsonPath);
+
+    // If the conversion produced zero upstreams (e.g. the user picked an
+    // already-patched ~/.cursor/mcp.json that only contains the mcp-shark
+    // self-reference, and no backup was available to restore), don't blow
+    // away whatever the proxy already has. A healthy existing mcps.json is
+    // strictly more useful than an empty new one.
+    const convertedUpstreamCount = Object.keys(convertedConfig?.servers || {}).length;
+    const existingHasUpstreams = this._existingMcpsHasUpstreams(mcpsJsonPath);
+    const skipWriteToPreserveExisting =
+      convertedUpstreamCount === 0 && existingHasUpstreams && !sourceIsProxyConfig;
+
+    if (skipWriteToPreserveExisting) {
+      this.logger?.warn(
+        { path: mcpsJsonPath, source: fileData.resolvedFilePath },
+        'Conversion yielded zero upstreams; preserving existing mcps.json instead of overwriting'
+      );
+    } else {
+      this.configService.writeConfigAsJson(mcpsJsonPath, convertedConfig);
+    }
 
     // Stop existing server if running
     if (this.serverInstance?.stop) {
@@ -86,9 +123,13 @@ export class ServerManagementService {
       },
     });
 
-    // Patch the original config file if it exists
+    // Patch the original config file if it exists. Skip this when the
+    // source IS our own proxy config — patching it would corrupt the
+    // upstream list we just wrote.
     const patchWarning =
-      fileData.resolvedFilePath && this.configService.fileExists(fileData.resolvedFilePath)
+      fileData.resolvedFilePath &&
+      this.configService.fileExists(fileData.resolvedFilePath) &&
+      !sourceIsProxyConfig
         ? this.configPatchingService.patchConfigFile(fileData.resolvedFilePath, updatedConfig)
             .warning || null
         : null;
@@ -102,6 +143,20 @@ export class ServerManagementService {
       backupPath: null, // TODO: Implement backup creation in BackupService
       warning: restoreWarning || patchWarning || undefined,
     };
+  }
+
+  _existingMcpsHasUpstreams(mcpsJsonPath) {
+    try {
+      if (!this.configService.fileExists(mcpsJsonPath)) return false;
+      const content = this.configService.readConfigFile(mcpsJsonPath);
+      const parsed = this.configService.tryParseJson(content, mcpsJsonPath);
+      if (!parsed) return false;
+      const count =
+        Object.keys(parsed.servers || {}).length + Object.keys(parsed.mcpServers || {}).length;
+      return count > 0;
+    } catch {
+      return false;
+    }
   }
 
   /**

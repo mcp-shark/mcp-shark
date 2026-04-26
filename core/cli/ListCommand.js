@@ -5,6 +5,7 @@
  */
 import Table from 'cli-table3';
 import kleur from 'kleur';
+import { inspectServerConfigForAauth } from '#core/services/security/aauthParser.js';
 import { getAllServers, scanIdeConfigs } from './ConfigScanner.js';
 import { TOOL_CLASSIFICATIONS } from './ToolClassifications.js';
 import { S } from './symbols.js';
@@ -91,9 +92,38 @@ function renderTerminalInventory(servers, ideResults) {
   console.log(table.toString());
   console.log('');
 
+  renderAauthSummary(servers);
   renderIdeSummary(ideResults);
 
   return 0;
+}
+
+/**
+ * Print a single-line AAuth advertisement summary across all detected servers.
+ * Visibility-only: this only checks for AAuth-shaped fields in the static config
+ * (agent IDs, JWKS URLs, .well-known/aauth references). It does not connect.
+ */
+function renderAauthSummary(servers) {
+  let advertised = 0;
+  for (const server of servers) {
+    if (inspectServerConfigForAauth(server.config)) {
+      advertised += 1;
+    }
+  }
+  const remaining = servers.length - advertised;
+  if (servers.length === 0) {
+    return;
+  }
+  console.log(kleur.bold('  AAuth Visibility'));
+  console.log(
+    `  ${kleur.green(S.pass)} ${advertised} server${advertised === 1 ? '' : 's'} advertise AAuth · ${kleur.dim(`${remaining} do not`)}`
+  );
+  console.log(
+    kleur.dim(
+      '  Observed only — mcp-shark does not verify AAuth identity. See https://www.aauth.dev'
+    )
+  );
+  console.log('');
 }
 
 /**
@@ -128,6 +158,7 @@ function renderJsonInventory(servers, ideResults) {
       tool_count: getToolCount(s),
       command: s.config?.command || null,
       args_present: hasArgsPresent(s.config),
+      aauth: inspectServerConfigForAauth(s.config),
     })),
   };
   console.log(JSON.stringify(output, null, 2));

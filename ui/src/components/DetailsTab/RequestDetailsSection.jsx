@@ -1,5 +1,6 @@
 import { colors } from '../../theme';
 import CollapsibleSection from '../CollapsibleSection';
+import AAuthIdentitySection from './AAuthIdentitySection';
 import BodySection from './BodySection';
 import CollapsibleRequestResponse from './CollapsibleRequestResponse';
 import HeadersSection from './HeadersSection';
@@ -21,6 +22,7 @@ export default function RequestDetailsSection({ request, requestHeaders, request
       <InfoSection data={request} titleColor={colors.accentBlue} />
       <NetworkInfoSection data={request} showUserAgent={true} />
       <ProtocolInfoSection data={request} titleColor={colors.accentBlue} />
+      <AAuthIdentitySection aauth={request.aauth} titleColor={colors.accentBlue} />
       <HeadersSection headers={requestHeaders} titleColor={colors.accentBlue} />
       <BodySection body={requestBody} titleColor={colors.accentBlue} />
       {request.jsonrpc_params && (

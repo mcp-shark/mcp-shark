@@ -20,6 +20,7 @@ describe('ServerManagementService', () => {
       info: () => {},
       error: () => {},
       debug: () => {},
+      warn: () => {},
     };
     ctx.service = new ServerManagementService(
       ctx.mockConfigService,
@@ -215,6 +216,131 @@ describe('ServerManagementService', () => {
 
       await ctx.service.shutdown(cleanup);
       assert.deepStrictEqual(callOrder, ['stop', 'cleanup']);
+    });
+  });
+
+  describe('setup self-write protection', () => {
+    function buildSetupCtx({
+      sourcePath,
+      mcpsPath = '/tmp/mcps.json',
+      convertedConfig = { servers: { upstream: { type: 'stdio', command: 'node' } } },
+      existingMcpsContent = null,
+    }) {
+      const writes = [];
+      const patchCalls = [];
+      const startCalls = [];
+
+      const writeMap = new Map();
+      if (existingMcpsContent !== null) {
+        writeMap.set(mcpsPath, existingMcpsContent);
+      }
+
+      const configService = {
+        getMcpConfigPath: () => mcpsPath,
+        processSetup: () => ({
+          success: true,
+          fileData: { resolvedFilePath: sourcePath, content: '{}' },
+          originalConfig: { mcpServers: {} },
+          convertedConfig,
+          updatedConfig: { mcpServers: {} },
+        }),
+        writeConfigAsJson: (p, cfg) => {
+          writes.push({ path: p, config: cfg });
+          writeMap.set(p, JSON.stringify(cfg));
+        },
+        fileExists: (p) => writeMap.has(p) || p === sourcePath,
+        readConfigFile: (p) => writeMap.get(p) || '',
+        tryParseJson: (s) => {
+          try {
+            return s ? JSON.parse(s) : null;
+          } catch {
+            return null;
+          }
+        },
+      };
+
+      const configPatchingService = {
+        restoreIfPatched: () => ({}),
+        patchConfigFile: (p, cfg) => {
+          patchCalls.push({ path: p, config: cfg });
+          return {};
+        },
+      };
+
+      const service = new ServerManagementService(
+        configService,
+        configPatchingService,
+        ctx.mockLogger
+      );
+      service.startServer = async (opts) => {
+        startCalls.push(opts);
+        return { stop: () => {} };
+      };
+
+      return { service, writes, patchCalls, startCalls };
+    }
+
+    test('does not patch source when source is the proxy mcps.json', async () => {
+      const mcpsPath = '/tmp/mcps.json';
+      const { service, writes, patchCalls, startCalls } = buildSetupCtx({
+        sourcePath: mcpsPath,
+        mcpsPath,
+      });
+
+      const result = await service.setup({ filePath: mcpsPath });
+      assert.strictEqual(result.success, true);
+      assert.strictEqual(writes.length, 1, 'still writes converted config to mcps.json');
+      assert.strictEqual(writes[0].path, mcpsPath);
+      assert.strictEqual(patchCalls.length, 0, 'must NOT patch the proxy config file');
+      assert.strictEqual(startCalls.length, 1, 'still starts the proxy');
+    });
+
+    test('still patches when source is an editor config', async () => {
+      const mcpsPath = '/tmp/mcps.json';
+      const editorPath = '/tmp/cursor-mcp.json';
+      const { service, patchCalls } = buildSetupCtx({
+        sourcePath: editorPath,
+        mcpsPath,
+      });
+
+      await service.setup({ filePath: editorPath });
+      assert.strictEqual(patchCalls.length, 1, 'editor config still gets patched');
+      assert.strictEqual(patchCalls[0].path, editorPath);
+    });
+
+    test('preserves existing mcps.json when conversion produced zero upstreams', async () => {
+      const mcpsPath = '/tmp/mcps.json';
+      const editorPath = '/tmp/cursor-mcp.json';
+      const existing = JSON.stringify({
+        servers: { keep: { type: 'stdio', command: 'node' } },
+      });
+      const { service, writes } = buildSetupCtx({
+        sourcePath: editorPath,
+        mcpsPath,
+        convertedConfig: { servers: {} },
+        existingMcpsContent: existing,
+      });
+
+      await service.setup({ filePath: editorPath });
+      assert.strictEqual(
+        writes.length,
+        0,
+        'must not overwrite a healthy mcps.json with an empty conversion'
+      );
+    });
+
+    test('writes empty config when no existing upstreams to preserve', async () => {
+      const mcpsPath = '/tmp/mcps.json';
+      const editorPath = '/tmp/cursor-mcp.json';
+      const { service, writes } = buildSetupCtx({
+        sourcePath: editorPath,
+        mcpsPath,
+        convertedConfig: { servers: {} },
+        existingMcpsContent: null,
+      });
+
+      await service.setup({ filePath: editorPath });
+      assert.strictEqual(writes.length, 1, 'first-time setup may legitimately write empty config');
     });
   });
 });

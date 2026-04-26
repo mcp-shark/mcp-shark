@@ -46,6 +46,48 @@ describe('ConfigTransformService', () => {
       const result = ctx.service.convertMcpServersToServers(null);
       assert.deepStrictEqual(result, { servers: {} });
     });
+
+    test('drops mcp-shark self-reference from mcpServers', () => {
+      const config = {
+        mcpServers: {
+          'mcp-shark': { url: 'http://127.0.0.1:9851/mcp' },
+          real: { command: 'node', args: ['s.js'] },
+        },
+      };
+
+      const result = ctx.service.convertMcpServersToServers(config);
+
+      assert.strictEqual(result.servers['mcp-shark'], undefined);
+      assert.ok(result.servers.real);
+    });
+
+    test('drops self-reference from legacy servers shape', () => {
+      const config = {
+        servers: {
+          'mcp-shark': { type: 'http', url: 'http://localhost:9851/mcp' },
+          ok: { type: 'stdio', command: 'node' },
+        },
+      };
+
+      const result = ctx.service.convertMcpServersToServers(config);
+
+      assert.strictEqual(result.servers['mcp-shark'], undefined);
+      assert.ok(result.servers.ok);
+    });
+
+    test('drops entries whose URL points at proxy port even with custom name', () => {
+      const config = {
+        mcpServers: {
+          'custom-loop': { url: 'http://127.0.0.1:9851/mcp' },
+          remote: { url: 'http://api.example.com:9851/mcp' },
+        },
+      };
+
+      const result = ctx.service.convertMcpServersToServers(config);
+
+      assert.strictEqual(result.servers['custom-loop'], undefined);
+      assert.ok(result.servers.remote);
+    });
   });
 
   describe('extractServices', () => {

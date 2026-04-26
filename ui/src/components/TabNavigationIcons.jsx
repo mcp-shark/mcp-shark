@@ -4,6 +4,7 @@ import {
   IconBrandStackoverflow,
   IconChevronDown,
   IconFileText,
+  IconKey,
   IconMenu2,
   IconNetwork,
   IconSettings,
@@ -42,4 +43,8 @@ export const ChevronDownIcon = ({ size = 16, color = 'currentColor' }) => (
 
 export const SecurityIcon = ({ size = 16, color = 'currentColor' }) => (
   <IconShieldCheck size={size} stroke={1.5} color={color} />
+);
+
+export const AauthIcon = ({ size = 16, color = 'currentColor' }) => (
+  <IconKey size={size} stroke={1.5} color={color} />
 );

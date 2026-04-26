@@ -142,7 +142,10 @@ export async function startMcpSharkServer(options = {}) {
       throw new Error('auditLogger is required. Call initAuditLogger() and pass it in options.');
     }
     const auditLogger = providedAuditLogger;
-    const externalServersResult = await runAllExternalServers(serverLogger, configPath);
+    const externalServersResult = await runAllExternalServers(serverLogger, configPath, {
+      selfPort: port,
+      allowEmpty: true,
+    });
 
     if (isError(externalServersResult)) {
       serverLogger.error(

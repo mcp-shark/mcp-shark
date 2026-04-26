@@ -201,7 +201,15 @@ export class ConfigService {
         ? this.transformService.filterServers(baseConvertedConfig, selectedServices)
         : baseConvertedConfig;
 
-    if (Object.keys(convertedConfig.servers || {}).length === 0) {
+    // A zero-upstream config is a legitimate state (monitoring-only mode):
+    // mcp-shark still runs the audit/UI/AAuth surfaces, just without any
+    // upstreams to forward to. We only fail here if the *original* config
+    // file declared no servers at all (different from "all servers were
+    // self-references and got filtered out").
+    const originalHadAnyServer =
+      Object.keys(originalConfig.mcpServers || {}).length > 0 ||
+      Object.keys(originalConfig.servers || {}).length > 0;
+    if (!originalHadAnyServer) {
       return {
         success: false,
         error: 'No servers found in config',
