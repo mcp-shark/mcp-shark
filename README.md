@@ -6,7 +6,7 @@
 
   <div style="text-align: left; max-width: 42rem; margin: 0 auto;">
     <p><strong>Security scanner for AI agent tools</strong> — built for security and platform engineers working with MCP in the IDE.</p>
-    <p>Run a local static <code>scan</code> over MCP <strong>IDE configs</strong> and embedded tool metadata: <strong>41 rules</strong>, toxic-flow heuristics, and <strong>SARIF</strong> / <strong>HTML</strong> / <strong>JSON</strong> reports. There is no hosted config-scan backend.</p>
+    <p>Run a local static <code>scan</code> over MCP <strong>IDE configs</strong> and embedded tool metadata: <strong>41 rules</strong> (including <strong>AAuth visibility</strong>), toxic-flow heuristics, and <strong>SARIF</strong> / <strong>HTML</strong> / <strong>JSON</strong> reports. There is no hosted config-scan backend.</p>
     <p>Add an optional <strong>local HTTP proxy</strong> with an <strong>in-browser dashboard</strong> so live traffic, findings, AAuth signals, and playground checks stay in one place—without sending your configs to a vendor.</p>
     <p><strong>Dashboard includes:</strong></p>
     <ul style="margin: 0.35rem 0 0.75rem; padding-left: 1.25rem;">
